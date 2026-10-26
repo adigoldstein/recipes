@@ -1,13 +1,13 @@
 # Bite & Board — PRD Addendum
 
-Technical context carried over from the original `docs/prd.md`. These are **inputs for the architecture step** (`bmad-architecture`), not product requirements. Anything marked _proposed_ still needs Adi's decision there (CLAUDE.md: no architecture decisions without Adi).
+Technical context carried over from the original `docs/prd.md`. These are **inputs for the architecture step** (`bmad-architecture`), not product requirements. Anything marked *proposed* still needs Adi's decision there (CLAUDE.md: no architecture decisions without Adi).
 
 ## Tech stack (from the original PRD)
 
-- **Monorepo:** Nx (integrated workspace). _Already in place._
-- **Frontend:** React, Vite, TypeScript, Tailwind CSS, shadcn/ui, TanStack Query, Zod. _React + Vite in place; the rest proposed._
-- **UI state:** React hooks / Context; adopt Zustand only if client state gets complex. _Proposed._
-- **Backend:** Python 3.12, FastAPI, Pydantic v2, SQLModel (SQLAlchemy 2), Alembic, Uvicorn, SQLite. _FastAPI app scaffolded with `@nxlv/python` + `uv`; dependencies installed._
+- **Monorepo:** Nx (integrated workspace). *Already in place.*
+- **Frontend:** React, Vite, TypeScript, Tailwind CSS, shadcn/ui, TanStack Query, Zod. *React + Vite in place; the rest proposed.*
+- **UI state:** React hooks / Context; adopt Zustand only if client state gets complex. *Proposed.*
+- **Backend:** Python 3.12, FastAPI, Pydantic v2, SQLModel (SQLAlchemy 2), Alembic, Uvicorn, SQLite. *FastAPI app scaffolded with `@nxlv/python` + `uv`; dependencies installed.*
 - **AI (post-MVP):** `instructor` with OpenAI / Anthropic SDKs or Ollama, behind a Python `Protocol` so providers can be swapped by environment variable.
 - **DevOps:** Docker, multi-stage Dockerfiles, Docker Compose.
 

@@ -9,19 +9,19 @@ sources:
   - ../../prds/prd-recipes-2026-10-26/addendum.md
 colors:
   # Light (default). Keys map 1:1 to shadcn CSS variables (see "Token mapping").
-  background: '#EFEEEA' # stone countertop
-  foreground: '#1E1B18' # charcoal ink
+  background: '#EFEEEA'          # stone countertop
+  foreground: '#1E1B18'          # charcoal ink
   card: '#FAF9F6'
   card-foreground: '#1E1B18'
   popover: '#FAF9F6'
   popover-foreground: '#1E1B18'
-  primary: '#1E1B18' # charcoal pill button
+  primary: '#1E1B18'             # charcoal pill button
   primary-foreground: '#F5E9D8'
   secondary: '#E2E0DA'
   secondary-foreground: '#1E1B18'
   muted: '#E2E0DA'
   muted-foreground: '#5F574F'
-  accent: '#E2E0DA' # shadcn hover/active fill (neutral)
+  accent: '#E2E0DA'              # shadcn hover/active fill (neutral)
   accent-foreground: '#1E1B18'
   destructive: '#B42318'
   destructive-foreground: '#FFFFFF'
@@ -29,11 +29,11 @@ colors:
   input: '#D9D6CF'
   ring: '#1E1B18'
   # Brand extensions (new CSS variables)
-  board: '#D6A46A' # oak cutting board
+  board: '#D6A46A'               # oak cutting board
   board-foreground: '#24190E'
-  hint: '#4F3A22' # original-value hint, on board
-  hint-muted: '#5F574F' # original-value hint, on card/background (edit form)
-  flag: '#A1440A' # import field "needs completing"
+  hint: '#4F3A22'                # original-value hint, on board
+  hint-muted: '#5F574F'          # original-value hint, on card/background (edit form)
+  flag: '#A1440A'                # import field "needs completing"
   # Dark
   background-dark: '#1A1816'
   foreground-dark: '#F3ECE3'
@@ -41,7 +41,7 @@ colors:
   card-foreground-dark: '#F3ECE3'
   popover-dark: '#242120'
   popover-foreground-dark: '#F3ECE3'
-  primary-dark: '#D6A46A' # in dark, the pill takes the oak colour
+  primary-dark: '#D6A46A'        # in dark, the pill takes the oak colour
   primary-foreground-dark: '#1A1208'
   secondary-dark: '#2E2A27'
   secondary-foreground-dark: '#F3ECE3'
@@ -54,7 +54,7 @@ colors:
   border-dark: '#3A3531'
   input-dark: '#3A3531'
   ring-dark: '#D6A46A'
-  board-dark: '#73502E' # walnut
+  board-dark: '#73502E'          # walnut
   board-foreground-dark: '#FBF1E3'
   hint-dark: '#F0D7B6'
   hint-muted-dark: '#B9ADA0'
@@ -106,22 +106,22 @@ typography:
     fontWeight: '600'
     lineHeight: '1.3'
 rounded:
-  sm: 8px # inputs, chips' focus ring offset area
-  md: 12px # cards on stone, dialogs on phone
-  lg: 16px # dialogs, sheets
-  board: 24px # the board slab
-  full: 9999px # every button, chip and stepper
+  sm: 8px          # inputs, chips' focus ring offset area
+  md: 12px         # cards on stone, dialogs on phone
+  lg: 16px         # dialogs, sheets
+  board: 24px      # the board slab
+  full: 9999px     # every button, chip and stepper
 spacing:
   # Tailwind's 4px scale is inherited unchanged; these are the named roles.
   margin-mobile: 16px
   margin-desktop: 32px
   gutter: 16px
-  stack: 12px # gap between items inside a section
-  section: 32px # gap between sections on phone
+  stack: 12px      # gap between items inside a section
+  section: 32px    # gap between sections on phone
   section-lg: 48px
   board-pad: 18px
-  board-slot-top: 36px # board top padding that leaves room for the handle slot
-  touch: 44px # minimum touch target
+  board-slot-top: 36px   # board top padding that leaves room for the handle slot
+  touch: 44px      # minimum touch target
 components:
   button-primary:
     background: '{colors.primary}'
@@ -171,6 +171,7 @@ components:
 
 > Visual reference: [`mockups/key-screens.html`](mockups/key-screens.html). The sample food photos in `mockups/assets/` are CC-licensed and credited (`mockups/assets/credits.json`). Where this file and a mockup disagree, this file wins.
 
+
 **ביס & סיר** ("bite & pot") is Adi's own kitchen in an app. It is a personal recipe box used on the phone at the counter, and it also works as a portfolio piece that a recruiter browses on desktop. The visual idea is **the cutting board**. The thing you actually cook on becomes the surface that holds what you cook with. The recipe's ingredients sit on a solid oak slab with a handle slot, on a stone-grey countertop. Everything else stays plain and gets out of the way.
 
 The posture is bold, warm and plain-spoken: heavy Hebrew type at large sizes, solid fields of colour, pill-shaped buttons. There are no gradients, no glows, no illustrations and no emoji. The single motif carries the personality, so it stays recognisable without becoming a costume.
@@ -185,7 +186,7 @@ One ground, one ink, one material:
 
 - **Stone (`background`)**: the countertop. Every page ground. A slightly warm grey, not cream.
 - **Charcoal (`foreground`, `primary`)**: all running text, and the fill of every primary pill button. In light mode, the "action" colour is ink, not a hue.
-- **Oak (`board`)**: the only saturated colour, and it marks _the food_. It is used for the ingredient board on the detail page and the recipe cards in the library. Food photos supply the rest of the colour. It is never used for chrome, nav, links or errors. In dark mode the board becomes walnut (`board-dark`), and oak moves to the primary button so the action stays visible.
+- **Oak (`board`)**: the only saturated colour, and it marks *the food*. It is used for the ingredient board on the detail page and the recipe cards in the library. Food photos supply the rest of the colour. It is never used for chrome, nav, links or errors. In dark mode the board becomes walnut (`board-dark`), and oak moves to the primary button so the action stays visible.
 - **Hint brown (`hint`)**: the original-value hint on the board. It contrasts with the board at 4.8:1 (light) and 5.2:1 (dark). On plain surfaces (the edit form) the hint uses `hint-muted`.
 - **Flag (`flag`)**: burnt orange, used only for the import-review "needs completing" fields. Not used for errors; errors use `destructive`.
 - **Neutral steps** (`card`, `secondary`, `muted`, `border`) separate surfaces by tone. Borders appear on inputs only, where they are a form convention.
@@ -203,7 +204,7 @@ One family: **Rubik** (Google Fonts) for everything, Hebrew and Latin. Its round
 - `quantity`: every ingredient amount and the servings value. Uses tabular figures so amounts line up as they scale.
 - `label` / `hint`: form labels, meta (meal type, tags, time) and the original-value hint.
 
-Five visible sizes at most. No uppercase or letter-spaced labels (Hebrew has no case anyway). Numbers and units are wrapped for bidi isolation (see EXPERIENCE.md, _Right-to-left & Hebrew_).
+Five visible sizes at most. No uppercase or letter-spaced labels (Hebrew has no case anyway). Numbers and units are wrapped for bidi isolation (see EXPERIENCE.md, *Right-to-left & Hebrew*).
 
 ## Layout & Spacing
 
@@ -243,15 +244,15 @@ Inputs use `rounded.sm` (8px) and dialogs `rounded.lg` (16px), so the form doesn
 
 ## Do's and Don'ts
 
-| Do                                                                                 | Don't                                          |
-| ---------------------------------------------------------------------------------- | ---------------------------------------------- |
-| Use oak (`board`) only on food surfaces: the ingredient board and the recipe cards | Use oak for nav, links, badges or decoration   |
-| Keep forms, login and dialogs plain shadcn on stone and card                       | Put the board motif on forms or the login page |
-| Use pill buttons everywhere you press                                              | Mix square and soft-radius buttons             |
-| Use one family (Rubik) in three weights                                            | Add a second display face                      |
-| Separate surfaces by tone                                                          | Use resting shadows, gradients, glows or blur  |
-| Use logical spacing (`ps-`/`pe-`/`start-`/`end-`)                                  | Use `pl-`/`pr-`/`left-`/`right-`               |
-| Design at 375px first, then add breakpoints                                        | Design desktop first and squeeze down          |
+| Do | Don't |
+|---|---|
+| Use oak (`board`) only on food surfaces: the ingredient board and the recipe cards | Use oak for nav, links, badges or decoration |
+| Keep forms, login and dialogs plain shadcn on stone and card | Put the board motif on forms or the login page |
+| Use pill buttons everywhere you press | Mix square and soft-radius buttons |
+| Use one family (Rubik) in three weights | Add a second display face |
+| Separate surfaces by tone | Use resting shadows, gradients, glows or blur |
+| Use logical spacing (`ps-`/`pe-`/`start-`/`end-`) | Use `pl-`/`pr-`/`left-`/`right-` |
+| Design at 375px first, then add breakpoints | Design desktop first and squeeze down |
 
 ## Token mapping (implementation note)
 

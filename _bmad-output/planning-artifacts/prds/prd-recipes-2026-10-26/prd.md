@@ -1,5 +1,5 @@
 ---
-title: 'Bite & Board PRD'
+title: "Bite & Board PRD"
 status: final
 created: 2026-10-26
 updated: 2026-10-26
@@ -21,14 +21,14 @@ source: docs/prd.md
 
 ## 2. Goals and Success Criteria
 
-| Goal                      | Success criterion                                                                                                             |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| Recipes in one place      | Adi can add, find, edit and delete recipes without touching the database or code.                                             |
-| Safe to show publicly     | Visitors can browse, but only signed-in editors and the admin can create, edit or delete.                                     |
-| Recipes fit Adi's taste   | Adi can change any quantity and still see what the original recipe said.                                                      |
-| Cook for any group size   | Any recipe can be viewed for any number of servings, with correct quantities.                                                 |
+| Goal | Success criterion |
+|---|---|
+| Recipes in one place | Adi can add, find, edit and delete recipes without touching the database or code. |
+| Safe to show publicly | Visitors can browse, but only signed-in editors and the admin can create, edit or delete. |
+| Recipes fit Adi's taste | Adi can change any quantity and still see what the original recipe said. |
+| Cook for any group size | Any recipe can be viewed for any number of servings, with correct quantities. |
 | Interview-worthy codebase | The repo passes lint, type-check and tests in CI; a reviewer can follow the architecture from the README in under 10 minutes. |
-| Learning                  | Adi builds the React and FastAPI parts with AI support, and can explain every architectural choice.                           |
+| Learning | Adi builds the React and FastAPI parts with AI support, and can explain every architectural choice. |
 
 **Counter-metric.** Scope creep: if a post-MVP feature (§8) starts before the MVP is complete and deployed locally, the portfolio goal is at risk.
 
@@ -58,19 +58,19 @@ source: docs/prd.md
 
 ## 5. User Journeys
 
-**UJ-1 — Saving a new recipe.** Adi finds a shakshuka recipe online, opens Bite & Board, clicks _New recipe_, types the title, picks the meal type _Breakfast_ (suggested by the form), adds the tag _Brunch_, sets 4 servings, adds six ingredients and four steps, and saves. The recipe appears at the top of the library.
+**UJ-1 — Saving a new recipe.** Adi finds a shakshuka recipe online, opens Bite & Board, clicks *New recipe*, types the title, picks the meal type *Breakfast* (suggested by the form), adds the tag *Brunch*, sets 4 servings, adds six ingredients and four steps, and saves. The recipe appears at the top of the library.
 
-**UJ-2 — Making it personal.** After cooking it twice, Adi thinks it needs more cumin and less salt. Adi opens the recipe, clicks _Edit_, changes cumin from 1 tsp to 2 tsp and salt from 1 tsp to ½ tsp, and saves. From now on the recipe shows _2 tsp cumin_ with a small hint _originally 1 tsp_. Months later, wondering whether the original was better, Adi resets cumin to the original value with one click.
+**UJ-2 — Making it personal.** After cooking it twice, Adi thinks it needs more cumin and less salt. Adi opens the recipe, clicks *Edit*, changes cumin from 1 tsp to 2 tsp and salt from 1 tsp to ½ tsp, and saves. From now on the recipe shows *2 tsp cumin* with a small hint *originally 1 tsp*. Months later, wondering whether the original was better, Adi resets cumin to the original value with one click.
 
-**UJ-3 — Cooking for a crowd.** Friends are coming over: 10 people. Adi opens the lasagna recipe (base 4 servings), sets servings to 10, and every quantity updates instantly. Eggs show as _5_, not _5.000_. "Salt — to taste" stays as it is.
+**UJ-3 — Cooking for a crowd.** Friends are coming over: 10 people. Adi opens the lasagna recipe (base 4 servings), sets servings to 10, and every quantity updates instantly. Eggs show as *5*, not *5.000*. "Salt — to taste" stays as it is.
 
-**UJ-4 — Finding a recipe.** Adi has 60 recipes, types "chick" into the search box and sees the chickpea curry and the roast chicken, then narrows the list with the _Dinner_ meal-type filter.
+**UJ-4 — Finding a recipe.** Adi has 60 recipes, types "chick" into the search box and sees the chickpea curry and the roast chicken, then narrows the list with the *Dinner* meal-type filter.
 
 **UJ-5 — Cleaning up.** A recipe Adi tried once was bad. Adi deletes it, confirms in a dialog, and it is gone from the library.
 
-**UJ-6 — Visitor, editor and admin.** A recruiter opens the app from Adi's CV and browses recipes and scales one to 6 servings, but sees no _New_, _Edit_ or _Delete_ buttons. Adi clicks _Log in_, enters email and password, and the editing controls appear. Adi opens _Users_, adds an editor account for their partner with a starting password, and the partner logs in and adds a recipe. A week later the session has expired and Adi logs in again.
+**UJ-6 — Visitor, editor and admin.** A recruiter opens the app from Adi's CV and browses recipes and scales one to 6 servings, but sees no *New*, *Edit* or *Delete* buttons. Adi clicks *Log in*, enters email and password, and the editing controls appear. Adi opens *Users*, adds an editor account for their partner with a starting password, and the partner logs in and adds a recipe. A week later the session has expired and Adi logs in again.
 
-**UJ-7 — Importing from the web.** Adi finds a great focaccia recipe on a cooking site, copies the URL, clicks _Import_, and pastes it. A few seconds later the recipe form opens pre-filled: title, 8 servings, ingredients with amounts and units, and steps. The import read "a pinch of salt" as amount 1, unit pinch; the import pre-picked the meal type and suggested the existing tag _Bakery_; Adi adds a new tag _Party_ and saves. Another site blocks the import, so Adi copies the recipe text from the page, pastes it into the _Paste text_ tab instead, and gets the same pre-filled form.
+**UJ-7 — Importing from the web.** Adi finds a great focaccia recipe on a cooking site, copies the URL, clicks *Import*, and pastes it. A few seconds later the recipe form opens pre-filled: title, 8 servings, ingredients with amounts and units, and steps. The import read "a pinch of salt" as amount 1, unit pinch; the import pre-picked the meal type and suggested the existing tag *Bakery*; Adi adds a new tag *Party* and saves. Another site blocks the import, so Adi copies the recipe text from the page, pastes it into the *Paste text* tab instead, and gets the same pre-filled form.
 
 ## 6. Features and Functional Requirements
 
@@ -85,18 +85,18 @@ An ingredient has: name (required), an optional amount (positive number), an opt
 ### F1. Recipe library
 
 - **FR-1 — List recipes.** The library shows all recipes as cards with title, meal type, tags, total time (prep + cook, if known) and the photo if there is one, newest first.
-  - AC: With 0 recipes, an empty state with a _New recipe_ call to action is shown.
+  - AC: With 0 recipes, an empty state with a *New recipe* call to action is shown.
   - AC: With 60+ recipes the list loads in under 1 second locally (NFR-3).
 - **FR-2 — Search.** A search box filters recipes by title, case-insensitive substring match, as the user types.
   - AC: "chick" matches "Chickpea Curry" and "Roast Chicken"; it does not match "Lasagna".
   - AC: No matches shows a "No recipes found" message with a way to clear the search.
 - **FR-3 — Filter by meal type and tags.** The user can filter by one meal type and by one or more tags (a recipe must have all selected tags); filters and search combine.
-  - AC: Selecting _Dinner_ with search "chick" shows only dinner recipes whose title contains "chick"; adding the tag _BBQ_ narrows it further.
+  - AC: Selecting *Dinner* with search "chick" shows only dinner recipes whose title contains "chick"; adding the tag *BBQ* narrows it further.
   - AC: Search text and filter survive navigating to a recipe and back.
 
 ### F2. Create recipe
 
-- **FR-4 — Create.** The user creates a recipe through a form with all fields from _Recipe content_, adding, removing and reordering ingredients and steps.
+- **FR-4 — Create.** The user creates a recipe through a form with all fields from *Recipe content*, adding, removing and reordering ingredients and steps.
   - AC: Saving a valid recipe creates it and navigates to its detail page.
   - AC: Invalid input (e.g. empty title, servings 0, no ingredients) shows inline field errors and does not save. The same rules are enforced by the API (an invalid request returns HTTP 422 with field-level errors).
   - AC: Leaving the form with unsaved changes asks for confirmation.
@@ -112,15 +112,15 @@ An ingredient has: name (required), an optional amount (positive number), an opt
 
 - **FR-6 — Edit.** The user edits any part of a recipe using the same form as FR-4; saving overwrites the recipe in place (no versions).
   - AC: Same validation and unsaved-changes behavior as FR-4.
-  - AC: The recipe's _updated_ timestamp changes on save.
+  - AC: The recipe's *updated* timestamp changes on save.
 - **FR-7 — Remember the original quantity.** The first time an existing ingredient's amount or unit is changed, the system keeps its original amount and unit.
-  - AC: Changing cumin from 1 tsp → 2 tsp → 3 tsp keeps _1 tsp_ as the original (the first saved value, not the previous one).
+  - AC: Changing cumin from 1 tsp → 2 tsp → 3 tsp keeps *1 tsp* as the original (the first saved value, not the previous one).
   - AC: Ingredients added during an edit have no original value and show no hint.
   - AC: Changing only the name or note of an ingredient does not create a hint.
 - **FR-8 — Show the hint.** Wherever an ingredient with a stored original is shown (detail page and edit form), a subtle hint reads "originally {amount} {unit}".
   - AC: The hint is visually secondary to the current value and readable by screen readers.
   - AC: When scaling (F6) is active, the hint is scaled by the same ratio.
-- **FR-9 — Reset to original.** In the edit form, each hinted ingredient has a _Reset to original_ action that restores the original amount and unit and removes the hint once saved.
+- **FR-9 — Reset to original.** In the edit form, each hinted ingredient has a *Reset to original* action that restores the original amount and unit and removes the hint once saved.
   - AC: Resetting and saving makes the ingredient indistinguishable from never having been edited.
 
 ### F5. Delete recipe
@@ -137,7 +137,7 @@ An ingredient has: name (required), an optional amount (positive number), an opt
   - AC: To-taste ingredients are never scaled.
   - AC: Display rounding: whole numbers show without decimals ("5", not "5.000"); otherwise at most 2 significant decimals ("1.5", "0.33"); `unit`-type ingredients (eggs, cloves) are shown to the nearest ½.
   - AC: Scaling is view-only — it never changes the saved recipe. Reloading the page returns to base servings.
-  - AC: A _Reset_ control returns to base servings.
+  - AC: A *Reset* control returns to base servings.
 
 ### F7. Demo seed data
 
@@ -148,6 +148,7 @@ An ingredient has: name (required), an optional amount (positive number), an opt
 
 There are three access levels. A **visitor** is not logged in and can only read: list, search, view and scale. An **editor** has an account and can also create, edit, reset, delete and import recipes, upload photos, and manage meal types and tags. The **admin** can do everything an editor can, and also manages users. In this PRD, "the owner" in F2–F10 means any signed-in user (an editor or the admin). Recipes form one shared library: every editor can edit every recipe, and each recipe records who created it and who last updated it.
 
+
 - **FR-13 — Create the admin account.** A command-line command creates the first admin account from an email and a password. There is no sign-up page.
   - AC: Running it when an admin already exists fails with a clear message (or, with an explicit flag, changes that admin's password).
   - AC: The password is stored only as a salted hash, never in plain text, and is never returned by any API.
@@ -155,12 +156,12 @@ There are three access levels. A **visitor** is not logged in and can only read:
 - **FR-14 — Log in.** A login page takes email and password. On success the backend issues a JWT and the UI shows the controls for the user's role.
   - AC: Wrong email or wrong password gives the same generic "Invalid email or password" message.
   - AC: The token expires after a fixed period (default 7 days); after expiry, the next protected action sends the user to the login page and returns them to where they were after logging in.
-- **FR-15 — Log out.** A _Log out_ action ends the session in the UI; editing controls disappear.
+- **FR-15 — Log out.** A *Log out* action ends the session in the UI; editing controls disappear.
 - **FR-16 — Public vs. protected.** Listing, searching, viewing and scaling recipes (FR-1–FR-3, FR-5, FR-11) work without login. Create, edit, reset-to-original, delete, import, photo upload and tag management (FR-4, FR-6–FR-10, F9, F10) require an editor or admin session. User management (FR-25–FR-27) requires the admin role.
   - AC: Calling a protected API endpoint without a valid token returns HTTP 401 and changes nothing.
   - AC: Visitors see no create, edit or delete controls; navigating directly to an edit URL sends them to the login page.
-  - AC: An editor calling an admin-only endpoint gets HTTP 403 and changes nothing; editors never see the _Users_ screen.
-- **FR-25 — Manage users.** On a _Users_ screen the admin lists users and adds a user with an email, a display name, a role (editor or admin) and a starting password.
+  - AC: An editor calling an admin-only endpoint gets HTTP 403 and changes nothing; editors never see the *Users* screen.
+- **FR-25 — Manage users.** On a *Users* screen the admin lists users and adds a user with an email, a display name, a role (editor or admin) and a starting password.
   - AC: Emails are unique (case-insensitive); the starting password follows FR-13's rules.
 - **FR-26 — Change role, block, reset password.** The admin can change a user's role, block or unblock a user, and set a new password for a user.
   - AC: A blocked user cannot log in, and their existing session stops working on the next request.
@@ -171,16 +172,16 @@ There are three access levels. A **visitor** is not logged in and can only read:
 
 Owner-only (FR-16 applies). Import never saves anything by itself: it produces a draft that the owner reviews in the normal recipe form.
 
-- **FR-17 — Import from URL.** The owner pastes a recipe page URL; the system fetches the page and extracts a draft recipe in the app's recipe format (_Recipe content_, §6).
+- **FR-17 — Import from URL.** The owner pastes a recipe page URL; the system fetches the page and extracts a draft recipe in the app's recipe format (*Recipe content*, §6).
   - AC: If the page contains structured recipe data (schema.org `Recipe`, e.g. JSON-LD), it is used first; only if that is missing or incomplete is the page text sent to the LLM.
   - AC: Only `http`/`https` URLs to public hosts are fetched; private/internal addresses are refused, and pages larger than a fixed size or slower than a fixed timeout fail with a clear message.
-  - AC: A fetch failure (blocked site, 404, timeout) shows a message suggesting the _Paste text_ option (FR-18).
+  - AC: A fetch failure (blocked site, 404, timeout) shows a message suggesting the *Paste text* option (FR-18).
   - AC: The recipe's main photo is taken from the page when available (schema.org `Recipe.image` first, then the page's `og:image`). How photos are stored (local copy vs. link to the source) is decided in the architecture step.
 - **FR-18 — Import from pasted text.** The owner pastes raw recipe text; the LLM extracts a draft recipe in the same format.
   - AC: Text with no recognizable recipe gives "No recipe found in this text" and no draft.
 - **FR-21 — Hebrew drafts.** Imports from pages or text in another language (e.g. English) produce a draft translated to Hebrew (title, description, ingredient names and notes, steps). Amounts and units are preserved and mapped to the app's unit list, and the source URL is kept.
   - AC: Importing an English recipe yields a Hebrew draft whose amounts and units match the source.
-- **FR-19 — Review before save.** A successful import opens the recipe create form (FR-4) pre-filled with the draft; nothing is saved until the owner clicks _Save_.
+- **FR-19 — Review before save.** A successful import opens the recipe create form (FR-4) pre-filled with the draft; nothing is saved until the owner clicks *Save*.
   - AC: The draft goes through the same validation as FR-4; fields the import could not fill (e.g. meal type, servings) are left empty and flagged for the owner to complete.
   - AC: Ingredients the import could not quantify become to-taste ingredients rather than invented amounts.
   - AC: Units are mapped to the app's unit list; an unmappable unit is left empty and the original text is kept in the ingredient note.
@@ -230,15 +231,15 @@ These are kept so the architecture does not rule them out. None has a committed 
 
 ## 9. Open Questions and Deferred Decisions
 
-| #    | Question                                                                                                                                                                                         | Blocks                     | Revisit when      |
-| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- | ----------------- |
-| OQ-1 | **Deployment target.** Where to host the public demo (e.g. Railway, Render, a VPS), and how the SQLite data is persisted and backed up there.                                                    | Public deployment          | When MVP is done  |
-| OQ-2 | **LLM provider and cost.** Which provider/model for F9 (cloud API vs. local Ollama), and a monthly cost ceiling. Scope is decided: URL + pasted text, review before save, structured data first. | F9 implementation          | Architecture step |
-| OQ-3 | **Event menus.** Saved and reopenable, or temporary? Fields (date, guest count)?                                                                                                                 | Event menus, shopping list | When MVP is done  |
-| OQ-4 | **Shopping list merging.** Exact name + unit, or unit conversion (g↔kg, tsp↔tbsp) and plural matching? Can items be ticked off or edited?                                                        | Shopping list              | With OQ-3         |
-| OQ-5 | **Smart substitution.** In or out; rule-based or AI?                                                                                                                                             | Substitution               | After OQ-2        |
-| OQ-6 | ~~Tags.~~ **Resolved 2026-10-26 (Adi):** fixed category replaced by one meal type per recipe + free tags (F10).                                                                                  | —                          | —                 |
-| OQ-7 | **Old PRD.** `docs/prd.md` predates this document. Keep, replace with a pointer, or delete?                                                                                                      | Nothing                    | Next review       |
+| # | Question | Blocks | Revisit when |
+|---|---|---|---|
+| OQ-1 | **Deployment target.** Where to host the public demo (e.g. Railway, Render, a VPS), and how the SQLite data is persisted and backed up there. | Public deployment | When MVP is done |
+| OQ-2 | **LLM provider and cost.** Which provider/model for F9 (cloud API vs. local Ollama), and a monthly cost ceiling. Scope is decided: URL + pasted text, review before save, structured data first. | F9 implementation | Architecture step |
+| OQ-3 | **Event menus.** Saved and reopenable, or temporary? Fields (date, guest count)? | Event menus, shopping list | When MVP is done |
+| OQ-4 | **Shopping list merging.** Exact name + unit, or unit conversion (g↔kg, tsp↔tbsp) and plural matching? Can items be ticked off or edited? | Shopping list | With OQ-3 |
+| OQ-5 | **Smart substitution.** In or out; rule-based or AI? | Substitution | After OQ-2 |
+| OQ-6 | ~~Tags.~~ **Resolved 2026-10-26 (Adi):** fixed category replaced by one meal type per recipe + free tags (F10). | — | — |
+| OQ-7 | **Old PRD.** `docs/prd.md` predates this document. Keep, replace with a pointer, or delete? | Nothing | Next review |
 
 ## 10. Constraints and Assumptions
 

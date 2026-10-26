@@ -77,7 +77,7 @@ AD-1 says modules talk only through services. AD-7 says `recipes.service` enforc
 ### H3. Ingredient identity on PUT, and to-taste originals
 
 - **Unit A, the recipes repository:** implements "PUT replaces the full aggregate" as delete-all-then-insert. The ingredient ids change and `original_*` is lost, because the service only sees new ingredients.
-- **Unit B, the recipes service:** matches by `id`. A client that sends an id belonging to _another_ recipe is not rejected, and that ingredient's original fields get copied.
+- **Unit B, the recipes service:** matches by `id`. A client that sends an id belonging to *another* recipe is not rejected, and that ingredient's original fields get copied.
 - **Edge case, to-taste:** cumin goes from 1 tsp to null (to-taste). The service stores `original_amount = 1, original_unit = tsp`, which is fine. Salt goes from null (to-taste) to 2 tsp. The original is `(null, null)`, which looks the same as "no original", so the hint is lost. A third implementer adds a `has_original` flag, and the two read shapes now differ.
 - **Proposed AD-4a:** the PUT diff matches by ingredient `id` and updates rows in place. An `id` that does not belong to the recipe returns 422. An omitted id means delete, and a row without an id is an insert. An original is represented by an explicit `original: {amount, unit} | null` object on `IngredientRead`, so `{amount: null, unit: null}` means "originally to taste". The order of `ingredients[]` and `steps[]` in the array is the only ordering, and `position` never appears on the wire.
 
@@ -168,7 +168,7 @@ AD-9 fixes the error shape as `{detail: string}` and the 422 `detail[].msg`. AD-
 ### M7. CSRF header and credentials on the generated client (including multipart)
 
 - **Unit A:** adds `X-Requested-With` in a fetch wrapper for JSON mutations.
-- **Unit B:** the photo upload uses the generated multipart call, or a raw `fetch` (AD-2 forbids it, but it is tempting for progress events), and leaves the header off, so it gets a 401 or 403. Upload _progress_ (EXPERIENCE) is not possible with `fetch` at all.
+- **Unit B:** the photo upload uses the generated multipart call, or a raw `fetch` (AD-2 forbids it, but it is tempting for progress events), and leaves the header off, so it gets a 401 or 403. Upload *progress* (EXPERIENCE) is not possible with `fetch` at all.
 - **Proposed rule (in AD-6):** one `client.setConfig` in `libs/data-access` sets `credentials: 'same-origin'` and the CSRF header for every non-GET request. Photo upload goes through one data-access `uploadPhoto()` that uses XHR for progress and is the single sanctioned exception to "generated client only".
 
 ### M8. Form model vs wire model (RHF `useFieldArray` and the `id` key)
@@ -201,28 +201,28 @@ AD-4's whole-aggregate PUT means the last write wins with no warning. **Rule:** 
 
 ## Proposed rule index
 
-| New / tightened AD                                                                                                                            | Closes |
-| --------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| AD-19 Quantities (3-dp NUMERIC, JSON number, quantized equality, shared `parseAmount`)                                                        | C1     |
-| AD-7a Recipe write carries `TagRefIn` (id or name); tags are created in the recipe transaction                                                | C2     |
-| AD-14a Photo upload returns an unattached key; the aggregate is the only attach path; server-built URLs; safe fetch for `source_url`; sweeper | C3     |
-| AD-6a Public `/auth/session`, login 400 (not 401), logout endpoint, scoped 401 interceptor, 403 for CSRF                                      | C4     |
-| AD-20 `Unit` StrEnum of English codes everywhere; Hebrew only in i18n; one countable set                                                      | H1     |
-| AD-7b `recipe_tag` owned by tags; module DAG enforced by import-linter                                                                        | H2     |
-| AD-4a Id-matched diff, foreign ids rejected, explicit `original` object, array order authoritative                                            | H3     |
-| AD-8a Unpaginated summary list, client-side filtering, id-based URL params                                                                    | H4     |
-| AD-9a `{detail, code, params}` with an `ErrorCode` enum; client renders only i18n keys; Zod error map                                         | H5     |
-| AD-12a Provider timeouts from the server drive the client abort; import error codes, never 422                                                | H6     |
-| AD-12b `DraftRecipe` schema with `missing_fields`; passed via router state only                                                               | H7     |
-| AD-18a Meal types from a Hebrew data migration; seed goes through services                                                                    | H8     |
-| AD-3a `generate_unique_id_function` = `{tag}_{func}`; naming test                                                                             | H9     |
-| AD-8b Generated query keys only, plus one invalidation map                                                                                    | M1     |
-| AD-2a `libs/recipe-domain` pure lib for scale, format and parse                                                                               | M2     |
-| AD-4 additions: separate Pydantic API schemas, `extra="forbid"`                                                                               | M3     |
-| AD-16a Deterministic fake plus fake fetcher; scenario fixtures; prod guard                                                                    | M4     |
-| AD-18 additions: FK pragma, batch mode, tests via `alembic upgrade`                                                                           | M5     |
-| Conventions: `UtcDateTime` with `Z`; `APP_TIMEZONE` for the daily cap                                                                         | M6     |
-| AD-6 additions: one client config; `uploadPhoto()` exception                                                                                  | M7     |
-| AD-9 additions: `RecipeFormValues` plus two mapping functions                                                                                 | M8     |
+| New / tightened AD | Closes |
+| --- | --- |
+| AD-19 Quantities (3-dp NUMERIC, JSON number, quantized equality, shared `parseAmount`) | C1 |
+| AD-7a Recipe write carries `TagRefIn` (id or name); tags are created in the recipe transaction | C2 |
+| AD-14a Photo upload returns an unattached key; the aggregate is the only attach path; server-built URLs; safe fetch for `source_url`; sweeper | C3 |
+| AD-6a Public `/auth/session`, login 400 (not 401), logout endpoint, scoped 401 interceptor, 403 for CSRF | C4 |
+| AD-20 `Unit` StrEnum of English codes everywhere; Hebrew only in i18n; one countable set | H1 |
+| AD-7b `recipe_tag` owned by tags; module DAG enforced by import-linter | H2 |
+| AD-4a Id-matched diff, foreign ids rejected, explicit `original` object, array order authoritative | H3 |
+| AD-8a Unpaginated summary list, client-side filtering, id-based URL params | H4 |
+| AD-9a `{detail, code, params}` with an `ErrorCode` enum; client renders only i18n keys; Zod error map | H5 |
+| AD-12a Provider timeouts from the server drive the client abort; import error codes, never 422 | H6 |
+| AD-12b `DraftRecipe` schema with `missing_fields`; passed via router state only | H7 |
+| AD-18a Meal types from a Hebrew data migration; seed goes through services | H8 |
+| AD-3a `generate_unique_id_function` = `{tag}_{func}`; naming test | H9 |
+| AD-8b Generated query keys only, plus one invalidation map | M1 |
+| AD-2a `libs/recipe-domain` pure lib for scale, format and parse | M2 |
+| AD-4 additions: separate Pydantic API schemas, `extra="forbid"` | M3 |
+| AD-16a Deterministic fake plus fake fetcher; scenario fixtures; prod guard | M4 |
+| AD-18 additions: FK pragma, batch mode, tests via `alembic upgrade` | M5 |
+| Conventions: `UtcDateTime` with `Z`; `APP_TIMEZONE` for the daily cap | M6 |
+| AD-6 additions: one client config; `uploadPhoto()` exception | M7 |
+| AD-9 additions: `RecipeFormValues` plus two mapping functions | M8 |
 
 Note: AD-2a (a new lib), AD-7b (module ownership) and AD-8a (client-side filtering, no pagination) are architecture decisions. Under CLAUDE.md, Adi has to agree to them before they are adopted.

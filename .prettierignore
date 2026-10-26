@@ -5,3 +5,6 @@
 /.nx/workspace-data
 .nx/self-healing
 storybook-static
+
+# BMAD planning documents are hand-maintained; never reformatted by tooling.
+/_bmad-output/planning-artifacts

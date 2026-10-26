@@ -1,1003 +1,260 @@
 <title>ביס &amp; סיר Screens</title>
-<meta name="claude:viewport-fit-sides" content="cover" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link
-  rel="stylesheet"
-  href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;800&display=swap"
-/>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;800&display=swap">
 <style>
-  /* Layout: each key screen rendered twice from the same markup: a 375px phone and a 1280px desktop (scaled to fit). The app screens use container queries, so the responsive rules shown here are the real mobile-first rules from EXPERIENCE.md. Colours are the DESIGN.md tokens. */
-  :root {
-    --background: #efeeea;
-    --foreground: #1e1b18;
-    --card: #faf9f6;
-    --primary: #1e1b18;
-    --primary-foreground: #f5e9d8;
-    --secondary: #e2e0da;
-    --muted-foreground: #5f574f;
-    --border: #d9d6cf;
-    --input: #d9d6cf;
-    --ring: #1e1b18;
-    --destructive: #b42318;
-    --board: #d6a46a;
-    --board-foreground: #24190e;
-    --hint: #4f3a22;
-    --hint-muted: #5f574f;
-    --flag: #a1440a;
-    --frame: #d9d6cf;
-    --font: 'Rubik', system-ui, sans-serif;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme='light']) {
-      --background: #1a1816;
-      --foreground: #f3ece3;
-      --card: #242120;
-      --primary: #d6a46a;
-      --primary-foreground: #1a1208;
-      --secondary: #2e2a27;
-      --muted-foreground: #b9ada0;
-      --border: #3a3531;
-      --input: #3a3531;
-      --ring: #d6a46a;
-      --destructive: #f97066;
-      --board: #73502e;
-      --board-foreground: #fbf1e3;
-      --hint: #f0d7b6;
-      --hint-muted: #b9ada0;
-      --flag: #f5a35c;
-      --frame: #2e2a27;
-      color-scheme: dark;
-    }
-  }
-  :root[data-theme='dark'] {
-    --background: #1a1816;
-    --foreground: #f3ece3;
-    --card: #242120;
-    --primary: #d6a46a;
-    --primary-foreground: #1a1208;
-    --secondary: #2e2a27;
-    --muted-foreground: #b9ada0;
-    --border: #3a3531;
-    --input: #3a3531;
-    --ring: #d6a46a;
-    --destructive: #f97066;
-    --board: #73502e;
-    --board-foreground: #fbf1e3;
-    --hint: #f0d7b6;
-    --hint-muted: #b9ada0;
-    --flag: #f5a35c;
-    --frame: #2e2a27;
-    color-scheme: dark;
-  }
-  body {
-    background: var(--background);
-    color: var(--foreground);
-    font-family: var(--font);
-    font-size: 16px;
-    line-height: 1.55;
-  }
-  .wrap {
-    max-width: 1440px;
-    margin: 0 auto;
-    padding-block: 32px 48px;
-    padding-left: max(16px, env(safe-area-inset-left, 0px));
-    padding-right: max(16px, env(safe-area-inset-right, 0px));
-  }
-  .intro {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: end;
-    gap: 16px;
-    margin-bottom: 24px;
-  }
-  .intro h1 {
-    font-size: clamp(32px, 5vw, 48px);
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    line-height: 1;
-    margin: 0 0 8px;
-  }
-  .intro p {
-    margin: 0;
-    max-width: 64ch;
-  }
-  .ctl {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-  .pill {
-    font: 600 15px var(--font);
-    border: 0;
-    border-radius: 9999px;
-    padding: 10px 18px;
-    cursor: pointer;
-    background: var(--secondary);
-    color: var(--foreground);
-    min-height: 44px;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .pill[aria-pressed='true'],
-  .pill.primary {
-    background: var(--primary);
-    color: var(--primary-foreground);
-  }
-  button:focus-visible,
-  input:focus-visible,
-  select:focus-visible,
-  a:focus-visible {
-    outline: 2px solid var(--ring);
-    outline-offset: 2px;
-  }
-  .views {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 24px;
-  }
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 28px;
-  }
-  @media (max-width: 1100px) {
-    .grid {
-      grid-template-columns: minmax(0, 1fr);
-    }
-  }
-  .cap {
-    font-weight: 600;
-    margin: 0 0 10px;
-    font-size: 18px;
-  }
-  .phone {
-    max-width: 375px;
-    margin: 0 auto;
-    border-radius: 36px;
-    padding: 8px;
-    background: var(--frame);
-  }
-  .phone .scr {
-    border-radius: 30px;
-    min-height: 720px;
-  }
-  .desk {
-    display: flex;
-    flex-direction: column;
-    gap: 40px;
-  }
-  .dwrap {
-    width: 100%;
-    overflow: hidden;
-    border-radius: 14px;
-    background: var(--frame);
-    padding: 8px;
-    box-sizing: border-box;
-  }
-  .dchrome {
-    height: 22px;
-    display: flex;
-    gap: 6px;
-    align-items: center;
-    padding-inline: 6px;
-    direction: ltr;
-  }
-  .dchrome i {
-    width: 10px;
-    height: 10px;
-    border-radius: 9999px;
-    background: var(--background);
-    display: block;
-  }
-  .dscale {
-    transform-origin: top left;
-    width: 1280px;
-  }
-  .dscale .scr {
-    border-radius: 8px;
-    min-height: 800px;
-  }
-  .credits {
-    margin-top: 40px;
-    font-size: 14px;
-    color: var(--foreground);
-    max-width: 110ch;
-  }
-  .credits a {
-    color: inherit;
-  }
+/* Layout: each key screen rendered twice from the same markup: a 375px phone and a 1280px desktop (scaled to fit). The app screens use container queries, so the responsive rules shown here are the real mobile-first rules from EXPERIENCE.md. Colours are the DESIGN.md tokens. */
+:root{
+  --background:#EFEEEA;--foreground:#1E1B18;--card:#FAF9F6;--primary:#1E1B18;--primary-foreground:#F5E9D8;
+  --secondary:#E2E0DA;--muted-foreground:#5F574F;--border:#D9D6CF;--input:#D9D6CF;--ring:#1E1B18;--destructive:#B42318;
+  --board:#D6A46A;--board-foreground:#24190E;--hint:#4F3A22;--hint-muted:#5F574F;--flag:#A1440A;
+  --frame:#D9D6CF;
+  --font:"Rubik",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --background:#1A1816;--foreground:#F3ECE3;--card:#242120;--primary:#D6A46A;--primary-foreground:#1A1208;
+  --secondary:#2E2A27;--muted-foreground:#B9ADA0;--border:#3A3531;--input:#3A3531;--ring:#D6A46A;--destructive:#F97066;
+  --board:#73502E;--board-foreground:#FBF1E3;--hint:#F0D7B6;--hint-muted:#B9ADA0;--flag:#F5A35C;--frame:#2E2A27;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --background:#1A1816;--foreground:#F3ECE3;--card:#242120;--primary:#D6A46A;--primary-foreground:#1A1208;
+  --secondary:#2E2A27;--muted-foreground:#B9ADA0;--border:#3A3531;--input:#3A3531;--ring:#D6A46A;--destructive:#F97066;
+  --board:#73502E;--board-foreground:#FBF1E3;--hint:#F0D7B6;--hint-muted:#B9ADA0;--flag:#F5A35C;--frame:#2E2A27;color-scheme:dark}
+body{background:var(--background);color:var(--foreground);font-family:var(--font);font-size:16px;line-height:1.55}
+.wrap{max-width:1440px;margin:0 auto;padding-block:32px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.intro{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:16px;margin-bottom:24px}
+.intro h1{font-size:clamp(32px,5vw,48px);font-weight:800;letter-spacing:-.02em;line-height:1;margin:0 0 8px}
+.intro p{margin:0;max-width:64ch}
+.ctl{display:flex;flex-wrap:wrap;gap:6px}
+.pill{font:600 15px var(--font);border:0;border-radius:9999px;padding:10px 18px;cursor:pointer;background:var(--secondary);color:var(--foreground);min-height:44px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.pill[aria-pressed="true"],.pill.primary{background:var(--primary);color:var(--primary-foreground)}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--ring);outline-offset:2px}
+.views{display:flex;gap:6px;margin-bottom:24px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px}
+@media (max-width:1100px){.grid{grid-template-columns:minmax(0,1fr)}}
+.cap{font-weight:600;margin:0 0 10px;font-size:18px}
+.phone{max-width:375px;margin:0 auto;border-radius:36px;padding:8px;background:var(--frame)}
+.phone .scr{border-radius:30px;min-height:720px}
+.desk{display:flex;flex-direction:column;gap:40px}
+.dwrap{width:100%;overflow:hidden;border-radius:14px;background:var(--frame);padding:8px;box-sizing:border-box}
+.dchrome{height:22px;display:flex;gap:6px;align-items:center;padding-inline:6px;direction:ltr}
+.dchrome i{width:10px;height:10px;border-radius:9999px;background:var(--background);display:block}
+.dscale{transform-origin:top left;width:1280px}
+.dscale .scr{border-radius:8px;min-height:800px}
+.credits{margin-top:40px;font-size:14px;color:var(--foreground);max-width:110ch}
+.credits a{color:inherit}
 
-  /* ===== app (container-query responsive) ===== */
-  .scr {
-    container-type: inline-size;
-    overflow: hidden;
-    background: var(--background);
-    color: var(--foreground);
-    display: flex;
-    flex-direction: column;
-  }
-  .bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    padding: 12px 16px;
-  }
-  .mark {
-    font-weight: 800;
-    font-size: 20px;
-    letter-spacing: -0.01em;
-  }
-  .acts {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-  }
-  .ibtn {
-    width: 44px;
-    height: 44px;
-    border-radius: 9999px;
-    border: 0;
-    background: var(--secondary);
-    color: var(--foreground);
-    font: 800 20px var(--font);
-    cursor: pointer;
-    display: grid;
-    place-items: center;
-    flex: none;
-  }
-  .ibtn.primary {
-    background: var(--primary);
-    color: var(--primary-foreground);
-  }
-  .wide {
-    display: none;
-  }
-  .pg {
-    padding: 4px 16px 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    flex: 1;
-    width: 100%;
-    box-sizing: border-box;
-    margin: 0 auto;
-  }
-  .t {
-    font-size: 24px;
-    font-weight: 800;
-    line-height: 1.15;
-    margin: 0;
-    letter-spacing: -0.01em;
-  }
-  .meta {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--muted-foreground);
-    margin: 0;
-  }
-  .ph {
-    display: block;
-    width: 100%;
-    aspect-ratio: 4/3;
-    object-fit: cover;
-    border-radius: 14px;
-    background: var(--secondary);
-  }
-  /* board-shaped photo: the image itself carries the handle slot */
-  .phb {
-    position: relative;
-  }
-  .phb .ph {
-    border-radius: 24px;
-  }
-  .phb::before {
-    content: '';
-    position: absolute;
-    top: 12px;
-    inset-inline-start: 50%;
-    width: 44px;
-    height: 12px;
-    border-radius: 9999px;
-    background: var(--background);
-    transform: translateX(50%);
-    z-index: 1;
-  }
+/* ===== app (container-query responsive) ===== */
+.scr{container-type:inline-size;overflow:hidden;background:var(--background);color:var(--foreground);display:flex;flex-direction:column}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 16px}
+.mark{font-weight:800;font-size:20px;letter-spacing:-.01em}
+.acts{display:flex;gap:6px;align-items:center}
+.ibtn{width:44px;height:44px;border-radius:9999px;border:0;background:var(--secondary);color:var(--foreground);font:800 20px var(--font);cursor:pointer;display:grid;place-items:center;flex:none}
+.ibtn.primary{background:var(--primary);color:var(--primary-foreground)}
+.wide{display:none}
+.pg{padding:4px 16px 24px;display:flex;flex-direction:column;gap:14px;flex:1;width:100%;box-sizing:border-box;margin:0 auto}
+.t{font-size:24px;font-weight:800;line-height:1.15;margin:0;letter-spacing:-.01em}
+.meta{font-size:14px;font-weight:600;color:var(--muted-foreground);margin:0}
+.ph{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:14px;background:var(--secondary)}
+/* board-shaped photo: the image itself carries the handle slot */
+.phb{position:relative}
+.phb .ph{border-radius:24px}
+.phb::before{content:"";position:absolute;top:12px;inset-inline-start:50%;width:44px;height:12px;border-radius:9999px;background:var(--background);transform:translateX(50%);z-index:1}
 
-  /* library */
-  .lib-head {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .search {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--card);
-    border: 1px solid var(--input);
-    border-radius: 9999px;
-    padding: 0 16px;
-    min-height: 46px;
-  }
-  .search input {
-    border: 0;
-    background: transparent;
-    font: 400 16px var(--font);
-    color: var(--foreground);
-    flex: 1;
-    min-width: 0;
-    outline: none;
-  }
-  .chips {
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    padding-bottom: 2px;
-    scrollbar-width: none;
-  }
-  .chip {
-    flex: none;
-    border: 0;
-    border-radius: 9999px;
-    padding: 8px 14px;
-    font: 600 14px var(--font);
-    background: var(--secondary);
-    color: var(--foreground);
-    cursor: pointer;
-    min-height: 40px;
-  }
-  .chip[aria-pressed='true'] {
-    background: var(--primary);
-    color: var(--primary-foreground);
-  }
-  .cards {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 12px;
-  }
-  .card {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    height: 100%;
-    box-sizing: border-box;
-    text-decoration: none;
-    background: var(--board);
-    color: var(--board-foreground);
-    border-radius: 24px;
-    padding: 32px 12px 16px;
-    transition: transform 0.15s;
-  }
-  .card:hover {
-    transform: scale(1.02);
-  }
-  .card:active {
-    transform: scale(0.98);
-  }
-  .card::before,
-  .board::before {
-    content: '';
-    position: absolute;
-    top: 12px;
-    inset-inline-start: 50%;
-    width: 44px;
-    height: 12px;
-    border-radius: 9999px;
-    background: var(--background);
-    transform: translateX(50%);
-  }
-  .card .txt {
-    padding-inline: 6px;
-  }
-  .card h3 {
-    margin: 0 0 2px;
-    font-size: 22px;
-    font-weight: 800;
-    line-height: 1.15;
-  }
-  .card p {
-    margin: 0;
-    font-size: 14px;
-    font-weight: 600;
-  }
-  .card.nophoto .txt {
-    padding-block: 12px 4px;
-  }
-  .card.nophoto h3 {
-    font-size: 26px;
-  }
-  .empty {
-    display: none;
-  }
+/* library */
+.lib-head{display:flex;flex-direction:column;gap:12px}
+.search{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--input);border-radius:9999px;padding:0 16px;min-height:46px}
+.search input{border:0;background:transparent;font:400 16px var(--font);color:var(--foreground);flex:1;min-width:0;outline:none}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.chip{flex:none;border:0;border-radius:9999px;padding:8px 14px;font:600 14px var(--font);background:var(--secondary);color:var(--foreground);cursor:pointer;min-height:40px}
+.chip[aria-pressed="true"]{background:var(--primary);color:var(--primary-foreground)}
+.cards{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+.card{position:relative;display:flex;flex-direction:column;gap:10px;height:100%;box-sizing:border-box;text-decoration:none;background:var(--board);color:var(--board-foreground);border-radius:24px;padding:32px 12px 16px;transition:transform .15s}
+.card:hover{transform:scale(1.02)}
+.card:active{transform:scale(.98)}
+.card::before,.board::before{content:"";position:absolute;top:12px;inset-inline-start:50%;width:44px;height:12px;border-radius:9999px;background:var(--background);transform:translateX(50%)}
+.card .txt{padding-inline:6px}
+.card h3{margin:0 0 2px;font-size:22px;font-weight:800;line-height:1.15}
+.card p{margin:0;font-size:14px;font-weight:600}
+.card.nophoto .txt{padding-block:12px 4px}
+.card.nophoto h3{font-size:26px}
+.empty{display:none}
 
-  /* detail */
-  .det {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: 'photo' 'head' 'side' 'steps' 'cta';
-    gap: 16px;
-  }
-  .det .photo {
-    grid-area: photo;
-  }
-  .det .head {
-    grid-area: head;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-  .det .side {
-    grid-area: side;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .det .steps-w {
-    grid-area: steps;
-  }
-  .det .cta {
-    grid-area: cta;
-  }
-  .dt {
-    font-size: 40px;
-    font-weight: 800;
-    line-height: 1;
-    letter-spacing: -0.02em;
-    margin: 0;
-  }
-  .serv {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-  }
-  .serv .l {
-    font-weight: 600;
-  }
-  .step {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .step output {
-    min-width: 40px;
-    text-align: center;
-    font-size: 22px;
-    font-weight: 800;
-    font-variant-numeric: tabular-nums;
-  }
-  .reset {
-    background: none;
-    border: 0;
-    font: 600 14px var(--font);
-    color: var(--muted-foreground);
-    cursor: pointer;
-    min-height: 44px;
-    padding: 0 4px;
-  }
-  .board {
-    position: relative;
-    background: var(--board);
-    color: var(--board-foreground);
-    border-radius: 24px;
-    padding: 36px 18px 16px;
-  }
-  .ings {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .ing {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    column-gap: 10px;
-    align-items: baseline;
-  }
-  .ing .q {
-    font-size: 20px;
-    font-weight: 800;
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-  }
-  .ing .n {
-    min-width: 0;
-  }
-  .ing .note {
-    font-size: 14px;
-  }
-  .ing .h {
-    grid-column: 2;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--hint);
-  }
-  .ing.taste .q {
-    font-weight: 600;
-    font-size: 16px;
-  }
-  h4 {
-    font-size: 18px;
-    font-weight: 600;
-    margin: 0 0 8px;
-  }
-  .steps {
-    margin: 0;
-    padding-inline-start: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  .src {
-    font-size: 14px;
-    color: var(--muted-foreground);
-    margin: 12px 0 0;
-  }
-  .src a {
-    color: var(--foreground);
-  }
+/* detail */
+.det{display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"photo" "head" "side" "steps" "cta";gap:16px}
+.det .photo{grid-area:photo}.det .head{grid-area:head;display:flex;flex-direction:column;gap:6px}.det .side{grid-area:side;display:flex;flex-direction:column;gap:12px}.det .steps-w{grid-area:steps}.det .cta{grid-area:cta}
+.dt{font-size:40px;font-weight:800;line-height:1;letter-spacing:-.02em;margin:0}
+.serv{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.serv .l{font-weight:600}
+.step{display:flex;align-items:center;gap:8px}
+.step output{min-width:40px;text-align:center;font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+.reset{background:none;border:0;font:600 14px var(--font);color:var(--muted-foreground);cursor:pointer;min-height:44px;padding:0 4px}
+.board{position:relative;background:var(--board);color:var(--board-foreground);border-radius:24px;padding:36px 18px 16px}
+.ings{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.ing{display:grid;grid-template-columns:auto 1fr;column-gap:10px;align-items:baseline}
+.ing .q{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ing .n{min-width:0}
+.ing .note{font-size:14px}
+.ing .h{grid-column:2;font-size:14px;font-weight:600;color:var(--hint)}
+.ing.taste .q{font-weight:600;font-size:16px}
+h4{font-size:18px;font-weight:600;margin:0 0 8px}
+.steps{margin:0;padding-inline-start:20px;display:flex;flex-direction:column;gap:10px}
+.src{font-size:14px;color:var(--muted-foreground);margin:12px 0 0}
+.src a{color:var(--foreground)}
 
-  /* import review */
-  .rev {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: 'banner' 'photo' 'fields' 'ings' 'btns';
-    gap: 14px;
-  }
-  .rev .banner {
-    grid-area: banner;
-    color: var(--flag);
-    font-weight: 600;
-    font-size: 15px;
-    margin: 0;
-  }
-  .rev .photo {
-    grid-area: photo;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .rev .fields {
-    grid-area: fields;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .rev .ings-w {
-    grid-area: ings;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .rev .btns {
-    grid-area: btns;
-    display: flex;
-    gap: 8px;
-  }
-  .rev .btns .pill {
-    flex: 1;
-  }
-  .photo-acts {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    color: var(--muted-foreground);
-  }
-  .linkbtn {
-    background: none;
-    border: 0;
-    font: 600 14px var(--font);
-    color: var(--foreground);
-    text-decoration: underline;
-    cursor: pointer;
-    min-height: 44px;
-    padding: 0;
-  }
-  .f {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-  .f label {
-    font-size: 14px;
-    font-weight: 600;
-  }
-  .f input,
-  .f select {
-    font: 400 16px var(--font);
-    color: var(--foreground);
-    background: var(--card);
-    border: 1px solid var(--input);
-    border-radius: 8px;
-    padding: 10px 12px;
-    min-height: 44px;
-    width: 100%;
-    box-sizing: border-box;
-  }
-  .f.flag input,
-  .f.flag select {
-    border: 2px solid var(--flag);
-  }
-  .f .fn {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--flag);
-  }
-  .row2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-  .irow {
-    display: grid;
-    grid-template-columns: 4.5em 6.5em 1fr;
-    gap: 8px;
-    align-items: center;
-  }
-  .irow span {
-    font: 400 16px var(--font);
-    background: var(--card);
-    border: 1px solid var(--input);
-    border-radius: 8px;
-    padding: 9px 10px;
-    min-height: 42px;
-    box-sizing: border-box;
-    color: var(--foreground);
-    min-width: 0;
-    display: flex;
-    align-items: center;
-  }
-  .irow .taste {
-    grid-column: 1/3;
-    color: var(--muted-foreground);
-    background: var(--secondary);
-    border-color: transparent;
-  }
+/* import review */
+.rev{display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"banner" "photo" "fields" "ings" "btns";gap:14px}
+.rev .banner{grid-area:banner;color:var(--flag);font-weight:600;font-size:15px;margin:0}
+.rev .photo{grid-area:photo;display:flex;flex-direction:column;gap:8px}
+.rev .fields{grid-area:fields;display:flex;flex-direction:column;gap:12px}
+.rev .ings-w{grid-area:ings;display:flex;flex-direction:column;gap:8px}
+.rev .btns{grid-area:btns;display:flex;gap:8px}
+.rev .btns .pill{flex:1}
+.photo-acts{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:14px;color:var(--muted-foreground)}
+.linkbtn{background:none;border:0;font:600 14px var(--font);color:var(--foreground);text-decoration:underline;cursor:pointer;min-height:44px;padding:0}
+.f{display:flex;flex-direction:column;gap:6px}
+.f label{font-size:14px;font-weight:600}
+.f input,.f select{font:400 16px var(--font);color:var(--foreground);background:var(--card);border:1px solid var(--input);border-radius:8px;padding:10px 12px;min-height:44px;width:100%;box-sizing:border-box}
+.f.flag input,.f.flag select{border:2px solid var(--flag)}
+.f .fn{font-size:14px;font-weight:600;color:var(--flag)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.irow{display:grid;grid-template-columns:4.5em 6.5em 1fr;gap:8px;align-items:center}
+.irow span{font:400 16px var(--font);background:var(--card);border:1px solid var(--input);border-radius:8px;padding:9px 10px;min-height:42px;box-sizing:border-box;color:var(--foreground);min-width:0;display:flex;align-items:center}
+.irow .taste{grid-column:1/3;color:var(--muted-foreground);background:var(--secondary);border-color:transparent}
 
-  /* ---- sm: 640px ---- */
-  @container (min-width:640px) {
-    .cards {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-  /* ---- lg: 1024px ---- */
-  @container (min-width:1024px) {
-    .bar {
-      padding: 16px 32px;
-    }
-    .narrow {
-      display: none;
-    }
-    .wide {
-      display: inline-flex;
-    }
-    .pg {
-      padding: 8px 32px 48px;
-      max-width: 1264px;
-      gap: 20px;
-    }
-    .t {
-      font-size: 32px;
-    }
-    .lib-head {
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
-      gap: 24px;
-    }
-    .lib-head .search {
-      width: 360px;
-    }
-    .cards {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 20px;
-    }
-    .det {
-      grid-template-columns: 400px minmax(0, 1fr);
-      grid-template-areas: 'side photo' 'side head' 'side steps' 'side cta';
-      column-gap: 48px;
-      row-gap: 20px;
-      align-items: start;
-    }
-    .det .side {
-      position: sticky;
-      top: 16px;
-    }
-    .det .photo .ph {
-      aspect-ratio: 16/9;
-    }
-    .dt {
-      font-size: 56px;
-    }
-    .det .cta {
-      justify-self: start;
-    }
-    .rev {
-      grid-template-columns: minmax(0, 1fr) 380px;
-      grid-template-areas: 'banner banner' 'fields photo' 'ings photo' 'btns btns';
-      column-gap: 48px;
-      align-items: start;
-      max-width: 1040px;
-    }
-    .rev .btns {
-      justify-content: flex-start;
-    }
-    .rev .btns .pill {
-      flex: none;
-      min-width: 140px;
-    }
-  }
+/* ---- sm: 640px ---- */
+@container (min-width:640px){
+  .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+/* ---- lg: 1024px ---- */
+@container (min-width:1024px){
+  .bar{padding:16px 32px}
+  .narrow{display:none}
+  .wide{display:inline-flex}
+  .pg{padding:8px 32px 48px;max-width:1264px;gap:20px}
+  .t{font-size:32px}
+  .lib-head{flex-direction:row;align-items:center;justify-content:space-between;gap:24px}
+  .lib-head .search{width:360px}
+  .cards{grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+  .det{grid-template-columns:400px minmax(0,1fr);grid-template-areas:"side photo" "side head" "side steps" "side cta";column-gap:48px;row-gap:20px;align-items:start}
+  .det .side{position:sticky;top:16px}
+  .det .photo .ph{aspect-ratio:16/9}
+  .dt{font-size:56px}
+  .det .cta{justify-self:start}
+  .rev{grid-template-columns:minmax(0,1fr) 380px;grid-template-areas:"banner banner" "fields photo" "ings photo" "btns btns";column-gap:48px;align-items:start;max-width:1040px}
+  .rev .btns{justify-content:flex-start}
+  .rev .btns .pill{flex:none;min-width:140px}
+}
 </style>
 
 <div class="wrap">
   <div class="intro">
     <div>
       <h1>ביס &amp; סיר: key screens</h1>
-      <p>
-        Direction B, "The Board". The phone layout is the base design and
-        desktop is built on top of it, with the same markup and the same tokens.
-        The three screens are the library, a recipe with live scaling and an
-        original-value hint, and the review form after an AI import (with the
-        imported photo). One card has no photo, to show the fallback.
-      </p>
+      <p>Direction B, "The Board". The phone layout is the base design and desktop is built on top of it, with the same markup and the same tokens. The three screens are the library, a recipe with live scaling and an original-value hint, and the review form after an AI import (with the imported photo). One card has no photo, to show the fallback.</p>
     </div>
     <div class="ctl" role="group" aria-label="Theme">
       <button type="button" class="pill" data-t="light">Light</button>
       <button type="button" class="pill" data-t="dark">Dark</button>
-      <button type="button" class="pill" data-t="" aria-pressed="true">
-        System
-      </button>
+      <button type="button" class="pill" data-t="" aria-pressed="true">System</button>
     </div>
   </div>
   <div class="views" role="group" aria-label="View">
-    <button type="button" class="pill" data-v="phone" aria-pressed="true">
-      Phone
-    </button>
-    <button type="button" class="pill" data-v="desk" aria-pressed="false">
-      Desktop
-    </button>
+    <button type="button" class="pill" data-v="phone" aria-pressed="true">Phone</button>
+    <button type="button" class="pill" data-v="desk" aria-pressed="false">Desktop</button>
   </div>
 
   <div id="v-phone" class="grid">
-    <section>
-      <p class="cap">1 · Library (owner logged in)</p>
-      <div class="phone"><div class="scr" data-screen="lib"></div></div>
-    </section>
-    <section>
-      <p class="cap">2 · Recipe, scaled to 6 servings</p>
-      <div class="phone"><div class="scr" data-screen="det"></div></div>
-    </section>
-    <section>
-      <p class="cap">3 · Review after import</p>
-      <div class="phone"><div class="scr" data-screen="rev"></div></div>
-    </section>
+    <section><p class="cap">1 · Library (owner logged in)</p><div class="phone"><div class="scr" data-screen="lib"></div></div></section>
+    <section><p class="cap">2 · Recipe, scaled to 6 servings</p><div class="phone"><div class="scr" data-screen="det"></div></div></section>
+    <section><p class="cap">3 · Review after import</p><div class="phone"><div class="scr" data-screen="rev"></div></div></section>
   </div>
 
   <div id="v-desk" class="desk" hidden>
-    <section>
-      <p class="cap">
-        1 · Library, 1280px: three columns, search beside the title, actions in
-        the top bar
-      </p>
-      <div class="dwrap">
-        <div class="dchrome"><i></i><i></i><i></i></div>
-        <div class="dscale"><div class="scr" data-screen="lib"></div></div>
-      </div>
-    </section>
-    <section>
-      <p class="cap">
-        2 · Recipe, 1280px: servings and board in a sticky column on the right
-        (start), photo and steps beside it
-      </p>
-      <div class="dwrap">
-        <div class="dchrome"><i></i><i></i><i></i></div>
-        <div class="dscale"><div class="scr" data-screen="det"></div></div>
-      </div>
-    </section>
-    <section>
-      <p class="cap">
-        3 · Review after import, 1280px: the photo panel beside the fields
-      </p>
-      <div class="dwrap">
-        <div class="dchrome"><i></i><i></i><i></i></div>
-        <div class="dscale"><div class="scr" data-screen="rev"></div></div>
-      </div>
-    </section>
+    <section><p class="cap">1 · Library, 1280px: three columns, search beside the title, actions in the top bar</p><div class="dwrap"><div class="dchrome"><i></i><i></i><i></i></div><div class="dscale"><div class="scr" data-screen="lib"></div></div></div></section>
+    <section><p class="cap">2 · Recipe, 1280px: servings and board in a sticky column on the right (start), photo and steps beside it</p><div class="dwrap"><div class="dchrome"><i></i><i></i><i></i></div><div class="dscale"><div class="scr" data-screen="det"></div></div></div></section>
+    <section><p class="cap">3 · Review after import, 1280px: the photo panel beside the fields</p><div class="dwrap"><div class="dchrome"><i></i><i></i><i></i></div><div class="dscale"><div class="scr" data-screen="rev"></div></div></div></section>
   </div>
 
-  <p class="credits">
-    Sample photos (placeholders for the mockup, openly licensed):
-    <a href="https://commons.wikimedia.org/w/index.php?curid=39264308"
-      >"Shakshuka by Calliopejen1"</a
-    >, CC BY-SA 3.0;
-    <a href="https://commons.wikimedia.org/w/index.php?curid=25518612"
-      >"Focaccia Genovese 02"</a
-    >
-    by Alessio Sbarbaro, CC BY-SA 3.0;
-    <a href="https://commons.wikimedia.org/w/index.php?curid=1235151"
-      >"Chana masala"</a
-    >
-    by Simon Law, CC BY-SA 2.0;
-    <a href="https://commons.wikimedia.org/w/index.php?curid=11627047"
-      >"Max's Roasted Chicken"</a
-    >
-    by Evan Swigart, CC BY 2.0;
-    <a href="https://commons.wikimedia.org/w/index.php?curid=18808966"
-      >"Lasagne in baking dish fresh from the oven"</a
-    >
-    by Jessica Spengler, CC BY 2.0;
-    <a href="https://commons.wikimedia.org/w/index.php?curid=9431098"
-      >"Chocolate cake with chocolate frosting"</a
-    >
-    by ChildofMidnight, CC BY 2.0. All via Wikimedia Commons.
-  </p>
+  <p class="credits">Sample photos (placeholders for the mockup, openly licensed): <a href="https://commons.wikimedia.org/w/index.php?curid=39264308">"Shakshuka by Calliopejen1"</a>, CC BY-SA 3.0; <a href="https://commons.wikimedia.org/w/index.php?curid=25518612">"Focaccia Genovese 02"</a> by Alessio Sbarbaro, CC BY-SA 3.0; <a href="https://commons.wikimedia.org/w/index.php?curid=1235151">"Chana masala"</a> by Simon Law, CC BY-SA 2.0; <a href="https://commons.wikimedia.org/w/index.php?curid=11627047">"Max's Roasted Chicken"</a> by Evan Swigart, CC BY 2.0; <a href="https://commons.wikimedia.org/w/index.php?curid=18808966">"Lasagne in baking dish fresh from the oven"</a> by Jessica Spengler, CC BY 2.0; <a href="https://commons.wikimedia.org/w/index.php?curid=9431098">"Chocolate cake with chocolate frosting"</a> by ChildofMidnight, CC BY 2.0. All via Wikimedia Commons.</p>
 </div>
 
 <script>
-  /* ---------- shared bits ---------- */
-  const bar = (start, end) => `<div class="bar">${start}${end}</div>`;
-  const mark = `<span class="mark">ביס &amp; סיר</span>`;
-  const ownerActs = `<span class="acts">
+/* ---------- shared bits ---------- */
+const bar = (start, end) => `<div class="bar">${start}${end}</div>`;
+const mark = `<span class="mark">ביס &amp; סיר</span>`;
+const ownerActs = `<span class="acts">
   <a href="#" class="pill wide">ייבוא</a><a href="#" class="pill primary wide">מתכון חדש</a>
   <button class="ibtn" type="button" aria-label="ערכת צבעים">◐</button>
   <button class="ibtn primary narrow" type="button" aria-label="הוספת מתכון">+</button></span>`;
 
-  /* ---------- library ---------- */
-  const CATS = [
-    'הכל',
-    'ארוחת בוקר',
-    'צהריים',
-    'ארוחת ערב',
-    'קינוחים',
-    'מאפים',
-    'תוספות',
-    'משקאות',
-    'אחר',
-  ];
-  const RECIPES = [
-    ['שקשוקה', 'ארוחת בוקר', '35 דק׳', 'shakshuka'],
-    ['פוקאצ׳ה ביתית', 'מאפים', '2 ש׳', 'focaccia'],
-    ['קארי חומוס', 'ארוחת ערב', '40 דק׳', 'curry'],
-    ['מרק עדשים כתומות', 'צהריים', '45 דק׳', ''],
-    ['עוף צלוי בלימון', 'ארוחת ערב', '1 ש׳ 30 דק׳', 'chicken'],
-    ['לזניה', 'ארוחת ערב', '1 ש׳ 20 דק׳', 'lasagna'],
-    ['עוגת שוקולד', 'קינוחים', '50 דק׳', 'cake'],
-  ];
-  function mountLib(el) {
-    let cat = 'הכל';
-    el.innerHTML =
-      bar(mark, ownerActs) +
-      `<div class="pg" dir="rtl" lang="he">
+/* ---------- library ---------- */
+const CATS=["הכל","ארוחת בוקר","צהריים","ארוחת ערב","קינוחים","מאפים","תוספות","משקאות","אחר"];
+const RECIPES=[["שקשוקה","ארוחת בוקר","35 דק׳","shakshuka"],["פוקאצ׳ה ביתית","מאפים","2 ש׳","focaccia"],["קארי חומוס","ארוחת ערב","40 דק׳","curry"],["מרק עדשים כתומות","צהריים","45 דק׳",""],["עוף צלוי בלימון","ארוחת ערב","1 ש׳ 30 דק׳","chicken"],["לזניה","ארוחת ערב","1 ש׳ 20 דק׳","lasagna"],["עוגת שוקולד","קינוחים","50 דק׳","cake"]];
+function mountLib(el){
+  let cat="הכל";
+  el.innerHTML = bar(mark, ownerActs) + `<div class="pg" dir="rtl" lang="he">
     <div class="lib-head"><h2 class="t">המתכונים שלי</h2>
     <label class="search"><span aria-hidden="true">⌕</span><input type="search" placeholder="חיפוש מתכון" aria-label="חיפוש מתכון"></label></div>
     <div class="chips" role="group" aria-label="קטגוריה"></div>
     <ul class="cards"></ul>
     <p class="empty meta">לא נמצאו מתכונים. <button type="button" class="reset">ניקוי החיפוש</button></p></div>`;
-    const chips = el.querySelector('.chips'),
-      cards = el.querySelector('.cards'),
-      q = el.querySelector('input'),
-      empty = el.querySelector('.empty');
-    const draw = () => {
-      chips.innerHTML = CATS.map(
-        (c) =>
-          `<button type="button" class="chip" aria-pressed="${c === cat}">${c}</button>`,
-      ).join('');
-      const list = RECIPES.filter(
-        (r) => (cat === 'הכל' || r[1] === cat) && r[0].includes(q.value.trim()),
-      );
-      cards.innerHTML = list
-        .map(
-          (r) =>
-            `<li><a class="card${r[3] ? '' : ' nophoto'}" href="#">${r[3] ? `<img class="ph" src="assets/${r[3]}.jpg" alt="" loading="lazy">` : ''}<div class="txt"><h3>${r[0]}</h3><p>${r[1]} · ${r[2]}</p></div></a></li>`,
-        )
-        .join('');
-      empty.style.display = list.length ? 'none' : 'block';
-    };
-    chips.addEventListener('click', (e) => {
-      const b = e.target.closest('.chip');
-      if (b) {
-        cat = b.textContent;
-        draw();
-      }
-    });
-    q.addEventListener('input', draw);
-    empty.querySelector('button').addEventListener('click', () => {
-      q.value = '';
-      cat = 'הכל';
-      draw();
-    });
-    el.addEventListener('click', (e) => {
-      if (e.target.closest('a')) e.preventDefault();
-    });
-    draw();
-  }
+  const chips=el.querySelector(".chips"),cards=el.querySelector(".cards"),q=el.querySelector("input"),empty=el.querySelector(".empty");
+  const draw=()=>{
+    chips.innerHTML=CATS.map(c=>`<button type="button" class="chip" aria-pressed="${c===cat}">${c}</button>`).join("");
+    const list=RECIPES.filter(r=>(cat==="הכל"||r[1]===cat)&&r[0].includes(q.value.trim()));
+    cards.innerHTML=list.map(r=>`<li><a class="card${r[3]?"":" nophoto"}" href="#">${r[3]?`<img class="ph" src="assets/${r[3]}.jpg" alt="" loading="lazy">`:""}<div class="txt"><h3>${r[0]}</h3><p>${r[1]} · ${r[2]}</p></div></a></li>`).join("");
+    empty.style.display=list.length?"none":"block";
+  };
+  chips.addEventListener("click",e=>{const b=e.target.closest(".chip");if(b){cat=b.textContent;draw();}});
+  q.addEventListener("input",draw);
+  empty.querySelector("button").addEventListener("click",()=>{q.value="";cat="הכל";draw();});
+  el.addEventListener("click",e=>{if(e.target.closest("a"))e.preventDefault();});
+  draw();
+}
 
-  /* ---------- detail ---------- */
-  const BASE = 4;
-  const ING = [
-    { a: 6, u: ['ביצה', 'ביצים'], n: '', ut: 1 },
-    { a: 1, u: ['קופסה', 'קופסאות'], n: 'עגבניות מרוסקות' },
-    { a: 1, u: ['יח׳', 'יח׳'], n: 'פלפל אדום', note: 'פרוס דק', ut: 1 },
-    { a: 3, u: ['שן', 'שיניים'], n: 'שום', note: 'קצוץ', ut: 1 },
-    { a: 2, u: ['כפית', 'כפיות'], n: 'כמון', o: 1 },
-    { a: 1, u: ['כפית', 'כפיות'], n: 'פפריקה מתוקה' },
-    { a: null, n: 'מלח' },
-  ];
-  const fmt = (v, ut) => {
-    if (ut) v = Math.round(v * 2) / 2;
-    return Number.isInteger(v) ? String(v) : String(parseFloat(v.toFixed(2)));
-  };
-  const qty = (a, u, r, ut) => {
-    const v = a * r;
-    return `<bdi>${fmt(v, ut)}</bdi> ${v === 1 ? u[0] : u[1]}`;
-  };
-  function mountDet(el) {
-    let sv = 6;
-    const draw = (focus) => {
-      const r = sv / BASE;
-      el.innerHTML =
-        bar(
-          `<span class="acts"><button class="ibtn" type="button" aria-label="חזרה לרשימה">→</button>${mark}</span>`,
-          `<span class="acts"><button class="ibtn" type="button" aria-label="ערכת צבעים">◐</button></span>`,
-        ) +
-        `<div class="pg" dir="rtl" lang="he"><div class="det">
+/* ---------- detail ---------- */
+const BASE=4;
+const ING=[{a:6,u:["ביצה","ביצים"],n:"",ut:1},{a:1,u:["קופסה","קופסאות"],n:"עגבניות מרוסקות"},{a:1,u:["יח׳","יח׳"],n:"פלפל אדום",note:"פרוס דק",ut:1},{a:3,u:["שן","שיניים"],n:"שום",note:"קצוץ",ut:1},{a:2,u:["כפית","כפיות"],n:"כמון",o:1},{a:1,u:["כפית","כפיות"],n:"פפריקה מתוקה"},{a:null,n:"מלח"}];
+const fmt=(v,ut)=>{if(ut)v=Math.round(v*2)/2;return Number.isInteger(v)?String(v):String(parseFloat(v.toFixed(2)));};
+const qty=(a,u,r,ut)=>{const v=a*r;return `<bdi>${fmt(v,ut)}</bdi> ${v===1?u[0]:u[1]}`;};
+function mountDet(el){
+  let sv=6;
+  const draw=(focus)=>{
+    const r=sv/BASE;
+    el.innerHTML = bar(`<span class="acts"><button class="ibtn" type="button" aria-label="חזרה לרשימה">→</button>${mark}</span>`, `<span class="acts"><button class="ibtn" type="button" aria-label="ערכת צבעים">◐</button></span>`) +
+    `<div class="pg" dir="rtl" lang="he"><div class="det">
       <div class="photo phb"><img class="ph" src="assets/shakshuka.jpg" alt="שקשוקה במחבת"></div>
       <div class="head"><p class="meta">ארוחת בוקר · הכנה 10 דק׳ · בישול 25 דק׳</p><h2 class="dt">שקשוקה</h2></div>
       <div class="side">
         <div class="serv"><span class="l">מנות</span>
           <span class="step"><button class="ibtn primary" type="button" data-d="-1" aria-label="פחות מנות">−</button><output aria-live="polite">${sv}</output><button class="ibtn primary" type="button" data-d="1" aria-label="עוד מנות">+</button></span>
-          <button type="button" class="reset" data-r ${sv === BASE ? 'hidden' : ''}>חזרה ל־${BASE}</button></div>
-        <div class="board"><ul class="ings" aria-label="מצרכים">${ING.map(
-          (i) =>
-            i.a === null
-              ? `<li class="ing taste"><span class="q">לפי הטעם</span><span class="n">${i.n}</span></li>`
-              : `<li class="ing"><span class="q">${qty(i.a, i.u, r, i.ut)}</span><span class="n">${i.n}${i.note ? ` <span class="note">${i.note}</span>` : ''}</span>${i.o ? `<span class="h">במקור ${qty(i.o, i.u, r, i.ut)}</span>` : ''}</li>`,
-        ).join('')}</ul></div>
+          <button type="button" class="reset" data-r ${sv===BASE?"hidden":""}>חזרה ל־${BASE}</button></div>
+        <div class="board"><ul class="ings" aria-label="מצרכים">${ING.map(i=>i.a===null
+          ?`<li class="ing taste"><span class="q">לפי הטעם</span><span class="n">${i.n}</span></li>`
+          :`<li class="ing"><span class="q">${qty(i.a,i.u,r,i.ut)}</span><span class="n">${i.n}${i.note?` <span class="note">${i.note}</span>`:""}</span>${i.o?`<span class="h">במקור ${qty(i.o,i.u,r,i.ut)}</span>`:""}</li>`).join("")}</ul></div>
       </div>
       <div class="steps-w"><h4>אופן ההכנה</h4>
         <ol class="steps"><li>מחממים שמן זית במחבת רחבה ומטגנים את הפלפל והשום כ־5 דקות.</li><li>מוסיפים כמון ופפריקה, ואחריהם את העגבניות. מבשלים 10 דקות עד שהרוטב מסמיך.</li><li>יוצרים גומות ברוטב, שוברים לתוכן את הביצים, מכסים ומבשלים 6–8 דקות.</li></ol>
         <p class="src">מקור: <a href="#" dir="ltr">example-cooking.site</a></p></div>
       <a href="#" class="pill primary cta">עריכת מתכון</a>
     </div></div>`;
-      if (focus) el.querySelector(focus)?.focus();
-    };
-    el.addEventListener('click', (e) => {
-      if (e.target.closest('a')) e.preventDefault();
-      const b = e.target.closest('button');
-      if (!b) return;
-      if (b.dataset.d) {
-        sv = Math.min(100, Math.max(1, sv + +b.dataset.d));
-        draw(`[data-d="${b.dataset.d}"]`);
-      } else if (b.hasAttribute('data-r')) {
-        sv = BASE;
-        draw('[data-d="1"]');
-      }
-    });
-    draw();
-  }
+    if(focus) el.querySelector(focus)?.focus();
+  };
+  el.addEventListener("click",e=>{
+    if(e.target.closest("a")) e.preventDefault();
+    const b=e.target.closest("button");if(!b)return;
+    if(b.dataset.d){sv=Math.min(100,Math.max(1,sv+ +b.dataset.d));draw(`[data-d="${b.dataset.d}"]`);}
+    else if(b.hasAttribute("data-r")){sv=BASE;draw('[data-d="1"]');}
+  });
+  draw();
+}
 
-  /* ---------- import review ---------- */
-  let uid = 0;
-  function mountRev(el) {
-    const id = ++uid;
-    el.innerHTML =
-      bar(
-        `<span class="acts"><button class="ibtn" type="button" aria-label="ביטול">✕</button><span class="mark">מתכון מיובא</span></span>`,
-        `<span class="acts"><button class="ibtn" type="button" aria-label="ערכת צבעים">◐</button></span>`,
-      ) +
-      `<div class="pg" dir="rtl" lang="he"><div class="rev">
+/* ---------- import review ---------- */
+let uid=0;
+function mountRev(el){
+  const id=++uid;
+  el.innerHTML = bar(`<span class="acts"><button class="ibtn" type="button" aria-label="ביטול">✕</button><span class="mark">מתכון מיובא</span></span>`, `<span class="acts"><button class="ibtn" type="button" aria-label="ערכת צבעים">◐</button></span>`) +
+  `<div class="pg" dir="rtl" lang="he"><div class="rev">
     <p class="banner" role="status">שדה אחד דורש השלמה · המתכון תורגם מאנגלית</p>
     <div class="photo"><div class="phb"><img class="ph" src="assets/focaccia.jpg" alt="תמונת המתכון מהאתר"></div>
       <div class="photo-acts"><span>תמונה מהאתר</span><span><button type="button" class="linkbtn" data-rm>הסרה</button> · <button type="button" class="linkbtn">החלפה</button></span></div></div>
@@ -1019,58 +276,40 @@
     </div>
     <div class="btns"><button type="button" class="pill primary">שמירה</button><button type="button" class="pill">ביטול</button></div>
   </div></div>`;
-    el.querySelector('[data-rm]').addEventListener('click', (e) => {
-      const p = el.querySelector('.phb');
-      const gone = (p.hidden = !p.hidden);
-      e.target.textContent = gone ? 'החזרת התמונה' : 'הסרה';
-      el.querySelector('.photo-acts span').textContent = gone
-        ? 'התמונה לא תישמר'
-        : 'תמונה מהאתר';
-    });
-  }
+  el.querySelector("[data-rm]").addEventListener("click",e=>{
+    const p=el.querySelector(".phb"); const gone=p.hidden=!p.hidden;
+    e.target.textContent=gone?"החזרת התמונה":"הסרה";
+    el.querySelector(".photo-acts span").textContent=gone?"התמונה לא תישמר":"תמונה מהאתר";
+  });
+}
 
-  const MOUNT = { lib: mountLib, det: mountDet, rev: mountRev };
-  document
-    .querySelectorAll('[data-screen]')
-    .forEach((el) => MOUNT[el.dataset.screen](el));
+const MOUNT={lib:mountLib,det:mountDet,rev:mountRev};
+document.querySelectorAll("[data-screen]").forEach(el=>MOUNT[el.dataset.screen](el));
 
-  /* ---------- desktop scaling ---------- */
-  function fit() {
-    document.querySelectorAll('.dwrap').forEach((w) => {
-      const s = w.querySelector('.dscale');
-      const avail = w.clientWidth - 16;
-      if (avail <= 0) return;
-      const k = Math.min(1, avail / 1280);
-      s.style.transform = `scale(${k})`;
-      s.style.marginBottom = `${(k - 1) * s.offsetHeight}px`;
-    });
-  }
-  new ResizeObserver(fit).observe(document.body);
-  document
-    .querySelectorAll('.dscale')
-    .forEach((s) => new ResizeObserver(fit).observe(s));
+/* ---------- desktop scaling ---------- */
+function fit(){
+  document.querySelectorAll(".dwrap").forEach(w=>{
+    const s=w.querySelector(".dscale"); const avail=w.clientWidth-16;
+    if(avail<=0) return;
+    const k=Math.min(1,avail/1280);
+    s.style.transform=`scale(${k})`;
+    s.style.marginBottom=`${(k-1)*s.offsetHeight}px`;
+  });
+}
+new ResizeObserver(fit).observe(document.body);
+document.querySelectorAll(".dscale").forEach(s=>new ResizeObserver(fit).observe(s));
 
-  /* ---------- switches ---------- */
-  document.querySelectorAll('[data-t]').forEach((b) =>
-    b.addEventListener('click', () => {
-      const t = b.dataset.t;
-      if (t) document.documentElement.dataset.theme = t;
-      else delete document.documentElement.dataset.theme;
-      document
-        .querySelectorAll('[data-t]')
-        .forEach((x) => x.setAttribute('aria-pressed', x === b));
-    }),
-  );
-  function setView(v) {
-    document.getElementById('v-phone').hidden = v !== 'phone';
-    document.getElementById('v-desk').hidden = v !== 'desk';
-    document
-      .querySelectorAll('[data-v]')
-      .forEach((x) => x.setAttribute('aria-pressed', x.dataset.v === v));
-    fit();
-  }
-  document
-    .querySelectorAll('[data-v]')
-    .forEach((b) => b.addEventListener('click', () => setView(b.dataset.v)));
-  if (location.hash === '#desktop') setView('desk');
+/* ---------- switches ---------- */
+document.querySelectorAll("[data-t]").forEach(b=>b.addEventListener("click",()=>{
+  const t=b.dataset.t; if(t) document.documentElement.dataset.theme=t; else delete document.documentElement.dataset.theme;
+  document.querySelectorAll("[data-t]").forEach(x=>x.setAttribute("aria-pressed",x===b));
+}));
+function setView(v){
+  document.getElementById("v-phone").hidden=v!=="phone";
+  document.getElementById("v-desk").hidden=v!=="desk";
+  document.querySelectorAll("[data-v]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.v===v));
+  fit();
+}
+document.querySelectorAll("[data-v]").forEach(b=>b.addEventListener("click",()=>setView(b.dataset.v)));
+if(location.hash==="#desktop") setView("desk");
 </script>
