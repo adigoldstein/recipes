@@ -1,0 +1,80 @@
+# Review: versions and technology reality check
+
+- **Spine reviewed:** `ARCHITECTURE-SPINE.md` (draft, 2026-10-26)
+- **Reviewer:** independent version/currency check
+- **Date:** 2026-10-26
+- **Method:**
+  - Read the installed versions from `package.json`, `node_modules/*/package.json`, `apps/recipe-service/pyproject.toml` and `uv.lock`.
+  - Queried the npm registry (`npm view`) and the PyPI JSON API on 2026-10-26.
+  - Ran web searches for release notes and compatibility.
+
+## Verdict
+
+Most of the core stack was reality-checked, and the pinned backend versions match `uv.lock` and PyPI's latest releases exactly (FastAPI 0.162.0, SQLModel 0.0.48, Alembic 1.20.1). On the frontend, though, the workspace contradicts the spine: React Router 6.30.3 is installed, and the Nx 24 generators only know React Router 7.14 and 6.30. Several items are marked "current" without a pin, so they were never confirmed: Gemini model and API surface, MSW (now v3), the ESLint hooks plugin and the React Compiler wiring. The import-pipeline libraries (JSON-LD, readable text) and the rate limiter are not named at all.
+
+## Table
+
+| Technology | Spine says | Verified current (2026-10-26) | Status | Source URL | Suggested fix |
+| --- | --- | --- | --- | --- | --- |
+| Nx | 24.0.0 | 24.0.0 installed (`nx`, `@nx/*`). I found no public 24.0 release notes. | ok | local `node_modules/nx/package.json` | None. |
+| Nx ↔ React Router v8 | RR 8.x assumed to work in Nx | Nx 24 `@nx/react` hard-codes `reactRouterDomVersion = '6.30.3'` and `reactRouterVersion = '^7.14.2'`. Neither its generators nor `@nx/react/router-plugin` (framework mode) targets v8. | **risk** | local `node_modules/@nx/react/dist/...` (grep); https://nx.dev/docs/technologies/react/guides/react-router | Use RR v8 in **data/library mode** (`createBrowserRouter` + `lazy`), not framework mode, so the Nx router plugin isn't needed. Install it by hand rather than through the generator, and record "no Nx RR plugin" in the spine. |
+| React Router | 8.x (released 2026-06; replaces EOL 6.30) | v8.0.0 released 2026-06-17 (confirmed); latest is **8.5.0**. v6 is EOL. v8 **removes `react-router-dom`**: import from `react-router` and `react-router/dom`. It is ESM-only, has middleware on by default, peers on `react >=19.2.7` and needs `node >=22.22.0`. | **wrong (workspace)** / ok (spine) | https://reactrouter.com/8.0.0/changelog ; https://remix.run/blog/react-router-v8 ; https://infoq.com/news/2026/08/react-route-v8 ; `npm view react-router` | `package.json` still has `react-router-dom: 6.30.3` (the Nx default). Replace it with `react-router@^8.5`. Make the "lazy route modules" wording explicit about data mode vs framework mode. Pin Node ≥22.22 in CI (local is 24.21, which is OK). |
+| React / React DOM | 19.x | 19.3.1 installed, which meets RR v8's peer of ≥19.2.7. | ok | local | Raise the floor to `^19.2.7`. |
+| Vite | 8.x | 8.3.5 installed (Rolldown/Oxc). | ok | https://vite.dev/blog/announcing-vite8 | None. |
+| @vitejs/plugin-react | (not in spine) | 6.1.2 installed. **v6 dropped Babel.** React Compiler has two options: the native Rust `react({ compiler: true })` through `oxc-transform-react` (README marks it **experimental**), or the Babel route with `@rolldown/plugin-babel` (0.2.4, pre-1.0), `@babel/core`, `babel-plugin-react-compiler` (1.0.0) and `reactCompilerPreset()`. | **risk** | local `node_modules/@vitejs/plugin-react/README.md`; https://recca0120.github.io/en/2026/04/14/react-compiler-vite-v6/ ; https://voidzero.dev/posts/whats-new-aug-2026 | AD-11 says "React Compiler is enabled" without saying how. Pick one route and write it down. Recommendation: the Babel preset route (stable compiler 1.0), with the Oxc route as a later swap. The old `react({ babel: { plugins } })` setup from many tutorials no longer works on v6. |
+| React Compiler | enabled; no manual memo without reason | `babel-plugin-react-compiler` 1.0.0 (stable). | ok (with row above) | `npm view babel-plugin-react-compiler` | None beyond the row above. |
+| eslint-plugin-react-hooks | (not in spine) | **5.0.0 installed**; latest is **7.1.1**. The compiler-aware rules (`immutability`, `globals`, `refs`, etc.) only ship in 7.x. | **risk** | https://react.dev/reference/eslint-plugin-react-hooks ; `npm view eslint-plugin-react-hooks` | Bump to `^7.1` and use the `recommended` (or `recommended-latest`) flat config. Without it, the "no hand-written memo" rule has no lint backing. |
+| TypeScript | ~6.0 | 6.0.3 installed. | ok | local | None. |
+| typescript-eslint | (not in spine) | `^8.58` installed; latest 8.72.0 has peer `typescript >=4.8.4 <6.1.0`. | ok (watch) | `npm view typescript-eslint` | Fine on TS 6.0.x. Bumping TS to 6.1 will break lint until typescript-eslint catches up, so keep the `~6.0` pin. |
+| Vitest | ~5.0 | 5.0.5 installed. | ok | local | None. |
+| @tanstack/react-query | 5.x | 5.104.5 is latest. I found no React Query v6 (only the devtools packages for other frameworks are at 6.x). | ok | https://releasealert.dev/npmjs/@tanstack/react-query ; `npm view` | None. |
+| @hey-api/openapi-ts | 0.99.x, pin exact | 0.99.0 is latest. TS peer `>=5.5.3 \|\| >=6.0.0`. Has `@tanstack/react-query` and `zod` plugins; the zod plugin's `compatibilityVersion` defaults to Zod 4 when 4.x is installed. | ok | https://depscope.dev/pkg/npm/%40hey-api/openapi-ts ; https://mintlify.wiki/hey-api/openapi-ts/validators/zod ; `npm view` | Pin `0.99.0` exactly. The generated Zod schemas carry no i18n messages, so AD-9 needs a Zod 4 `error` map / i18next bridge for Hebrew field messages. That map isn't in the spine. |
+| Zod | 4.x | 4.6.7 is latest. Zod 4 replaced `required_error`/`invalid_type_error` with a single `error` option; the old options are silently ignored at runtime. | ok | https://www.issoh.co.jp/tech/details/2371/ ; `npm view zod` | Use the Zod 4 `error` API in any hand-written refinements. |
+| React Hook Form + resolver | current stable | `react-hook-form` 7.91.0; `@hookform/resolvers` **6.0.0** (new major) with peers `zod ^3.25 \|\| ^4`, `react-hook-form ^7.55`. Compatible. | ok | `npm view @hookform/resolvers@6.0.0 peerDependencies`; https://npmjs.com/@hookform/resolvers | Pin at scaffold. Check the 6.0 changelog: most tutorials show 5.x. |
+| i18next / react-i18next | current stable | i18next 26.5.11, react-i18next 17.1.9. | ok | `npm view` | Pin at scaffold. |
+| Tailwind CSS | 4.x | 4.3.3 is latest. | ok | https://releases.sh/tailwind-css/tailwind-css.md ; `npm view tailwindcss` | None. |
+| shadcn/ui RTL | current CLI (RTL logical classes) | CLI 4.22.1. Official RTL support (changelog 2026-01): `rtl: true` in `components.json` rewrites physical classes to logical ones at install, but **only for the newer styles (`base-nova`, `radix-nova`)**. Other styles need `shadcn migrate rtl`, which is not idempotent. shadcn ships its own `direction` component (`DirectionProvider`). Sources disagree on the prop name (`direction` vs `dir`). | **risk** | https://ui.shadcn.com/docs/rtl ; https://ui.shadcn.com/docs/changelog/2026-01-rtl ; https://ui.shadcn.com/docs/components/direction ; https://www.assistant-ui.com/docs/rtl | Commit to a `*-nova` style with `rtl: true` at `shadcn init`. Use shadcn's generated `direction` wrapper (it wraps the Radix provider) and check the prop name in the generated file. Make sure the lint ban on `ml-/left-` etc. does not flag shadcn's `rtl:` variants. |
+| Radix DirectionProvider | Radix `DirectionProvider` | `radix-ui` 1.8.1 / `@radix-ui/react-direction` 1.2.0. It does **not** set `dir` on the DOM, so `<html dir="rtl">` is still required (the spine already says this). | ok | https://www.shadcn.io/ui/direction ; `npm view` | None. |
+| MSW | current stable | **3.0.3** is latest (major 3). Peers `vite >=6`, `typescript >=5.9`; needs node `>=22.12`. Most guides and examples cover v2. | **risk** | `npm view msw` | Pin `msw@^3` deliberately and follow the v3 docs. Check the Vitest/jsdom setup, since v3 lists `vite` as a peer. |
+| Playwright | current stable | `@playwright/test` 1.64.1. | ok | `npm view @playwright/test` | Pin at scaffold. |
+| Python | 3.12 (`>=3.12,<3.13`) | 3.12 is **security-only, source-only** (last binary installer was 3.12.10; EOL Oct 2028). All chosen libraries support 3.12, though recipe-scrapers, Pillow and pydantic-settings now require ≥3.11. The machine default is Python 3.15.0, so uv must provision 3.12 (`.python-version` = 3.12). | **risk** | https://www.python.org/downloads/release/python-31211/ ; PyPI `requires_python` | It works today via uv-managed builds. Consider 3.13 or 3.14 for a new project (Adi's call). At minimum, add `uv python pin 3.12` in CI and a Dockerfile that uses a 3.12 base image. |
+| FastAPI | ≥0.162 | 0.162.0 (2026-10-23) is latest; locked 0.162.0. Starlette 1.10.0 locked. | ok | PyPI JSON; `uv.lock` | FastAPI is still 0.x, and minor releases can break. Pin `~=0.162.0` and bump deliberately. |
+| SQLModel / Pydantic | ≥0.0.48 / 2.x | SQLModel 0.0.48 (2026-10-06) is latest and locked; it added SQLAlchemy 2.1 support (2.1.6 locked). Pydantic 2.14.1 locked. Still maintained (FastAPI org) and Pydantic-2-native. | ok | https://tech-insider.org/sqlalchemy-vs-django-orm-vs-sqlmodel-2026/ ; PyPI; `uv.lock` | SQLModel is still 0.0.x, so pin an upper bound (`<0.0.49` or `~=0.0.48`). |
+| Alembic | ≥1.20 | 1.20.1 (2026-10-22) is latest; locked. | ok | PyPI | For SQLite autogenerate, set `render_as_batch=True` in `env.py`. The spine doesn't mention it, and without it ALTERs on SQLite fail. |
+| pwdlib[argon2] | current stable | pwdlib 0.3.1 (2026-08-12), argon2-cffi 25.1.0. | ok | PyPI; https://archlinux.org/packages/extra/any/python-pwdlib/ | Pin at scaffold. |
+| PyJWT | current stable | 2.15.1 (2026-09-28). **Several CVEs were fixed in 2.12.0 and 2.13.0**: an algorithm allow-list bypass in 2.9–2.12.1, and unrestricted JWKS fetch. | ok (pin floor) | https://simple-repository.app.cern.ch/project/PyJWT ; https://security-tracker.debian.org/tracker/pyjwt | Pin `PyJWT>=2.13` and always pass `algorithms=["HS256"]` explicitly. |
+| httpx | current stable | 0.28.1 is still latest (released **2024-12**, no release in about 22 months; still 0.x). It is only in the **dev** group today and is needed at runtime for imports. | risk | PyPI JSON | Move httpx to runtime deps. AD-13 needs DNS pinning: resolve, check, and connect to the *checked* IP (custom transport or a resolve-then-connect wrapper). httpx does not do this out of the box, so the spine should say how. |
+| Pillow (WebP) | current stable | Pillow **13.0.0** (2026-10-16), requires ≥3.11. Official wheels bundle libwebp. | ok | PyPI JSON | Pin `pillow>=13,<14`. Pillow 13 is a new major, so check the release notes for removed APIs. |
+| pydantic-settings | named in conventions | 2.16.1 (2026-10-20), requires ≥3.11. | ok | PyPI JSON | Add it to dependencies; it isn't in `pyproject.toml` yet. |
+| ollama (Python) / app | 0.6.x / current | ollama-python **0.6.3** (2026-09-29). Structured outputs via `format=<JSON schema>` (Pydantic `model_json_schema()`) have been supported since Ollama 0.5. | ok | https://registry.ollama.ai/blog/structured-outputs ; PyPI | Pin `ollama~=0.6.3`. Constrained JSON quality depends on the model, which the spine leaves to the spike (fine). |
+| google-genai SDK | current; Flash model name in config | **google-genai 2.33.0** (major 2, 2026-10-23). Current free-tier Flash models: **Gemini 3.8 Flash**, 3.6 Flash, 3 Flash Preview, 2.5 Flash. Free-tier content **is used to improve Google products**. The official structured-output docs now show the **Interactions API** (`client.interactions.create(..., response_format={mime_type, schema})`) with `gemini-3.8-flash`, not the older `generate_content(response_schema=...)` that most tutorials use. Free-tier RPM is low (about 5 RPM reported by a third party). | **risk** | https://ai.google.dev/gemini-api/docs/pricing ; https://ai.google.dev/gemini-api/docs/structured-output ; https://docs.claude-mem.ai/usage/gemini-provider | Pin `google-genai~=2.33` and set the default model to `gemini-3.8-flash` in config. Decide which API surface the adapter uses and confirm it with a spike. Note the free-tier data-use terms for Adi (low sensitivity for recipes, but it is a decision). The 60s timeout plus a low free-tier RPM makes "retry with Gemini" easy to rate-limit, so handle 429 explicitly. |
+| JSON-LD extraction | "schema.org JSON-LD extract" (**no library named**) | `extruct` 0.18.0, **last release 2024-11** (stale). `recipe-scrapers` 15.13.0 (2026-10-18; active; parses JSON-LD, microdata and OpenGraph; requires ≥3.11). | **risk (unverified/unnamed)** | PyPI JSON; https://www.piwheels.org/project/extruct/ ; https://pypi.org/project/recipe-scrapers/ | Name the library. Recommendation: `recipe-scrapers` (its `scrape_html` with wild mode / schema fallback), or a small hand-written `<script type="application/ld+json">` parser. Avoid building on `extruct`. |
+| Readable-text fallback | "readable-text fallback" (**no library named**) | `trafilatura` 2.3.1 (2026-10-06), active, requires ≥3.10. | ok (if chosen) | PyPI JSON; https://thunderbit.com/blog/trafilatura-review | Name `trafilatura` in the spine/stack. Feed it HTML from the SSRF-safe fetcher; never let it fetch URLs itself. |
+| Login rate limiting | "5 per minute" (**no library named**) | `slowapi` 0.1.10 (2026-06-13); docs still say "alpha quality". It is built on `limits` 5.8.0. An in-memory store is fine for the single-container, single-worker deployment (AD-15). | risk (unnamed) | https://github.com/laurentS/slowapi ; https://www.danilchenko.dev/posts/fastapi-rate-limiting/ ; PyPI | Name the mechanism. Recommendation: `slowapi` (or `limits` directly) with an in-memory store, plus a note that it breaks if uvicorn runs more than one worker. |
+| @nxlv/python | (not in spine) | 23.3.1 is latest; peer `@nx/devkit >=22`, so the open-ended peer accepts Nx 24. I found no explicit Nx 24 support statement. | risk (low) | `npm view @nxlv/python` | Smoke-test `nx run recipe-service:*` targets on Nx 24 in CI (AD-17) before relying on `nx affected` for Python. |
+| uv | CI uses uv | uv 0.13.1 installed locally. | ok | local | Pin the uv version in the GitHub Action. |
+
+## Items asserted without evidence in the spine
+
+These were marked "current stable / current" and so were not committed:
+
+- React Hook Form
+- i18next
+- Playwright
+- MSW
+- pwdlib
+- PyJWT
+- httpx
+- Pillow
+- Ollama app
+- google-genai
+
+All of them exist and are maintained (see the table), but MSW, google-genai, Pillow and @hookform/resolvers have **new majors** since most training-era examples. Pin them at scaffold and use current docs.
+
+## Top issues
+
+1. **React Router:** the workspace has `react-router-dom@6.30.3`, while the spine says v8. v8 removed `react-router-dom`, and Nx 24 has no v8 generator or plugin support. Install `react-router@^8.5` by hand in data mode.
+2. **React Compiler on @vitejs/plugin-react 6.1:** no Babel by default. Choose the Babel preset route (`@rolldown/plugin-babel` + `babel-plugin-react-compiler@1`) or the experimental Oxc `compiler: true`. Also bump `eslint-plugin-react-hooks` 5.0.0 → 7.x.
+3. **Gemini adapter:** unpinned. The current SDK is google-genai 2.x, the current free Flash model is `gemini-3.8-flash`, and the docs show the Interactions API `response_format`. The free tier uses your data and has low RPM.
+4. **Import pipeline and rate-limit libraries are unnamed.** Avoid stale `extruct` (2024). Name recipe-scrapers or a hand parser, trafilatura and slowapi/limits. httpx (dev-only today, last release 2024) needs an explicit DNS-pinning approach for AD-13.
+5. **Python 3.12 pin:** security-only and source-only. It works via uv, but 3.13 or 3.14 is worth Adi's decision. Also pin PyJWT ≥2.13 for the CVEs, and add `render_as_batch` for Alembic on SQLite.

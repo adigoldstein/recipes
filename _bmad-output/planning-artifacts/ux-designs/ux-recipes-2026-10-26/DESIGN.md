@@ -153,7 +153,7 @@ components:
     typography: '{typography.hint}'
     color-on-board: '{colors.hint}'
     color-on-surface: '{colors.hint-muted}'
-  category-chip:
+  filter-chip:
     background: '{colors.secondary}'
     background-selected: '{colors.primary}'
     foreground-selected: '{colors.primary-foreground}'
@@ -202,7 +202,7 @@ One family: **Rubik** (Google Fonts) for everything, Hebrew and Latin. Its round
 - `heading`: section heads inside a page ("מצרכים", "אופן ההכנה").
 - `body`: steps, descriptions, form text. Minimum 16px, so iOS does not zoom on input focus.
 - `quantity`: every ingredient amount and the servings value. Uses tabular figures so amounts line up as they scale.
-- `label` / `hint`: form labels, meta (category, time) and the original-value hint.
+- `label` / `hint`: form labels, meta (meal type, tags, time) and the original-value hint.
 
 Five visible sizes at most. No uppercase or letter-spaced labels (Hebrew has no case anyway). Numbers and units are wrapped for bidi isolation (see EXPERIENCE.md, *Right-to-left & Hebrew*).
 
@@ -232,12 +232,12 @@ Inputs use `rounded.sm` (8px) and dialogs `rounded.lg` (16px), so the form doesn
 ## Components
 
 - **Board.** `{colors.board}` slab, `{rounded.board}`, padding `{spacing.board-pad}` with `{spacing.board-slot-top}` on top for the slot. It holds the ingredient list on the detail page. Lines are separated by 8px of space, with no rules. Amounts use `{typography.quantity}`, names use `body`, notes use `label` in `board-foreground` at reduced emphasis, and the hint sits under its line in `{colors.hint}`.
-- **Recipe card.** A smaller board: slot, then the photo (4:3, `rounded.md`-ish 14px inset corners, `object-fit: cover`), then the title in `title` and the category and total time in `label`. The whole card is the link. Without a photo, the title is set larger and there is no placeholder art. Hover is a 2% scale up and press a 2% scale down, with no shadow.
+- **Recipe card.** A smaller board: slot, then the photo (4:3, `rounded.md`-ish 14px inset corners, `object-fit: cover`), then the title in `title` and the meal type, tags and total time in `label`. The whole card is the link. Without a photo, the title is set larger and there is no placeholder art. Hover is a 2% scale up and press a 2% scale down, with no shadow.
 - **Board-shaped photo.** On the detail page and in import review, the photo itself is masked as a board: `rounded.board` corners and the handle slot cut through the image near its top edge. It is 4:3 on phone and 16:9 on desktop. Photos are never filtered or tinted.
 - **Photo credit.** Imported photos show "מקור: {domain}" under the steps, in `muted-foreground`.
 - **Servings stepper.** Two 44px round `primary` buttons (− and +) around the value in `quantity`. On the detail page it sits directly above the board. The "חזרה ל־4" reset is a text button in `muted-foreground`.
 - **Primary button.** A `primary` pill, 44px tall, label in `label` weight 600. One per screen.
-- **Category chips.** `secondary` pills. The selected chip is filled `primary`. On phone they scroll in a single row.
+- **Filter chips (meal type and tags).** `secondary` pills. The selected chip is filled `primary`. On phone they scroll in a single row. Tag chips in the form and under the search carry a remove (×) control.
 - **Ingredient row (form).** shadcn inputs for amount, unit (Select), name and note. On phone the row stacks amount and unit over name and note. A hinted row shows the hint under it in `hint-muted` and a "חזרה למקור" text button.
 - **Flagged field (import review).** The input border and a note in `{colors.flag}` read "יש להשלים". A summary line at the top of the form is also in `flag`.
 - **Theme toggle.** An icon button in the top bar: sun, moon, or the system setting.

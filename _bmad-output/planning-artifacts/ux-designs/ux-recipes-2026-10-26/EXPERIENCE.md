@@ -20,23 +20,26 @@ sources:
 - **Form factor.** **Mobile-first** responsive web (Adi, 2026-10-26). Every screen is designed at 375px first (the phone at the kitchen counter), then enhanced for tablet and desktop (PRD NFR-4). It is not a native app.
 - **UI system.** shadcn/ui (Radix primitives) on React + Vite + Tailwind. Components are styled only through tokens (NFR-7). This spine specifies the behavioural differences from shadcn; anything not listed uses shadcn's default behaviour.
 - **Language and direction.** The UI is in Hebrew and right to left: `<html lang="he" dir="rtl">`. See *Right-to-left & Hebrew* below. This is now in the PRD as NFR-12.
-- **Two audiences on one surface.** The **visitor** (anonymous; a recruiter, a friend) can browse, search, view and scale. The **owner** (Adi, logged in) also sees create, edit, reset, delete and import. Owner controls are *absent* for visitors, not disabled (FR-16).
+- **Three access levels on one surface.** The **visitor** (anonymous; a recruiter, a friend) can browse, search, view and scale. An **editor** (signed in, account created by Adi) also sees create, edit, reset, delete, import, photo upload and tag management. The **admin** (Adi) also sees *Users*. Controls a role can't use are *absent*, not disabled (FR-16). "Owner" below means any signed-in user (editor or admin).
 - **Visual identity.** `DESIGN.md`. Where the two documents conflict, the spines win over any mockup.
 
 ## Information Architecture
 
 | Surface | Route [ASSUMPTION] | Reached from | Who | Purpose | PRD |
 |---|---|---|---|---|---|
-| Library | `/` | App open, the brand link | All | Recipe cards, search, category filter | FR-1–3 |
+| Library | `/` | App open, the brand link | All | Recipe cards, search, meal-type and tag filters | FR-1–3 |
 | Recipe detail | `/recipes/:id` | Library card | All | Full recipe, serving scaling, original-value hints, source link | FR-5, FR-8, FR-11 |
 | New recipe | `/recipes/new` | "מתכון חדש" in the top bar and the empty state | Owner | Recipe form | FR-4 |
 | Edit recipe | `/recipes/:id/edit` | "עריכה" on the detail page | Owner | The same form, prefilled, with hints and reset | FR-6–9 |
 | Import | `/import` (dialog over the library on desktop, full page on phone) [ASSUMPTION] | "ייבוא" in the top bar | Owner | URL tab, pasted-text tab, progress | FR-17, 18, 20 |
+| Meal types & tags | `/tags` | Account menu | Owner | Add, rename, delete meal types and tags | FR-22–24 |
+| Users | `/users` | Account menu | Admin | List users; add user (email, name, role, starting password); change role; block/unblock; reset password | FR-25–26 |
+| My account | `/account` | Account menu | Owner | Change own password | FR-27 |
 | Import review | `/recipes/new?draft=…` | Successful import | Owner | Recipe form prefilled from the draft, unfilled fields flagged | FR-19 |
 | Log in | `/login?next=…` | "כניסה" in the top bar, an expired session, a direct edit URL | All | Email and password | FR-14 |
 | Not found | any unknown route or id | Bad link | All | Message and a link back to the library | FR-5 |
 
-**Navigation.** There is one top bar and no sidebar, because there are only two primary destinations. The top bar holds the wordmark (links to the library), plus "מתכון חדש" and "ייבוא" for the owner, the theme toggle, and "כניסה" or "יציאה". On phone, the owner actions collapse into one "+" menu with two items: new recipe and import [ASSUMPTION].
+**Navigation.** There is one top bar and no sidebar, because there are only two primary destinations. The top bar holds the wordmark (links to the library), plus "מתכון חדש" and "ייבוא" for signed-in users, the theme toggle, and "כניסה" for visitors or an account menu (the user's name) for signed-in users. The account menu holds "תגיות וסוגי ארוחה", "משתמשים" (admin only), "החשבון שלי" and "יציאה". On phone, the owner actions collapse into one "+" menu with two items: new recipe and import [ASSUMPTION].
 
 **Delete** has no route of its own. It is a confirm dialog on the detail page (FR-10).
 
@@ -76,10 +79,13 @@ Behavioural only. The visual specs are in `DESIGN.md.Components`.
 
 | Component | Where | Behaviour |
 |---|---|---|
-| Recipe card | Library | The whole card is one link to the detail page. It shows the photo (if any), title, category and total time (prep + cook). When neither time is known, the time is omitted rather than shown as "0". A card without a photo shows a larger title on the board and no placeholder image. Photos are lazy-loaded (NFR-11). |
+| Recipe card | Library | The whole card is one link to the detail page. It shows the photo (if any), title, meal type, up to 3 tags and total time (prep + cook). When neither time is known, the time is omitted rather than shown as "0". A card without a photo shows a larger title on the board and no placeholder image. Photos are lazy-loaded (NFR-11). |
 | Recipe photo | Detail, form, import review | One optional photo per recipe. It comes from an import (schema.org `Recipe.image`, then `og:image`) or a manual upload in the form. In the form: "הוספת תמונה" / "החלפה" / "הסרה". A removed photo is dropped on Save, and "החזרת התמונה" is available until then. An imported photo shows the source domain as credit on the detail page. Storage, resizing and format are architecture decisions (OQ-UX-6). |
 | Search field | Library | Filters as you type, with no submit. Matching is a case-insensitive substring on the title. Input stays responsive (deferred filtering). Includes a clear (×) control. The value is kept in the URL query (`?q=`) so it survives navigating back (FR-3). |
-| Category filter | Library | A single-select chip row with "הכל" plus the 8 categories. On phone it scrolls horizontally inside its own row. Stored in the URL (`?cat=`). Combines with search. |
+| Meal-type filter | Library | A single-select chip row with "הכל" plus the owner's meal types. On phone it scrolls horizontally inside its own row. Stored in the URL (`?meal=`). Combines with search and tags. |
+| Tag filter | Library | A "תגיות" button opens a sheet (phone) or popover (desktop) of tag checkboxes. The selected tags show as removable chips under the search; a recipe must have all of them. Stored in the URL (`?tags=`). |
+| Meal type + tag input | Form | The meal type is a required single select. On create it is preselected from a suggestion [ASSUMPTION: by time of day: morning→בוקר, evening→ערב]. Tags use a combobox that autocompletes existing tags (case-insensitive) and offers "יצירת תגית '{text}'" for a new one. Chosen tags are removable chips. |
+| Manage meal types & tags | `/tags` (owner) | Two lists with inline rename and add. Deleting a tag asks for confirmation and states how many recipes use it. A meal type that is in use cannot be deleted, and the message says how many recipes use it (FR-23). Reached from the account menu. |
 | Servings stepper | Detail | − / value / + plus direct typing, clamped to 1–100. Every amount updates on each change, with no network call. A "חזרה ל־{base}" link appears only when the value differs from the base. Not persisted: a reload returns to the base (FR-11). |
 | Ingredient line | Detail, form | Shows amount, unit, name and note. A to-taste line reads "מלח — לפי הטעם" and never scales. When an original exists, a hint line "במקור {amount} {unit}" sits under it, visually secondary (`{colors.hint}`), scaled by the same ratio, and announced to screen readers as part of the line. |
 | Reset to original | Edit form | A small text action on hinted rows only: "חזרה למקור". It restores the amount and unit in the form. The hint stays until Save, and after Save the row is indistinguishable from an unedited one (FR-9). It can be undone before Save by retyping. |
@@ -107,6 +113,9 @@ Behavioural only. The visual specs are in `DESIGN.md.Components`.
 | Import fetch failed | Import / URL tab | A message suggesting the paste tab, with a one-click switch that keeps the dialog open (FR-17). |
 | Import no recipe | Import / text tab | "לא נמצא מתכון בטקסט הזה". The text is kept so it can be fixed. |
 | Import LLM error or timeout | Import | A readable reason (service unavailable, quota, too slow) and "לנסות שוב". Nothing is saved. |
+| Blocked user | Any action | The session ends and the next request sends them to login with "החשבון חסום. יש לפנות למנהל." |
+| Editor opens `/users` | Users | A not-found page (the screen doesn't exist for them). |
+| Last admin | Users | The role and block controls on the last active admin are disabled with the reason "חייב להישאר מנהל אחד לפחות". |
 | Session expired | Any owner action | The next protected action goes to `/login?next=…`, with a short note "פג תוקף החיבור". After login the user returns to the same place. Unsaved form data is kept in memory across this jump [ASSUMPTION]. |
 | Login failed | Log in | "אימייל או סיסמה שגויים" (generic, FR-14). Rate limited: "יותר מדי ניסיונות. אפשר לנסות שוב בעוד דקה." |
 | Save failed (network / 5xx) | Form | A toast, and the form keeps every value. Save can be retried. |
@@ -165,17 +174,18 @@ Failure: Adi types 0 or 150 → the value is clamped to 1 or 100, and a brief me
 ### Flow 3 — Importing from the web (UJ-7)
 
 1. Adi copies a focaccia URL, taps "ייבוא" and pastes it into the "קישור" tab.
-2. A progress message appears ("קוראים את הדף…") with a cancel button. A few seconds later the form opens prefilled. The top of the form says "שדה אחד דורש השלמה", and the category field is flagged.
+2. A progress message appears ("קוראים את הדף…") with a cancel button. A few seconds later the form opens prefilled. The top of the form says "שדה אחד דורש השלמה", and the meal type is pre-picked; the tag "מאפים" is suggested.
 3. Adi picks "מאפים" and taps "שמירה".
 4. A second site blocks the fetch, and the message offers "הדבקת טקסט". Adi pastes the copied recipe text into that tab and gets the same prefilled form.
-5. **Climax:** Two recipes from two sites, saved in under a minute each, with nothing typed by hand except one category.
+5. **Climax:** Two recipes from two sites, saved in under a minute each, with nothing typed by hand except one new tag.
 
-### Flow 4 — Owner vs. visitor (UJ-6)
+### Flow 4 — Visitor, editor and admin (UJ-6)
 
 1. A recruiter opens the app from Adi's CV and sees the library with no "+" and no "ייבוא".
 2. They open a recipe and scale it to 6. It works, and there is no edit or delete control.
-3. Adi taps "כניסה", logs in, and the owner controls appear in the same place, without a reload.
-4. **Climax:** One app, two experiences, with no "permission denied" walls anywhere.
+3. Adi taps "כניסה", logs in, and the editing controls appear in the same place, without a reload.
+4. Adi opens "משתמשים", adds their partner as an editor with a starting password, and the partner logs in on their own phone and adds a recipe; its detail page shows who added it.
+5. **Climax:** One app, three experiences, with no "permission denied" walls anywhere.
 
 ### Flow 5 — Finding and cleaning up (UJ-4, UJ-5)
 
