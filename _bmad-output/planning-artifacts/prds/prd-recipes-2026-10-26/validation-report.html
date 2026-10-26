@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PRD Validation: Bite &amp; Board</title>
+<style>
+  :root {
+    --bg: #fafaf9;
+    --surface: #ffffff;
+    --border: #e7e5e4;
+    --text: #1c1917;
+    --muted: #78716c;
+
+    --verdict-strong: #16a34a;
+    --verdict-adequate: #65a30d;
+    --verdict-thin: #d97706;
+    --verdict-broken: #dc2626;
+
+    --sev-low: #64748b;
+    --sev-medium: #ca8a04;
+    --sev-high: #ea580c;
+    --sev-critical: #dc2626;
+
+    --grade-exc: #16a34a;
+    --grade-good: #65a30d;
+    --grade-fair: #d97706;
+    --grade-poor: #dc2626;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 15px;
+  }
+  .container { max-width: 960px; margin: 0 auto; padding: 32px 24px 64px; }
+
+  header.report-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+  .title h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+  .title .subtitle { color: var(--muted); font-size: 13px; margin-top: 4px; font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+  .grade {
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    color: white;
+    font-size: 15px;
+    white-space: nowrap;
+  }
+  .grade-excellent { background: var(--grade-exc); }
+  .grade-good { background: var(--grade-good); }
+  .grade-fair { background: var(--grade-fair); }
+  .grade-poor { background: var(--grade-poor); }
+
+  .synthesis {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--muted);
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin-bottom: 24px;
+    font-size: 15.5px;
+  }
+  .synthesis p { margin: 0 0 10px; }
+  .synthesis p:last-child { margin-bottom: 0; }
+
+  .dimension-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .dim-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .dim-card .dim-name { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  .dim-card .dim-verdict { font-size: 14px; font-weight: 600; }
+
+  section.dimension, section.reviewer-section { margin-bottom: 14px; }
+  section.dimension details, section.reviewer-section details {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  section summary {
+    padding: 14px 20px;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  section summary::-webkit-details-marker { display: none; }
+  section summary::before {
+    content: "▸";
+    display: inline-block;
+    color: var(--muted);
+    transition: transform 0.15s ease;
+  }
+  section details[open] summary::before { transform: rotate(90deg); }
+  section summary h2 {
+    display: inline;
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    flex: 1;
+  }
+  .verdict-pill {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: white;
+  }
+  .verdict-strong { background: var(--verdict-strong); }
+  .verdict-adequate { background: var(--verdict-adequate); }
+  .verdict-thin { background: var(--verdict-thin); }
+  .verdict-broken { background: var(--verdict-broken); }
+
+  .dim-body { padding: 4px 20px 18px; }
+  .dim-judgment { color: var(--text); font-size: 14.5px; }
+  .dim-judgment p { margin: 0 0 10px; }
+
+  .findings-list { padding: 0 20px 4px; }
+  article.finding {
+    padding: 14px 0;
+    border-top: 1px solid var(--border);
+  }
+  article.finding:first-child { border-top: none; }
+  article.finding header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+  }
+  .badge {
+    font-size: 10.5px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    line-height: 1.4;
+  }
+  .badge-sev-low { background: rgba(100, 116, 139, 0.12); color: var(--sev-low); }
+  .badge-sev-medium { background: rgba(202, 138, 4, 0.14); color: var(--sev-medium); }
+  .badge-sev-high { background: rgba(234, 88, 12, 0.14); color: var(--sev-high); }
+  .badge-sev-critical { background: rgba(220, 38, 38, 0.14); color: var(--sev-critical); }
+  .finding-title { margin: 0; font-size: 15px; font-weight: 500; flex: 1; min-width: 200px; }
+  .finding-location { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12.5px; color: var(--muted); }
+  .finding-note, .finding-fix { margin-top: 6px; font-size: 14px; }
+  .finding-fix strong { color: var(--muted); font-weight: 500; }
+
+  .reviewer-source {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+
+  .mechanical {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-top: 24px;
+    font-size: 14px;
+  }
+  .mechanical h3 { margin: 0 0 10px; font-size: 14px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .mechanical ul { margin: 0; padding-left: 20px; }
+  .mechanical li { margin-bottom: 4px; color: var(--text); }
+
+  footer.report-footer {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--muted);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  footer .meta { display: flex; gap: 24px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+  <div class="container">
+
+    <header class="report-header">
+      <div class="title">
+        <h1>Bite &amp; Board — Validation Report</h1>
+        <div class="subtitle">docs/prd.md</div>
+      </div>
+      <div class="grade grade-poor">Poor</div>
+    </header>
+
+    <div class="synthesis">
+      <p>This document is a technical design sketch with a PRD title. It does three things well: the stack, the deferred decisions with their fallbacks, and three feature mechanics (scaling formula, consolidation key, AI import pipeline). As a product requirements source it is thin to broken. It has no stated user or problem, no FR IDs or acceptance conditions, no success criteria, and no non-goals. Several features appear in the milestones but are never specified (Smart Ingredient Substitution, recipe edit/delete, search, menu persistence). For a personal hobby project the light rigor is fine. But the PRD is meant to feed UX, architecture, and epics/stories, and those workflows will have to invent most of the product behavior themselves unless the done-ness and scope gaps are closed first.</p>
+      <p>The adversarial reviewer agrees on the core gaps (no user, no FRs, incomplete CRUD) and reaches the same bottom line: not ready for downstream work. It adds risks the rubric did not raise. Server-side URL import is an unspecified fetcher with an SSRF surface, and schema.org JSON-LD is ignored as a cheaper path. A deployed instance with no auth exposes the paid LLM endpoint. There are no NFRs, most importantly phone-width use in the kitchen and LLM latency/cost bounds. Scaling has no rounding, display, or "to taste" rules. Phase 2 has no app shell, routing, or list/detail screens. There is no test strategy. It also flags two technical consistency hazards: Zod schemas written separately from the OpenAPI types, and the risk of two services writing to one SQLite file.</p>
+    </div>
+
+    <div class="dimension-summary">
+      <div class="dim-card">
+        <div class="dim-name">Decision-readiness</div>
+        <div class="dim-verdict" style="color: var(--verdict-adequate)">adequate</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Substance over theater</div>
+        <div class="dim-verdict" style="color: var(--verdict-thin)">thin</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Strategic coherence</div>
+        <div class="dim-verdict" style="color: var(--verdict-thin)">thin</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Done-ness clarity</div>
+        <div class="dim-verdict" style="color: var(--verdict-broken)">broken</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Scope honesty</div>
+        <div class="dim-verdict" style="color: var(--verdict-thin)">thin</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Downstream usability</div>
+        <div class="dim-verdict" style="color: var(--verdict-thin)">thin</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Shape fit</div>
+        <div class="dim-verdict" style="color: var(--verdict-thin)">thin</div>
+      </div>
+    </div>
+
+    <!-- Decision-readiness -->
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>Decision-readiness</h2>
+          <span class="verdict-pill verdict-adequate">adequate</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>The "Key Decision Points" block at the top of the doc is the strongest part of the PRD. Each item is stated as a decision or an explicit deferral, with a default and a trigger. Item 4 is closed (<code>@nxlv/python</code> with <code>uv</code>). A reader who pushes back on Zustand or the service split finds the objection already handled.</p>
+            <p>What is missing is product decisions. Every listed decision is technical. Product-level choices with real trade-offs are not surfaced, so they will be made silently downstream: AI-import review-before-save, whether event menus are persisted, single-user vs. multi-user, and how far ingredient matching goes. The trigger for the service split ("if/when … warrant it") is also unmeasurable.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">Product trade-offs absent from decision list</h3>
+              <span class="finding-location">§ Key Decision Points</span>
+            </header>
+            <div class="finding-note">All four decisions are about infrastructure. AI import review-before-save, menu persistence, auth/user model, and unit normalization in consolidation all carry real cost/benefit and are left implicit.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Add a "Product decisions" subsection that states the chosen option and what was given up for each (e.g., "AI imports open in an editable preview before save; gives up one-click import").</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">Split trigger is not testable</h3>
+              <span class="finding-location">§ Key Decision Points #2</span>
+            </header>
+            <div class="finding-note">"if/when asynchronous AI processing or heavy dependencies warrant it" gives no threshold. The architecture workflow will either ignore it or have to re-decide it.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Name a concrete trigger, e.g., "split if the AI deps exceed X MB in the recipe-service image or an import call exceeds the request timeout."</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">Decision #2 is partly overtaken by events</h3>
+              <span class="finding-location">§ Key Decision Points #2, § 2 directory layout</span>
+            </header>
+            <div class="finding-note">The repo already contains <code>apps/recipe-service</code>, and no <code>apps/ai-service</code> exists. The PRD still frames the split as open and lists <code>ai-service/</code> in the tree and in the Docker files.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Mark single-service as the current state and show <code>ai-service</code> as conditional in the layout.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <!-- Substance over theater -->
+    <section class="dimension">
+      <details open>
+        <summary>
+          <h2>Substance over theater</h2>
+          <span class="verdict-pill verdict-thin">thin</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>There are no personas, so there is no persona theater, but there is also no user at all. The Vision (§1) is a feature list that would fit any recipe app. Its second paragraph states engineering values ("Clean Architecture … high developer ergonomics, and seamless containerization"), not product value. The PRD never says why this app exists or what goes wrong for its user today. "Messy recipes" is the only hint at a real pain point, and it is never developed.</p>
+            <p>Large parts of the document (the §2 directory tree, the §3 Smart/Dumb component examples, the state-management split) are architecture content. It is real content, not furniture, but it sits in the wrong document and displaces product content. There are no NFRs, so there is no NFR theater, but there are also no product-specific quality bounds.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-critical">critical</span>
+              <h3 class="finding-title">No problem statement or user</h3>
+              <span class="finding-location">§1 Executive Summary &amp; Vision</span>
+            </header>
+            <div class="finding-note">The Vision does not say who uses the app or what problem it solves. Without that, nothing downstream can prioritize or make trade-offs, for example whether AI import is the core bet or a nice-to-have behind manual entry.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Add 3–5 sentences naming the user (e.g., Adi, cooking for family and hosting events), the current pain (recipes scattered across sites/screenshots, manual scaling and shopping-list math for events), and the bet the app makes.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">Architecture content occupies product space</h3>
+              <span class="finding-location">§2, §3</span>
+            </header>
+            <div class="finding-note">The directory tree, component names, and state-management rules belong in the architecture doc. In a PRD they pre-empt the architecture workflow and add bulk without adding requirements.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Move §2–§3 to a "Technical constraints" appendix, or hand them to the bmad-architecture step as input. Keep only real constraints in the PRD (Nx, React, FastAPI, SQLite, Docker).</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">Adjective-only qualities</h3>
+              <span class="finding-location">§1 "seamless containerization", "high developer ergonomics", "modern"</span>
+            </header>
+            <div class="finding-note">These have no bounds.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Drop them, or replace them with checkable statements (e.g., "<code>docker compose up</code> starts the full stack with persistent data").</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <!-- Strategic coherence -->
+    <section class="dimension">
+      <details open>
+        <summary>
+          <h2>Strategic coherence</h2>
+          <span class="verdict-pill verdict-thin">thin</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>There is no thesis, so the feature order follows the build order (backend → frontend → AI → containers) rather than user value. §6 labels the phases "MVP-1/2/3": three MVPs, and no stated MVP scope. It is unclear whether the MVP is "I can store and scale my recipes" (Phases 1+2) or whether AI import is required for the app to be worth using. There are no success metrics or counter-metrics. Even for a hobby project, one or two personal success signals would anchor scope.</p>
+            <p>The feature set itself does form a reasonable arc: store → scale → plan an event → shop → import faster. Stating that arc would make it a thesis.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">MVP boundary undefined</h3>
+              <span class="finding-location">§6 phase headers "MVP-1", "MVP-2", "MVP-3"</span>
+            </header>
+            <div class="finding-note">Three "MVPs" means none of them is the MVP. Epic planning cannot tell what must ship first for the app to be useful.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Declare one MVP cut (e.g., Phases 1–2 plus manual recipe entry). Label the rest as post-MVP increments with a one-line rationale.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">No success signals</h3>
+              <span class="finding-location">whole document</span>
+            </header>
+            <div class="finding-note">Nothing checks whether the app works for its user.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Add 2–3 lightweight personal success criteria tied to the core flows, plus one counter-signal (e.g., "AI import errors that go unnoticed until cooking").</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">Smart Ingredient Substitution appears from nowhere</h3>
+              <span class="finding-location">§6 Phase 3</span>
+            </header>
+            <div class="finding-note">It is not in the Vision or in §5, and it has no data model. It reads as a backlog item.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Either specify it in §5 with its purpose in the arc, or move it to an explicit "Later / ideas" list.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <!-- Done-ness clarity -->
+    <section class="dimension">
+      <details open>
+        <summary>
+          <h2>Done-ness clarity</h2>
+          <span class="verdict-pill verdict-broken">broken</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>This is the weakest dimension and the one stories depend on most. There are no numbered FRs. §5 holds three feature descriptions, and each gives a mechanism but no testable end state or edge-case behavior. <strong>§5.1 Scaling</strong> gives no rounding, precision, fraction display, or servings bounds, and no rule for count units. <strong>§5.2 Consolidation</strong> leaves case and unit-synonym matching, scale-before-aggregate, and output format open. <strong>§5.3 AI import</strong> leaves URL fetching, failures, a review step, missing required fields, and latency unspecified.</p>
+            <p>Whole capabilities that the UI implies have no requirement at all: recipe create/edit/delete, browse/search/filter, recipe detail content, and event menu save/load.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-critical">critical</span>
+              <h3 class="finding-title">No FRs with testable consequences</h3>
+              <span class="finding-location">§5</span>
+            </header>
+            <div class="finding-note">Story creation will have no acceptance criteria to extract. Every story will need its "done" invented.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Convert §5 into numbered FRs (FR-1…), each with 1–3 verifiable consequences. Example: "FR-2 Scaling: when target servings change, every ingredient amount equals base × target/base, displayed to at most 2 decimals (or common fractions for tbsp/tsp/cup); no network request is made."</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-critical">critical</span>
+              <h3 class="finding-title">Recipe management CRUD unspecified</h3>
+              <span class="finding-location">§6 Phase 1 endpoint list; §5</span>
+            </header>
+            <div class="finding-note">There is no update or delete endpoint and no requirement for manual entry or editing, yet these are the backbone of a recipe manager. Under the current spec, AI-imported mistakes cannot be corrected.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Add FRs for creating, viewing, editing, and deleting a recipe (with ingredients and steps), and list the matching endpoints (<code>PUT/PATCH /recipes/{id}</code>, <code>DELETE /recipes/{id}</code>).</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">AI import failure and review behavior undefined</h3>
+              <span class="finding-location">§5.3 "Result: Direct ingestion into SQLite via FastAPI"</span>
+            </header>
+            <div class="finding-note">It is unclear whether there is a preview, what happens on LLM schema-validation failure or URL fetch failure, and how missing required fields get filled.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Specify that the parsed result is shown in an editable form and the user saves it. On failure, show an error and keep the input. Missing numeric fields default to null (adjust the model) or prompt the user.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">Event menu has no data or lifecycle definition</h3>
+              <span class="finding-location">§5.2; §4 (no Menu/Event model)</span>
+            </header>
+            <div class="finding-note">It is unknown whether a menu can be saved, named, and reopened, or whether per-recipe target servings apply inside a menu. The "active event shopping cart" in §3 is never defined.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Add an <code>EventMenu</code> concept (ephemeral or persisted, decided explicitly) with per-recipe servings, and state the rule that consolidation operates on scaled amounts.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">Consolidation matching rules ambiguous</h3>
+              <span class="finding-location">§5.2 "matching <code>name</code> and <code>unit</code>"</span>
+            </header>
+            <div class="finding-note">Without normalization rules, the obvious test cases (case, whitespace, plural, unit synonyms) have no expected result.</div>
+            <div class="finding-fix"><strong>Fix:</strong> State the rule, e.g., "case-insensitive, trimmed name; exact unit string; no unit conversion in MVP (non-goal)." Add one worked example.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">Data model cannot represent common recipe data</h3>
+              <span class="finding-location">§4 Ingredient <code>amount: float</code>, Recipe <code>prep_time_minutes: int</code></span>
+            </header>
+            <div class="finding-note">"Salt to taste" and "a pinch" have no float amount, and imported recipes often lack times. This will collide with AI import.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Make <code>amount</code>/<code>unit</code> optional (or add a free-text quantity), and make the time fields optional.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">Search/browse implied but unspecified</h3>
+              <span class="finding-location">§3 <code>SearchBar</code>; §4 <code>category</code></span>
+            </header>
+            <div class="finding-note">There is no requirement for listing, searching, or filtering by category.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Add an FR for recipe list/search (fields searched, filter by category), or declare it a non-goal.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">Ambiguous ID type</h3>
+              <span class="finding-location">§4 "<code>id</code>: <code>UUID</code> / <code>str</code>"</span>
+            </header>
+            <div class="finding-note">The ID is typed two ways.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Pick one (e.g., UUID stored as string in SQLite) and state it once.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <!-- Scope honesty -->
+    <section class="dimension">
+      <details open>
+        <summary>
+          <h2>Scope honesty</h2>
+          <span class="verdict-pill verdict-thin">thin</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>Omissions are almost entirely implicit. There is no Non-Goals section, no <code>[ASSUMPTION]</code> tags, no <code>[NOTE FOR PM]</code> callouts, and no Open Questions section. The Key Decision Points serve as open items for technical choices only. For a hobby project a high open-item count would be acceptable. The problem here is the opposite: things that are clearly undecided are presented as settled or simply left out. Phase 4 marks deployment as "(Optional)", which is the only explicit de-scoping in the document.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">No non-goals; major silent assumptions</h3>
+              <span class="finding-location">whole document</span>
+            </header>
+            <div class="finding-note">Silently assumed and stated nowhere: no authentication / single user, no recipe images, no unit conversion, no mobile/offline support, no sharing, no nutrition data. UX and architecture will each guess differently.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Add a short "Non-goals for MVP" list. Auth/single-user is the most important item, because it shapes the data model and deployment.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">Inferred requirements not flagged</h3>
+              <span class="finding-location">§4 <code>base_servings</code> Default: 4; §6 "10 realistic recipes"; §5.3 URL support</span>
+            </header>
+            <div class="finding-note">Several specifics read as guesses. URL import in particular implies scraping, which carries legal and technical weight.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Tag unconfirmed items with <code>[ASSUMPTION: …]</code> and collect them in an index at the end.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">Milestone checkboxes do not reflect actual state</h3>
+              <span class="finding-location">§6 Phase 1 "Initialize Nx Workspace …"</span>
+            </header>
+            <div class="finding-note">The repo already has <code>apps/web</code> and <code>apps/recipe-service</code> (commits b0df473, a82ea3b), but the item is unchecked.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Check off completed items, or mark them "done" so epic creation does not re-plan them.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <!-- Downstream usability -->
+    <section class="dimension">
+      <details open>
+        <summary>
+          <h2>Downstream usability</h2>
+          <span class="verdict-pill verdict-thin">thin</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>The PRD is chain-top (UX → architecture → epics/stories), so this dimension matters. Architecture has plenty to extract, arguably too much already decided. UX has nothing to extract: there are no user journeys, screens, flows, or states (empty, loading, error) beyond component names. For epics/stories, the §6 checklists give a ready skeleton but mix infra tasks with features, and there are no FR IDs to trace to. There is no glossary, and the terms drift ("event menu", "Event Menu Planner", "active event shopping cart", "shopping list").</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">Nothing for UX to source from</h3>
+              <span class="finding-location">whole document</span>
+            </header>
+            <div class="finding-note">There are no journeys or flows for import → review → save, browse → open → scale, or build menu → generate list.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Add 3–4 short user journeys with a named protagonist (e.g., "Adi plans a Friday dinner for 10"), each listing the steps and the end state.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">No IDs or traceability</h3>
+              <span class="finding-location">§5, §6</span>
+            </header>
+            <div class="finding-note">Stories cannot reference requirements.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Number the FRs (FR-1…), and tag each §6 checklist item with the FR(s) it delivers.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">No glossary; event terminology drifts</h3>
+              <span class="finding-location">§3 "active event shopping cart", §5.2 "event menu", §6 "Event Menu Planner"</span>
+            </header>
+            <div class="finding-note">One concept goes by several names.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Add a 5–8 term glossary (Recipe, Ingredient, Instruction Step, Base Servings, Target Servings, Event Menu, Shopping List) and use the terms consistently.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <!-- Shape fit -->
+    <section class="dimension">
+      <details open>
+        <summary>
+          <h2>Shape fit</h2>
+          <span class="verdict-pill verdict-thin">thin</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>The product is a hobby/solo app with meaningful UX, so it needs light rigor and a few journeys. The document is over-formalized on architecture (directory tree, Dockerfile names, component naming conventions, state-library policy) and under-formalized on product (no user, journeys, FRs, or success criteria). For a standalone build note the shape would be fine. It is mis-shaped for a document meant to drive the BMAD UX → architecture → stories chain.</p>
+            <p>As a brownfield note, its references to existing code are mostly accurate (<code>apps/web</code>, <code>apps/recipe-service</code>, <code>@nxlv/python</code>). However, <code>libs/</code> is currently empty, the root is named <code>bite-and-board/</code> while the repo is <code>recipes</code>, and <code>ai-service</code> does not exist. The PRD should distinguish what exists from what is planned.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">Wrong weight distribution for a chain-top PRD</h3>
+              <span class="finding-location">§2–§3 vs §5</span>
+            </header>
+            <div class="finding-note">Roughly half the document is architecture, and the product sections are short.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Rebalance: move §2–§3 to an architecture input/appendix, and expand §5 into FRs and journeys at hobby-appropriate depth (a page, not a spec book).</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">Planned vs existing structure not distinguished</h3>
+              <span class="finding-location">§2 directory tree</span>
+            </header>
+            <div class="finding-note">The tree mixes apps and libs that exist with ones that are only planned.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Annotate each app/lib as "exists" or "planned".</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <!-- Adversarial reviewer -->
+    <section class="reviewer-section">
+      <details>
+        <summary>
+          <h2>Adversarial review</h2>
+          <span class="reviewer-source">review-adversarial-general.md</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p><strong>Not ready for downstream work.</strong> This is a tech-stack memo with a feature sketch attached, not a PRD. It says almost nothing about who uses the product, what they need to do, or how anyone checks that a requirement is met, while it locks in libraries, folder layouts, and component patterns. UX gets no user flows. Architecture gets decisions already made but no quality attributes to test them against. Epics/stories get checklist items with no acceptance criteria and no FR IDs to trace back to. The core recipe loop is barely specified. The three feature areas that make this more than a CRUD app each leave out the edge cases that decide their design.</p>
+            <p>Counts: 2 critical, 10 high, 10 medium, 4 low (26 total). Severity was added at the caller's request; the adversarial lens does not assign it natively.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-critical">critical</span>
+              <h3 class="finding-title">F1. No problem statement, users, goals, or testable requirements</h3>
+              <span class="finding-location">general; §1</span>
+            </header>
+            <div class="finding-note">The "vision" lists capabilities and then moves straight to "Clean Architecture". There is no persona, no JTBD, no success criteria, no FRs, no acceptance criteria, and no out-of-scope list. Epics/stories will be invented by whoever writes them, and "done" will mean "the checkbox is ticked".</div>
+            <div class="finding-fix"><strong>Fix:</strong> Add Problem &amp; Users, Goals &amp; Success Criteria, numbered FRs with acceptance criteria (e.g. FR-SCALE-1), Non-Goals, and NFRs.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-critical">critical</span>
+              <h3 class="finding-title">F2. Core recipe lifecycle is incomplete: no update, delete, or browse/detail/create UI</h3>
+              <span class="finding-location">§6 Phase 1 "CRUD endpoints"; §6 Phase 2; §4 <code>updated_at</code></span>
+            </header>
+            <div class="finding-note">The section is labeled "CRUD" but has only Create and Read, even though <code>updated_at</code> exists. Zod validates a form that is never specified. The user can't fix a typo or a bad AI import, so every import mistake becomes permanent.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Add FRs and endpoints for list, detail, create, edit, and delete (with cascade), plus the Phase 2 UI: list, detail, and an editor with dynamic rows.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">F3. "Smart Ingredient Substitution" appears from nowhere</h3>
+              <span class="finding-location">§6 Phase 3</span>
+            </header>
+            <div class="finding-note">A whole AI feature shows up as a single checklist line, with no inputs, outputs, UI, or persistence. It is scope creep with no definition.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Cut it to Non-Goals/Future, or give it a §5.4 spec (trigger, inputs, output shape, suggest vs mutate, UI surface).</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">F4. AI import accepts URLs, but fetching and scraping is unspecified</h3>
+              <span class="finding-location">§5.3 "raw text or a recipe URL"</span>
+            </header>
+            <div class="finding-note">Nothing covers who fetches, JS-rendered pages, paywalls, timeouts, or token limits. Server-side fetching is an SSRF surface. schema.org JSON-LD is ignored. As written, the URL half of the headline feature cannot be designed.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Split the requirement into FR-IMPORT-TEXT and FR-IMPORT-URL. For URL import: a fetch with timeout and size cap, http(s) only, private IPs blocked, JSON-LD first with LLM fallback, and a defined error for each failure class. Alternatively, scope the MVP to pasted text only.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">F5. AI output goes straight into the database with no review step</h3>
+              <span class="finding-location">§5.3 "Direct ingestion into SQLite"; §6 Phase 3</span>
+            </header>
+            <div class="finding-note">Output that passes Pydantic can still be hallucinated. Bad data gets into the DB silently and spreads into scaling and shopping lists, and with no edit endpoint it can't be fixed.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Return a draft that the user edits in the recipe editor and saves explicitly. Define behavior after N <code>instructor</code> retries, and store <code>source_url</code>/<code>source_text</code>.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">F6. Shopping-list consolidation rule is too naive to give correct lists</h3>
+              <span class="finding-location">§5.2 "matching <code>name</code> and <code>unit</code>"</span>
+            </header>
+            <div class="finding-note">"Egg"/"eggs"/"large eggs", "g"/"grams", and 500 g + 1 kg all fail to merge, and <code>notes</code> is ignored. The headline event feature produces wrong lines, and a later fix needs a data migration.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Use a canonical unit enum with aliases and a name-normalization rule. Decide on unit conversion. Define how non-mergeable items appear, and add acceptance examples.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">F7. Event menu has no data model, no persistence, and no scaling rule</h3>
+              <span class="finding-location">§5.2; §3 "active event shopping cart"; §4</span>
+            </header>
+            <div class="finding-note">There is no Event entity, and client-state "cart" data is lost on refresh. Nothing defines per-recipe servings, how scaling feeds aggregation, or list check-off/export. Architecture can't decide whether this is a backend feature or client-only.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Decide between a persisted <code>Event</code> and an ephemeral session. Define the pipeline scale → normalize → aggregate. Add FRs for list output, or declare it a non-goal.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">F8. Scaling ignores rounding, display, and unscalable ingredients</h3>
+              <span class="finding-location">§5.1; §4 <code>amount: float</code></span>
+            </header>
+            <div class="finding-note">Scaling produces 1.25 eggs and 0.333 tbsp, and "to taste" has no float amount. Target servings are unbounded, and nothing says whether step text gets scaled. The result is nonsensical quantities exactly where the user looks while cooking.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Make <code>amount</code> optional. Set rounding and display rules per unit class and bound target servings (1–100). State that instruction text is not scaled.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">F9. No authentication or ownership model, plus optional public deployment</h3>
+              <span class="finding-location">§1 "personal recipes"; §6 Phase 4 deployment</span>
+            </header>
+            <div class="finding-note">If deployed publicly with no auth, anyone can read, write, delete, and run the paid LLM endpoint at the owner's expense. Retrofitting <code>user_id</code> later means a schema migration.</div>
+            <div class="finding-fix"><strong>Fix:</strong> State "single user, local-only" or "single user, deployed behind basic auth / proxy auth". Add a rate limit or cap on LLM endpoints.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">F10. Non-functional requirements are missing</h3>
+              <span class="finding-location">general</span>
+            </header>
+            <div class="finding-note">Nothing covers mobile/kitchen use, accessibility, LLM latency/cost, backup/export, offline use, or error handling. Architecture will pick defaults and UX will design desktop-first.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Add hobby-scale NFRs: phone width ≥ 360px, AI import within 60 s with progress, an LLM spend cap, SQLite backup/JSON export, and WCAG AA contrast.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">F11. Search and filtering are implied but never required</h3>
+              <span class="finding-location">§3 <code>SearchBar</code>; §4 <code>category</code></span>
+            </header>
+            <div class="finding-note">There is no FR for search, filter, or sort, and <code>GET /recipes</code> has no query params or pagination. Components will be built for features with no spec, and the list endpoint contract will churn.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Add FR-BROWSE (title/ingredient search, category filter, sort). State client-side vs server-side.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">F12. Phase 2 is missing the screens it depends on, and the phase order has a gap</h3>
+              <span class="finding-location">§6 Phase 2</span>
+            </header>
+            <div class="finding-note">There is no app shell, routing, list page, or detail page to host <code>PortionSelector</code>, and data-access wiring is in no phase. The first story will turn out to be blocked by unwritten work.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Order Phase 2 as shell + routing → data-access hooks → list → detail with PortionSelector → editor → event planner.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">F13. Implementation details pose as requirements</h3>
+              <span class="finding-location">Key Decision Points; §2; §3</span>
+            </header>
+            <div class="finding-note">About half the doc is library choices and folder layout. The architecture step becomes rubber-stamping, and the real gaps stay hidden behind detail that looks thorough.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Move §2–§3 and the key decisions to architecture or to a "Technical Constraints" appendix.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">F14. The ai-service is "optional" but drawn as fixed structure</h3>
+              <span class="finding-location">Key Decision 2; §2 layout; §6 Phase 3</span>
+            </header>
+            <div class="finding-note">"Phase 1/3" is not a decision point, and the split trigger is unmeasurable. This leads to scaffolding drift and empty projects.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Decide on a single service for MVP, remove <code>ai-service</code> and its Dockerfile from the layout, and record a concrete split trigger.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">F15. Several writers sharing one SQLite file is not addressed</h3>
+              <span class="finding-location">§2; §5.3; §6 Phase 4</span>
+            </header>
+            <div class="finding-note">A split ai-service writing to the same file brings locking problems, and PaaS filesystems are often ephemeral. The result is data loss on the first redeploy or "database is locked" errors.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Only recipe-service owns the DB. Require a persistent volume, or put hosted deployment out of scope.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">F16. Two sources of truth for schemas</h3>
+              <span class="finding-location">§2 <code>libs/data-access</code> Zod vs <code>libs/shared-types</code> generated</span>
+            </header>
+            <div class="finding-note">Hand-written Zod schemas will drift from Pydantic, so the form will accept input the API rejects.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Generate Zod from OpenAPI, or make Pydantic authoritative and test Zod against it.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">F17. Data model is thin and makes questionable required/optional choices</h3>
+              <span class="finding-location">§4 Recipe, Ingredient</span>
+            </header>
+            <div class="finding-note">Required times, a free-text single category, no source/image/tags, no ingredient order or grouping, and no <code>base_servings ≥ 1</code> constraint. AI imports will fail validation, and migrations will churn.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Make times optional. Add <code>source_url</code>, image or explicit no-images, tags or an enum, <code>position</code>/<code>group</code>, and the constraint.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">F18. AI importer's behavior when fields are missing is unspecified</h3>
+              <span class="finding-location">§5.3 Output</span>
+            </header>
+            <div class="finding-note">Nothing says whether to infer, default, or leave blank for servings, category, and times. A silent "4 servings" breaks scaling, and categories sprawl.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Set per-field rules (infer-with-flag / default / null), one recipe per import, and a language policy.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">F19. LLM provider abstraction hides real differences in capability</h3>
+              <span class="finding-location">Key Decision 3</span>
+            </header>
+            <div class="finding-note">An env-var swap between Ollama and cloud models assumes equal quality. "Works with GPT" turns into a broken feature on Ollama.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Set an acceptance bar per provider against a golden set, disable the import UI when no provider is configured, and load keys from env only.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">F20. No testing or verification strategy</h3>
+              <span class="finding-location">general; §6</span>
+            </header>
+            <div class="finding-note">No phase includes tests, yet scaling, aggregation, and extraction are exactly the logic that needs them.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Add per-phase test expectations: unit, API, an AI golden-set eval, and an e2e smoke test.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">F21. "Key Decision Points" mixes resolved, deferred and trivial items without owners or deadlines</h3>
+              <span class="finding-location">Key Decision Points</span>
+            </header>
+            <div class="finding-note">Zustand-vs-Context gets attention while the blocking decisions (auth, event persistence, URL scope) are not listed.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Replace the block with an Open Questions table (question, what it blocks, decide-by, default).</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">F22. Optimistic updates and cache invalidation are promised with nothing to apply them to</h3>
+              <span class="finding-location">§3 Server State</span>
+            </header>
+            <div class="finding-note">The only mutation is POST. This leads to an over-engineered data layer and stories about cache plumbing.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Drop optimistic updates unless an FR needs them, and tie error handling to a defined UX pattern.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">F23. Phase 1 checklist is stale</h3>
+              <span class="finding-location">§6 Phase 1</span>
+            </header>
+            <div class="finding-note">Commits b0df473 and a82ea3b already did the work, but the item is unchecked. Epics will duplicate done work.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Tick completed items and confirm the workspace style.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">F24. Ambiguous ID type</h3>
+              <span class="finding-location">§4 <code>id</code></span>
+            </header>
+            <div class="finding-note">Storage, generator, and URL format are all unclear, so SQLModel, OpenAPI, and TS types will mismatch.</div>
+            <div class="finding-fix"><strong>Fix:</strong> "Server-generated UUIDv4, stored as TEXT, serialized as canonical string."</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">F25. Seed data source and licensing unstated</h3>
+              <span class="finding-location">§6 Phase 1 seed script</span>
+            </header>
+            <div class="finding-note">Seeds will only exercise the happy path, so aggregation bugs stay hidden.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Use original recipes that deliberately include no-amount ingredients, shared ingredients with unit variants, and varied servings.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">F26. "Seamless containerization" is vision copy, not a requirement</h3>
+              <span class="finding-location">§1; §6 Phase 4</span>
+            </header>
+            <div class="finding-note">The dev workflow (Compose vs nx serve, hot reload) is unstated.</div>
+            <div class="finding-fix"><strong>Fix:</strong> State the dev workflow and drop the adjective.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <div class="mechanical">
+      <h3>Mechanical notes</h3>
+      <ul>
+        <li><strong>IDs:</strong> No FR/UJ/SM IDs at all, so continuity cannot be checked. Section numbering (§1–§6) is contiguous. The Key Decision Points block sits unnumbered above §1.</li>
+        <li><strong>Cross-references:</strong> §6 Phase 3 "Smart Ingredient Substitution" has no target in §5. §3 "active event shopping cart" has no definition. §3 <code>SearchBar</code> and <code>ModalLayout</code> have no corresponding requirement.</li>
+        <li><strong>Glossary drift:</strong> "event menu" / "Event Menu Planner" / "event shopping cart" / "shopping list"; "AI module" / "AI Service / Module" / "AI integration layer" / "ai-service"; "AI Recipe Importer" (§5.3) / "AI Recipe Import modal" (§6) / <code>AIImporterModal</code> (§3).</li>
+        <li><strong>Assumptions Index:</strong> Absent. There are no inline <code>[ASSUMPTION]</code> tags, so nothing to roundtrip.</li>
+        <li><strong>Data model consistency:</strong> <code>id: UUID / str</code> vs <code>recipe_id: UUID</code> (the FK is typed differently from the PK). <code>category: str</code> is free text with no enumerated values, although examples are given.</li>
+        <li><strong>API surface:</strong> §6 lists only GET list, GET by id, and POST, with no update/delete. This is inconsistent with the CRUD claim ("Implement CRUD endpoints").</li>
+        <li><strong>Required sections missing for a chain-top PRD:</strong> problem/user statement, FRs, user journeys, success criteria, non-goals, glossary.</li>
+      </ul>
+    </div>
+
+    <footer class="report-footer">
+      <div class="meta">
+        <span>Rubric: .claude/skills/bmad-prd/assets/prd-validation-checklist.md</span>
+        <span>Generated: 2026-10-26</span>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>
