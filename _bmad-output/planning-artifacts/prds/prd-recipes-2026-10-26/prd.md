@@ -77,13 +77,13 @@ FR IDs are global and stable. Each FR lists its acceptance criteria (AC).
 
 ### Recipe content (applies to F2–F5)
 
-A recipe has: title (required, 1–120 chars), optional description, category (one of a fixed list: Breakfast, Lunch, Dinner, Dessert, Bakery, Side, Drink, Other), base servings (required, integer 1–100), optional prep time and cook time (minutes), an optional source URL, an ordered list of ingredients (at least one) and an ordered list of instruction steps (at least one).
+A recipe has: title (required, 1–120 chars), optional description, category (one of a fixed list: Breakfast, Lunch, Dinner, Dessert, Bakery, Side, Drink, Other), base servings (required, integer 1–100), optional prep time and cook time (minutes), an optional source URL, an optional photo (one per recipe), an ordered list of ingredients (at least one) and an ordered list of instruction steps (at least one).
 
 An ingredient has: name (required), an optional amount (positive number), an optional unit (from a fixed list: g, kg, ml, l, tsp, tbsp, cup, unit, pinch, clove, slice, can, package), and an optional note (e.g. "finely chopped"). An ingredient without an amount is a **to-taste** ingredient (e.g. "Salt — to taste").
 
 ### F1. Recipe library
 
-- **FR-1 — List recipes.** The library shows all recipes as cards with title, category and total time (prep + cook, if known), newest first.
+- **FR-1 — List recipes.** The library shows all recipes as cards with title, category, total time (prep + cook, if known) and the photo if there is one, newest first.
   - AC: With 0 recipes, an empty state with a *New recipe* call to action is shown.
   - AC: With 60+ recipes the list loads in under 1 second locally (NFR-3).
 - **FR-2 — Search.** A search box filters recipes by title, case-insensitive substring match, as the user types.
@@ -99,10 +99,11 @@ An ingredient has: name (required), an optional amount (positive number), an opt
   - AC: Saving a valid recipe creates it and navigates to its detail page.
   - AC: Invalid input (e.g. empty title, servings 0, no ingredients) shows inline field errors and does not save. The same rules are enforced by the API (an invalid request returns HTTP 422 with field-level errors).
   - AC: Leaving the form with unsaved changes asks for confirmation.
+  - AC: The owner can add, replace or remove the recipe's photo by uploading an image (one per recipe, also in edit). Allowed types and size limits are shown beside the field; storage and resizing are decided in the architecture step.
 
 ### F3. View recipe
 
-- **FR-5 — Detail page.** Shows all recipe content, ingredients in order with amount, unit, name and note, and numbered steps.
+- **FR-5 — Detail page.** Shows all recipe content (including the photo, if any), ingredients in order with amount, unit, name and note, and numbered steps.
   - AC: To-taste ingredients render as "Salt — to taste".
   - AC: Opening a recipe ID that does not exist shows a not-found page with a link back to the library.
 
@@ -164,13 +165,17 @@ Owner-only (FR-16 applies). Import never saves anything by itself: it produces a
   - AC: If the page contains structured recipe data (schema.org `Recipe`, e.g. JSON-LD), it is used first; only if that is missing or incomplete is the page text sent to the LLM.
   - AC: Only `http`/`https` URLs to public hosts are fetched; private/internal addresses are refused, and pages larger than a fixed size or slower than a fixed timeout fail with a clear message.
   - AC: A fetch failure (blocked site, 404, timeout) shows a message suggesting the *Paste text* option (FR-18).
+  - AC: The recipe's main photo is taken from the page when available (schema.org `Recipe.image` first, then the page's `og:image`). How photos are stored (local copy vs. link to the source) is decided in the architecture step.
 - **FR-18 — Import from pasted text.** The owner pastes raw recipe text; the LLM extracts a draft recipe in the same format.
   - AC: Text with no recognizable recipe gives "No recipe found in this text" and no draft.
+- **FR-21 — Hebrew drafts.** Imports from pages or text in another language (e.g. English) produce a draft translated to Hebrew (title, description, ingredient names and notes, steps). Amounts and units are preserved and mapped to the app's unit list, and the source URL is kept.
+  - AC: Importing an English recipe yields a Hebrew draft whose amounts and units match the source.
 - **FR-19 — Review before save.** A successful import opens the recipe create form (FR-4) pre-filled with the draft; nothing is saved until the owner clicks *Save*.
   - AC: The draft goes through the same validation as FR-4; fields the import could not fill (e.g. category, servings) are left empty and flagged for the owner to complete.
   - AC: Ingredients the import could not quantify become to-taste ingredients rather than invented amounts.
   - AC: Units are mapped to the app's unit list; an unmappable unit is left empty and the original text is kept in the ingredient note.
   - AC: The source URL (if any) is stored with the saved recipe and shown on its detail page as a link.
+  - AC: An imported photo is shown in the review form, where the owner can keep or remove it before saving.
   - AC: Cancelling the form discards the draft.
 - **FR-20 — Import feedback.** While an import runs, the UI shows progress and the owner can cancel it.
   - AC: An import that takes longer than 60 seconds is stopped with a clear message.
@@ -181,7 +186,7 @@ Owner-only (FR-16 applies). Import never saves anything by itself: it produces a
 - **NFR-1 — Code quality (portfolio).** Frontend and backend are fully typed (TypeScript strict; Python type hints checked). Lint and format are enforced. CI runs lint, type-check and tests on every push and must pass.
 - **NFR-2 — Testing.** Backend: unit tests for domain logic (validation, original-value rules) and API tests for every endpoint. Frontend: unit tests for scaling and rounding, component tests for the recipe form. Scaling and original-value logic have 100% branch coverage.
 - **NFR-3 — Performance.** With 200 recipes on a local machine: library first render < 1 s, search filtering feels instant (< 100 ms per keystroke), detail page < 500 ms.
-- **NFR-4 — Responsive.** Every MVP screen is usable on a 375 px wide phone (cooking from the phone in the kitchen) and on desktop.
+- **NFR-4 — Responsive, mobile-first.** Every MVP screen is designed for a 375 px wide phone first (cooking from the phone in the kitchen), then enhanced for tablet and desktop.
 - **NFR-5 — Accessibility.** Keyboard navigable, visible focus, labelled form fields, WCAG AA color contrast.
 - **NFR-6 — Run locally.** One documented command starts the whole app (frontend, backend, database with migrations applied). Data survives restarts.
 - **NFR-7 — Design system.** All UI styling uses design tokens (Tailwind + shadcn/ui theme): no hard-coded colors, spacing or font sizes. Shared presentational components live in a shared UI library and consume only tokens.
@@ -189,6 +194,7 @@ Owner-only (FR-16 applies). Import never saves anything by itself: it produces a
 - **NFR-9 — Documentation.** The README explains what the app does, how to run it, the architecture at a glance, and links to the architecture decision record.
 - **NFR-10 — Security basics.** Secrets (JWT signing key, owner credentials) come from environment variables, never from the repo. Passwords are hashed with a current, slow password-hashing algorithm. Repeated failed logins are rate-limited (e.g. 5 per minute). Token storage in the browser and the hashing library are decided in the architecture step.
 - **NFR-11 — Frontend performance best practices.** Routes are lazy-loaded (code-split per page, like Angular lazy modules), so visitors never download the editor, login or import code they don't use. Server data is cached and not re-fetched needlessly. Search input does not block typing. Images are lazy-loaded and sized. Targets on a mid-range phone: Lighthouse performance ≥ 90, LCP < 2.5 s, initial JavaScript ≤ 200 KB gzipped; a bundle-size budget fails CI when exceeded. Concrete tools are chosen in the architecture step.
+- **NFR-12 — Hebrew, right-to-left.** The whole UI is in Hebrew and laid out right-to-left (`lang="he" dir="rtl"`); layout mirrors correctly, numbers and units inside Hebrew text display in the right order, and fonts support Hebrew. User content in another language still displays correctly. How UI strings are stored (translation files vs. inline) is decided in the architecture step.
 
 ## 8. Post-MVP Candidates (not committed)
 
