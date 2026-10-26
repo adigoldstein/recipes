@@ -50,4 +50,4 @@ jobs:
       - uses: nrwl/nx-set-shas@v5
 
       - run: npx nx format:check
-      - run: npx nx affected -t lint typecheck test build
+      - run: npx nx affected -t lint typecheck test build build-storybook

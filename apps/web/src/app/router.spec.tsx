@@ -6,19 +6,16 @@ import {
   within,
 } from '@testing-library/react';
 import { createMemoryRouter, data, RouterProvider } from 'react-router';
-import { DirectionProvider } from '@bite-and-board/ui-components';
+import { AppProviders } from './app-providers';
 import { RouteError } from './route-error';
 import { routes } from './router';
-import { ThemeProvider } from './theme';
 
 function renderApp(path: string, appRoutes = routes) {
   const router = createMemoryRouter(appRoutes, { initialEntries: [path] });
   render(
-    <DirectionProvider dir="rtl">
-      <ThemeProvider>
-        <RouterProvider router={router} />
-      </ThemeProvider>
-    </DirectionProvider>,
+    <AppProviders>
+      <RouterProvider router={router} />
+    </AppProviders>,
   );
 }
 

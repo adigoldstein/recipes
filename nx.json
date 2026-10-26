@@ -55,6 +55,14 @@
       }
     },
     {
+      "plugin": "@nx/storybook/plugin",
+      "options": {
+        "buildStorybookTargetName": "build-storybook",
+        "serveStorybookTargetName": "storybook",
+        "staticStorybookTargetName": "static-storybook"
+      }
+    },
+    {
       "plugin": "@nxlv/python",
       "options": {
         "packageManager": "uv"

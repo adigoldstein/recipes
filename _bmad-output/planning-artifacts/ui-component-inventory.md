@@ -30,6 +30,13 @@ Used as shadcn ships them, styled only through the theme variables (DESIGN.md).
 | Sheet + Checkbox              | tag filter (sheet on phone, popover on desktop)                        | library                            | 4.2 (just in time)                              |
 | Tabs                          | import: "קישור" / "הדבקת טקסט"                                         | import                             | 5.2 (just in time)                              |
 
+Notes from Story 1.5 (primitives are shadcn's, adapted only where the project rules require it):
+
+- Controls are 44 px high (Input, Select trigger, ToggleGroup chips); ToggleGroup is trimmed to pill chips with a fixed gap.
+- `Toaster` takes `theme` from the app, so ui-components needs no theme context; its toast colours come from `[data-sonner-toaster]` in `theme.css`.
+- `DialogContent` and `DialogFooter` take a `closeLabel` prop instead of shadcn's English "Close" text; no label means no close button.
+- `--input` is the stronger control border (>= 3:1); `--border` stays the quiet divider.
+
 ## Custom shared components (brand and composites)
 
 Built by the story that first renders them, in `libs/ui-components`.

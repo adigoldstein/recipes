@@ -1,99 +1,463 @@
 <title>Bite &amp; Board Directions</title>
-<meta name="claude:viewport-fit-sides" content="cover">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&family=Frank+Ruhl+Libre:wght@500;700&family=Heebo:wght@400;500;700&family=Rubik:wght@400;600;800&display=swap">
+<meta name="claude:viewport-fit-sides" content="cover" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&family=Frank+Ruhl+Libre:wght@500;700&family=Heebo:wght@400;500;700&family=Rubik:wght@400;600;800&display=swap"
+/>
 <style>
-/* Layout: three phone mockups of the same recipe screen, side by side on desktop, stacked on phone. Page chrome stays neutral; each mock carries its own token set (light + dark). */
-:root{
-  --bg:#f4f4f2; --fg:#1b1c1a; --muted:#5d605b; --panel:#e9e9e6; --accent:#1b1c1a; --accent-fg:#f4f4f2;
-  --ui:"Assistant",system-ui,sans-serif;
-}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141513;--fg:#ecece8;--muted:#a3a59f;--panel:#1f201e;--accent:#ecece8;--accent-fg:#141513;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#141513;--fg:#ecece8;--muted:#a3a59f;--panel:#1f201e;--accent:#ecece8;--accent-fg:#141513;color-scheme:dark}
-body{background:var(--bg);color:var(--fg);font-family:var(--ui);font-size:16px;line-height:1.5}
-.wrap{max-width:1180px;margin:0 auto;padding-block:40px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-h1{font-size:clamp(28px,4vw,40px);line-height:1.1;letter-spacing:-.02em;margin:0 0 8px;text-wrap:balance}
-.lead{max-width:62ch;margin:0 0 20px;color:var(--fg)}
-.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:32px}
-.controls button{font:600 15px var(--ui);padding:8px 16px;border-radius:999px;border:0;background:var(--panel);color:var(--fg);cursor:pointer}
-.controls button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg)}
-.controls button:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
-.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px}
-@media (max-width:1020px){.grid{grid-template-columns:minmax(0,1fr)}}
-.dir h2{font-size:22px;margin:0 0 4px;letter-spacing:-.01em}
-.dir .tag{font-weight:600;color:var(--muted);margin:0 0 8px}
-.dir .why{margin:0 0 16px;max-width:60ch}
-.dir ul.pros{margin:0 0 16px;padding-inline-start:18px;color:var(--fg)}
-.dir ul.pros li{margin-bottom:4px}
-.rec{display:inline-block;background:var(--accent);color:var(--accent-fg);font-weight:700;font-size:13px;padding:2px 10px;border-radius:999px;margin-inline-start:8px;vertical-align:middle}
+  /* Layout: three phone mockups of the same recipe screen, side by side on desktop, stacked on phone. Page chrome stays neutral; each mock carries its own token set (light + dark). */
+  :root {
+    --bg: #f4f4f2;
+    --fg: #1b1c1a;
+    --muted: #5d605b;
+    --panel: #e9e9e6;
+    --accent: #1b1c1a;
+    --accent-fg: #f4f4f2;
+    --ui: 'Assistant', system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+      --bg: #141513;
+      --fg: #ecece8;
+      --muted: #a3a59f;
+      --panel: #1f201e;
+      --accent: #ecece8;
+      --accent-fg: #141513;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme='dark'] {
+    --bg: #141513;
+    --fg: #ecece8;
+    --muted: #a3a59f;
+    --panel: #1f201e;
+    --accent: #ecece8;
+    --accent-fg: #141513;
+    color-scheme: dark;
+  }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--ui);
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding-block: 40px 64px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  h1 {
+    font-size: clamp(28px, 4vw, 40px);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin: 0 0 8px;
+    text-wrap: balance;
+  }
+  .lead {
+    max-width: 62ch;
+    margin: 0 0 20px;
+    color: var(--fg);
+  }
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 32px;
+  }
+  .controls button {
+    font: 600 15px var(--ui);
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 0;
+    background: var(--panel);
+    color: var(--fg);
+    cursor: pointer;
+  }
+  .controls button[aria-pressed='true'] {
+    background: var(--accent);
+    color: var(--accent-fg);
+  }
+  .controls button:focus-visible {
+    outline: 2px solid var(--fg);
+    outline-offset: 2px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 32px;
+  }
+  @media (max-width: 1020px) {
+    .grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  .dir h2 {
+    font-size: 22px;
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+  }
+  .dir .tag {
+    font-weight: 600;
+    color: var(--muted);
+    margin: 0 0 8px;
+  }
+  .dir .why {
+    margin: 0 0 16px;
+    max-width: 60ch;
+  }
+  .dir ul.pros {
+    margin: 0 0 16px;
+    padding-inline-start: 18px;
+    color: var(--fg);
+  }
+  .dir ul.pros li {
+    margin-bottom: 4px;
+  }
+  .rec {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--accent-fg);
+    font-weight: 700;
+    font-size: 13px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    margin-inline-start: 8px;
+    vertical-align: middle;
+  }
 
-/* ---------- phone frame + shared mock structure ---------- */
-.phone{width:100%;max-width:360px;margin:0 auto;border-radius:36px;padding:10px;background:var(--panel)}
-.screen{border-radius:28px;overflow:hidden;background:var(--m-bg);color:var(--m-ink);font-family:var(--m-body);min-height:640px;display:flex;flex-direction:column}
-.m-top{display:flex;justify-content:space-between;align-items:center;padding:14px 18px}
-.m-brand{font-family:var(--m-display);font-weight:700;font-size:17px}
-.m-login{font-size:14px;color:var(--m-muted)}
-.m-body{padding:4px 18px 20px;flex:1;display:flex;flex-direction:column;gap:14px}
-.m-cat{font-size:14px;color:var(--m-muted);margin:0}
-.m-title{font-family:var(--m-display);font-size:34px;line-height:1.05;margin:0}
-.m-meta{display:flex;gap:16px;font-size:14px;color:var(--m-muted)}
-.m-serv{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.m-serv .lbl{font-weight:600;font-size:15px}
-.step{display:flex;align-items:center;gap:6px}
-.step button{width:40px;height:40px;font-size:20px;font-weight:700;cursor:pointer;border:0;background:var(--m-chip);color:var(--m-ink);font-family:var(--m-body)}
-.step output{min-width:36px;text-align:center;font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
-.step button:focus-visible,.m-cta:focus-visible{outline:2px solid var(--m-ink);outline-offset:2px}
-.m-reset{font-size:13px;color:var(--m-muted);background:none;border:0;cursor:pointer;font-family:var(--m-body);padding:0}
-.ings{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
-.ing{display:grid;grid-template-columns:auto 1fr;column-gap:10px;align-items:baseline;padding:8px 0}
-.ing .q{font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
-.ing .n{min-width:0}
-.ing .h{grid-column:2;font-size:13px;color:var(--m-hint)}
-.ing.taste .q{color:var(--m-muted);font-weight:400}
-.ing.scaled .q{color:var(--m-scaled)}
-.m-cta{margin-top:auto;font:700 16px var(--m-body);padding:13px 18px;border:0;cursor:pointer;background:var(--m-accent);color:var(--m-accent-fg)}
+  /* ---------- phone frame + shared mock structure ---------- */
+  .phone {
+    width: 100%;
+    max-width: 360px;
+    margin: 0 auto;
+    border-radius: 36px;
+    padding: 10px;
+    background: var(--panel);
+  }
+  .screen {
+    border-radius: 28px;
+    overflow: hidden;
+    background: var(--m-bg);
+    color: var(--m-ink);
+    font-family: var(--m-body);
+    min-height: 640px;
+    display: flex;
+    flex-direction: column;
+  }
+  .m-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px;
+  }
+  .m-brand {
+    font-family: var(--m-display);
+    font-weight: 700;
+    font-size: 17px;
+  }
+  .m-login {
+    font-size: 14px;
+    color: var(--m-muted);
+  }
+  .m-body {
+    padding: 4px 18px 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .m-cat {
+    font-size: 14px;
+    color: var(--m-muted);
+    margin: 0;
+  }
+  .m-title {
+    font-family: var(--m-display);
+    font-size: 34px;
+    line-height: 1.05;
+    margin: 0;
+  }
+  .m-meta {
+    display: flex;
+    gap: 16px;
+    font-size: 14px;
+    color: var(--m-muted);
+  }
+  .m-serv {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .m-serv .lbl {
+    font-weight: 600;
+    font-size: 15px;
+  }
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .step button {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 0;
+    background: var(--m-chip);
+    color: var(--m-ink);
+    font-family: var(--m-body);
+  }
+  .step output {
+    min-width: 36px;
+    text-align: center;
+    font-size: 22px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .step button:focus-visible,
+  .m-cta:focus-visible {
+    outline: 2px solid var(--m-ink);
+    outline-offset: 2px;
+  }
+  .m-reset {
+    font-size: 13px;
+    color: var(--m-muted);
+    background: none;
+    border: 0;
+    cursor: pointer;
+    font-family: var(--m-body);
+    padding: 0;
+  }
+  .ings {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .ing {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 10px;
+    align-items: baseline;
+    padding: 8px 0;
+  }
+  .ing .q {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .ing .n {
+    min-width: 0;
+  }
+  .ing .h {
+    grid-column: 2;
+    font-size: 13px;
+    color: var(--m-hint);
+  }
+  .ing.taste .q {
+    color: var(--m-muted);
+    font-weight: 400;
+  }
+  .ing.scaled .q {
+    color: var(--m-scaled);
+  }
+  .m-cta {
+    margin-top: auto;
+    font: 700 16px var(--m-body);
+    padding: 13px 18px;
+    border: 0;
+    cursor: pointer;
+    background: var(--m-accent);
+    color: var(--m-accent-fg);
+  }
 
-/* ---------- A · Annotated Card ---------- */
-.dA{--m-bg:#eef1ee;--m-card:#ffffff;--m-ink:#1f3a2e;--m-muted:#56665d;--m-hint:#6f7479;--m-chip:#e2e8e3;--m-accent:#c4321c;--m-accent-fg:#ffffff;--m-scaled:#1f3a2e;
-  --m-display:"Frank Ruhl Libre",Georgia,serif;--m-body:"Assistant",system-ui,sans-serif}
-.dark .dA{--m-bg:#111613;--m-card:#1a211d;--m-ink:#e3ece6;--m-muted:#a1b0a7;--m-hint:#a9adb1;--m-chip:#26302a;--m-accent:#ff6b4f;--m-accent-fg:#1a0a06}
-.dA .m-body{background:var(--m-card);margin:0 12px 12px;border-radius:6px;padding-top:18px}
-.dA .step button{border-radius:4px}
-.dA .ing{padding:9px 0}
-.dA .ing + .ing{box-shadow:inset 0 1px 0 var(--m-chip)}
-.dA .ing .h{font-family:"Frank Ruhl Libre",Georgia,serif;font-size:14px}
-.dA .ing .h::before{content:"✎ ";}
-.dA .m-cta{border-radius:4px}
-.dA .ing .q{font-size:17px}
+  /* ---------- A · Annotated Card ---------- */
+  .dA {
+    --m-bg: #eef1ee;
+    --m-card: #ffffff;
+    --m-ink: #1f3a2e;
+    --m-muted: #56665d;
+    --m-hint: #6f7479;
+    --m-chip: #e2e8e3;
+    --m-accent: #c4321c;
+    --m-accent-fg: #ffffff;
+    --m-scaled: #1f3a2e;
+    --m-display: 'Frank Ruhl Libre', Georgia, serif;
+    --m-body: 'Assistant', system-ui, sans-serif;
+  }
+  .dark .dA {
+    --m-bg: #111613;
+    --m-card: #1a211d;
+    --m-ink: #e3ece6;
+    --m-muted: #a1b0a7;
+    --m-hint: #a9adb1;
+    --m-chip: #26302a;
+    --m-accent: #ff6b4f;
+    --m-accent-fg: #1a0a06;
+  }
+  .dA .m-body {
+    background: var(--m-card);
+    margin: 0 12px 12px;
+    border-radius: 6px;
+    padding-top: 18px;
+  }
+  .dA .step button {
+    border-radius: 4px;
+  }
+  .dA .ing {
+    padding: 9px 0;
+  }
+  .dA .ing + .ing {
+    box-shadow: inset 0 1px 0 var(--m-chip);
+  }
+  .dA .ing .h {
+    font-family: 'Frank Ruhl Libre', Georgia, serif;
+    font-size: 14px;
+  }
+  .dA .ing .h::before {
+    content: '✎ ';
+  }
+  .dA .m-cta {
+    border-radius: 4px;
+  }
+  .dA .ing .q {
+    font-size: 17px;
+  }
 
-/* ---------- B · The Board ---------- */
-.dB{--m-bg:#efeeea;--m-board:#d6a46a;--m-board-ink:#24190e;--m-ink:#1e1b18;--m-muted:#5f574f;--m-hint:#4f3a22;--m-chip:#1e1b18;--m-accent:#1e1b18;--m-accent-fg:#f5e9d8;--m-scaled:#24190e;
-  --m-display:"Rubik",system-ui,sans-serif;--m-body:"Rubik",system-ui,sans-serif}
-.dark .dB{--m-bg:#1a1816;--m-board:#8c6238;--m-board-ink:#fbf1e3;--m-ink:#f3ece3;--m-muted:#b9ada0;--m-hint:#f0d7b6;--m-chip:#f3ece3;--m-accent:#d6a46a;--m-accent-fg:#1a1208}
-.dB .m-title{font-weight:800;font-size:40px;letter-spacing:-.02em}
-.dB .step button{border-radius:999px;color:var(--m-bg)}
-.dB .board{position:relative;background:var(--m-board);color:var(--m-board-ink);border-radius:26px;padding:34px 18px 14px}
-.dB .board::before{content:"";position:absolute;top:12px;inset-inline-start:50%;width:44px;height:12px;border-radius:999px;background:var(--m-bg);transform:translateX(50%)}
-.dB .ing .q{font-size:20px;font-weight:800}
-.dB .ing .h{color:var(--m-hint);font-weight:600}
-.dB .ing.taste .q{color:var(--m-board-ink);opacity:.7}
-.dB .m-cta{border-radius:999px}
+  /* ---------- B · The Board ---------- */
+  .dB {
+    --m-bg: #efeeea;
+    --m-board: #d6a46a;
+    --m-board-ink: #24190e;
+    --m-ink: #1e1b18;
+    --m-muted: #5f574f;
+    --m-hint: #4f3a22;
+    --m-chip: #1e1b18;
+    --m-accent: #1e1b18;
+    --m-accent-fg: #f5e9d8;
+    --m-scaled: #24190e;
+    --m-display: 'Rubik', system-ui, sans-serif;
+    --m-body: 'Rubik', system-ui, sans-serif;
+  }
+  .dark .dB {
+    --m-bg: #1a1816;
+    --m-board: #8c6238;
+    --m-board-ink: #fbf1e3;
+    --m-ink: #f3ece3;
+    --m-muted: #b9ada0;
+    --m-hint: #f0d7b6;
+    --m-chip: #f3ece3;
+    --m-accent: #d6a46a;
+    --m-accent-fg: #1a1208;
+  }
+  .dB .m-title {
+    font-weight: 800;
+    font-size: 40px;
+    letter-spacing: -0.02em;
+  }
+  .dB .step button {
+    border-radius: 999px;
+    color: var(--m-bg);
+  }
+  .dB .board {
+    position: relative;
+    background: var(--m-board);
+    color: var(--m-board-ink);
+    border-radius: 26px;
+    padding: 34px 18px 14px;
+  }
+  .dB .board::before {
+    content: '';
+    position: absolute;
+    top: 12px;
+    inset-inline-start: 50%;
+    width: 44px;
+    height: 12px;
+    border-radius: 999px;
+    background: var(--m-bg);
+    transform: translateX(50%);
+  }
+  .dB .ing .q {
+    font-size: 20px;
+    font-weight: 800;
+  }
+  .dB .ing .h {
+    color: var(--m-hint);
+    font-weight: 600;
+  }
+  .dB .ing.taste .q {
+    color: var(--m-board-ink);
+    opacity: 0.7;
+  }
+  .dB .m-cta {
+    border-radius: 999px;
+  }
 
-/* ---------- C · Kitchen Ledger ---------- */
-.dC{--m-bg:#ffffff;--m-ink:#121212;--m-muted:#666666;--m-hint:#6b6b6b;--m-chip:#eeeeee;--m-accent:#121212;--m-accent-fg:#ffffff;--m-scaled:#1d5fbf;--m-line:#e6e6e6;
-  --m-display:"Heebo",system-ui,sans-serif;--m-body:"Heebo",system-ui,sans-serif}
-.dark .dC{--m-bg:#0e0e0e;--m-ink:#ededed;--m-muted:#9a9a9a;--m-hint:#a0a0a0;--m-chip:#222222;--m-accent:#ededed;--m-accent-fg:#0e0e0e;--m-scaled:#78a8f5;--m-line:#262626}
-.dC .m-title{font-weight:700;font-size:28px;letter-spacing:-.01em}
-.dC .m-top{box-shadow:inset 0 -1px 0 var(--m-line)}
-.dC .step button{border-radius:8px}
-.dC .ing{grid-template-columns:4.5em 1fr;box-shadow:inset 0 -1px 0 var(--m-line)}
-.dC .ing .q{font-size:18px;font-weight:500}
-.dC .m-cta{border-radius:8px}
+  /* ---------- C · Kitchen Ledger ---------- */
+  .dC {
+    --m-bg: #ffffff;
+    --m-ink: #121212;
+    --m-muted: #666666;
+    --m-hint: #6b6b6b;
+    --m-chip: #eeeeee;
+    --m-accent: #121212;
+    --m-accent-fg: #ffffff;
+    --m-scaled: #1d5fbf;
+    --m-line: #e6e6e6;
+    --m-display: 'Heebo', system-ui, sans-serif;
+    --m-body: 'Heebo', system-ui, sans-serif;
+  }
+  .dark .dC {
+    --m-bg: #0e0e0e;
+    --m-ink: #ededed;
+    --m-muted: #9a9a9a;
+    --m-hint: #a0a0a0;
+    --m-chip: #222222;
+    --m-accent: #ededed;
+    --m-accent-fg: #0e0e0e;
+    --m-scaled: #78a8f5;
+    --m-line: #262626;
+  }
+  .dC .m-title {
+    font-weight: 700;
+    font-size: 28px;
+    letter-spacing: -0.01em;
+  }
+  .dC .m-top {
+    box-shadow: inset 0 -1px 0 var(--m-line);
+  }
+  .dC .step button {
+    border-radius: 8px;
+  }
+  .dC .ing {
+    grid-template-columns: 4.5em 1fr;
+    box-shadow: inset 0 -1px 0 var(--m-line);
+  }
+  .dC .ing .q {
+    font-size: 18px;
+    font-weight: 500;
+  }
+  .dC .m-cta {
+    border-radius: 8px;
+  }
 </style>
 
 <div class="wrap">
   <h1><bdi lang="he">ביס &amp; סיר</bdi>: three looks</h1>
-  <p class="lead">Each of these is the same recipe page, shown at phone width, in Hebrew and right to left. It shows six servings scaled from a base of four, and the cumin amount has been edited. Tap + and − to try the scaling. "Dark" switches all three mockups to their dark token set.</p>
+  <p class="lead">
+    Each of these is the same recipe page, shown at phone width, in Hebrew and
+    right to left. It shows six servings scaled from a base of four, and the
+    cumin amount has been edited. Tap + and − to try the scaling. "Dark"
+    switches all three mockups to their dark token set.
+  </p>
   <div class="controls" role="group" aria-label="Mockup theme">
     <button type="button" id="t-light" aria-pressed="true">Light</button>
     <button type="button" id="t-dark" aria-pressed="false">Dark</button>
@@ -103,57 +467,97 @@ h1{font-size:clamp(28px,4vw,40px);line-height:1.1;letter-spacing:-.02em;margin:0
     <section class="dir">
       <h2>A · Annotated Card <span class="rec">Recommended</span></h2>
       <p class="tag">Calm, personal, editorial</p>
-      <p class="why">The recipe is a white index card. A serif title sits over a clean sans body, in herb-green ink with one tomato-red button. Edited amounts carry a pencil note in the margin, the way you'd write on a printed recipe.</p>
-      <ul class="pros"><li>The original-value hint becomes the signature of the app</li><li>Easy to build with shadcn; mostly colour, font and radius changes</li><li>Risk: quieter at first glance</li></ul>
+      <p class="why">
+        The recipe is a white index card. A serif title sits over a clean sans
+        body, in herb-green ink with one tomato-red button. Edited amounts carry
+        a pencil note in the margin, the way you'd write on a printed recipe.
+      </p>
+      <ul class="pros">
+        <li>The original-value hint becomes the signature of the app</li>
+        <li>
+          Easy to build with shadcn; mostly colour, font and radius changes
+        </li>
+        <li>Risk: quieter at first glance</li>
+      </ul>
       <div class="phone"><div class="screen dA mock"></div></div>
     </section>
     <section class="dir">
       <h2>B · The Board</h2>
       <p class="tag">Bold, playful, memorable</p>
-      <p class="why">The cutting board is the motif. Ingredients sit on a solid oak-coloured slab with a handle slot, the type is heavy and large, and the buttons are pill-shaped.</p>
-      <ul class="pros"><li>The most recognisable of the three, and it ties to the name</li><li>Risk: the motif can feel gimmicky across many screens (forms, login)</li><li>More custom styling on top of shadcn</li></ul>
+      <p class="why">
+        The cutting board is the motif. Ingredients sit on a solid oak-coloured
+        slab with a handle slot, the type is heavy and large, and the buttons
+        are pill-shaped.
+      </p>
+      <ul class="pros">
+        <li>The most recognisable of the three, and it ties to the name</li>
+        <li>
+          Risk: the motif can feel gimmicky across many screens (forms, login)
+        </li>
+        <li>More custom styling on top of shadcn</li>
+      </ul>
       <div class="phone"><div class="screen dB mock"></div></div>
     </section>
     <section class="dir">
       <h2>C · Kitchen Ledger</h2>
       <p class="tag">Quiet, precise, numbers first</p>
-      <p class="why">Black and white with one blue that marks scaled amounts. One sans typeface, thin lines between rows and a numbers column aligned at the start. Very easy to read at arm's length while cooking.</p>
-      <ul class="pros"><li>The fastest to build; closest to stock shadcn</li><li>Strong contrast, simple dark mode</li><li>Risk: looks like many other apps, with little personality for a portfolio</li></ul>
+      <p class="why">
+        Black and white with one blue that marks scaled amounts. One sans
+        typeface, thin lines between rows and a numbers column aligned at the
+        start. Very easy to read at arm's length while cooking.
+      </p>
+      <ul class="pros">
+        <li>The fastest to build; closest to stock shadcn</li>
+        <li>Strong contrast, simple dark mode</li>
+        <li>
+          Risk: looks like many other apps, with little personality for a
+          portfolio
+        </li>
+      </ul>
       <div class="phone"><div class="screen dC mock"></div></div>
     </section>
   </div>
 </div>
 
 <script>
-const BASE = 4;
-const ING = [
-  {a:6, u:["ביצה","ביצים"], n:"", unitType:true},
-  {a:1, u:["קופסה","קופסאות"], n:"עגבניות מרוסקות"},
-  {a:1, u:["יח׳","יח׳"], n:"פלפל אדום, פרוס", unitType:true},
-  {a:3, u:["שן","שיניים"], n:"שום, קצוץ", unitType:true},
-  {a:2, u:["כפית","כפיות"], n:"כמון", orig:{a:1, u:["כפית","כפיות"]}},
-  {a:1, u:["כפית","כפיות"], n:"פפריקה מתוקה"},
-  {a:null, n:"מלח"}
-];
-function fmt(v, unitType){
-  if (unitType) v = Math.round(v*2)/2;
-  if (Number.isInteger(v)) return String(v);
-  return String(parseFloat(v.toFixed(2)));
-}
-function qty(a,u,ratio,unitType){
-  const v = a*ratio, s = fmt(v,unitType);
-  return s + " " + (v===1 ? u[0] : u[1]);
-}
-function render(el, serv){
-  const r = serv/BASE;
-  const items = ING.map(i=>{
-    if (i.a===null) return `<li class="ing taste"><span class="q">לפי הטעם</span><span class="n">${i.n}</span></li>`;
-    const h = i.orig ? `<span class="h">במקור ${qty(i.orig.a,i.orig.u,r,i.unitType)}</span>` : "";
-    return `<li class="ing${r!==1?" scaled":""}"><span class="q">${qty(i.a,i.u,r,i.unitType)}</span><span class="n">${i.n}</span>${h}</li>`;
-  }).join("");
-  const isB = el.classList.contains("dB");
-  const list = `<ul class="ings" aria-label="מצרכים">${items}</ul>`;
-  el.innerHTML = `
+  const BASE = 4;
+  const ING = [
+    { a: 6, u: ['ביצה', 'ביצים'], n: '', unitType: true },
+    { a: 1, u: ['קופסה', 'קופסאות'], n: 'עגבניות מרוסקות' },
+    { a: 1, u: ['יח׳', 'יח׳'], n: 'פלפל אדום, פרוס', unitType: true },
+    { a: 3, u: ['שן', 'שיניים'], n: 'שום, קצוץ', unitType: true },
+    {
+      a: 2,
+      u: ['כפית', 'כפיות'],
+      n: 'כמון',
+      orig: { a: 1, u: ['כפית', 'כפיות'] },
+    },
+    { a: 1, u: ['כפית', 'כפיות'], n: 'פפריקה מתוקה' },
+    { a: null, n: 'מלח' },
+  ];
+  function fmt(v, unitType) {
+    if (unitType) v = Math.round(v * 2) / 2;
+    if (Number.isInteger(v)) return String(v);
+    return String(parseFloat(v.toFixed(2)));
+  }
+  function qty(a, u, ratio, unitType) {
+    const v = a * ratio,
+      s = fmt(v, unitType);
+    return s + ' ' + (v === 1 ? u[0] : u[1]);
+  }
+  function render(el, serv) {
+    const r = serv / BASE;
+    const items = ING.map((i) => {
+      if (i.a === null)
+        return `<li class="ing taste"><span class="q">לפי הטעם</span><span class="n">${i.n}</span></li>`;
+      const h = i.orig
+        ? `<span class="h">במקור ${qty(i.orig.a, i.orig.u, r, i.unitType)}</span>`
+        : '';
+      return `<li class="ing${r !== 1 ? ' scaled' : ''}"><span class="q">${qty(i.a, i.u, r, i.unitType)}</span><span class="n">${i.n}</span>${h}</li>`;
+    }).join('');
+    const isB = el.classList.contains('dB');
+    const list = `<ul class="ings" aria-label="מצרכים">${items}</ul>`;
+    el.innerHTML = `
     <div class="m-top" dir="rtl" lang="he"><span class="m-brand">ביס &amp; סיר</span><span class="m-login">כניסה</span></div>
     <div class="m-body" dir="rtl" lang="he">
       <p class="m-cat">ארוחת בוקר</p>
@@ -166,26 +570,36 @@ function render(el, serv){
           <output aria-live="polite">${serv}</output>
           <button type="button" data-d="1" aria-label="עוד מנות">+</button>
         </div>
-        <button type="button" class="m-reset" data-reset>${serv!==BASE?"חזרה ל־4":"בסיס: 4"}</button>
+        <button type="button" class="m-reset" data-reset>${serv !== BASE ? 'חזרה ל־4' : 'בסיס: 4'}</button>
       </div>
       ${isB ? `<div class="board">${list}</div>` : list}
       <button type="button" class="m-cta">עריכת מתכון</button>
     </div>`;
-  el.dataset.serv = serv;
-}
-document.querySelectorAll(".mock").forEach(el=>{
-  render(el, 6);
-  el.addEventListener("click", e=>{
-    const b = e.target.closest("button"); if(!b) return;
-    let s = +el.dataset.serv;
-    if (b.dataset.d) s = Math.min(100, Math.max(1, s + +b.dataset.d));
-    else if (b.hasAttribute("data-reset")) s = BASE;
-    else return;
-    render(el, s);
-    el.querySelector(b.dataset.d ? `[data-d="${b.dataset.d}"]` : "[data-reset]")?.focus();
+    el.dataset.serv = serv;
+  }
+  document.querySelectorAll('.mock').forEach((el) => {
+    render(el, 6);
+    el.addEventListener('click', (e) => {
+      const b = e.target.closest('button');
+      if (!b) return;
+      let s = +el.dataset.serv;
+      if (b.dataset.d) s = Math.min(100, Math.max(1, s + +b.dataset.d));
+      else if (b.hasAttribute('data-reset')) s = BASE;
+      else return;
+      render(el, s);
+      el.querySelector(
+        b.dataset.d ? `[data-d="${b.dataset.d}"]` : '[data-reset]',
+      )?.focus();
+    });
   });
-});
-const grid = document.getElementById("grid"), tl = document.getElementById("t-light"), td = document.getElementById("t-dark");
-function setT(dark){ grid.classList.toggle("dark",dark); tl.setAttribute("aria-pressed",!dark); td.setAttribute("aria-pressed",dark); }
-tl.onclick = ()=>setT(false); td.onclick = ()=>setT(true);
+  const grid = document.getElementById('grid'),
+    tl = document.getElementById('t-light'),
+    td = document.getElementById('t-dark');
+  function setT(dark) {
+    grid.classList.toggle('dark', dark);
+    tl.setAttribute('aria-pressed', !dark);
+    td.setAttribute('aria-pressed', dark);
+  }
+  tl.onclick = () => setT(false);
+  td.onclick = () => setT(true);
 </script>

@@ -10,6 +10,7 @@
 This document is a technical design sketch with a PRD title. It does three things well: the stack, the deferred decisions with their fallbacks, and three feature mechanics (scaling formula, consolidation key, AI import pipeline). As a product requirements source it is thin to broken. It has no stated user or problem, no FR IDs or acceptance conditions, no success criteria, and no non-goals. Several features appear in the milestones but are never specified (Smart Ingredient Substitution, recipe edit/delete, search, menu persistence). For a personal hobby project the light rigor is fine. But the PRD is meant to feed UX, architecture, and epics/stories, and those workflows will have to invent most of the product behavior themselves unless the done-ness and scope gaps are closed first.
 
 The adversarial reviewer agrees on the core gaps (no user, no FRs, incomplete CRUD) and reaches the same bottom line: not ready for downstream work. It adds risks the rubric did not raise:
+
 - **URL import:** server-side fetching is unspecified and is an SSRF surface; schema.org JSON-LD is ignored as a cheaper path.
 - **Unauthenticated deployment:** a public instance exposes the paid LLM endpoint to anyone.
 - **Missing NFRs:** most importantly phone-width use in the kitchen and LLM latency/cost bounds.

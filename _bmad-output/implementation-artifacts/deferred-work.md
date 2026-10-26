@@ -37,8 +37,8 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-1-4-theme-rtl-and-app-shell.md`
   summary: Cover the real app bootstrap (i18n init, DirectionProvider, ThemeProvider in `main.tsx`) with a test, e.g. by extracting a shared `AppProviders` used by `main.tsx` and the specs.
   evidence: Specs build their own provider tree and `test-setup.ts` inits i18n globally, so removing `initI18n()` or `ThemeProvider` from `main.tsx` keeps every check green; structure is Adi's call.
-  resolved: Adi (2026-10-26) — scheduled into Story 1.5 as an AC (shared `AppProviders`).
+  resolved: Adi (2026-10-26) — scheduled into Story 1.5 as an AC (shared `AppProviders`). Done in Story 1.5: `apps/web/src/app/app-providers.tsx`, plus `main.spec.tsx`, which mounts the real `main.tsx`.
 - source_spec: `_bmad-output/implementation-artifacts/spec-1-4-theme-rtl-and-app-shell.md`
   summary: Decide how input/control boundaries meet WCAG 1.4.11 (3:1) before Input ships in 1.5 — the DESIGN.md `--border`/`--input` tokens are ~1.25:1 (light) and ~1.46:1 (dark) on the background.
   evidence: Measured from theme.css; DESIGN.md colours are fixed by the 1.4 spec, so changing them (or using a stronger focus/border treatment for inputs) is a design decision.
-  resolved: Adi (2026-10-26) — scheduled into Story 1.5 as an AC (stronger `--input` border token, contrast-tested, Storybook preview for approval).
+  resolved: Adi (2026-10-26) — scheduled into Story 1.5 as an AC (stronger `--input` border token, contrast-tested, Storybook preview for approval). Done in Story 1.5: `--input` light `#857f75`, dark `#7a726a`; `theme-contrast.spec.ts` checks 3:1 on background, card and popover; preview story "Foundations / Input border (for approval)".

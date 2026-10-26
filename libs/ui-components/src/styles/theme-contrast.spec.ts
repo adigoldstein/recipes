@@ -64,4 +64,14 @@ describe.each([':root', '.dark'])('theme %s', (selector) => {
     expect(contrast(theme.ring, theme.background)).toBeGreaterThanOrEqual(3);
     expect(contrast(theme.ring, theme.card)).toBeGreaterThanOrEqual(3);
   });
+
+  // WCAG 1.4.11: the edge of an input, select or toggle must be visible
+  // wherever a control can sit (page, card, dialog/popover). --border stays a
+  // quiet divider and is not used for controls.
+  it.each(['background', 'card', 'popover'])(
+    'control border (--input) on %s meets non-text contrast (3:1)',
+    (surface) => {
+      expect(contrast(theme.input, theme[surface])).toBeGreaterThanOrEqual(3);
+    },
+  );
 });

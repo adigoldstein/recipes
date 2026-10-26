@@ -1,7 +1,3 @@
-import { initI18n } from '@bite-and-board/i18n';
-
-initI18n();
-
 type Listener = (event: MediaQueryListEvent) => void;
 
 const listeners = new Set<Listener>();

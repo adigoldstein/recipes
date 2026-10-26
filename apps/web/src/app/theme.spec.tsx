@@ -4,7 +4,8 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { setSystemDark } from '../test-setup';
 import { routes } from './router';
-import { THEME_STORAGE_KEY, ThemeProvider } from './theme';
+import { AppProviders } from './app-providers';
+import { THEME_STORAGE_KEY } from './theme';
 
 const LABELS = {
   system: 'צבעים: לפי המכשיר',
@@ -17,9 +18,9 @@ const isDark = () => document.documentElement.classList.contains('dark');
 async function renderApp() {
   const router = createMemoryRouter(routes, { initialEntries: ['/'] });
   render(
-    <ThemeProvider>
+    <AppProviders>
       <RouterProvider router={router} />
-    </ThemeProvider>,
+    </AppProviders>,
   );
   await screen.findByRole('heading', { name: 'מתכונים' });
 }

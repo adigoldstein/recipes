@@ -421,7 +421,7 @@ flowchart LR
 | mypy, import-linter, slowapi, recipe-scrapers, trafilatura         | current stable, pinned at scaffold                                        |
 | size-limit, babel-plugin-react-compiler, eslint-plugin-react-hooks | current stable (hooks ≥7 for compiler rules)                              |
 | MSW                                                                | 3.x                                                                       |
-| Storybook (`@nx/storybook`, React + Vite, addon-a11y)              | 10.x (10.6.4 latest on npm, 2026-10-26; pin exact at Story 1.5)           |
+| Storybook (`@nx/storybook`, React + Vite, addon-a11y)              | 10.x (10.6.4 pinned exactly in Story 1.5)                                 |
 
 ## Structural Seed
 

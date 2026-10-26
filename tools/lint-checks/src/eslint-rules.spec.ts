@@ -147,6 +147,24 @@ describe('Hebrew literals', () => {
     expect(messages).toEqual([]);
   });
 
+  it('allows Hebrew sample copy in Storybook stories', async () => {
+    const messages = await lint(
+      'libs/ui-components',
+      'export const A = () => <p>שלום</p>;\n',
+      'src/fixture.stories.tsx',
+    );
+    expect(messages).toEqual([]);
+  });
+
+  it('keeps colour literals banned in stories', async () => {
+    const messages = await lint(
+      'libs/ui-components',
+      "export const c = '#ff0000';\n",
+      'src/fixture.stories.tsx',
+    );
+    expect(rulesOf(messages)).toEqual(['no-restricted-syntax']);
+  });
+
   it('keeps colour literals banned in spec files', async () => {
     const messages = await lint(
       'apps/web',

@@ -56,6 +56,8 @@ const HEBREW_SYNTAX = [
   `JSXText[value=${HEBREW}]`,
 ].map((selector) => ({ selector, message: HEBREW_MESSAGE }));
 const SPEC_FILES = ['**/*.{spec,test}.{ts,tsx,js,jsx}'];
+// Storybook stories show sample copy; they are never shipped to the app.
+const STORY_FILES = ['**/*.stories.{ts,tsx}'];
 
 export default [
   ...nx.configs['flat/base'],
@@ -65,6 +67,7 @@ export default [
     ignores: [
       '**/dist',
       '**/out-tsc',
+      '**/storybook-static',
       '**/vite.config.*.timestamp*',
       '**/vitest.config.*.timestamp*',
     ],
@@ -158,8 +161,9 @@ export default [
     },
   },
   {
-    files: SPEC_FILES,
-    // Same list minus the Hebrew ban: tests query by the Hebrew the user sees.
+    files: [...SPEC_FILES, ...STORY_FILES],
+    // Same list minus the Hebrew ban: tests query by the Hebrew the user sees,
+    // and stories demonstrate components with sample Hebrew copy.
     rules: { 'no-restricted-syntax': ['error', ...COLOUR_SYNTAX] },
   },
   {
