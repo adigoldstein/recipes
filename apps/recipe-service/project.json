@@ -28,9 +28,7 @@
     },
     "build": {
       "executor": "@nxlv/python:build",
-      "outputs": [
-        "{projectRoot}/dist"
-      ],
+      "outputs": ["{projectRoot}/dist"],
       "options": {
         "outputPath": "{projectRoot}/dist",
         "publish": false,
@@ -40,13 +38,28 @@
       "cache": true
     },
     "lint": {
-      "executor": "@nxlv/python:ruff-check",
+      "executor": "@nxlv/python:run-commands",
       "outputs": [],
       "options": {
-        "lintFilePatterns": [
-          "app",
-          "tests"
-        ]
+        "commands": [
+          "uv run ruff check app tests",
+          "uv run ruff format --check app tests",
+          "uv run lint-imports"
+        ],
+        "parallel": false,
+        "cwd": "{projectRoot}",
+        "env": {
+          "PYTHONUTF8": "1"
+        }
+      },
+      "cache": true
+    },
+    "typecheck": {
+      "executor": "@nxlv/python:run-commands",
+      "outputs": [],
+      "options": {
+        "command": "uv run mypy",
+        "cwd": "{projectRoot}"
       },
       "cache": true
     },
@@ -54,10 +67,7 @@
       "executor": "@nxlv/python:ruff-format",
       "outputs": [],
       "options": {
-        "filePatterns": [
-          "app",
-          "tests"
-        ]
+        "filePatterns": ["app", "tests"]
       },
       "cache": true
     },

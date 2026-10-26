@@ -1,9 +1,11 @@
 import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import babel from '@rolldown/plugin-babel';
+import react, { reactCompilerPreset } from '@vitejs/plugin-react';
 export default defineConfig(() => ({
   root: import.meta.dirname,
   cacheDir: '../../node_modules/.vite/libs/data-access',
-  plugins: [react()],
+  // Tests run the same compiled components the app ships.
+  plugins: [react(), babel({ presets: [reactCompilerPreset()] })],
   test: {
     name: '@bite-and-board/data-access',
     watch: false,

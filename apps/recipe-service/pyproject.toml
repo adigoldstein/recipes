@@ -45,6 +45,8 @@ dev = [
   "pytest-sugar>=1.0.0",
   "pytest-cov>=6.0.0",
   "pytest-html>=4.1.1",
+  "mypy==2.4.0",
+  "import-linter==2.15",
 ]
 
 [build-system]
@@ -82,3 +84,169 @@ ignore = []
 
 fixable = ["ALL"]
 unfixable = []
+
+[tool.mypy]
+strict = true
+plugins = ["pydantic.mypy"]
+files = ["app", "tests"]
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+
+# Feature-module rules: layers point down, and modules meet only through services.
+[tool.importlinter]
+root_package = "app"
+
+[[tool.importlinter.contracts]]
+name = "Feature layers point down: router -> service -> repository -> models"
+type = "layers"
+containers = [
+  "app.auth",
+  "app.imports",
+  "app.photos",
+  "app.recipes",
+  "app.tags",
+  "app.users",
+]
+layers = ["router", "service", "repository", "models"]
+exhaustive = false
+
+[[tool.importlinter.contracts]]
+name = "auth: router, repository, models and schemas are private to the module"
+type = "protected"
+protected_modules = [
+  "app.auth.router",
+  "app.auth.repository",
+  "app.auth.models",
+  "app.auth.schemas",
+]
+allowed_importers = ["app.auth"]
+ignore_imports = [
+  "app.main -> app.auth.router",
+  "app.core.metadata -> app.auth.models",
+]
+
+[[tool.importlinter.contracts]]
+name = "imports: router, repository, models and schemas are private to the module"
+type = "protected"
+protected_modules = [
+  "app.imports.router",
+  "app.imports.repository",
+  "app.imports.models",
+  "app.imports.schemas",
+]
+allowed_importers = ["app.imports"]
+ignore_imports = [
+  "app.main -> app.imports.router",
+  "app.core.metadata -> app.imports.models",
+]
+
+[[tool.importlinter.contracts]]
+name = "photos: router, repository, models and schemas are private to the module"
+type = "protected"
+protected_modules = [
+  "app.photos.router",
+  "app.photos.repository",
+  "app.photos.models",
+  "app.photos.schemas",
+]
+allowed_importers = ["app.photos"]
+ignore_imports = [
+  "app.main -> app.photos.router",
+  "app.core.metadata -> app.photos.models",
+]
+
+[[tool.importlinter.contracts]]
+name = "recipes: router, repository, models and schemas are private to the module"
+type = "protected"
+protected_modules = [
+  "app.recipes.router",
+  "app.recipes.repository",
+  "app.recipes.models",
+  "app.recipes.schemas",
+]
+allowed_importers = ["app.recipes"]
+ignore_imports = [
+  "app.main -> app.recipes.router",
+  "app.core.metadata -> app.recipes.models",
+]
+
+[[tool.importlinter.contracts]]
+name = "tags: router, repository, models and schemas are private to the module"
+type = "protected"
+protected_modules = [
+  "app.tags.router",
+  "app.tags.repository",
+  "app.tags.models",
+  "app.tags.schemas",
+]
+allowed_importers = ["app.tags"]
+ignore_imports = [
+  "app.main -> app.tags.router",
+  "app.core.metadata -> app.tags.models",
+]
+
+[[tool.importlinter.contracts]]
+name = "users: router, repository, models and schemas are private to the module"
+type = "protected"
+protected_modules = [
+  "app.users.router",
+  "app.users.repository",
+  "app.users.models",
+  "app.users.schemas",
+]
+allowed_importers = ["app.users"]
+ignore_imports = [
+  "app.main -> app.users.router",
+  "app.core.metadata -> app.users.models",
+]
+
+# Layers contracts allow skipping downwards; routers must still go through their service.
+[[tool.importlinter.contracts]]
+name = "Routers never reach the repository or models"
+type = "forbidden"
+source_modules = ["app.*.router"]
+forbidden_modules = ["app.*.repository", "app.*.models"]
+# Direct imports only: router -> service -> repository is the intended chain.
+allow_indirect_imports = true
+
+# The only cross-module edges among these four: recipes -> tags, photos; imports -> tags.
+[[tool.importlinter.contracts]]
+name = "tags depends on no other catalogue module"
+type = "forbidden"
+source_modules = ["app.tags"]
+forbidden_modules = ["app.recipes", "app.imports", "app.photos"]
+
+[[tool.importlinter.contracts]]
+name = "photos depends on no other catalogue module"
+type = "forbidden"
+source_modules = ["app.photos"]
+forbidden_modules = ["app.recipes", "app.imports", "app.tags"]
+
+[[tool.importlinter.contracts]]
+name = "recipes does not depend on imports"
+type = "forbidden"
+source_modules = ["app.recipes"]
+forbidden_modules = ["app.imports"]
+
+[[tool.importlinter.contracts]]
+name = "imports depends only on tags"
+type = "forbidden"
+source_modules = ["app.imports"]
+forbidden_modules = ["app.recipes", "app.photos"]
+
+[[tool.importlinter.contracts]]
+name = "core depends on no feature module (metadata only collects models)"
+type = "forbidden"
+source_modules = ["app.core"]
+forbidden_modules = [
+  "app.auth",
+  "app.imports",
+  "app.photos",
+  "app.recipes",
+  "app.tags",
+  "app.users",
+]
+ignore_imports = ["app.core.metadata -> app.*.models"]

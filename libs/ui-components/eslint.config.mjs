@@ -6,8 +6,11 @@ export default [
   ...baseConfig,
   {
     files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
-    // Override or add rules here
-    rules: {},
+    // Inline styles skip the design tokens; shared components style through classes only.
+    rules: {
+      'react/forbid-dom-props': ['error', { forbid: ['style'] }],
+      'react/forbid-component-props': ['error', { forbid: ['style'] }],
+    },
   },
   {
     ignores: ['**/out-tsc'],

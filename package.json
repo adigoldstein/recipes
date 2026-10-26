@@ -10,6 +10,7 @@
     "node": ">=22.22.0"
   },
   "devDependencies": {
+    "@babel/core": "8.0.9",
     "@eslint/js": "^9.8.0",
     "@nx/eslint": "24.0.0",
     "@nx/eslint-plugin": "24.0.0",
@@ -19,6 +20,7 @@
     "@nx/vitest": "24.0.0",
     "@nx/web": "24.0.0",
     "@nxlv/python": "^23.3.1",
+    "@rolldown/plugin-babel": "0.2.4",
     "@swc-node/register": "1.11.1",
     "@swc/cli": "~0.8.1",
     "@swc/core": "1.15.8",
@@ -31,12 +33,14 @@
     "@vitejs/plugin-react": "^6.0.0",
     "@vitest/coverage-v8": "~5.0.1",
     "@vitest/ui": "~5.0.1",
+    "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9.8.0",
     "eslint-config-prettier": "^10.0.0",
+    "eslint-plugin-better-tailwindcss": "4.10.0",
     "eslint-plugin-import": "2.31.0",
     "eslint-plugin-jsx-a11y": "6.10.1",
     "eslint-plugin-react": "^7.35.0",
-    "eslint-plugin-react-hooks": "5.0.0",
+    "eslint-plugin-react-hooks": "7.1.1",
     "jiti": "2.4.2",
     "jsdom": "^27.1.0",
     "nx": "24.0.0",
@@ -49,7 +53,8 @@
   },
   "workspaces": [
     "apps/*",
-    "libs/*"
+    "libs/*",
+    "tools/*"
   ],
   "packageManager": "npm@12.1.0",
   "dependencies": {

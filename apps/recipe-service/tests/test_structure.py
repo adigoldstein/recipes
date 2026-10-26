@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 from fastapi import APIRouter, FastAPI
 from fastapi.testclient import TestClient
+from sqlalchemy import Engine
 from sqlmodel import Session
 
 from app.core import metadata
@@ -100,7 +101,9 @@ def test_session_uses_sqlite_in_data_dir(tmp_path: Path) -> None:
     sessions = get_session(get_settings())
     session = next(sessions)
     assert isinstance(session, Session)
-    assert session.get_bind().url.database == str(tmp_path / "data" / DB_FILENAME)
+    bind = session.get_bind()
+    assert isinstance(bind, Engine)
+    assert bind.url.database == str(tmp_path / "data" / DB_FILENAME)
     assert (tmp_path / "data").is_dir()
     sessions.close()
 
@@ -109,6 +112,8 @@ def test_session_follows_overridden_settings(tmp_path: Path) -> None:
     other = get_settings().model_copy(update={"data_dir": tmp_path / "other"})
     sessions = get_session(other)
     session = next(sessions)
-    assert session.get_bind().url.database == str(tmp_path / "other" / DB_FILENAME)
+    bind = session.get_bind()
+    assert isinstance(bind, Engine)
+    assert bind.url.database == str(tmp_path / "other" / DB_FILENAME)
     sessions.close()
     get_engine(tmp_path / "other").dispose()

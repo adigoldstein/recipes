@@ -81,7 +81,7 @@ def _describe(error: ValidationError) -> str:
 def load_settings() -> Settings:
     """Build Settings, turning validation errors into a readable startup failure."""
     try:
-        return Settings()  # type: ignore[call-arg]  # values come from env
+        return Settings()
     except ValidationError as error:
         raise SystemExit(_describe(error)) from None
 

@@ -1,4 +1,4 @@
-from collections.abc import Iterator
+from collections.abc import Generator
 from functools import lru_cache
 from pathlib import Path
 from typing import Annotated
@@ -25,7 +25,7 @@ def get_engine(data_dir: Path) -> Engine:
 
 def get_session(
     settings: Annotated[Settings, Depends(get_settings)],
-) -> Iterator[Session]:
+) -> Generator[Session]:
     """One session per request, injectable with `Depends(get_session)`."""
     with Session(get_engine(settings.data_dir)) as session:
         yield session
