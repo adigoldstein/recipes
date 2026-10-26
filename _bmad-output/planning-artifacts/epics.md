@@ -313,10 +313,27 @@ So that it feels like a finished, personal app from the first screen.
 **And** all UI strings come from `he.json` through i18next, with no Hebrew hard-coded in components (AD-10). They follow the EXPERIENCE.md Voice and Tone rules: gender-neutral infinitives, no exclamation marks, no emoji (UX-DR23). Every later story's copy is held to the same rules
 **And** an unknown route shows "הדף לא נמצא" with a "חזרה לרשימה" link
 **And** focus moves to the page `h1` and `document.title` updates on every route change (UX-DR21)
+**And** shadcn/ui is initialized for `libs/ui-components` (its `components.json` points there) with the Button primitive, which the theme toggle and top bar use
 **And** shared presentational pieces (the top bar, the Board container, buttons) live in `libs/ui-components` and use tokens only
 **And** every text/background pair used passes WCAG AA in both themes
 
-### Story 1.5: Recipe data model and read API
+### Story 1.5: UI kit: shadcn primitives in ui-components
+
+As a developer (Adi),
+I want the shadcn primitives that Epics 1–2 need set up once in `libs/ui-components`,
+So that every screen uses the same accessible, token-driven building blocks.
+
+**Acceptance Criteria:**
+
+**Given** Story 1.4's theme and shadcn setup (Button), and the inventory in `ui-component-inventory.md`
+**When** the story is done
+**Then** `libs/ui-components` exports Input, Label, Skeleton, ToggleGroup, DropdownMenu, Sonner (Toaster + `toast`), Dialog, AlertDialog, Select and Table, generated with the shadcn CLI and styled only through the theme tokens (NFR-7)
+**And** each primitive renders correctly in RTL (logical utilities, Radix `DirectionProvider`) in light and dark
+**And** each primitive has a small component test: it renders, it is keyboard operable where interactive, and the dialogs trap and restore focus
+**And** none imports data-access, TanStack Query or the router (AD-2 lint)
+**And** `nx run-many -t lint test build` passes
+
+### Story 1.6: Recipe data model and read API
 
 As a visitor,
 I want the server to provide the recipe list and full recipe details,
@@ -345,7 +362,7 @@ So that the app has real data to show.
 **And** operation IDs follow `{tag}_{function}`, enforced by a test (AD-19)
 **And** API tests cover both endpoints against a temporary database migrated with `alembic upgrade head`
 
-### Story 1.6: Generated API client pipeline
+### Story 1.7: Generated API client pipeline
 
 As a developer (Adi),
 I want the frontend's API types and hooks generated from the backend,
@@ -353,7 +370,7 @@ So that client and server can never drift apart (NFR-8).
 
 **Acceptance Criteria:**
 
-**Given** the backend from Story 1.5
+**Given** the backend from Story 1.6
 **When** `nx run data-access:generate` runs
 **Then** `recipe-service:openapi` writes `libs/data-access/openapi.json` (committed), and hey-api generates types, the fetch client, TanStack Query hooks and Zod schemas into `libs/data-access/src/generated` (AD-3)
 **And** the client is configured once, with `credentials: 'same-origin'` and the `X-Requested-With: bite-and-board` header on every non-GET request (AD-19)
@@ -361,7 +378,7 @@ So that client and server can never drift apart (NFR-8).
 **And** CI regenerates the client and fails on `git diff --exit-code` if it is stale
 **And** a non-422 API error reaches the UI as an `ErrorCode`, and the UI shows `errors.<code>` from `he.json`, with a generic message for unknown codes (AD-28)
 
-### Story 1.7: Demo seed data
+### Story 1.8: Demo seed data
 
 As Adi,
 I want one command that fills the app with realistic recipes,
@@ -377,7 +394,7 @@ So that it looks alive for demos and development (FR12).
 **And** the seed never creates meal types
 **And** an ingredient with an original value is added to the seed in Epic 3, once the original-value rule exists
 
-### Story 1.8: Recipe library with search and meal-type filter
+### Story 1.9: Recipe library with search and meal-type filter
 
 As a visitor,
 I want to see all recipes as cards, search them and filter by meal type,
@@ -400,7 +417,7 @@ So that I can quickly find what to cook (FR1, FR2, FR3).
 **And** filtering is one pure function in `libs/recipe-domain`, with unit tests (AD-26, AD-32)
 **And** with 200 recipes, filtering takes under 100 ms per keystroke (NFR-3)
 
-### Story 1.9: Recipe detail page
+### Story 1.10: Recipe detail page
 
 As a visitor,
 I want to open a recipe and read its ingredients and steps comfortably on my phone,
@@ -422,7 +439,7 @@ So that I can cook from it (FR5).
 **And** a skeleton shows while loading, and the page renders in under 500 ms locally (NFR-3)
 **And** the route is lazy-loaded in its own chunk (AD-11)
 
-### Story 1.10: Live serving scaling and kitchen mode
+### Story 1.11: Live serving scaling and kitchen mode
 
 As a cook,
 I want to change the number of servings and see every amount update instantly,

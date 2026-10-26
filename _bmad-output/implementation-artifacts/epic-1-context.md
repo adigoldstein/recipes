@@ -12,12 +12,13 @@ Anyone can open Bite & Board (ביס & סיר) on a phone or desktop — Hebrew,
 - Story 1.2: Adapt the frontend scaffold and shared libs
 - Story 1.3: CI and quality gates
 - Story 1.4: Theme, RTL and app shell
-- Story 1.5: Recipe data model and read API
-- Story 1.6: Generated API client pipeline
-- Story 1.7: Demo seed data
-- Story 1.8: Recipe library with search and meal-type filter
-- Story 1.9: Recipe detail page
-- Story 1.10: Live serving scaling and kitchen mode
+- Story 1.5: UI kit: shadcn primitives in ui-components
+- Story 1.6: Recipe data model and read API
+- Story 1.7: Generated API client pipeline
+- Story 1.8: Demo seed data
+- Story 1.9: Recipe library with search and meal-type filter
+- Story 1.10: Recipe detail page
+- Story 1.11: Live serving scaling and kitchen mode
 
 ## Requirements & Constraints
 
@@ -48,6 +49,7 @@ Anyone can open Bite & Board (ביס & סיר) on a phone or desktop — Hebrew,
 
 - `<html lang="he" dir="rtl">`, Radix DirectionProvider, logical Tailwind utilities only, amount+unit wrapped in `<bdi>`, `dir="auto"` on user content.
 - Theme = shadcn CSS variables in `:root`/`.dark` plus brand tokens (`--board`, `--hint`, `--flag` …); Rubik only; theme toggle system/light/dark remembered per browser.
+- Components: `_bmad-output/planning-artifacts/ui-component-inventory.md` maps every shadcn primitive and custom shared component to the story that adds it. 1.4 initializes shadcn with Button; 1.5 adds Input, Label, Skeleton, ToggleGroup, DropdownMenu, Sonner, Dialog, AlertDialog, Select and Table; the rest are added just in time.
 - Top bar only (no sidebar): wordmark linking to `/`, theme toggle, login/account.
 - RecipeCard is a "board" (oak slab, radius 24, handle slot); grid 1/2/3 columns at base/`sm`/`lg`. Skeletons while loading; empty, no-results and not-found states.
 - Detail: one column on phone; from `lg` a sticky start column (servings + ingredient board) beside photo and steps. ServingsStepper: 44 px buttons, typeable, clamped, polite live region; screen wake lock requested, failure ignored.
@@ -57,6 +59,6 @@ Anyone can open Bite & Board (ביס & סיר) on a phone or desktop — Hebrew,
 
 - 1.1 (backend layout, config, `/api/health`) precedes 1.2's root `dev` script and Vite proxy, and every backend story.
 - 1.3 adds mypy strict + import-linter to the layout from 1.1 and ESLint rules over the libs from 1.2.
-- 1.5 adds DB/Alembic into `app/core` and the `recipes`/`tags` modules; 1.6 generates the client from 1.5's OpenAPI; 1.7 seeds through `recipes.service`.
-- 1.8–1.10 consume 1.4's theme/shell, 1.6's hooks and `recipe-domain`; 1.8 creates `libs/feature-recipes` and replaces 1.2's placeholder home route.
+- 1.6 adds DB/Alembic into `app/core` and the `recipes`/`tags` modules; 1.7 generates the client from 1.6's OpenAPI; 1.8 seeds through `recipes.service`.
+- 1.9–1.11 consume 1.4's theme/shell, 1.7's hooks and `recipe-domain`; 1.9 creates `libs/feature-recipes` and replaces 1.2's placeholder home route.
 - `created_by/updated_by` FKs to `user` wait for Epic 2 (Story 2.1).
