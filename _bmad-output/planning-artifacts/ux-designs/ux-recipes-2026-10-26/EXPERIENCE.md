@@ -35,7 +35,7 @@ sources:
 | Meal types & tags | `/tags` | Account menu | Owner | Add, rename, delete meal types and tags | FR-22–24 |
 | Users | `/users` | Account menu | Admin | List users; add user (email, name, role, starting password); change role; block/unblock; reset password | FR-25–26 |
 | My account | `/account` | Account menu | Owner | Change own password | FR-27 |
-| Import review | `/recipes/new?draft=…` | Successful import | Owner | Recipe form prefilled from the draft, unfilled fields flagged | FR-19 |
+| Import review | `/recipes/new` (draft passed in router state, never in the URL; AD-22) | Successful import | Owner | Recipe form prefilled from the draft, unfilled fields flagged | FR-19 |
 | Log in | `/login?next=…` | "כניסה" in the top bar, an expired session, a direct edit URL | All | Email and password | FR-14 |
 | Not found | any unknown route or id | Bad link | All | Message and a link back to the library | FR-5 |
 
@@ -91,7 +91,7 @@ Behavioural only. The visual specs are in `DESIGN.md.Components`.
 | Reset to original | Edit form | A small text action on hinted rows only: "חזרה למקור". It restores the amount and unit in the form. The hint stays until Save, and after Save the row is indistinguishable from an unedited one (FR-9). It can be undone before Save by retyping. |
 | Ingredient / step list editor | Form | Add a row (Enter in the last row adds a new one), remove a row, and reorder with up/down buttons (keyboard accessible). Drag reordering is optional on desktop [ASSUMPTION]. At least one row is enforced. |
 | Recipe form | New, edit, import review | Inline field errors appear on blur and on submit. On a failed submit, focus moves to the first error. Server 422 field errors map onto the same fields. If the user leaves with unsaved changes, a confirm dialog appears (also on browser back, via a route blocker). |
-| Import dialog | Import | Two tabs: "קישור" (URL) and "הדבקת טקסט" (paste text). While running it shows progress text that changes by phase (fetching, reading, organising) and a Cancel button. Hard timeout at 60s. On success it routes to import review. |
+| Import dialog | Import | Two tabs: "קישור" (URL) and "הדבקת טקסט" (paste text). While running it shows progress text that changes by phase (fetching, reading, organising) and a Cancel button. Time limit per AI engine from `GET /api/imports/providers` (about 180 s local, 60 s Gemini; AD-22). On success it routes to import review. |
 | Draft flag | Import review | Fields the import couldn't fill are marked "יש להשלים" (needs completing), with the field framed in `{colors.flag}`, and a summary at the top: "3 שדות דורשים השלמה". Ingredients it couldn't quantify become to-taste. Unmappable units leave the unit empty, with the original text in the note. |
 | Confirm dialog | Delete, unsaved changes | shadcn `AlertDialog`. It names the recipe, and the destructive button states the action ("מחיקה"). Focus starts on Cancel. |
 | Theme toggle | Top bar | Cycles system → light → dark [ASSUMPTION]. The choice is remembered per browser. |

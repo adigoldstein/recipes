@@ -1,0 +1,89 @@
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created, ready for development
+#   - in-progress: Developer actively working on implementation
+#   - review: Implementation complete, ready for review
+#   - done: Story completed
+
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+
+# Action Item Status:
+#   - open: Committed during a retrospective, not yet addressed
+#   - in-progress: Actively being worked on
+#   - done: Completed
+
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when its first story starts (via build's sprint sync)
+# - Stories can be worked in parallel if team capacity allows
+# - Developer typically creates the next story after the previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+# - Retrospective appends its action items to action_items; the status view surfaces open ones
+generated: 10-26-2026 13:09
+last_updated: 10-26-2026 13:09
+project: recipes
+project_key: NOKEY
+tracking_system: file-system
+story_location: _bmad-output/implementation-artifacts
+development_status:
+  epic-1: backlog
+  1-1-adapt-the-backend-scaffold: backlog
+  1-2-adapt-the-frontend-scaffold-and-shared-libs: backlog
+  1-3-ci-and-quality-gates: backlog
+  1-4-theme-rtl-and-app-shell: backlog
+  1-5-recipe-data-model-and-read-api: backlog
+  1-6-generated-api-client-pipeline: backlog
+  1-7-demo-seed-data: backlog
+  1-8-recipe-library-with-search-and-meal-type-filter: backlog
+  1-9-recipe-detail-page: backlog
+  1-10-live-serving-scaling-and-kitchen-mode: backlog
+  epic-1-retrospective: optional
+
+  epic-2: backlog
+  2-1-admin-account-from-the-command-line: backlog
+  2-2-log-in-and-log-out: backlog
+  2-3-role-guards-and-protected-areas: backlog
+  2-4-users-screen-list-and-add-users: backlog
+  2-5-change-role-block-reset-password: backlog
+  2-6-my-account-change-my-password: backlog
+  epic-2-retrospective: optional
+
+  epic-3: backlog
+  3-1-create-a-recipe-api-and-basic-form: backlog
+  3-2-recipe-form-experience: backlog
+  3-3-tags-on-a-recipe-with-inline-new-tags: backlog
+  3-4-edit-a-recipe-with-original-value-tracking: backlog
+  3-5-reset-an-ingredient-to-its-original: backlog
+  3-6-delete-a-recipe: backlog
+  3-7-recipe-photos-upload-replace-remove: backlog
+  epic-3-retrospective: optional
+
+  epic-4: backlog
+  4-1-manage-meal-types-and-tags: backlog
+  4-2-filter-the-library-by-tags: backlog
+  epic-4-retrospective: optional
+
+  epic-5: backlog
+  5-1-spike-ollama-vs-gemini-on-real-recipes: backlog
+  5-2-import-from-pasted-text: backlog
+  5-3-review-the-draft-before-saving: backlog
+  5-4-import-from-a-url: backlog
+  5-5-progress-cancel-engine-choice-and-errors: backlog
+  epic-5-retrospective: optional
+
+  epic-6: backlog
+  6-1-one-production-container: backlog
+  6-2-logging-and-backups: backlog
+  6-3-end-to-end-tests-in-ci: backlog
+  6-4-performance-budgets: backlog
+  6-5-readme-for-recruiters: backlog
+  epic-6-retrospective: optional
