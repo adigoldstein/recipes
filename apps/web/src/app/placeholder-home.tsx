@@ -1,8 +1,13 @@
-// Stands in for the recipe library page until it lands in its feature lib.
+import { useTranslation } from 'react-i18next';
+import { PageHeading } from './page-heading';
+
+// Stands in for the recipe library page until it lands in its feature lib (1.9).
 export function PlaceholderHome() {
+  const { t } = useTranslation();
   return (
-    <main>
-      <h1>Bite &amp; Board</h1>
-    </main>
+    <>
+      <title>{t('app.name')}</title>
+      <PageHeading>{t('home.title')}</PageHeading>
+    </>
   );
 }

@@ -1,1 +1,4 @@
-/* You can add global styles to this file, and also import other style files */
+/* The theme (tokens, Rubik, base styles) lives in ui-components; the app only adds sources. */
+@import '@bite-and-board/ui-components/theme.css';
+
+@source '../../../libs';

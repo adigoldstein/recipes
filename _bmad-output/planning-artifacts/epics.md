@@ -122,62 +122,63 @@ UX-DR1: Implement the DESIGN.md theme as shadcn CSS variables. Light (`:root`) a
 UX-DR2: Typography. Rubik (400/600/800, Hebrew and Latin) is the only family. The type roles are display (40/56 lg), title 24, heading 18, body 16, quantity 20/800 with tabular figures, label 14/600 and hint 14/600. At most 5 visible sizes.
 UX-DR3: Theme toggle in the top bar: system, light, dark. The choice is remembered per browser, and `.dark` is applied on `<html>`.
 UX-DR4: App shell. One top bar with no sidebar:
-  - the wordmark "ביס & סיר", linking to the library
-  - for signed-in users, "מתכון חדש" and "ייבוא" (on phone, one "+" menu)
-  - the theme toggle
-  - "כניסה", or an account menu with "תגיות וסוגי ארוחה", "משתמשים" (admin only), "החשבון שלי" and "יציאה"
-UX-DR5: RTL foundation:
-  - `<html lang="he" dir="rtl">` and Radix `DirectionProvider`.
-  - Logical utilities only.
-  - Directional icons are mirrored.
-  - Each amount+unit pair is wrapped in `<bdi>`.
-  - `dir="auto"` on user content.
-  - The URL, email and password fields are `dir="ltr"`.
-UX-DR6: Board component. An oak slab with radius 24, padding 18 and 36 at the top for the handle slot (a 44×12 pill in the ground colour, centred 12 px from the top). It is used only for food surfaces.
-UX-DR7: RecipeCard. A board with the slot, a 4:3 photo (14 px corners, cover), then the title, meal type, up to 3 tags and total time. The whole card is the link. Without a photo, the title is larger and there is no placeholder. Hover scales up 2% and press scales down 2%, with no shadow.
-UX-DR8: Board-shaped photo on the detail page and in import review. Board radius with the handle slot cut through the image, 4:3 on phone and 16:9 on desktop. Imported photos show the credit "מקור: {domain}".
-UX-DR9: ServingsStepper. Round 44 px − and + buttons, typing allowed, clamped to 1–100 with a range message. "חזרה ל־{base}" appears only when the value differs from the base. A polite live region announces the servings.
-UX-DR10: IngredientLine. Shows the amount in the quantity role, the unit label (singular or plural), the name and the note. To-taste lines read "לפי הטעם". The hint "במקור …" sits under the line in `hint` colour, scaled, and linked with `aria-describedby`.
-UX-DR11: Library filters:
-  - a pill search field with clear (×), kept in `?q=`, focused with `/` on desktop
-  - a single-select meal-type chip row ("הכל" plus the meal types; horizontal scroll on phone)
-  - a "תגיות" button that opens a sheet (phone) or popover (desktop) of tag checkboxes, with the selected tags shown as removable chips
-  - all state kept in the URL
-UX-DR12: Recipe form:
-  - fields: title, description, meal type select, tag combobox (autocomplete, case-insensitive reuse, "יצירת תגית '{text}'"), servings, prep and cook time, source URL, photo (add, replace, remove, with an upload thumbnail and progress, limits shown beside the field)
-  - ingredient rows (amount as text accepting ½ and ⅓, unit select, name, note; stacked on phone, one row from `sm`) with add, remove and up/down reorder, and Enter in the last row adding a row
-  - hinted rows show "חזרה למקור"
-  - step rows
-  - errors on blur and submit, with focus moving to the first error
-  - an unsaved-changes guard
-UX-DR13: Import dialog. A dialog on desktop and a full page on phone, with tabs "קישור" and "הדבקת טקסט". An engine choice (local or Gemini) remembers the last pick. While running, it shows client-timed phase text, an indeterminate progress bar and Cancel. Errors switch to the paste tab or offer "לנסות שוב עם Gemini".
-UX-DR14: Import review. A banner in `flag` colour ("N שדות דורשים השלמה · המתכון תורגם מאנגלית"). Flagged fields get a 2 px `flag` border and the note "יש להשלים". Suggested tags are shown as chips. The photo panel offers "הסרה" and "החלפה".
-UX-DR15: Confirm dialogs (shadcn AlertDialog) for delete, unsaved changes and tag deletion. They name the object and its usage count, start focus on Cancel, and label the destructive action ("מחיקה").
-UX-DR16: Toasts, one at a time: saved, deleted, deleted-already (404), logged out.
-UX-DR17: States:
-  - skeleton cards (6) and a detail skeleton
-  - empty library for editors (with "מתכון חדש" and "ייבוא מקישור") and for visitors
-  - no results, with "ניקוי החיפוש"
-  - not found, with "חזרה לרשימה"
-  - session expired ("פג תוקף החיבור", returning to the same place, with form data kept)
-  - blocked user
-  - login errors, generic and rate-limited
-  - save failed (values kept)
-UX-DR18: Tags management screen at `/tags`: two lists (meal types, tags) with inline rename and add. Deletes are confirmed and show usage counts. A meal type in use can't be deleted.
-UX-DR19: Users screen at `/users` (admin): a list, add user (email, name, role, starting password), role change, block or unblock, and reset password. The controls on the last admin are disabled with a reason. `/account` lets a user change their own password.
-UX-DR20: Responsive layouts:
-  - library: 1 column below 640, 2 columns from `sm`, 3 from `lg`
-  - detail: one column on phone (photo, header, servings, board, steps); from `lg`, a 400 px sticky start column (servings and board) with the photo and steps beside it
-  - form: up to about 860 px wide
-  - import review: from `lg`, the photo panel sits beside the fields
-UX-DR21: Accessibility behaviours:
-  - focus moves to the `h1` and `document.title` updates on route change
-  - visible focus through `ring`
-  - touch targets at least 44 px
-  - reduced motion drops everything except opacity
-  - labelled fields, with errors linked through `aria-describedby`
-UX-DR22: Kitchen mode. The detail page requests a screen wake lock and ignores failure.
-UX-DR23: All UI copy follows the Voice and Tone rules: Hebrew, gender-neutral infinitives, no exclamation marks or emoji, and every string comes from `he.json`.
+
+- the wordmark "ביס & סיר", linking to the library
+- for signed-in users, "מתכון חדש" and "ייבוא" (on phone, one "+" menu)
+- the theme toggle
+- "כניסה", or an account menu with "תגיות וסוגי ארוחה", "משתמשים" (admin only), "החשבון שלי" and "יציאה"
+  UX-DR5: RTL foundation:
+- `<html lang="he" dir="rtl">` and Radix `DirectionProvider`.
+- Logical utilities only.
+- Directional icons are mirrored.
+- Each amount+unit pair is wrapped in `<bdi>`.
+- `dir="auto"` on user content.
+- The URL, email and password fields are `dir="ltr"`.
+  UX-DR6: Board component. An oak slab with radius 24, padding 18 and 36 at the top for the handle slot (a 44×12 pill in the ground colour, centred 12 px from the top). It is used only for food surfaces.
+  UX-DR7: RecipeCard. A board with the slot, a 4:3 photo (14 px corners, cover), then the title, meal type, up to 3 tags and total time. The whole card is the link. Without a photo, the title is larger and there is no placeholder. Hover scales up 2% and press scales down 2%, with no shadow.
+  UX-DR8: Board-shaped photo on the detail page and in import review. Board radius with the handle slot cut through the image, 4:3 on phone and 16:9 on desktop. Imported photos show the credit "מקור: {domain}".
+  UX-DR9: ServingsStepper. Round 44 px − and + buttons, typing allowed, clamped to 1–100 with a range message. "חזרה ל־{base}" appears only when the value differs from the base. A polite live region announces the servings.
+  UX-DR10: IngredientLine. Shows the amount in the quantity role, the unit label (singular or plural), the name and the note. To-taste lines read "לפי הטעם". The hint "במקור …" sits under the line in `hint` colour, scaled, and linked with `aria-describedby`.
+  UX-DR11: Library filters:
+- a pill search field with clear (×), kept in `?q=`, focused with `/` on desktop
+- a single-select meal-type chip row ("הכל" plus the meal types; horizontal scroll on phone)
+- a "תגיות" button that opens a sheet (phone) or popover (desktop) of tag checkboxes, with the selected tags shown as removable chips
+- all state kept in the URL
+  UX-DR12: Recipe form:
+- fields: title, description, meal type select, tag combobox (autocomplete, case-insensitive reuse, "יצירת תגית '{text}'"), servings, prep and cook time, source URL, photo (add, replace, remove, with an upload thumbnail and progress, limits shown beside the field)
+- ingredient rows (amount as text accepting ½ and ⅓, unit select, name, note; stacked on phone, one row from `sm`) with add, remove and up/down reorder, and Enter in the last row adding a row
+- hinted rows show "חזרה למקור"
+- step rows
+- errors on blur and submit, with focus moving to the first error
+- an unsaved-changes guard
+  UX-DR13: Import dialog. A dialog on desktop and a full page on phone, with tabs "קישור" and "הדבקת טקסט". An engine choice (local or Gemini) remembers the last pick. While running, it shows client-timed phase text, an indeterminate progress bar and Cancel. Errors switch to the paste tab or offer "לנסות שוב עם Gemini".
+  UX-DR14: Import review. A banner in `flag` colour ("N שדות דורשים השלמה · המתכון תורגם מאנגלית"). Flagged fields get a 2 px `flag` border and the note "יש להשלים". Suggested tags are shown as chips. The photo panel offers "הסרה" and "החלפה".
+  UX-DR15: Confirm dialogs (shadcn AlertDialog) for delete, unsaved changes and tag deletion. They name the object and its usage count, start focus on Cancel, and label the destructive action ("מחיקה").
+  UX-DR16: Toasts, one at a time: saved, deleted, deleted-already (404), logged out.
+  UX-DR17: States:
+- skeleton cards (6) and a detail skeleton
+- empty library for editors (with "מתכון חדש" and "ייבוא מקישור") and for visitors
+- no results, with "ניקוי החיפוש"
+- not found, with "חזרה לרשימה"
+- session expired ("פג תוקף החיבור", returning to the same place, with form data kept)
+- blocked user
+- login errors, generic and rate-limited
+- save failed (values kept)
+  UX-DR18: Tags management screen at `/tags`: two lists (meal types, tags) with inline rename and add. Deletes are confirmed and show usage counts. A meal type in use can't be deleted.
+  UX-DR19: Users screen at `/users` (admin): a list, add user (email, name, role, starting password), role change, block or unblock, and reset password. The controls on the last admin are disabled with a reason. `/account` lets a user change their own password.
+  UX-DR20: Responsive layouts:
+- library: 1 column below 640, 2 columns from `sm`, 3 from `lg`
+- detail: one column on phone (photo, header, servings, board, steps); from `lg`, a 400 px sticky start column (servings and board) with the photo and steps beside it
+- form: up to about 860 px wide
+- import review: from `lg`, the photo panel sits beside the fields
+  UX-DR21: Accessibility behaviours:
+- focus moves to the `h1` and `document.title` updates on route change
+- visible focus through `ring`
+- touch targets at least 44 px
+- reduced motion drops everything except opacity
+- labelled fields, with errors linked through `aria-describedby`
+  UX-DR22: Kitchen mode. The detail page requests a screen wake lock and ignores failure.
+  UX-DR23: All UI copy follows the Voice and Tone rules: Hebrew, gender-neutral infinitives, no exclamation marks or emoji, and every string comes from `he.json`.
 
 ### FR Coverage Map
 
@@ -214,26 +215,32 @@ FR27: Epic 2 - Change your own password
 > Approved by Adi 2026-10-26: Q1 A (auth before editing), Q2 A (tags as their own epic), Q3 A (the LLM spike opens Epic 5; all AI work stays together), Q4 A (final "ready to show" epic).
 
 ### Epic 1: Browse and cook from the phone
+
 Anyone can open ביס & סיר on a phone or desktop (Hebrew, RTL, light or dark), browse the seeded recipes, search them, filter by meal type, open a recipe and scale it live, with the screen staying awake in the kitchen. The groundwork comes first: adapting the scaffold, the shared libs, the OpenAPI pipeline, the database with its migrations and Hebrew meal types, the theme, the app shell, seed data and CI.
 **FRs covered:** FR1, FR2, FR3 (meal type), FR5, FR11, FR12
 
 ### Epic 2: Accounts, login and roles
+
 Adi bootstraps the admin account, and users log in and out. Visitors read, editors change content, and the admin also manages users on the Users screen (add, change role, block, reset password). Everyone can change their own password.
 **FRs covered:** FR13, FR14, FR15, FR16, FR25, FR26, FR27
 
 ### Epic 3: Create, edit and delete recipes
+
 Editors create recipes in the full form: ingredient and step rows, fractions, validation, and an unsaved-changes guard. They pick the meal type and tags (creating new tags inline) and add a photo. Editing keeps "originally …" hints, with reset to original, and recipes can be deleted after a confirmation.
 **FRs covered:** FR4, FR6, FR7, FR8, FR9, FR10, FR22
 
 ### Epic 4: Organise with meal types and tags
+
 Editors manage meal types and tags (add, rename, delete, with usage counts), and everyone can filter the library by tags.
 **FRs covered:** FR3 (tags), FR23
 
 ### Epic 5: AI import
+
 Editors import a recipe from a link or from pasted text with Ollama (local) or Gemini. They get a Hebrew draft with a suggested meal type, tags and photo, review the flagged fields, and save. Progress, cancel and per-engine timeouts make slow local runs usable. Story 5.1 is the spike that compares Ollama and Gemini and confirms the default engine.
 **FRs covered:** FR17, FR18, FR19, FR20, FR21, FR24
 
 ### Epic 6: Ready to show
+
 The app runs as one production container (`docker compose up`) with backups, structured logging and an env template. Performance budgets (bundle size, Lighthouse) and the Playwright e2e flows run in CI. A README explains the app and its architecture for recruiters.
 **NFRs completed:** NFR3, NFR6, NFR9, NFR11 (NFR1, 2, 4, 5, 7, 8, 10 and 12 are met inside every epic's stories)
 
@@ -289,13 +296,14 @@ So that the repo is always green and interview-ready (NFR-1).
 **And** the old Nx Cloud `start-ci-run` / `fix-ci` steps are removed
 **And** `recipe-service:typecheck` runs mypy in strict mode with the pydantic plugin, and `recipe-service:lint` runs ruff plus the import-linter contracts for AD-1
 **And** the web ESLint config bans:
-  - physical-direction Tailwind utilities (`ml-`, `mr-`, `pl-`, `pr-`, `left-`, `right-`, `text-left/right`)
-  - arbitrary values
-  - hex/rgb literals outside the theme file
-  - the `style` prop in `libs/ui-components`
-**And** the web ESLint config also enables jsx-a11y and the version of the React hooks rules that the compiler needs (AD-33)
-**And** a deliberately broken line (e.g. `className="ml-2"`) makes CI fail, and reverting it makes CI pass
-**And** the React Compiler is enabled through `babel-plugin-react-compiler` in the Vite config
+
+- physical-direction Tailwind utilities (`ml-`, `mr-`, `pl-`, `pr-`, `left-`, `right-`, `text-left/right`)
+- arbitrary values
+- hex/rgb literals outside the theme file
+- the `style` prop in `libs/ui-components`
+  **And** the web ESLint config also enables jsx-a11y and the version of the React hooks rules that the compiler needs (AD-33)
+  **And** a deliberately broken line (e.g. `className="ml-2"`) makes CI fail, and reverting it makes CI pass
+  **And** the React Compiler is enabled through `babel-plugin-react-compiler` in the Vite config
 
 ### Story 1.4: Theme, RTL and app shell
 
@@ -331,6 +339,13 @@ So that every screen uses the same accessible, token-driven building blocks.
 **And** each primitive renders correctly in RTL (logical utilities, Radix `DirectionProvider`) in light and dark
 **And** each primitive has a small component test: it renders, it is keyboard operable where interactive, and the dialogs trap and restore focus
 **And** none imports data-access, TanStack Query or the router (AD-2 lint)
+**And** Storybook is set up on `libs/ui-components` with `@nx/storybook` (React + Vite builder)
+**And** the Storybook preview loads the theme CSS (tokens and Rubik), a global decorator sets `dir="rtl"` and wraps stories in `DirectionProvider`, and a toolbar toggle switches light and dark
+**And** `@storybook/addon-a11y` is enabled
+**And** every primitive and shared component has a story showing RTL in both themes, including Story 1.4's Button, TopBar, ThemeToggle and Board
+**And** a `build-storybook` target runs in CI through `nx affected`
+**And** the app's provider tree (i18n init, `DirectionProvider`, `ThemeProvider`) lives in one shared `AppProviders` used by both `main.tsx` and the specs, so a broken bootstrap fails a test
+**And** input and control boundaries meet WCAG 1.4.11 (≥ 3:1) in both themes through a stronger `--input` border token, checked in `theme-contrast.spec.ts` and shown in a Storybook preview for Adi to approve
 **And** `nx run-many -t lint test build` passes
 
 ### Story 1.6: Recipe data model and read API
@@ -344,23 +359,25 @@ So that the app has real data to show.
 **Given** a fresh database
 **When** the app starts
 **Then** Alembic migrations (batch mode) run automatically and create `recipe`, `ingredient`, `step`, `tag` and `recipe_tag` (AD-5, AD-24), with:
-  - UUID ids
-  - UTC timestamps
-  - nullable `created_by`/`updated_by` UUID columns (their foreign key to `user` is added in Story 2.1, when that table exists)
-  - `ON DELETE CASCADE` on child rows
-**And** every connection has `PRAGMA foreign_keys=ON` and WAL enabled
-**And** a data migration inserts the default meal types with fixed UUIDs and Hebrew names (בוקר, בראנץ', צהריים, ערב, קינוח, תוספת, משקה, אחר)
-**And** a failed migration exits the app non-zero
+
+- UUID ids
+- UTC timestamps
+- nullable `created_by`/`updated_by` UUID columns (their foreign key to `user` is added in Story 2.1, when that table exists)
+- `ON DELETE CASCADE` on child rows
+  **And** every connection has `PRAGMA foreign_keys=ON` and WAL enabled
+  **And** a data migration inserts the default meal types with fixed UUIDs and Hebrew names (בוקר, בראנץ', צהריים, ערב, קינוח, תוספת, משקה, אחר)
+  **And** a failed migration exits the app non-zero
 
 **Given** recipes exist
 **When** `GET /api/recipes` is called
 **Then** it returns all `RecipeSummary` items, unpaginated, sorted by `created_at desc, id` (AD-26). Each summary has: id, title, meal_type `{id,name}`, tags `[{id,name}]`, total_minutes or null, photo or null, and created_at
 **And** `GET /api/recipes/{id}` returns the full `RecipeRead` (AD-20, AD-31), with:
-  - ordered ingredients: `amount` as a JSON number or null, `unit` from the `Unit` enum or null, name, note, and `original` or null
-  - ordered steps
-**And** an unknown id returns 404 `{detail, code: "recipe_not_found"}` (AD-28)
-**And** operation IDs follow `{tag}_{function}`, enforced by a test (AD-19)
-**And** API tests cover both endpoints against a temporary database migrated with `alembic upgrade head`
+
+- ordered ingredients: `amount` as a JSON number or null, `unit` from the `Unit` enum or null, name, note, and `original` or null
+- ordered steps
+  **And** an unknown id returns 404 `{detail, code: "recipe_not_found"}` (AD-28)
+  **And** operation IDs follow `{tag}_{function}`, enforced by a test (AD-19)
+  **And** API tests cover both endpoints against a temporary database migrated with `alembic upgrade head`
 
 ### Story 1.7: Generated API client pipeline
 
@@ -429,15 +446,16 @@ So that I can cook from it (FR5).
 **When** I open `/recipes/:id`
 **Then** I see the meal type, prep and cook time, the title in display style, the ingredient board, numbered steps, and the source link if there is one (UX-DR6, UX-DR10)
 **And** each `IngredientLine` shows:
-  - the amount in quantity style, wrapped in `<bdi>`
-  - the singular or plural Hebrew unit label from `he.json`
-  - the name and the note
-  - for to-taste lines, "מלח — לפי הטעם"
-**And** the layout is one column on phone. From `lg`, the ingredient board sits in a sticky start column with the steps beside it (UX-DR20)
-**And** `IngredientLine` already renders an `original` hint when the API sends one, so Epic 3 needs no layout change
-**And** an unknown id shows "המתכון לא נמצא" with a "חזרה לרשימה" link
-**And** a skeleton shows while loading, and the page renders in under 500 ms locally (NFR-3)
-**And** the route is lazy-loaded in its own chunk (AD-11)
+
+- the amount in quantity style, wrapped in `<bdi>`
+- the singular or plural Hebrew unit label from `he.json`
+- the name and the note
+- for to-taste lines, "מלח — לפי הטעם"
+  **And** the layout is one column on phone. From `lg`, the ingredient board sits in a sticky start column with the steps beside it (UX-DR20)
+  **And** `IngredientLine` already renders an `original` hint when the API sends one, so Epic 3 needs no layout change
+  **And** an unknown id shows "המתכון לא נמצא" with a "חזרה לרשימה" link
+  **And** a skeleton shows while loading, and the page renders in under 500 ms locally (NFR-3)
+  **And** the route is lazy-loaded in its own chunk (AD-11)
 
 ### Story 1.11: Live serving scaling and kitchen mode
 
@@ -451,13 +469,14 @@ So that I can cook for any group without doing the maths (FR11).
 **When** I tap + until the servings read 10
 **Then** every amount is multiplied by 10/4 immediately, with no server call, and to-taste ingredients never change
 **And** rounding follows FR11:
-  - whole numbers have no decimals ("5", not "5.000")
-  - other numbers have at most 2 decimals
-  - countable units (unit, clove, slice, can, package) round to the nearest ½
-**And** the `ServingsStepper` has 44 px − and + buttons and a typeable value clamped to 1–100 with a range message. A polite live region announces the new servings count (UX-DR9)
-**And** "חזרה ל־4" appears only when the value differs from the base, and it restores the base. A reload also returns to the base
-**And** `scaleAmount` and `formatAmount` live in `libs/recipe-domain` with 100% branch coverage. `IngredientLine` uses them for both the amount and any original hint (AD-32, NFR-2)
-**And** while the detail page is open it requests a screen wake lock, and silently ignores a refusal (UX-DR22)
+
+- whole numbers have no decimals ("5", not "5.000")
+- other numbers have at most 2 decimals
+- countable units (unit, clove, slice, can, package) round to the nearest ½
+  **And** the `ServingsStepper` has 44 px − and + buttons and a typeable value clamped to 1–100 with a range message. A polite live region announces the new servings count (UX-DR9)
+  **And** "חזרה ל־4" appears only when the value differs from the base, and it restores the base. A reload also returns to the base
+  **And** `scaleAmount` and `formatAmount` live in `libs/recipe-domain` with 100% branch coverage. `IngredientLine` uses them for both the amount and any original hint (AD-32, NFR-2)
+  **And** while the detail page is open it requests a screen wake lock, and silently ignores a refusal (UX-DR22)
 
 ## Epic 2: Accounts, login and roles
 
@@ -894,4 +913,5 @@ So that a reviewer can follow the project quickly (NFR9).
 **Then** it explains what ביס & סיר is (with screenshots), how to run it (`npm run dev` and `docker compose up`), the env settings, and how to create the admin and seed the data
 **And** it shows the architecture at a glance (a diagram plus the key decisions) and links to `ARCHITECTURE-SPINE.md`, the PRD and the UX docs
 **And** it lists the quality gates (CI, tests, budgets) and the tech stack with the reasons behind each choice
+**And** the built Storybook of `libs/ui-components` is published (e.g. GitHub Pages) and the README links to it
 **And** a reader new to the project can follow the architecture in under 10 minutes

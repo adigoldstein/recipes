@@ -1,26 +1,62 @@
-import { render, screen } from '@testing-library/react';
-import { createMemoryRouter, RouterProvider } from 'react-router';
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react';
+import { createMemoryRouter, data, RouterProvider } from 'react-router';
+import { DirectionProvider } from '@bite-and-board/ui-components';
 import { RouteError } from './route-error';
 import { routes } from './router';
+import { ThemeProvider } from './theme';
 
-function renderAt(path: string) {
-  const router = createMemoryRouter(routes, { initialEntries: [path] });
-  render(<RouterProvider router={router} />);
+function renderApp(path: string, appRoutes = routes) {
+  const router = createMemoryRouter(appRoutes, { initialEntries: [path] });
+  render(
+    <DirectionProvider dir="rtl">
+      <ThemeProvider>
+        <RouterProvider router={router} />
+      </ThemeProvider>
+    </DirectionProvider>,
+  );
 }
 
 describe('routes', () => {
-  it('renders the lazy home page at /', async () => {
-    renderAt('/');
+  it('renders the shell and the lazy home page at /', async () => {
+    renderApp('/');
+    const heading = await screen.findByRole('heading', { name: 'מתכונים' });
+    const banner = screen.getByRole('banner');
     expect(
-      await screen.findByRole('heading', { name: 'Bite & Board' }),
-    ).toBeTruthy();
+      within(banner)
+        .getByRole('link', { name: 'ביס & סיר' })
+        .getAttribute('href'),
+    ).toBe('/');
+    expect(document.title).toBe('ביס & סיר');
+    // The first load does not move focus.
+    expect(document.activeElement).not.toBe(heading);
   });
 
-  it('renders the not-found error for an unknown path', async () => {
-    renderAt('/nope');
+  it('renders the not-found page inside the shell for an unknown path', async () => {
+    renderApp('/nope');
+    const heading = await screen.findByRole('heading', {
+      level: 1,
+      name: 'הדף לא נמצא',
+    });
+    expect(screen.getByRole('banner')).toBeTruthy();
     expect(
-      await screen.findByRole('heading', { name: 'Page not found' }),
-    ).toBeTruthy();
+      screen.getByRole('link', { name: 'חזרה לרשימה' }).getAttribute('href'),
+    ).toBe('/');
+    expect(document.title).toBe('הדף לא נמצא · ביס & סיר');
+    expect(document.activeElement).not.toBe(heading);
+  });
+
+  it('moves focus to the new h1 and updates the title on navigation', async () => {
+    renderApp('/nope');
+    fireEvent.click(await screen.findByRole('link', { name: 'חזרה לרשימה' }));
+    const heading = await screen.findByRole('heading', { name: 'מתכונים' });
+    await waitFor(() => expect(document.activeElement).toBe(heading));
+    expect(document.title).toBe('ביס & סיר');
   });
 });
 
@@ -29,21 +65,36 @@ describe('RouteError', () => {
     vi.restoreAllMocks();
   });
 
-  it('renders a generic message when a route throws', async () => {
-    // The router logs the thrown error; keep the test output clean.
-    vi.spyOn(console, 'error').mockImplementation(() => undefined);
-    const router = createMemoryRouter([
+  function throwingRoutes(error: unknown) {
+    return [
       {
         path: '/',
+        Component: () => null,
+        HydrateFallback: () => null,
         errorElement: <RouteError />,
         loader: () => {
-          throw new Error('boom');
+          throw error;
         },
       },
-    ]);
-    render(<RouterProvider router={router} />);
+    ];
+  }
+
+  it('renders a Hebrew message when a loader throws', async () => {
+    // The router logs the thrown error; keep the test output clean.
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    renderApp('/', throwingRoutes(new Error('boom')));
     expect(
-      await screen.findByRole('heading', { name: 'Something went wrong' }),
+      await screen.findByRole('heading', { name: 'משהו השתבש' }),
+    ).toBeTruthy();
+    expect(screen.getByText('אפשר לרענן ולנסות שוב')).toBeTruthy();
+    expect(document.title).toBe('משהו השתבש · ביס & סיר');
+  });
+
+  it('renders the not-found copy for a thrown 404', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    renderApp('/', throwingRoutes(data(null, { status: 404 })));
+    expect(
+      await screen.findByRole('heading', { name: 'הדף לא נמצא' }),
     ).toBeTruthy();
   });
 });

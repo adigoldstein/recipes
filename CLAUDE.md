@@ -12,6 +12,11 @@
 - No hardcoded values: all UI styling must use design tokens defined via the Tailwind CSS and shadcn/ui configuration (semantic colors like `bg-primary`, the spacing scale, typography tokens). No raw hex/rgb colors, arbitrary pixel values, or inline style values.
 - Single source of truth: every shared component in `libs/ui-components` must consume these tokens so the theme can be adjusted in one place.
 
+# AI model selection
+
+- See `docs/ai-model-playbook.md`. This project prefers Mode B (cost-effective).
+- Before starting each story, ask Adi which model and effort to use, with a recommendation.
+
 <!-- nx configuration start-->
 <!-- Leave the start & end comments to automatically receive updates. -->
 

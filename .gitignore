@@ -79,3 +79,6 @@ vitest.config.*.timestamp*
 
 # Vitest coverage output
 test-output
+
+# Local dev-server config for the Claude desktop preview
+.claude/launch.json

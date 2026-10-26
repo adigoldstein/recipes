@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-26-2026 13:09
-last_updated: 10-26-2026 15:05
+last_updated: 10-26-2026 20:45
 project: recipes
 project_key: NOKEY
 tracking_system: file-system
@@ -39,7 +39,7 @@ development_status:
   1-1-adapt-the-backend-scaffold: done
   1-2-adapt-the-frontend-scaffold-and-shared-libs: done
   1-3-ci-and-quality-gates: done
-  1-4-theme-rtl-and-app-shell: backlog
+  1-4-theme-rtl-and-app-shell: done
   1-5-ui-kit-shadcn-primitives-in-ui-components: backlog
   1-6-recipe-data-model-and-read-api: backlog
   1-7-generated-api-client-pipeline: backlog

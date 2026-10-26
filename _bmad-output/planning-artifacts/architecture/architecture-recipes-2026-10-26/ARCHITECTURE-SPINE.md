@@ -59,6 +59,7 @@ flowchart LR
   - `apps/web` holds only the shell (router, providers, app-wide layout). It lazy-loads pages from feature libs and may also import `libs/data-access` (the query client provider and the 401 handler), `libs/ui-components` (the shell's own UI) and `libs/recipe-domain`.
   - A feature lib may import `data-access`, `ui-components` and `recipe-domain`, but never another feature lib.
   - `libs/ui-components` imports neither the API nor any global state: props in, callbacks out, design tokens only (DESIGN.md).
+  - `libs/i18n` holds `he.json`, the i18next init and the typed keys. The app and feature libs may import it; it imports no workspace project. `libs/ui-components` may not import it or i18next: strings come in as props (Story 1.4).
   - Every server call goes through `libs/data-access`.
   - Nx module-boundary tags enforce this.
 
@@ -184,7 +185,7 @@ flowchart LR
 - **Prevents:** flaky shared-state tests, CI calling paid or slow models, and untested business rules.
 - **Rule:**
   - **Backend:** pytest with FastAPI `TestClient` against a fresh temporary SQLite database per test. There are API tests for every endpoint. Unit tests for `recipes.service` give 100% branch coverage on the original-value rules.
-  - **Frontend:** Vitest unit tests (scaling and rounding at 100% branch coverage). React Testing Library and MSW component tests (the recipe form). Playwright e2e for three flows: scale a recipe, edit with the original hint and reset, import with the `fake` provider.
+  - **Frontend:** Vitest unit tests (scaling and rounding at 100% branch coverage). React Testing Library and MSW component tests (the recipe form). Playwright e2e for three flows: scale a recipe, edit with the original hint and reset, import with the `fake` provider. Storybook on `libs/ui-components` documents every shared component in RTL and both themes, with the a11y addon; `build-storybook` runs in CI (Story 1.5).
   - Tests and CI always use `LLM_PROVIDER=fake`.
 
 ### AD-17 — CI on plain GitHub Actions [ADOPTED]
@@ -359,12 +360,14 @@ flowchart LR
 - **Rule:**
   - **Python:** mypy (strict, with the pydantic plugin) is the `recipe-service:typecheck` target. import-linter contracts for AD-1 and AD-25 run in `lint`.
   - **Rate limit:** slowapi limits login attempts (in memory, which is fine for one container).
-  - **Frontend boundaries:** Nx tags `type:app`, `type:feature`, `type:data-access`, `type:ui` and `type:domain` carry these dependency constraints:
-    - app → feature, data-access, ui, domain
-    - feature → data-access, ui, domain (never another feature)
-    - ui → domain
+  - **Frontend boundaries:** Nx tags `type:app`, `type:feature`, `type:data-access`, `type:ui`, `type:domain` and `type:i18n` carry these dependency constraints:
+    - app → feature, data-access, ui, domain, i18n
+    - feature → data-access, ui, domain, i18n (never another feature)
+    - ui → domain (i18next and react-i18next banned)
     - data-access → nothing
     - domain → nothing
+    - i18n → nothing
+  - **Copy:** ESLint bans Hebrew string literals and JSX text outside `he.json`; spec files are exempt.
   - **Styling:** ESLint rules ban physical-direction utilities, arbitrary Tailwind values, hex/rgb literals outside the theme, and the `style` prop in `libs/ui-components`. They also cover jsx-a11y and the React hooks rules version the compiler needs.
   - **Bundle size:** size-limit checks the initial JS (≤ 200 KB gzip) as `web:size` in CI.
   - **Recipe pages:** recipe-scrapers (JSON-LD) and trafilatura (readable text) parse imported pages.
@@ -381,43 +384,44 @@ flowchart LR
 
 ## Consistency Conventions
 
-| Concern | Convention |
-| --- | --- |
-| API paths | `/api/<plural-noun>`, kebab-case. JSON fields are snake_case on the wire, and the generated client uses them as-is. |
-| Timestamps | UTC ISO-8601 (`created_at`, `updated_at`) |
-| Errors | 422 validation; 400 bad input or credentials; 401 no session on a protected call; 403 CSRF or insufficient role; 404 missing; 409 conflict (duplicate tag rename, meal type in use); 413 upload too large; 429 rate limit or import cap; 502/504 provider failure or timeout. Body shape per AD-28 |
-| Python naming | modules `snake_case`; schemas `RecipeCreate / RecipeRead / RecipeUpdate` |
-| TS naming | components `PascalCase.tsx`; hooks `useX`; route modules `libs/feature-<name>/src/routes/<page>.tsx` |
-| Config | env vars only, read once in `app/core/config` (pydantic-settings); no secrets in the repo |
-| Styling | design tokens only (CLAUDE.md, NFR-7) |
+| Concern       | Convention                                                                                                                                                                                                                                                                                         |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| API paths     | `/api/<plural-noun>`, kebab-case. JSON fields are snake_case on the wire, and the generated client uses them as-is.                                                                                                                                                                                |
+| Timestamps    | UTC ISO-8601 (`created_at`, `updated_at`)                                                                                                                                                                                                                                                          |
+| Errors        | 422 validation; 400 bad input or credentials; 401 no session on a protected call; 403 CSRF or insufficient role; 404 missing; 409 conflict (duplicate tag rename, meal type in use); 413 upload too large; 429 rate limit or import cap; 502/504 provider failure or timeout. Body shape per AD-28 |
+| Python naming | modules `snake_case`; schemas `RecipeCreate / RecipeRead / RecipeUpdate`                                                                                                                                                                                                                           |
+| TS naming     | components `PascalCase.tsx`; hooks `useX`; route modules `libs/feature-<name>/src/routes/<page>.tsx`                                                                                                                                                                                               |
+| Config        | env vars only, read once in `app/core/config` (pydantic-settings); no secrets in the repo                                                                                                                                                                                                          |
+| Styling       | design tokens only (CLAUDE.md, NFR-7)                                                                                                                                                                                                                                                              |
 
 ## Stack
 
-| Name | Version |
-| --- | --- |
-| Nx | 24.0.0 [ADOPTED] |
-| React / React DOM | 19.x [ADOPTED] |
-| Vite | 8.x [ADOPTED] |
-| TypeScript | ~6.0 [ADOPTED] |
-| Vitest | ~5.0 [ADOPTED] |
-| Python | 3.13 (moved from 3.12 at scaffold) |
-| FastAPI | ≥0.162 [ADOPTED] |
-| SQLModel / Pydantic | ≥0.0.48 / 2.x [ADOPTED] |
-| Alembic | ≥1.20 [ADOPTED] |
-| SQLite | embedded [ADOPTED] |
-| React Router | 8.x (released 2026-06; replaces EOL 6.30) |
-| @tanstack/react-query | 5.x |
-| @hey-api/openapi-ts | 0.99.x (pre-1.0: pin exact) |
-| Zod | 4.x |
-| React Hook Form, i18next / react-i18next, Playwright, MSW | current stable, pinned at scaffold |
-| Tailwind CSS / shadcn/ui | 4.x / current CLI (RTL logical classes) |
-| pwdlib[argon2], PyJWT, httpx, Pillow | current stable, pinned at scaffold |
-| ollama (Python) / Ollama app | 0.6.x / current |
-| google-genai SDK | 2.x; Flash model name in config (`GEMINI_MODEL`, e.g. `gemini-3.8-flash`) |
-| PyJWT | ≥2.13 |
-| mypy, import-linter, slowapi, recipe-scrapers, trafilatura | current stable, pinned at scaffold |
-| size-limit, babel-plugin-react-compiler, eslint-plugin-react-hooks | current stable (hooks ≥7 for compiler rules) |
-| MSW | 3.x |
+| Name                                                               | Version                                                                   |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------- |
+| Nx                                                                 | 24.0.0 [ADOPTED]                                                          |
+| React / React DOM                                                  | 19.x [ADOPTED]                                                            |
+| Vite                                                               | 8.x [ADOPTED]                                                             |
+| TypeScript                                                         | ~6.0 [ADOPTED]                                                            |
+| Vitest                                                             | ~5.0 [ADOPTED]                                                            |
+| Python                                                             | 3.13 (moved from 3.12 at scaffold)                                        |
+| FastAPI                                                            | ≥0.162 [ADOPTED]                                                          |
+| SQLModel / Pydantic                                                | ≥0.0.48 / 2.x [ADOPTED]                                                   |
+| Alembic                                                            | ≥1.20 [ADOPTED]                                                           |
+| SQLite                                                             | embedded [ADOPTED]                                                        |
+| React Router                                                       | 8.x (released 2026-06; replaces EOL 6.30)                                 |
+| @tanstack/react-query                                              | 5.x                                                                       |
+| @hey-api/openapi-ts                                                | 0.99.x (pre-1.0: pin exact)                                               |
+| Zod                                                                | 4.x                                                                       |
+| React Hook Form, i18next / react-i18next, Playwright, MSW          | current stable, pinned at scaffold                                        |
+| Tailwind CSS / shadcn/ui                                           | 4.x / current CLI (RTL logical classes)                                   |
+| pwdlib[argon2], PyJWT, httpx, Pillow                               | current stable, pinned at scaffold                                        |
+| ollama (Python) / Ollama app                                       | 0.6.x / current                                                           |
+| google-genai SDK                                                   | 2.x; Flash model name in config (`GEMINI_MODEL`, e.g. `gemini-3.8-flash`) |
+| PyJWT                                                              | ≥2.13                                                                     |
+| mypy, import-linter, slowapi, recipe-scrapers, trafilatura         | current stable, pinned at scaffold                                        |
+| size-limit, babel-plugin-react-compiler, eslint-plugin-react-hooks | current stable (hooks ≥7 for compiler rules)                              |
+| MSW                                                                | 3.x                                                                       |
+| Storybook (`@nx/storybook`, React + Vite, addon-a11y)              | 10.x (10.6.4 latest on npm, 2026-10-26; pin exact at Story 1.5)           |
 
 ## Structural Seed
 
@@ -450,19 +454,19 @@ libs/
 
 ## Capability → Architecture Map
 
-| Capability | Lives in | Governed by |
-| --- | --- | --- |
-| F1 library, search, filters | libs/feature-recipes · recipes.router | AD-8, AD-7 |
-| F2–F5 recipe CRUD | recipes module · libs/feature-recipes | AD-1, AD-4, AD-9 |
-| F4 original-value hints | recipes.service | AD-4 |
-| F6 scaling | libs/recipe-domain | AD-31, AD-32 |
-| F8 users, roles, login | auth + users modules · libs/feature-auth, libs/feature-users | AD-6, AD-21, AD-30 |
-| F9 AI import | imports module + providers · libs/feature-import | AD-12, AD-13 |
-| F10 meal types & tags | tags module · libs/feature-tags | AD-7 |
-| Photos | photos module | AD-14 |
-| NFR-6 one-command run | compose + nx dev target | AD-15, AD-18 |
-| NFR-1/2 quality, CI | all projects | AD-16, AD-17 |
-| NFR-12 RTL | web + ui-components | AD-10 |
+| Capability                  | Lives in                                                     | Governed by        |
+| --------------------------- | ------------------------------------------------------------ | ------------------ |
+| F1 library, search, filters | libs/feature-recipes · recipes.router                        | AD-8, AD-7         |
+| F2–F5 recipe CRUD           | recipes module · libs/feature-recipes                        | AD-1, AD-4, AD-9   |
+| F4 original-value hints     | recipes.service                                              | AD-4               |
+| F6 scaling                  | libs/recipe-domain                                           | AD-31, AD-32       |
+| F8 users, roles, login      | auth + users modules · libs/feature-auth, libs/feature-users | AD-6, AD-21, AD-30 |
+| F9 AI import                | imports module + providers · libs/feature-import             | AD-12, AD-13       |
+| F10 meal types & tags       | tags module · libs/feature-tags                              | AD-7               |
+| Photos                      | photos module                                                | AD-14              |
+| NFR-6 one-command run       | compose + nx dev target                                      | AD-15, AD-18       |
+| NFR-1/2 quality, CI         | all projects                                                 | AD-16, AD-17       |
+| NFR-12 RTL                  | web + ui-components                                          | AD-10              |
 
 ## Open
 

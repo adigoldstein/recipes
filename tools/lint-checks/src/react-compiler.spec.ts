@@ -3,8 +3,8 @@ import { createServer } from 'vite';
 
 const WORKSPACE = join(import.meta.dirname, '../../..');
 
-// The memo cache sentinel only appears in components the React Compiler rewrote.
-const COMPILED = 'react.memo_cache_sentinel';
+// Only components the React Compiler rewrote import its memo-cache runtime.
+const COMPILED = /react[/_]compiler-runtime/;
 
 it('compiles app components with the React Compiler', async () => {
   const root = join(WORKSPACE, 'apps/web');
@@ -18,7 +18,7 @@ it('compiles app components with the React Compiler', async () => {
     const result = await server.transformRequest(
       '/src/app/placeholder-home.tsx',
     );
-    expect(result?.code).toContain(COMPILED);
+    expect(result?.code).toMatch(COMPILED);
   } finally {
     await server.close();
   }

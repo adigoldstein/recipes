@@ -1,12 +1,27 @@
 <!doctype html>
-<html lang="en">
+<html lang="he" dir="rtl">
   <head>
     <meta charset="utf-8" />
-    <title>Web</title>
+    <title>ביס & סיר</title>
     <base href="/" />
 
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <!-- Applies the dark theme before first paint; same storage key and rule as ThemeProvider (src/app/theme.tsx). -->
+    <script id="theme-init">
+      (function () {
+        var mode = null;
+        try {
+          mode = window.localStorage.getItem('theme');
+        } catch (e) {}
+        var dark =
+          mode === 'dark' ||
+          (mode !== 'light' &&
+            typeof window.matchMedia === 'function' &&
+            window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (dark) document.documentElement.classList.add('dark');
+      })();
+    </script>
     <link rel="stylesheet" href="/src/styles.css" />
   </head>
   <body>

@@ -41,6 +41,21 @@ const HEX_COLOUR = String.raw`/^#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$|(^|[^\
 const FUNCTIONAL_COLOUR = String.raw`/\b(rgba?|hsla?|hwb|lab|lch|oklab|oklch)\(/i`;
 const COLOUR_MESSAGE =
   'Colour literals belong in the theme; use a design token class instead.';
+const COLOUR_SYNTAX = [HEX_COLOUR, FUNCTIONAL_COLOUR].flatMap((regex) => [
+  { selector: `Literal[value=${regex}]`, message: COLOUR_MESSAGE },
+  { selector: `TemplateElement[value.raw=${regex}]`, message: COLOUR_MESSAGE },
+]);
+
+// Hebrew copy lives only in libs/i18n `he.json` (AD-10); specs may assert on it.
+const HEBREW = String.raw`/[֐-׿]/`;
+const HEBREW_MESSAGE =
+  'Hebrew copy belongs in libs/i18n he.json: use a t() key, or take the string as a prop.';
+const HEBREW_SYNTAX = [
+  `Literal[value=${HEBREW}]`,
+  `TemplateElement[value.raw=${HEBREW}]`,
+  `JSXText[value=${HEBREW}]`,
+].map((selector) => ({ selector, message: HEBREW_MESSAGE }));
+const SPEC_FILES = ['**/*.{spec,test}.{ts,tsx,js,jsx}'];
 
 export default [
   ...nx.configs['flat/base'],
@@ -70,6 +85,7 @@ export default [
                 'type:data-access',
                 'type:ui',
                 'type:domain',
+                'type:i18n',
               ],
             },
             {
@@ -78,19 +94,28 @@ export default [
                 'type:data-access',
                 'type:ui',
                 'type:domain',
+                'type:i18n',
               ],
             },
             {
               sourceTag: 'type:ui',
               onlyDependOnLibsWithTags: ['type:domain'],
-              // Presentational only: no server state, API client or routing.
+              // Presentational only: no server state, API client, routing or i18n
+              // (strings come in as props).
               bannedExternalImports: [
                 '@tanstack/*',
                 '@hey-api/*',
                 'react-router',
                 'react-router/*',
                 'react-router-*',
+                'i18next',
+                'react-i18next',
               ],
+            },
+            {
+              // he.json, the i18next init and typed keys (AD-10).
+              sourceTag: 'type:i18n',
+              onlyDependOnLibsWithTags: [],
             },
             {
               // Workspace tooling (lint fixture tests) imports no project code.
@@ -129,17 +154,13 @@ export default [
         },
       ],
       // A later block that sets `no-restricted-syntax` replaces this list: extend it instead.
-      'no-restricted-syntax': [
-        'error',
-        ...[HEX_COLOUR, FUNCTIONAL_COLOUR].flatMap((regex) => [
-          { selector: `Literal[value=${regex}]`, message: COLOUR_MESSAGE },
-          {
-            selector: `TemplateElement[value.raw=${regex}]`,
-            message: COLOUR_MESSAGE,
-          },
-        ]),
-      ],
+      'no-restricted-syntax': ['error', ...COLOUR_SYNTAX, ...HEBREW_SYNTAX],
     },
+  },
+  {
+    files: SPEC_FILES,
+    // Same list minus the Hebrew ban: tests query by the Hebrew the user sees.
+    rules: { 'no-restricted-syntax': ['error', ...COLOUR_SYNTAX] },
   },
   {
     files: ['**/*.tsx', '**/*.jsx'],

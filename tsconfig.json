@@ -17,6 +17,9 @@
     },
     {
       "path": "./tools/lint-checks"
+    },
+    {
+      "path": "./libs/i18n"
     }
   ],
   "compilerOptions": {}

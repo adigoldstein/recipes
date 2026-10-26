@@ -1,0 +1,162 @@
+/*
+ * The ביס & סיר theme: the one place colours, radii and type are defined
+ * (DESIGN.md, direction B "The Board"). Components use only the Tailwind
+ * classes generated from these tokens.
+ */
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+@import '@fontsource/rubik/400.css';
+@import '@fontsource/rubik/600.css';
+@import '@fontsource/rubik/800.css';
+
+@source '../';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --background: #efeeea;
+  --foreground: #1e1b18;
+  --card: #faf9f6;
+  --card-foreground: #1e1b18;
+  --popover: #faf9f6;
+  --popover-foreground: #1e1b18;
+  --primary: #1e1b18;
+  --primary-foreground: #f5e9d8;
+  --secondary: #e2e0da;
+  --secondary-foreground: #1e1b18;
+  --muted: #e2e0da;
+  --muted-foreground: #5f574f;
+  --accent: #e2e0da;
+  --accent-foreground: #1e1b18;
+  --destructive: #b42318;
+  --destructive-foreground: #ffffff;
+  --border: #d9d6cf;
+  --input: #d9d6cf;
+  --ring: #1e1b18;
+  --board: #d6a46a;
+  --board-foreground: #24190e;
+  --hint: #4f3a22;
+  --hint-muted: #5f574f;
+  --flag: #a1440a;
+  color-scheme: light;
+}
+
+.dark {
+  --background: #1a1816;
+  --foreground: #f3ece3;
+  --card: #242120;
+  --card-foreground: #f3ece3;
+  --popover: #242120;
+  --popover-foreground: #f3ece3;
+  --primary: #d6a46a;
+  --primary-foreground: #1a1208;
+  --secondary: #2e2a27;
+  --secondary-foreground: #f3ece3;
+  --muted: #2e2a27;
+  --muted-foreground: #b9ada0;
+  --accent: #2e2a27;
+  --accent-foreground: #f3ece3;
+  --destructive: #f97066;
+  --destructive-foreground: #1a0705;
+  --border: #3a3531;
+  --input: #3a3531;
+  --ring: #d6a46a;
+  --board: #73502e;
+  --board-foreground: #fbf1e3;
+  --hint: #f0d7b6;
+  --hint-muted: #b9ada0;
+  --flag: #f5a35c;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-board: var(--board);
+  --color-board-foreground: var(--board-foreground);
+  --color-hint: var(--hint);
+  --color-hint-muted: var(--hint-muted);
+  --color-flag: var(--flag);
+}
+
+@theme {
+  --font-sans: 'Rubik', system-ui, sans-serif;
+  --font-heading: var(--font-sans);
+
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-board: 1.5rem;
+
+  /* Content widths (DESIGN.md Layout): library 1200px, detail ~1040px. */
+  --container-library: 75rem;
+  --container-detail: 65rem;
+
+  /* Typography roles; `-lg` sizes are applied with the `lg:` variant. */
+  --text-display: 2.5rem;
+  --text-display--line-height: 1;
+  --text-display--letter-spacing: -0.02em;
+  --text-display--font-weight: 800;
+  --text-display-lg: 3.5rem;
+  --text-display-lg--line-height: 1;
+  --text-display-lg--letter-spacing: -0.02em;
+  --text-display-lg--font-weight: 800;
+  --text-title: 1.5rem;
+  --text-title--line-height: 1.15;
+  --text-title--letter-spacing: -0.01em;
+  --text-title--font-weight: 800;
+  --text-heading: 1.125rem;
+  --text-heading--line-height: 1.3;
+  --text-heading--font-weight: 600;
+  --text-body: 1rem;
+  --text-body--line-height: 1.55;
+  --text-body--font-weight: 400;
+  --text-quantity: 1.25rem;
+  --text-quantity--line-height: 1.2;
+  --text-quantity--font-weight: 800;
+  --text-label: 0.875rem;
+  --text-label--line-height: 1.4;
+  --text-label--font-weight: 600;
+  /* DESIGN.md's "hint" type role; named apart from the `hint` colour. */
+  --text-annotation: 0.875rem;
+  --text-annotation--line-height: 1.3;
+  --text-annotation--font-weight: 600;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring;
+  }
+  html {
+    @apply font-sans;
+  }
+  body {
+    @apply bg-background text-body text-foreground;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      transition-property: opacity !important;
+      animation: none !important;
+    }
+  }
+}

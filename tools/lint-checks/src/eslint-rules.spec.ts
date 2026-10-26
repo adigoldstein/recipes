@@ -123,6 +123,48 @@ describe('colour literals', () => {
   );
 });
 
+describe('Hebrew literals', () => {
+  const HEBREW_RULE = ['no-restricted-syntax'];
+
+  it.each([
+    ['JSX text', 'export const A = () => <p>שלום</p>;\n'],
+    ['an attribute', 'export const A = () => <p aria-label="שלום" />;\n'],
+    ['a string', "export const s = 'שלום';\n"],
+    ['a template literal', 'export const s = (n: number) => `${n} מנות`;\n'],
+  ])('rejects Hebrew in %s outside he.json', async (_, code) => {
+    expect(rulesOf(await lint('apps/web', code))).toEqual(HEBREW_RULE);
+    expect(rulesOf(await lint('libs/ui-components', code))).toEqual(
+      HEBREW_RULE,
+    );
+  });
+
+  it('allows Hebrew in spec files, which assert on the rendered copy', async () => {
+    const messages = await lint(
+      'apps/web',
+      "export const A = () => <p>שלום</p>;\nexport const s = 'שלום';\n",
+      'src/fixture.spec.tsx',
+    );
+    expect(messages).toEqual([]);
+  });
+
+  it('keeps colour literals banned in spec files', async () => {
+    const messages = await lint(
+      'apps/web',
+      "export const c = '#ff0000';\n",
+      'src/fixture.spec.ts',
+    );
+    expect(rulesOf(messages)).toEqual(['no-restricted-syntax']);
+  });
+
+  it('accepts translated copy', async () => {
+    const messages = await lint(
+      'apps/web',
+      "declare function t(key: string): string;\nexport const A = () => <p>{t('home.title')}</p>;\n",
+    );
+    expect(messages).toEqual([]);
+  });
+});
+
 describe('style prop', () => {
   const code =
     'import type { FC } from "react";\nexport const A = ({ C }: { C: FC<{ style?: object }> }) => <><div style={{}} /><C style={{}} /></>;\n';
@@ -174,6 +216,10 @@ describe('module boundaries', () => {
   it.each([
     ['libs/ui-components', '@bite-and-board/data-access'],
     ['libs/ui-components', 'react-router'],
+    ['libs/ui-components', '@bite-and-board/i18n'],
+    ['libs/ui-components', 'react-i18next'],
+    ['libs/ui-components', 'i18next'],
+    ['libs/i18n', '@bite-and-board/recipe-domain'],
     ['libs/recipe-domain', 'react'],
   ])('%s may not import %s', async (project, target) => {
     const messages = await lint(
@@ -187,6 +233,7 @@ describe('module boundaries', () => {
   it.each([
     ['libs/ui-components', '@bite-and-board/recipe-domain'],
     ['apps/web', '@bite-and-board/ui-components'],
+    ['apps/web', '@bite-and-board/i18n'],
   ])('%s may import %s', async (project, target) => {
     const messages = await lint(
       project,
@@ -210,6 +257,7 @@ describe('module boundaries', () => {
       'type:data-access',
       'type:ui',
       'type:domain',
+      'type:i18n',
     ]);
   });
 });

@@ -23,6 +23,7 @@
       "ui-components",
       "data-access",
       "recipe-domain",
+      "i18n",
       "recipe-service"
     ],
     "targets": {

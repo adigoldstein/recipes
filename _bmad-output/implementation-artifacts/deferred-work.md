@@ -26,9 +26,19 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-1-3-ci-and-quality-gates.md`
   summary: Declare `tailwindcss` explicitly (pinned) in `package.json` when Story 1.4 installs Tailwind.
   evidence: It is present today only as an auto-installed peer of `eslint-plugin-better-tailwindcss` (4.3.3 in the lockfile); lint resolves it through hoisting.
+  resolved: Story 1.4 — `tailwindcss` 4.3.3 and `@tailwindcss/vite` 4.3.3 are pinned in the root `package.json`.
 - source_spec: `_bmad-output/implementation-artifacts/spec-1-3-ci-and-quality-gates.md`
   summary: Decide how shadcn primitives that ship arbitrary values (e.g. `size-[1.15rem]`, `rounded-[4px]`, `max-h-(--radix-…)`) meet the arbitrary-value ban.
   evidence: Arbitrary variants (`data-[state=open]:`) are allowed, but arbitrary values in generated shadcn components will fail lint in Stories 1.4/1.5; options are token replacements or a scoped exception, which is Adi's call.
+  resolved: Story 1.4 (Adi, 2026-10-26) — arbitrary values in copied shadcn files are replaced with token utilities; the lint ban stays unscoped. Button is the first file done this way; 1.5 follows the same rule.
 - source_spec: `_bmad-output/implementation-artifacts/spec-1-3-ci-and-quality-gates.md`
   summary: Decide library list loading in Story 1.9 — (a) native `loading="lazy"` images only, (b) plus client-side load-more on scroll via IntersectionObserver, (c) TanStack Virtual; first visible row eager.
   evidence: Adi raised infinite scroll on 2026-10-26; API stays unpaginated (AD-26), so any windowing is client-only. Discuss when 1.9 starts.
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-4-theme-rtl-and-app-shell.md`
+  summary: Cover the real app bootstrap (i18n init, DirectionProvider, ThemeProvider in `main.tsx`) with a test, e.g. by extracting a shared `AppProviders` used by `main.tsx` and the specs.
+  evidence: Specs build their own provider tree and `test-setup.ts` inits i18n globally, so removing `initI18n()` or `ThemeProvider` from `main.tsx` keeps every check green; structure is Adi's call.
+  resolved: Adi (2026-10-26) — scheduled into Story 1.5 as an AC (shared `AppProviders`).
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-4-theme-rtl-and-app-shell.md`
+  summary: Decide how input/control boundaries meet WCAG 1.4.11 (3:1) before Input ships in 1.5 — the DESIGN.md `--border`/`--input` tokens are ~1.25:1 (light) and ~1.46:1 (dark) on the background.
+  evidence: Measured from theme.css; DESIGN.md colours are fixed by the 1.4 spec, so changing them (or using a stronger focus/border treatment for inputs) is a design decision.
+  resolved: Adi (2026-10-26) — scheduled into Story 1.5 as an AC (stronger `--input` border token, contrast-tested, Storybook preview for approval).
