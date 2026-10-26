@@ -25,7 +25,7 @@ Used as shadcn ships them, styled only through the theme variables (DESIGN.md).
 | AlertDialog                   | confirms: block/reset user, delete recipe, unsaved changes, delete tag | users, recipe, tags                | **UI kit story**                                |
 | Select                        | user role; meal type; ingredient unit                                  | users, recipe form                 | **UI kit story**                                |
 | Table                         | users list                                                             | users                              | **UI kit story**                                |
-| Textarea                      | recipe description, steps; pasted import text                          | recipe form, import                | 3.1 (just in time)                              |
+| Textarea                      | recipe description, notes, steps; pasted import text                         | recipe form, import                | 3.1 (just in time)                              |
 | Popover + Command             | tag combobox with "יצירת תגית '{text}'"                                | recipe form, import review         | 3.3 (just in time)                              |
 | Sheet + Checkbox              | tag filter (sheet on phone, popover on desktop)                        | library                            | 4.2 (just in time)                              |
 | Tabs                          | import: "קישור" / "הדבקת טקסט"                                         | import                             | 5.2 (just in time)                              |

@@ -23,7 +23,7 @@ FR1: The library lists every recipe as a card showing the title, meal type, tags
 FR2: Search filters recipes by title as you type (case-insensitive substring). When nothing matches, the library shows "no recipes found" with a way to clear the search.
 FR3: Filter by one meal type and by one or more tags (AND). The filters combine with search and survive navigating to a recipe and back.
 FR4: Create a recipe through a form with every content field. Ingredients and steps can be added, removed and reordered. The form validates inline, and the API rejects the same errors with 422. Leaving with unsaved changes asks for confirmation. The user can add, replace or remove the photo.
-FR5: The detail page shows all recipe content: photo, ingredients (amount, unit, name, note) and numbered steps. To-taste ingredients read "Salt — to taste". An unknown recipe id shows a not-found page.
+FR5: The detail page shows all recipe content: photo, ingredients (amount, unit, name, note), numbered steps and the recipe's notes after the steps. To-taste ingredients read "Salt — to taste". An unknown recipe id shows a not-found page.
 FR6: Edit a recipe with the same form as FR4; saving overwrites it in place and updates `updated_at`.
 FR7: The first change to an existing ingredient's amount or unit stores its original amount and unit. Later edits keep that first original. New ingredients get no original, and edits to the name or note alone don't create one.
 FR8: An ingredient that has an original shows the hint "originally {amount} {unit}" on the detail page and in the edit form. The hint is secondary, readable by screen readers, and scaled together with the amounts.
@@ -39,7 +39,7 @@ FR17: Import from a URL: schema.org JSON-LD first, falling back to the page text
 FR18: Import from pasted text through the LLM. Text without a recognisable recipe gives "No recipe found in this text".
 FR19: Review before saving. The import opens the create form prefilled, and nothing is saved until Save. Unfilled fields are flagged. Ingredients the LLM can't quantify become to-taste. An unmappable unit is left empty, with the original text kept in the note. The source URL is stored and shown. The imported photo can be kept or removed. Cancelling discards the draft.
 FR20: The import shows progress and can be cancelled. It stops at its engine's time limit (60 s hosted, about 180 s local). LLM errors are shown in readable form, and nothing is saved.
-FR21: Imports in another language produce a Hebrew draft. Amounts and units are preserved and mapped to the app's units, and the source URL is kept.
+FR21: Imports in another language produce a Hebrew draft. Amounts and units are mapped to the app's units, imperial units (oz, lb, fl oz) are converted to g and ml with the source value kept, °F in the steps becomes °C with the original step text kept, and the source URL is kept.
 FR22: Every recipe needs exactly one meal type and can have any number of tags. On create the form suggests a meal type. Tag input autocompletes and creates new tags inline, reusing an existing tag regardless of case.
 FR23: A management screen adds, renames and deletes meal types and tags. A rename applies everywhere. Deleting a tag asks for confirmation and shows how many recipes use it. A meal type that is still in use can't be deleted.
 FR24: Import pre-picks a meal type and suggests tags, preferring existing ones. A suggested new tag is created only if the user keeps it and saves.
@@ -145,7 +145,7 @@ UX-DR4: App shell. One top bar with no sidebar:
 - a "תגיות" button that opens a sheet (phone) or popover (desktop) of tag checkboxes, with the selected tags shown as removable chips
 - all state kept in the URL
   UX-DR12: Recipe form:
-- fields: title, description, meal type select, tag combobox (autocomplete, case-insensitive reuse, "יצירת תגית '{text}'"), servings, prep and cook time, source URL, photo (add, replace, remove, with an upload thumbnail and progress, limits shown beside the field)
+- fields: title, description, notes (a textarea for tips and remarks), meal type select, tag combobox (autocomplete, case-insensitive reuse, "יצירת תגית '{text}'"), servings, prep and cook time, source URL, photo (add, replace, remove, with an upload thumbnail and progress, limits shown beside the field)
 - ingredient rows (amount as text accepting ½ and ⅓, unit select, name, note; stacked on phone, one row from `sm`) with add, remove and up/down reorder, and Enter in the last row adding a row
 - hinted rows show "חזרה למקור"
 - step rows
@@ -362,6 +362,8 @@ So that the app has real data to show.
 
 - UUID ids
 - UTC timestamps
+- nullable `description` and `notes` text columns on `recipe` (`notes` holds free multi-line text for tips and personal remarks); the API limits them to 500 and 5,000 characters
+- nullable `source_amount` and `source_unit` columns on `ingredient` and a nullable `source_text` on `step`, set only when an import converted a unit or a temperature (separate from `original_*`, which FR-7 sets on edit)
 - nullable `created_by`/`updated_by` UUID columns (their foreign key to `user` is added in Story 2.1, when that table exists)
 - `ON DELETE CASCADE` on child rows
   **And** every connection has `PRAGMA foreign_keys=ON` and WAL enabled
@@ -373,8 +375,9 @@ So that the app has real data to show.
 **Then** it returns all `RecipeSummary` items, unpaginated, sorted by `created_at desc, id` (AD-26). Each summary has: id, title, meal_type `{id,name}`, tags `[{id,name}]`, total_minutes or null, photo or null, and created_at
 **And** `GET /api/recipes/{id}` returns the full `RecipeRead` (AD-20, AD-31), with:
 
-- ordered ingredients: `amount` as a JSON number or null, `unit` from the `Unit` enum or null, name, note, and `original` or null
-- ordered steps
+- `description` and `notes`, each a string or null
+- ordered ingredients: `amount` as a JSON number or null, `unit` from the `Unit` enum or null, name, note, `original` or null, and `source` (`{amount, unit}`, `unit` from `oz`, `lb`, `fl_oz`) or null
+- ordered steps, each with `source_text` or null
   **And** an unknown id returns 404 `{detail, code: "recipe_not_found"}` (AD-28)
   **And** operation IDs follow `{tag}_{function}`, enforced by a test (AD-19)
   **And** API tests cover both endpoints against a temporary database migrated with `alembic upgrade head`
@@ -430,6 +433,7 @@ So that I can quickly find what to cook (FR1, FR2, FR3).
 **Then** only recipes whose title contains the text remain (case-insensitive). The list updates as I type, using `useDeferredValue` and no network call, and the value is kept in `?q=` (UX-DR11)
 **And** with no matches I see "לא נמצאו מתכונים ל־'{q}'" with "ניקוי החיפוש", which clears both search and filter
 **And** a meal-type chip row ("הכל" plus the meal types) filters to one meal type, combines with search, and is kept in `?meal=<uuid>`
+**And** a "עד 30 דקות" chip keeps only recipes whose total time is known and at most 30 minutes, combines with search and the meal-type chips, and is kept in `?fast=1`; the test is part of the same pure filter function
 **And** after I open a recipe and go back, the search and filter are still applied
 **And** filtering is one pure function in `libs/recipe-domain`, with unit tests (AD-26, AD-32)
 **And** with 200 recipes, filtering takes under 100 ms per keystroke (NFR-3)
@@ -444,7 +448,8 @@ So that I can cook from it (FR5).
 
 **Given** a recipe exists
 **When** I open `/recipes/:id`
-**Then** I see the meal type, prep and cook time, the title in display style, the ingredient board, numbered steps, and the source link if there is one (UX-DR6, UX-DR10)
+**Then** I see the meal type, prep and cook time, the title in display style, the description under it if there is one, the ingredient board, numbered steps, and the source link if there is one (UX-DR6, UX-DR10)
+**And** when the recipe has notes, a "הערות וטיפים" section follows the steps and shows them as plain text with line breaks kept (never as HTML); with no notes, the section is absent
 **And** each `IngredientLine` shows:
 
 - the amount in quantity style, wrapped in `<bdi>`
@@ -452,7 +457,9 @@ So that I can cook from it (FR5).
 - the name and the note
 - for to-taste lines, "מלח — לפי הטעם"
   **And** the layout is one column on phone. From `lg`, the ingredient board sits in a sticky start column with the steps beside it (UX-DR20)
+  **And** when any ingredient has a `source` or any step has `source_text`, a "הצג מתכון מקורי" toggle appears (default off, kept for the visit only); recipes without converted values show no toggle. When on, converted ingredient lines read with their source value, e.g. "8 oz (227 גרם)", and converted steps show their original text beside the converted one; the FR-7 `original` hint is a separate thing and unaffected
   **And** `IngredientLine` already renders an `original` hint when the API sends one, so Epic 3 needs no layout change
+  **And** each ingredient and each step has a checkbox to tick it off while cooking; ticks are kept in this browser per recipe (localStorage, failures ignored), have a visible focus state and 44 px targets, and a "ניקוי סימונים" button clears them
   **And** an unknown id shows "המתכון לא נמצא" with a "חזרה לרשימה" link
   **And** a skeleton shows while loading, and the page renders in under 500 ms locally (NFR-3)
   **And** the route is lazy-loaded in its own chunk (AD-11)
@@ -477,6 +484,8 @@ So that I can cook for any group without doing the maths (FR11).
   **And** "חזרה ל־4" appears only when the value differs from the base, and it restores the base. A reload also returns to the base
   **And** `scaleAmount` and `formatAmount` live in `libs/recipe-domain` with 100% branch coverage. `IngredientLine` uses them for both the amount and any original hint (AD-32, NFR-2)
   **And** while the detail page is open it requests a screen wake lock, and silently ignores a refusal (UX-DR22)
+  **And** `formatAmount` shows common fractions as ½, ⅓, ⅔, ¼ and ¾ (with a whole part, e.g. "1½") when the value is within 0.01 of one, inside `<bdi>`, and otherwise keeps the FR11 decimals; 100% branch coverage includes these cases
+  **And** a "שיתוף" button shares the recipe as plain text through the Web Share API, or copies it to the clipboard when sharing is unavailable, confirming with the toast "הועתק". The text is the title, the ingredients at the current servings, the steps and the page link, in Hebrew, built by one pure function in `libs/recipe-domain` with unit tests
 
 ## Epic 2: Accounts, login and roles
 
@@ -600,9 +609,9 @@ So that my recipes live in one place (FR4).
 
 **Given** I'm signed in as an editor
 **When** I tap "מתכון חדש" (top bar, or "+" on phone)
-**Then** `/recipes/new` shows a form with these fields: title, description, meal type (required select), servings, prep and cook time, source URL (`dir="ltr"`), plus ingredient rows (amount as a number, unit select with Hebrew labels for the `Unit` enum, name, note) and step rows, with add and remove buttons
+**Then** `/recipes/new` shows a form with these fields: title, description, notes (a multi-line textarea, optional, "הערות וטיפים"), each of description and notes with a live character counter against its limit (500 and 5,000), meal type (required select), servings, prep and cook time, source URL (`dir="ltr"`), plus ingredient rows (amount as a number, unit select with Hebrew labels for the `Unit` enum, name, note) and step rows, with add and remove buttons
 **And** the form uses React Hook Form with its own `RecipeFormValues` type and the two mapping functions `toFormValues` and `toWritePayload`, validated by the generated write Zod schema (AD-22)
-**And** `POST /api/recipes` (editor) validates with Pydantic (`extra="forbid"`, at least one ingredient and one step, servings 1–100, title 1–120). It stores amounts quantized to 3 decimals, sets `created_by` and `updated_by` to me, and returns the `RecipeRead` (AD-20, AD-31)
+**And** `POST /api/recipes` (editor) validates with Pydantic (`extra="forbid"`, `description` up to 500 and `notes` up to 5,000 characters, at least one ingredient and one step, servings 1–100, title 1–120). It stores amounts quantized to 3 decimals, sets `created_by` and `updated_by` to me, and returns the `RecipeRead` (AD-20, AD-31)
 **And** invalid input returns 422, and the errors appear on the matching fields, mapped by `loc` and `type` to Hebrew messages (AD-9, AD-28)
 **And** after saving I land on the new recipe's detail page with the toast "המתכון נשמר", and the library list is invalidated (AD-19, UX-DR16)
 **And** the editor empty state in the library shows "מתכון חדש" (UX-DR17)
@@ -710,6 +719,20 @@ So that recipes look appetising in the library and on the detail page (FR4 photo
 **And** `/media/*` is served by FastAPI and is never answered by the SPA fallback. Images are lazy-loaded with width and height set (NFR-11)
 **And** the seed adds openly licensed sample photos with their credits
 
+### Story 3.8: Duplicate a recipe (stretch, can be cut)
+
+As an editor,
+I want to duplicate a recipe and edit the copy,
+So that a variation takes seconds (FR4).
+
+**Acceptance Criteria:**
+
+**Given** a recipe's detail page
+**When** I tap "שכפול"
+**Then** the create form opens prefilled with that recipe's title (with " (עותק)" added), description, notes, meal type, servings, times, ingredients, steps and tags, through router state like the import draft (AD-22), and nothing is saved until "שמירה"
+**And** the copy has no `original` hints, no photo and no `source` values, so it starts clean, and the source URL is kept
+**And** the story is optional: it can be dropped without affecting any other story
+
 ## Epic 4: Organise with meal types and tags
 
 Editors manage the meal-type list and the tags, and everyone can filter the library by tags.
@@ -777,7 +800,9 @@ So that I don't retype recipes by hand (FR18, FR21, FR24).
 **Given** I'm signed in as an editor
 **When** I open "ייבוא", choose the "הדבקת טקסט" tab, paste text and submit (the page lives in a new `libs/feature-import`, tag `type:feature`, as a lazy subpath export; AD-2, AD-11)
 **Then** `POST /api/imports/text` (editor) calls the default provider through the `LlmProvider` registry, which in this story has the `ollama` and `fake` adapters and returns a `DraftRecipe` validated by Pydantic (AD-12, AD-22)
-**And** the draft is in Hebrew (translated if the source is in another language), its units are mapped to the `Unit` enum, unquantifiable ingredients are to-taste, and unmappable units are empty with the original text kept in the note (FR19, FR21)
+**And** the draft is in Hebrew (translated if the source is in another language), its units are mapped to the `Unit` enum, imperial units are converted by the deterministic table (oz→g, lb→g, fl oz→ml, friendly rounding; cups and spoons unchanged) with `source_amount`/`source_unit` kept, unquantifiable ingredients are to-taste, and units that are still unmappable are empty with the original text kept in the note (FR19, FR21)
+**And** a deterministic pass rewrites °F temperatures in the step text to °C, rounded to the nearest 5 (350°F becomes "180°C"), and keeps the unconverted step text as `source_text` for the "הצג מתכון מקורי" toggle; the conversions live in code with unit tests, never in the model's output (FR21)
+**And** the draft's description comes from the source's description when it has one, and its notes stay empty unless the source has notes or tips of its own (FR19)
 **And** the draft pre-picks a meal type and suggests tags, preferring existing ones (FR24)
 **And** the create form opens prefilled through router state (never the URL), via `draftToFormValues()`, and nothing is saved until "שמירה" (AD-22)
 **And** text with no recipe returns `no_recipe_found` ("לא נמצא מתכון בטקסט הזה"), and the text stays for editing

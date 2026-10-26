@@ -36,9 +36,9 @@ Decided: shared libraries live under `libs/` (Adi, 2026-10-26).
 
 ## Draft data model (original PRD, updated for the new requirements)
 
-- **Recipe:** id, title, description?, category, base_servings, prep_time_minutes?, cook_time_minutes?, created_at, updated_at.
-- **Ingredient:** id, recipe_id, position, name, amount? (null = to taste), unit?, note?, **original_amount?**, **original_unit?** (set on first change — FR-7).
-- **InstructionStep:** id, recipe_id, step_number, description.
+- **Recipe:** id, title, description?, notes?, category, base_servings, prep_time_minutes?, cook_time_minutes?, created_at, updated_at.
+- **Ingredient:** id, recipe_id, position, name, amount? (null = to taste), unit?, note?, **original_amount?**, **original_unit?** (set on first change — FR-7), **source_amount?**, **source_unit?** (set only when converted on import — FR-21; separate from the FR-7 original).
+- **InstructionStep:** id, recipe_id, step_number, description, source_text? (the pre-conversion text, set only when an import converted a temperature).
 
 Changes vs. the original: prep/cook time optional; amount optional (to-taste); explicit ingredient position; original-value fields; ID type to be decided in architecture (UUID vs. integer).
 

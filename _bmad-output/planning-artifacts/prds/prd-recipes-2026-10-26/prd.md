@@ -78,9 +78,9 @@ FR IDs are global and stable. Each FR lists its acceptance criteria (AC).
 
 ### Recipe content (applies to F2–F5)
 
-A recipe has: title (required, 1–120 chars), optional description, a meal type (required, exactly one, from an owner-editable list seeded with Breakfast, Brunch, Lunch, Dinner, Dessert, Side, Drink, Other), any number of tags (optional, owner-managed free tags such as "BBQ", "Finger food", "Party"), base servings (required, integer 1–100), optional prep time and cook time (minutes), an optional source URL, an optional photo (one per recipe), an ordered list of ingredients (at least one) and an ordered list of instruction steps (at least one).
+A recipe has: title (required, 1–120 chars), optional description (a short intro, up to 500 chars), optional notes (free multi-line text for tips and personal remarks, up to 5,000 chars), a meal type (required, exactly one, from an owner-editable list seeded with Breakfast, Brunch, Lunch, Dinner, Dessert, Side, Drink, Other), any number of tags (optional, owner-managed free tags such as "BBQ", "Finger food", "Party"), base servings (required, integer 1–100), optional prep time and cook time (minutes), an optional source URL, an optional photo (one per recipe), an ordered list of ingredients (at least one) and an ordered list of instruction steps (at least one).
 
-An ingredient has: name (required), an optional amount (positive number), an optional unit (from a fixed list: g, kg, ml, l, tsp, tbsp, cup, unit, pinch, clove, slice, can, package), and an optional note (e.g. "finely chopped"). An ingredient without an amount is a **to-taste** ingredient (e.g. "Salt — to taste").
+An ingredient has: name (required), an optional amount (positive number), an optional unit (from a fixed list: g, kg, ml, l, tsp, tbsp, cup, unit, pinch, clove, slice, can, package), and an optional note (e.g. "finely chopped"), and, when it was converted on import, its source amount and unit (e.g. 8 oz). An ingredient without an amount is a **to-taste** ingredient (e.g. "Salt — to taste").
 
 ### F1. Recipe library
 
@@ -104,7 +104,7 @@ An ingredient has: name (required), an optional amount (positive number), an opt
 
 ### F3. View recipe
 
-- **FR-5 — Detail page.** Shows all recipe content (including the photo, if any), ingredients in order with amount, unit, name and note, and numbered steps.
+- **FR-5 — Detail page.** Shows all recipe content (including the photo, if any), ingredients in order with amount, unit, name and note, numbered steps, and the recipe's notes in their own section after the steps (line breaks kept) when there are any.
   - AC: To-taste ingredients render as "Salt — to taste".
   - AC: Opening a recipe ID that does not exist shows a not-found page with a link back to the library.
 
@@ -179,12 +179,13 @@ Owner-only (FR-16 applies). Import never saves anything by itself: it produces a
   - AC: The recipe's main photo is taken from the page when available (schema.org `Recipe.image` first, then the page's `og:image`). How photos are stored (local copy vs. link to the source) is decided in the architecture step.
 - **FR-18 — Import from pasted text.** The owner pastes raw recipe text; the LLM extracts a draft recipe in the same format.
   - AC: Text with no recognizable recipe gives "No recipe found in this text" and no draft.
-- **FR-21 — Hebrew drafts.** Imports from pages or text in another language (e.g. English) produce a draft translated to Hebrew (title, description, ingredient names and notes, steps). Amounts and units are preserved and mapped to the app's unit list, and the source URL is kept.
-  - AC: Importing an English recipe yields a Hebrew draft whose amounts and units match the source.
+- **FR-21 — Hebrew drafts.** Imports from pages or text in another language (e.g. English) produce a draft translated to Hebrew (title, description, ingredient names and notes, steps). Amounts and units are mapped to the app's unit list; imperial units (oz, lb, fl oz) are converted to g and ml by a fixed table with friendly rounding (cups and spoons are kept), and the source amount and unit are kept on the ingredient. Fahrenheit temperatures in the steps become Celsius, rounded to 5 ("180°C"), and a converted step keeps its pre-conversion text. A recipe with any converted ingredient or step shows a "הצג מתכון מקורי" toggle (off by default) that reveals the original values. The source URL is kept.
+  - AC: Importing an English recipe yields a Hebrew draft whose amounts and units match the source, with imperial units converted (8 oz becomes 227 g and keeps "8 oz" as its source value).
+  - AC: A step that says "350°F" reads "180°C" in the draft and keeps the original step text; the conversion is deterministic code, not model arithmetic.
 - **FR-19 — Review before save.** A successful import opens the recipe create form (FR-4) pre-filled with the draft; nothing is saved until the owner clicks *Save*.
   - AC: The draft goes through the same validation as FR-4; fields the import could not fill (e.g. meal type, servings) are left empty and flagged for the owner to complete.
   - AC: Ingredients the import could not quantify become to-taste ingredients rather than invented amounts.
-  - AC: Units are mapped to the app's unit list; an unmappable unit is left empty and the original text is kept in the ingredient note.
+  - AC: Units are mapped to the app's unit list, imperial units are converted (FR-21); a unit that is still unmappable is left empty and the original text is kept in the ingredient note.
   - AC: The source URL (if any) is stored with the saved recipe and shown on its detail page as a link.
   - AC: An imported photo is shown in the review form, where the owner can keep or remove it before saving.
   - AC: Cancelling the form discards the draft.
@@ -246,5 +247,5 @@ These are kept so the architecture does not rule them out. None has a committed 
 - **C-1 — Admin-managed accounts.** The first admin is created from the command line; every other account is created by an admin. Visitors are anonymous and read-only. Daily AI import limits are shared by all users.
 - **C-2 — Learning project.** Technology choices favor learning React and FastAPI (Adi's background is Angular / NestJS). The stack and architecture are recorded in `addendum.md` and finalized in the architecture step.
 - **A-1 — Data volume.** At most a few hundred recipes; one embedded database is enough.
-- **A-2 — Units.** A fixed unit list (§6) is enough for the MVP; no unit conversion.
+- **A-2 — Units.** A fixed unit list (§6) is enough for the MVP. The only conversion is on import (FR-21): imperial weights and volumes become g and ml by a fixed table, and the source value is kept for a "show the original recipe" toggle. There is no metric/imperial display setting.
 - **A-3 — Delete is permanent.** No trash or undo in the MVP.

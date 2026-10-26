@@ -66,6 +66,7 @@ development_status:
   3-5-reset-an-ingredient-to-its-original: backlog
   3-6-delete-a-recipe: backlog
   3-7-recipe-photos-upload-replace-remove: backlog
+  3-8-duplicate-a-recipe: backlog # stretch / optional: can be cut without affecting any other story
   epic-3-retrospective: optional
 
   epic-4: backlog

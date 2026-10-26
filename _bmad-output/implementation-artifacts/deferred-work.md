@@ -42,3 +42,9 @@
   summary: Decide how input/control boundaries meet WCAG 1.4.11 (3:1) before Input ships in 1.5 — the DESIGN.md `--border`/`--input` tokens are ~1.25:1 (light) and ~1.46:1 (dark) on the background.
   evidence: Measured from theme.css; DESIGN.md colours are fixed by the 1.4 spec, so changing them (or using a stronger focus/border treatment for inputs) is a design decision.
   resolved: Adi (2026-10-26) — scheduled into Story 1.5 as an AC (stronger `--input` border token, contrast-tested, Storybook preview for approval). Done in Story 1.5: `--input` light `#857f75`, dark `#7a726a`; `theme-contrast.spec.ts` checks 3:1 on background, card and popover; preview story "Foundations / Input border (for approval)".
+- source_spec: `_bmad-output/planning-artifacts/brainstorm-quick-wins.md`
+  summary: Search the library by ingredient names, not only titles (needs ingredient names in `RecipeSummary`, or a server-side search).
+  evidence: Adi (2026-10-26) wants it as a future feature, not now; it changes the summary shape (Story 1.6) and the filter function (Story 1.9), so decide it together with a larger-library plan.
+- source_spec: `_bmad-output/planning-artifacts/brainstorm-quick-wins.md`
+  summary: Open Graph link previews (title and photo when a recipe link is shared in WhatsApp), which needs server-set meta tags per recipe page in the production container.
+  evidence: Adi (2026-10-26) put it in the future; the SPA serves one HTML shell today, so it is a Story 6.x decision.
