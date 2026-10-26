@@ -31,10 +31,14 @@ jobs:
           cache: 'npm'
 
       # Installs the Python from apps/recipe-service/.python-version on first `uv sync`.
-      - uses: astral-sh/setup-uv@v10
+      # setup-uv publishes no moving major tags from v8 on, so pin the release.
+      - uses: astral-sh/setup-uv@v10.3.2
         with:
           enable-cache: true
           cache-dependency-glob: apps/recipe-service/uv.lock
+
+      # Same npm as local development (`packageManager`), not the runner's bundled one.
+      - run: npm install -g "$(node -p "require('./package.json').packageManager")"
 
       - run: npm ci
 
