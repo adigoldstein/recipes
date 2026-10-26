@@ -1,3 +1,17 @@
+# Git rules
+
+- NEVER run `git commit` or `git push` until Adi has reviewed the changes and explicitly approved them. Adi reviews everything first.
+- When work is ready, stop and summarize the changes (e.g. `git status` / `git diff`) for review instead of committing.
+
+# Architecture decisions
+
+- Never make architecture decisions on your own (libraries, folder structure, patterns, service boundaries, state management, DB/schema design, APIs, LLM provider, etc.). Propose options with a recommendation and discuss them with Adi first; implement only after Adi agrees.
+
+# Design system & design tokens
+
+- No hardcoded values: all UI styling must use design tokens defined via the Tailwind CSS and shadcn/ui configuration (semantic colors like `bg-primary`, the spacing scale, typography tokens). No raw hex/rgb colors, arbitrary pixel values, or inline style values.
+- Single source of truth: every shared component in `libs/ui-components` must consume these tokens so the theme can be adjusted in one place.
+
 <!-- nx configuration start-->
 <!-- Leave the start & end comments to automatically receive updates. -->
 

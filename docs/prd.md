@@ -1,4 +1,11 @@
-# 📄 Product Requirement Document (PRD): Bite & Board
+# Product Requirement Document (PRD): Bite & Board
+
+## Key Decision Points (To Decide On-the-Go or Before Implementation)
+
+1. **Client UI State Management (Zustand vs. React Context):** Deferred. Start with standard React hooks / Context for local state. If menu selection or shopping list state becomes complex, introduce `Zustand`.
+2. **Backend Architecture: Single FastAPI App vs. Split `recipe-service` + `ai-service`:** Decide during Phase 1/3. Start with a single FastAPI backend using modular folders, and split into a dedicated `ai-service` app if/when asynchronous AI processing or heavy dependencies warrant it.
+3. **AI LLM Provider (Local Ollama vs. Cloud API):** Deferred. Abstract LLM calls behind a Python `Protocol`/Interface so we can swap between Ollama (`Llama 3`) and Cloud APIs (`Anthropic/OpenAI` via `instructor`) with an environment variable.
+4. **Nx Python Plugin:** Decided: `@nxlv/python` with `uv`.
 
 ## 1. Executive Summary & Vision
 
@@ -90,14 +97,11 @@ bite-and-board/
 
 ### 5.1 Dynamic Portion Scaling (Client-Side)
 
-- **Execution Location:** React Hook / Dumb Component props.
-- **Calculation:**
-
-  $$\text{Scaling Ratio} = \frac{\text{Target Servings}}{\text{Base Servings}}$$
-
-  All ingredient quantities update dynamically in the UI without re-fetching from the server:
-
-  $$\text{Scaled Amount} = \text{Base Amount} \times \text{Scaling Ratio}$$
+- Execution Location: React Hook / Dumb Component props.
+- Calculation:
+  - Scaling Ratio = Target Servings / Base Servings
+  - Scaled Amount = Base Amount × Scaling Ratio
+- All ingredient quantities update dynamically in the UI without re-fetching from the server.
 
 ### 5.2 Event Shopping List Consolidation
 
@@ -106,14 +110,14 @@ bite-and-board/
 
 ### 5.3 AI Recipe Importer
 
-- **Trigger:** User pastes raw text or a recipe URL into the UI.
-- **Process:** The AI module sends raw input to an LLM enforcing structured output via `instructor` / Pydantic schemas.
-- **Output:** Validated JSON matching `Recipe`, `Ingredient`, and `InstructionStep` schemas.
-- **Result:** Direct ingestion into SQLite via FastAPI.
+- Trigger: User pastes raw text or a recipe URL into the UI.
+- Process: The AI module sends raw input to an LLM enforcing structured output via `instructor` / Pydantic schemas.
+- Output: Validated JSON matching `Recipe`, `Ingredient`, and `InstructionStep` schemas.
+- Result: Direct ingestion into SQLite via FastAPI.
 
 ## 6. Implementation Milestones (BMAD Execution Roadmap)
 
-### 🏁 Phase 1: Nx Monorepo & Core Backend Setup (MVP-1)
+### Phase 1: Nx Monorepo & Core Backend Setup (MVP-1)
 
 - [ ] Initialize Nx Workspace with `apps/web` (React + Vite) and `apps/recipe-service` (FastAPI).
 - [ ] Set up SQLite database with SQLModel and Alembic migrations.
@@ -122,33 +126,22 @@ bite-and-board/
 - [ ] Setup OpenAPI TypeScript type generation (`libs/shared-types`).
 - [ ] Create initial seed data script (10 realistic recipes).
 
-### 🎨 Phase 2: Frontend Architecture & UI Features (MVP-2)
+### Phase 2: Frontend Architecture & UI Features (MVP-2)
 
 - [ ] Create `libs/ui-components` for presentational/dumb UI elements.
 - [ ] Build dynamic `PortionSelector` and client-side quantity scaling logic.
 - [ ] Build "Event Menu Planner" container and shopping list aggregation logic.
 - [ ] Implement client-side form validation using `Zod`.
 
-### 🤖 Phase 3: AI Service Integration (MVP-3)
+### Phase 3: AI Service Integration (MVP-3)
 
 - [ ] Establish AI integration layer (either module within `recipe-service` or dedicated `apps/ai-service`).
 - [ ] Connect to LLM provider (Ollama or Cloud API) using `instructor`.
 - [ ] Create AI Recipe Import modal in React (Raw text -> Structured JSON -> Database save).
 - [ ] Implement Smart Ingredient Substitution endpoint.
 
-### 🐳 Phase 4: Containerization & Deployment
+### Phase 4: Containerization & Deployment
 
 - [ ] Author Dockerfiles for React frontend and FastAPI backend.
 - [ ] Configure `docker-compose.yml` for unified local execution with persistent SQLite volumes.
 - [ ] (Optional) Deployment target setup (Railway / Render / Cloud server).
-
-## 7. Key Decision Points (To Decide On-the-Go or Before Implementation)
-
-1. **Client UI State Management (Zustand vs. React Context):**
-   - Status: Deferred. We will start with standard React hooks / Context for local state. If menu selection or shopping list state becomes complex, we can introduce `Zustand`.
-2. **Backend Architecture: Single FastAPI App vs. Split `recipe-service` + `ai-service`:**
-   - Status: Decide during Phase 1/3. In an Nx monorepo, both python apps can exist side-by-side easily. We can start with a single FastAPI backend using modular folders, and split into a dedicated `ai-service` app if/when asynchronous AI processing or heavy dependencies warrant it.
-3. **AI LLM Provider (Local Ollama vs. Cloud API):**
-   - Status: Deferred. We will abstract the LLM calls behind a Python `Protocol`/Interface so we can swap between Ollama (`Llama 3`) and Cloud APIs (`Anthropic/OpenAI` via `instructor`) with an environment variable.
-4. **Nx Python Plugin:**
-   - Status: Decide at Nx setup. We can use `@nargs/nx-python` or `@pygwalker/nx-python` for native Poetry/UV integration, or manage Python virtual environments via simple Nx target commands (`exec`/`run-commands`).
