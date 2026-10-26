@@ -76,3 +76,6 @@ vitest.config.*.timestamp*
 # Test reports
 /reports
 .coverage
+
+# Vitest coverage output
+test-output

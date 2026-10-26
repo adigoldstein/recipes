@@ -21,13 +21,14 @@ companions: []
 
 ## Design Paradigm
 
-**Modular monolith.** There is one FastAPI service and one React SPA, both inside the Nx workspace. The backend is split by **feature module**. Each module is layered `router → service → repository → models/schemas`, much like a NestJS module: router = controller, service = provider, and FastAPI `Depends()` = DI. The frontend splits **containers** (routes, data, side effects) in `apps/web` from **presentational** components in `libs/ui-components`.
+**Modular monolith.** There is one FastAPI service and one React SPA, both inside the Nx workspace. The backend is split by **feature module**. Each module is layered `router → service → repository → models/schemas`, much like a NestJS module: router = controller, service = provider, and FastAPI `Depends()` = DI. The frontend follows Nx's "thin app, thick libs": `apps/web` is only the shell (router, providers, top bar). Each feature's pages and **containers** (routes, data, side effects) live in a `libs/feature-<name>` library, and **presentational** components live in `libs/ui-components`.
 
 ```mermaid
 flowchart LR
   subgraph web[apps/web]
-    routes[routes + containers]
+    shell[shell: router · providers · top bar]
   end
+  feat[libs/feature-*<br/>route pages + containers]
   da[libs/data-access<br/>generated client · query hooks · zod]
   ui[libs/ui-components<br/>presentational · tokens only]
   subgraph api[apps/recipe-service]
@@ -35,8 +36,9 @@ flowchart LR
     r[routers] --> s[services] --> repo[repositories] --> m[models]
     s --> ports[ports: LlmProvider · PhotoStorage]
   end
-  routes --> da
-  routes --> ui
+  shell --> feat
+  feat --> da
+  feat --> ui
   da -- HTTP /api --> r
 ```
 
@@ -52,7 +54,13 @@ flowchart LR
 
 - **Binds:** apps/web, libs/*
 - **Prevents:** presentational components that fetch data, and hand-rolled API calls.
-- **Rule:** `apps/web` may import `libs/data-access` and `libs/ui-components`. `libs/ui-components` imports neither the API nor any global state: props in, callbacks out, design tokens only (DESIGN.md). Every server call goes through `libs/data-access`. Nx module-boundary tags enforce this.
+- **Rule:**
+  - Feature libraries are `libs/feature-recipes` (library, detail, editor), `feature-auth` (login, account), `feature-users`, `feature-tags` and `feature-import`. The first story that needs one creates it.
+  - `apps/web` holds only the shell (router, providers, app-wide layout). It lazy-loads pages from feature libs and may also import `libs/data-access` (the query client provider and the 401 handler), `libs/ui-components` (the shell's own UI) and `libs/recipe-domain`.
+  - A feature lib may import `data-access`, `ui-components` and `recipe-domain`, but never another feature lib.
+  - `libs/ui-components` imports neither the API nor any global state: props in, callbacks out, design tokens only (DESIGN.md).
+  - Every server call goes through `libs/data-access`.
+  - Nx module-boundary tags enforce this.
 
 ### AD-3 — OpenAPI is the only contract [ADOPTED]
 
@@ -126,7 +134,7 @@ flowchart LR
 
 - **Binds:** apps/web, NFR-11
 - **Prevents:** eager bundles that ship editor or import code to visitors.
-- **Rule:** React Router v8 with **lazy** route modules per page (like Angular `loadChildren`). Signed-in routes (edit, new, import, tags, users, account, login) live in their own chunks. The React Compiler is enabled; hand-written `useMemo`/`useCallback` only with a measured reason.
+- **Rule:** React Router v8 with **lazy** route modules per page (like Angular `loadChildren`). Each page is its own subpath export of its feature lib (for example `@bite-and-board/feature-recipes/library`), so lazy-loading one page never pulls in the rest of the lib. Signed-in routes (edit, new, import, tags, users, account, login) live in their own chunks. The React Compiler is enabled; hand-written `useMemo`/`useCallback` only with a measured reason.
 
 ### AD-12 — AI providers behind one port [ADOPTED]
 
@@ -351,7 +359,12 @@ flowchart LR
 - **Rule:**
   - **Python:** mypy (strict, with the pydantic plugin) is the `recipe-service:typecheck` target. import-linter contracts for AD-1 and AD-25 run in `lint`.
   - **Rate limit:** slowapi limits login attempts (in memory, which is fine for one container).
-  - **Frontend boundaries:** Nx tags `type:app`, `type:data-access`, `type:ui` and `type:domain` carry dependency constraints.
+  - **Frontend boundaries:** Nx tags `type:app`, `type:feature`, `type:data-access`, `type:ui` and `type:domain` carry these dependency constraints:
+    - app → feature, data-access, ui, domain
+    - feature → data-access, ui, domain (never another feature)
+    - ui → domain
+    - data-access → nothing
+    - domain → nothing
   - **Styling:** ESLint rules ban physical-direction utilities, arbitrary Tailwind values, hex/rgb literals outside the theme, and the `style` prop in `libs/ui-components`. They also cover jsx-a11y and the React hooks rules version the compiler needs.
   - **Bundle size:** size-limit checks the initial JS (≤ 200 KB gzip) as `web:size` in CI.
   - **Recipe pages:** recipe-scrapers (JSON-LD) and trafilatura (readable text) parse imported pages.
@@ -374,7 +387,7 @@ flowchart LR
 | Timestamps | UTC ISO-8601 (`created_at`, `updated_at`) |
 | Errors | 422 validation; 400 bad input or credentials; 401 no session on a protected call; 403 CSRF or insufficient role; 404 missing; 409 conflict (duplicate tag rename, meal type in use); 413 upload too large; 429 rate limit or import cap; 502/504 provider failure or timeout. Body shape per AD-28 |
 | Python naming | modules `snake_case`; schemas `RecipeCreate / RecipeRead / RecipeUpdate` |
-| TS naming | components `PascalCase.tsx`; hooks `useX`; route modules `routes/<page>.tsx` |
+| TS naming | components `PascalCase.tsx`; hooks `useX`; route modules `libs/feature-<name>/src/routes/<page>.tsx` |
 | Config | env vars only, read once in `app/core/config` (pydantic-settings); no secrets in the repo |
 | Styling | design tokens only (CLAUDE.md, NFR-7) |
 
@@ -421,13 +434,15 @@ erDiagram
 ```text
 apps/
   web/src/
-    routes/            # lazy page modules (library, recipe, edit, import, tags, login)
-    app/               # providers: query client, router, i18n, theme, auth context
+    app/               # shell only: router, providers (query client, i18n, theme, auth context), top bar
   recipe-service/app/
     core/              # config, db, errors, security
     recipes/ tags/ auth/ users/ imports/ photos/   # each: router.py service.py repository.py models.py schemas.py
     imports/providers/ # ollama.py gemini.py fake.py registry.py
 libs/
+  feature-recipes/     # pages + containers: library, detail, editor (src/routes/<page>.tsx)
+  feature-auth/        # login, account
+  feature-users/ feature-tags/ feature-import/
   data-access/         # generated client + hooks + zod, query keys
   ui-components/       # shadcn-based presentational components, tokens only
   recipe-domain/       # pure TS: scale, format, parse, filter (AD-32)
@@ -437,13 +452,13 @@ libs/
 
 | Capability | Lives in | Governed by |
 | --- | --- | --- |
-| F1 library, search, filters | web routes/library · recipes.router | AD-8, AD-7 |
-| F2–F5 recipe CRUD | recipes module · web routes | AD-1, AD-4, AD-9 |
+| F1 library, search, filters | libs/feature-recipes · recipes.router | AD-8, AD-7 |
+| F2–F5 recipe CRUD | recipes module · libs/feature-recipes | AD-1, AD-4, AD-9 |
 | F4 original-value hints | recipes.service | AD-4 |
 | F6 scaling | libs/recipe-domain | AD-31, AD-32 |
-| F8 users, roles, login | auth + users modules | AD-6, AD-21, AD-30 |
-| F9 AI import | imports module + providers | AD-12, AD-13 |
-| F10 meal types & tags | tags module | AD-7 |
+| F8 users, roles, login | auth + users modules · libs/feature-auth, libs/feature-users | AD-6, AD-21, AD-30 |
+| F9 AI import | imports module + providers · libs/feature-import | AD-12, AD-13 |
+| F10 meal types & tags | tags module · libs/feature-tags | AD-7 |
 | Photos | photos module | AD-14 |
 | NFR-6 one-command run | compose + nx dev target | AD-15, AD-18 |
 | NFR-1/2 quality, CI | all projects | AD-16, AD-17 |

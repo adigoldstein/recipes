@@ -9,6 +9,11 @@ export default defineConfig(() => ({
   server: {
     port: 4200,
     host: 'localhost',
+    // Same origin in dev as in prod, so the auth cookie needs no CORS setup.
+    proxy: {
+      '/api/': 'http://localhost:8000',
+      '/media/': 'http://localhost:8000',
+    },
   },
   preview: {
     port: 4300,

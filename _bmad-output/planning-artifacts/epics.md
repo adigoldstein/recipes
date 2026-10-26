@@ -101,6 +101,7 @@ From ARCHITECTURE-SPINE.md (AD-1 to AD-33). There is **no starter template**: th
   - The pipeline is safe fetch, then JSON-LD (recipe-scrapers), then readable text (trafilatura), then the LLM. `core/safe_fetch` handles every outbound URL (AD-13, AD-23).
   - The draft reaches the form through router state only, with `missing_fields` (AD-22).
 - **Spike before the import feature:** compare Ollama and Gemini on about 5 real recipes (2 English, 3 Hebrew) for time and Hebrew quality, then confirm the default provider. Ollama runs as the native Windows app.
+- Frontend shape: "thin app, thick libs". `apps/web` is only the shell (router, providers, top bar). Pages and containers live in feature libs `libs/feature-{recipes,auth,users,tags,import}` (tag `type:feature`, never importing each other), and each feature lib is created by the first story that needs it (AD-2).
 - Frontend stack: React Router 8 lazy routes, TanStack Query, React Hook Form + Zod with `RecipeFormValues` and two mapping functions, i18next (`he.json`), and the React Compiler through the Babel plugin (AD-8 to AD-11, AD-22, AD-33).
 - Enforcement: mypy strict, import-linter, ESLint rules (no physical-direction utilities, arbitrary values, hex colours or the `style` prop in ui-components; jsx-a11y), and size-limit as the `web:size` target (AD-33).
 - Packaging: one container serves the SPA, `/api` and `/media` with a `/data` volume. `docker compose up` runs it locally. The SPA fallback excludes `/api` and `/media`, and there's a HEALTHCHECK (AD-15, AD-29).
@@ -269,7 +270,7 @@ So that every later frontend story lands in the right place and respects the bou
 **Given** `apps/web` with the Nx welcome page and `react-router-dom@6.30.3`
 **When** the story is done
 **Then** `react-router-dom` is replaced by `react-router@8` (data mode, lazy route modules), and the Nx welcome component is removed
-**And** the libs `data-access`, `ui-components` and `recipe-domain` exist with the Nx tags `type:app`, `type:data-access`, `type:ui` and `type:domain`, and `depConstraints` enforce AD-2 and AD-32 (a forbidden import fails `nx lint`)
+**And** the shared libs `data-access`, `ui-components` and `recipe-domain` exist (non-buildable, consumed from source) with the Nx tags `type:data-access`, `type:ui` and `type:domain`, `apps/web` is tagged `type:app`, and `depConstraints` enforce AD-2, AD-32 and AD-33, including the `type:feature` rules for the feature libs that later stories create (a forbidden import fails `nx lint`)
 **And** a root `npm run dev` starts web and API together (Story 1.1), with Vite proxying `/api` and `/media` to FastAPI (AD-15)
 **And** a placeholder home route renders through the router
 **And** `nx run-many -t lint test build` passes
@@ -387,6 +388,7 @@ So that I can quickly find what to cook (FR1, FR2, FR3).
 **Given** the seeded recipes
 **When** I open `/`
 **Then** I see `RecipeCard`s, newest first: 1 column on phone, 2 from `sm`, 3 from `lg` (UX-DR6, UX-DR7, UX-DR20). Each card is a board with the slot, title, meal type, up to 3 tags and total time, with a larger title when there is no photo
+**And** the page lives in a new `libs/feature-recipes` (tag `type:feature`) as the lazy subpath export `@bite-and-board/feature-recipes/library`, replacing the placeholder home route in `apps/web` (AD-2, AD-11)
 **And** while loading I see 6 skeleton cards. With no recipes I see the visitor empty state "עוד אין כאן מתכונים" (UX-DR17)
 
 **Given** the library
@@ -472,6 +474,7 @@ So that I get my editing controls only when I'm signed in (FR14, FR15).
 **Given** an active user exists
 **When** I submit correct credentials on `/login`
 **Then** `POST /api/auth/login` sets a signed JWT in an `httpOnly; SameSite=Lax` cookie (with `Secure` per `COOKIE_SECURE`) that expires after 7 days, and I'm sent to `?next=` or to `/` (AD-6, AD-21)
+**And** the `/login` page lives in a new `libs/feature-auth` (tag `type:feature`) as a lazy subpath export (AD-2, AD-11)
 **And** `GET /api/auth/session` (public) always returns 200 `{user: {id, email, name, role} | null}`, and the app's auth context reads it through the generated hook
 **And** wrong credentials return 400 `invalid_credentials`, and the form shows "אימייל או סיסמה שגויים" without revealing which field was wrong
 **And** a 6th attempt within a minute from the same client returns 429, and the form shows "יותר מדי ניסיונות. אפשר לנסות שוב בעוד דקה." (slowapi, NFR-10)
@@ -509,6 +512,7 @@ So that my partner or friends can edit recipes (FR25).
 **Given** I'm signed in as admin
 **When** I open "משתמשים" from the account menu
 **Then** `/users` lists users (name, email, role, blocked state) from `GET /api/users` (admin only) (UX-DR19)
+**And** the page lives in a new `libs/feature-users` (tag `type:feature`) as a lazy subpath export (AD-2, AD-11)
 **And** "הוספת משתמש" opens a form for email, name, role (עורך/מנהל) and a starting password with confirmation, and `POST /api/users` creates the user
 **And** a duplicate email (compared without case) returns 409 `email_taken`, shown on the email field
 **And** a starting password shorter than 8 characters is rejected on the client and the server
@@ -685,6 +689,7 @@ So that my categories stay tidy (FR23).
 **Given** I'm signed in as an editor
 **When** I open "תגיות וסוגי ארוחה" from the account menu
 **Then** `/tags` shows two lists, meal types and tags, each with inline rename and add (UX-DR18)
+**And** the page lives in a new `libs/feature-tags` (tag `type:feature`) as a lazy subpath export (AD-2, AD-11)
 **And** renaming updates every recipe that uses it, and a duplicate name (after normalization) returns 409 `tag_name_taken`
 **And** deleting a tag opens a confirm dialog with its usage count ("התגית משויכת ל־7 מתכונים"), and confirming detaches it from all recipes
 **And** deleting a meal type that recipes use returns 409 `meal_type_in_use` with the count in `params`, and the UI explains it. An unused meal type can be deleted
@@ -734,7 +739,7 @@ So that I don't retype recipes by hand (FR18, FR21, FR24).
 **Acceptance Criteria:**
 
 **Given** I'm signed in as an editor
-**When** I open "ייבוא", choose the "הדבקת טקסט" tab, paste text and submit
+**When** I open "ייבוא", choose the "הדבקת טקסט" tab, paste text and submit (the page lives in a new `libs/feature-import`, tag `type:feature`, as a lazy subpath export; AD-2, AD-11)
 **Then** `POST /api/imports/text` (editor) calls the default provider through the `LlmProvider` registry, which in this story has the `ollama` and `fake` adapters and returns a `DraftRecipe` validated by Pydantic (AD-12, AD-22)
 **And** the draft is in Hebrew (translated if the source is in another language), its units are mapped to the `Unit` enum, unquantifiable ingredients are to-taste, and unmappable units are empty with the original text kept in the note (FR19, FR21)
 **And** the draft pre-picks a meal type and suggests tags, preferring existing ones (FR24)

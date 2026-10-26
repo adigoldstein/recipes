@@ -22,8 +22,49 @@ export default [
           allow: ['^.*/eslint(\\.base)?\\.config\\.[cm]?[jt]s$'],
           depConstraints: [
             {
-              sourceTag: '*',
-              onlyDependOnLibsWithTags: ['*'],
+              sourceTag: 'type:app',
+              onlyDependOnLibsWithTags: [
+                'type:feature',
+                'type:data-access',
+                'type:ui',
+                'type:domain',
+              ],
+            },
+            {
+              sourceTag: 'type:feature',
+              onlyDependOnLibsWithTags: [
+                'type:data-access',
+                'type:ui',
+                'type:domain',
+              ],
+            },
+            {
+              sourceTag: 'type:ui',
+              onlyDependOnLibsWithTags: ['type:domain'],
+              // Presentational only: no server state, API client or routing.
+              bannedExternalImports: [
+                '@tanstack/*',
+                '@hey-api/*',
+                'react-router',
+                'react-router/*',
+                'react-router-*',
+              ],
+            },
+            {
+              sourceTag: 'type:data-access',
+              onlyDependOnLibsWithTags: [],
+            },
+            {
+              sourceTag: 'type:domain',
+              onlyDependOnLibsWithTags: [],
+              // Pure TypeScript: no React and no IO.
+              bannedExternalImports: [
+                'react',
+                'react/*',
+                'react-*',
+                '@tanstack/*',
+                '@hey-api/*',
+              ],
             },
           ],
         },

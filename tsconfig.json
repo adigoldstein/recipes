@@ -5,6 +5,15 @@
   "references": [
     {
       "path": "./apps/web"
+    },
+    {
+      "path": "./libs/recipe-domain"
+    },
+    {
+      "path": "./libs/data-access"
+    },
+    {
+      "path": "./libs/ui-components"
     }
   ],
   "compilerOptions": {}
