@@ -13,6 +13,7 @@
     "@nx/vite": "24.0.0",
     "@nx/vitest": "24.0.0",
     "@nx/web": "24.0.0",
+    "@nxlv/python": "^23.3.1",
     "@swc-node/register": "1.11.1",
     "@swc/cli": "~0.8.1",
     "@swc/core": "1.15.8",
@@ -43,7 +44,7 @@
   },
   "workspaces": [
     "apps/*",
-    "packages/*"
+    "libs/*"
   ],
   "packageManager": "npm@12.1.0",
   "dependencies": {

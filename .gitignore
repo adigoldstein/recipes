@@ -71,3 +71,7 @@ __pycache__/
 vite.config.*.timestamp*
 vitest.config.*.timestamp*
 .vitest
+
+# Test reports
+/reports
+.coverage
