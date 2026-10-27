@@ -1,196 +1,278 @@
 <!doctype html>
 <html lang="he" dir="rtl">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>מדריך ה-Backend של ביס וסיר</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #fbfaf7;
-    --surface: #ffffff;
-    --text: #1f2328;
-    --muted: #5b6470;
-    --accent: #b4532a;
-    --accent-soft: #f6e6dc;
-    --border: #e4e0d8;
-    --code-bg: #f3f1ec;
-    --code-text: #1f2328;
-    --mono: ui-monospace, "Cascadia Code", Consolas, "Courier New", monospace;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --bg: #161718;
-      --surface: #1e2022;
-      --text: #e8e6e1;
-      --muted: #a4a9b0;
-      --accent: #f09a6e;
-      --accent-soft: #3a2a22;
-      --border: #32353a;
-      --code-bg: #111213;
-      --code-text: #e8e6e1;
-    }
-  }
-  :root[data-theme="dark"] {
-    --bg: #161718;
-    --surface: #1e2022;
-    --text: #e8e6e1;
-    --muted: #a4a9b0;
-    --accent: #f09a6e;
-    --accent-soft: #3a2a22;
-    --border: #32353a;
-    --code-bg: #111213;
-    --code-text: #e8e6e1;
-  }
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>מדריך ה-Backend של ביס וסיר</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #fbfaf7;
+        --surface: #ffffff;
+        --text: #1f2328;
+        --muted: #5b6470;
+        --accent: #b4532a;
+        --accent-soft: #f6e6dc;
+        --border: #e4e0d8;
+        --code-bg: #f3f1ec;
+        --code-text: #1f2328;
+        --mono:
+          ui-monospace, 'Cascadia Code', Consolas, 'Courier New', monospace;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme='light']) {
+          --bg: #161718;
+          --surface: #1e2022;
+          --text: #e8e6e1;
+          --muted: #a4a9b0;
+          --accent: #f09a6e;
+          --accent-soft: #3a2a22;
+          --border: #32353a;
+          --code-bg: #111213;
+          --code-text: #e8e6e1;
+        }
+      }
+      :root[data-theme='dark'] {
+        --bg: #161718;
+        --surface: #1e2022;
+        --text: #e8e6e1;
+        --muted: #a4a9b0;
+        --accent: #f09a6e;
+        --accent-soft: #3a2a22;
+        --border: #32353a;
+        --code-bg: #111213;
+        --code-text: #e8e6e1;
+      }
 
-  * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
-  body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--text);
-    font-family: "Rubik", system-ui, sans-serif;
-    line-height: 1.7;
-  }
-  .layout {
-    display: grid;
-    grid-template-columns: 260px 1fr;
-    gap: 32px;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 24px 16px;
-  }
-  nav.toc {
-    position: sticky;
-    top: 16px;
-    align-self: start;
-    max-height: calc(100vh - 32px);
-    overflow-y: auto;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px;
-  }
-  nav.toc h2 { font-size: 1rem; margin: 0 0 8px; }
-  nav.toc ol { margin: 0; padding-inline-start: 20px; font-size: 0.95rem; }
-  nav.toc li { margin: 4px 0; }
-  nav.toc a { color: var(--text); text-decoration: none; }
-  nav.toc a:hover { color: var(--accent); }
-  main { min-width: 0; }
-  header.hero {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 24px;
-    margin-bottom: 24px;
-  }
-  header.hero h1 { margin: 0 0 8px; font-size: 1.9rem; }
-  header.hero p { margin: 0; color: var(--muted); }
-  section {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 24px;
-    margin-bottom: 24px;
-    scroll-margin-top: 16px;
-  }
-  section h2 { margin: 0 0 4px; font-size: 1.4rem; color: var(--accent); }
-  section .he-sub { margin: 0 0 16px; color: var(--muted); font-size: 0.95rem; }
-  h3 { font-size: 1.1rem; margin: 24px 0 8px; }
-  p { margin: 8px 0; }
-  code {
-    font-family: var(--mono);
-    font-size: 0.9em;
-    background: var(--code-bg);
-    color: var(--code-text);
-    padding: 1px 6px;
-    border-radius: 6px;
-    direction: ltr;
-    unicode-bidi: isolate;
-    overflow-wrap: anywhere;
-  }
-  pre {
-    font-family: var(--mono);
-    font-size: 0.88rem;
-    background: var(--code-bg);
-    color: var(--code-text);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 14px;
-    overflow-x: auto;
-    direction: ltr;
-    text-align: left;
-    line-height: 1.5;
-  }
-  pre.diagram { font-size: 0.85rem; }
-  .table-wrap { overflow-x: auto; }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.95rem;
-    margin: 12px 0;
-  }
-  th, td {
-    border: 1px solid var(--border);
-    padding: 8px 10px;
-    text-align: start;
-    vertical-align: top;
-  }
-  th { background: var(--accent-soft); }
-  .tip {
-    border-inline-start: 4px solid var(--accent);
-    background: var(--accent-soft);
-    padding: 10px 14px;
-    border-radius: 8px;
-    margin: 12px 0;
-  }
-  .steps { padding-inline-start: 22px; }
-  .steps li { margin: 10px 0; }
-  .ltr { direction: ltr; unicode-bidi: isolate; display: inline-block; }
-  bdi { unicode-bidi: isolate; }
-  @media (max-width: 860px) {
-    .layout { grid-template-columns: 1fr; padding: 12px; gap: 16px; }
-    nav.toc { position: static; max-height: none; }
-    header.hero h1 { font-size: 1.5rem; }
-  }
-</style>
-</head>
-<body>
-<div class="layout">
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: 'Rubik', system-ui, sans-serif;
+        line-height: 1.7;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: 260px 1fr;
+        gap: 32px;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 24px 16px;
+      }
+      nav.toc {
+        position: sticky;
+        top: 16px;
+        align-self: start;
+        max-height: calc(100vh - 32px);
+        overflow-y: auto;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px;
+      }
+      nav.toc h2 {
+        font-size: 1rem;
+        margin: 0 0 8px;
+      }
+      nav.toc ol {
+        margin: 0;
+        padding-inline-start: 20px;
+        font-size: 0.95rem;
+      }
+      nav.toc li {
+        margin: 4px 0;
+      }
+      nav.toc a {
+        color: var(--text);
+        text-decoration: none;
+      }
+      nav.toc a:hover {
+        color: var(--accent);
+      }
+      main {
+        min-width: 0;
+      }
+      header.hero {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 24px;
+      }
+      header.hero h1 {
+        margin: 0 0 8px;
+        font-size: 1.9rem;
+      }
+      header.hero p {
+        margin: 0;
+        color: var(--muted);
+      }
+      section {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 24px;
+        scroll-margin-top: 16px;
+      }
+      section h2 {
+        margin: 0 0 4px;
+        font-size: 1.4rem;
+        color: var(--accent);
+      }
+      section .he-sub {
+        margin: 0 0 16px;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+      h3 {
+        font-size: 1.1rem;
+        margin: 24px 0 8px;
+      }
+      p {
+        margin: 8px 0;
+      }
+      code {
+        font-family: var(--mono);
+        font-size: 0.9em;
+        background: var(--code-bg);
+        color: var(--code-text);
+        padding: 1px 6px;
+        border-radius: 6px;
+        direction: ltr;
+        unicode-bidi: isolate;
+        overflow-wrap: anywhere;
+      }
+      pre {
+        font-family: var(--mono);
+        font-size: 0.88rem;
+        background: var(--code-bg);
+        color: var(--code-text);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px;
+        overflow-x: auto;
+        direction: ltr;
+        text-align: left;
+        line-height: 1.5;
+      }
+      pre.diagram {
+        font-size: 0.85rem;
+      }
+      .table-wrap {
+        overflow-x: auto;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.95rem;
+        margin: 12px 0;
+      }
+      th,
+      td {
+        border: 1px solid var(--border);
+        padding: 8px 10px;
+        text-align: start;
+        vertical-align: top;
+      }
+      th {
+        background: var(--accent-soft);
+      }
+      .tip {
+        border-inline-start: 4px solid var(--accent);
+        background: var(--accent-soft);
+        padding: 10px 14px;
+        border-radius: 8px;
+        margin: 12px 0;
+      }
+      .steps {
+        padding-inline-start: 22px;
+      }
+      .steps li {
+        margin: 10px 0;
+      }
+      .ltr {
+        direction: ltr;
+        unicode-bidi: isolate;
+        display: inline-block;
+      }
+      bdi {
+        unicode-bidi: isolate;
+      }
+      @media (max-width: 860px) {
+        .layout {
+          grid-template-columns: 1fr;
+          padding: 12px;
+          gap: 16px;
+        }
+        nav.toc {
+          position: static;
+          max-height: none;
+        }
+        header.hero h1 {
+          font-size: 1.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <nav class="toc" aria-label="תוכן עניינים">
+        <h2>תוכן עניינים</h2>
+        <p style="margin: 0 0 8px">
+          <a href="#core"><strong>★ הליבה: 5 רעיונות</strong></a>
+        </p>
+        <ol>
+          <li><a href="#big-picture">1. התמונה הגדולה</a></li>
+          <li>
+            <a href="#cheatsheet">2. מילון מהיר Angular/Nest ↔ FastAPI</a>
+          </li>
+          <li><a href="#walkthrough">3. בקשה אחת, צעד אחר צעד</a></li>
+          <li><a href="#folders">4. סיור בתיקיות</a></li>
+          <li><a href="#startup">5. מה קורה בהפעלה</a></li>
+          <li><a href="#data-model">6. מודל הנתונים</a></li>
+          <li><a href="#python">7. תחביר Python שתפגשו</a></li>
+          <li><a href="#tests">8. בדיקות</a></li>
+          <li><a href="#run">9. הרצה והתנסות</a></li>
+          <li><a href="#glossary">10. מילון מונחים</a></li>
+        </ol>
+      </nav>
 
-<nav class="toc" aria-label="תוכן עניינים">
-  <h2>תוכן עניינים</h2>
-  <p style="margin:0 0 8px"><a href="#core"><strong>★ הליבה: 5 רעיונות</strong></a></p>
-  <ol>
-    <li><a href="#big-picture">1. התמונה הגדולה</a></li>
-    <li><a href="#cheatsheet">2. מילון מהיר Angular/Nest ↔ FastAPI</a></li>
-    <li><a href="#walkthrough">3. בקשה אחת, צעד אחר צעד</a></li>
-    <li><a href="#folders">4. סיור בתיקיות</a></li>
-    <li><a href="#startup">5. מה קורה בהפעלה</a></li>
-    <li><a href="#data-model">6. מודל הנתונים</a></li>
-    <li><a href="#python">7. תחביר Python שתפגשו</a></li>
-    <li><a href="#tests">8. בדיקות</a></li>
-    <li><a href="#run">9. הרצה והתנסות</a></li>
-    <li><a href="#glossary">10. מילון מונחים</a></li>
-  </ol>
-</nav>
+      <main>
+        <header class="hero">
+          <h1>מדריך ה-Backend של ביס וסיר</h1>
+          <p>
+            המדריך מיועד למפתח Frontend (Angular / Nest בסיסי) שלומד FastAPI. כל
+            הקטעים מבוססים על הקוד האמיתי ב-<code>apps/recipe-service</code>.
+            שמות קבצים, פונקציות וקטעי קוד מופיעים באנגלית כמו שהם בקוד.
+          </p>
+        </header>
 
-<main>
+        <section id="core">
+          <h2>★ הליבה: 5 רעיונות</h2>
+          <p class="he-sub">
+            זו הקריאה של 15 דקות. שאר המדריך הוא חומר עזר: חוזרים אליו כשסטורי
+            נוגע בנושא.
+          </p>
 
-<header class="hero">
-  <h1>מדריך ה-Backend של ביס וסיר</h1>
-  <p>המדריך מיועד למפתח Frontend (Angular / Nest בסיסי) שלומד FastAPI. כל הקטעים מבוססים על הקוד האמיתי ב-<code>apps/recipe-service</code>. שמות קבצים, פונקציות וקטעי קוד מופיעים באנגלית כמו שהם בקוד.</p>
-</header>
-
-<section id="core">
-  <h2>★ הליבה: 5 רעיונות</h2>
-  <p class="he-sub">זו הקריאה של 15 דקות. שאר המדריך הוא חומר עזר: חוזרים אליו כשסטורי נוגע בנושא.</p>
-
-  <h3>1. בקשה עוברת <code>router → service → repository</code></h3>
-  <p>ה-router מקבל בקשת HTTP ולא מחליט כלום. ה-service מכיל את ההחלטות (למשל "אין מתכון כזה, זו שגיאה"). ה-repository הוא היחיד ששואל את מסד הנתונים. זה כמו controller → service → data access ב-Nest.</p>
-<pre>
+          <h3>1. בקשה עוברת <code>router → service → repository</code></h3>
+          <p>
+            ה-router מקבל בקשת HTTP ולא מחליט כלום. ה-service מכיל את ההחלטות
+            (למשל "אין מתכון כזה, זו שגיאה"). ה-repository הוא היחיד ששואל את
+            מסד הנתונים. זה כמו controller → service → data access ב-Nest.
+          </p>
+          <pre>
 # apps/recipe-service/app/recipes/router.py
 @router.get("/{recipe_id}", responses={404: {"model": ErrorResponse}})
 def get_recipe(recipe_id: uuid.UUID, service: ServiceDep) -> RecipeRead:
@@ -202,9 +284,14 @@ if recipe is None:
     raise AppError(404, ErrorCode.RECIPE_NOT_FOUND, "Recipe not found")
 </pre>
 
-  <h3>2. <code>Depends</code> הוא כמו <code>inject()</code></h3>
-  <p>פרמטר עם <code>Depends</code> אומר ל-FastAPI: "תכין את זה בשבילי ותעביר לפונקציה". כך ה-endpoint מקבל service מוכן, שמקבל repository, שמקבל Session של מסד הנתונים. אין <code>new</code> ידני, בדיוק כמו הזרקה ב-Angular.</p>
-<pre>
+          <h3>2. <code>Depends</code> הוא כמו <code>inject()</code></h3>
+          <p>
+            פרמטר עם <code>Depends</code> אומר ל-FastAPI: "תכין את זה בשבילי
+            ותעביר לפונקציה". כך ה-endpoint מקבל service מוכן, שמקבל repository,
+            שמקבל Session של מסד הנתונים. אין <code>new</code> ידני, בדיוק כמו
+            הזרקה ב-Angular.
+          </p>
+          <pre>
 # apps/recipe-service/app/recipes/router.py
 ServiceDep = Annotated[RecipeService, Depends(get_recipe_service)]
 
@@ -216,9 +303,14 @@ def get_recipe_service(
     return RecipeService(RecipeRepository(session), tags)
 </pre>
 
-  <h3>3. מודלים של Pydantic הם DTOs</h3>
-  <p>מחלקה ב-<code>schemas.py</code> מתארת את צורת ה-JSON שיוצא או נכנס. FastAPI מאמת לפיה את הקלט, ומסנן לפיה את הפלט: מה שלא מופיע בה לא נשלח ללקוח. זה כמו DTO עם class-validator ב-Nest, וגם כמו ה-interface שהיית כותב ב-TypeScript.</p>
-<pre>
+          <h3>3. מודלים של Pydantic הם DTOs</h3>
+          <p>
+            מחלקה ב-<code>schemas.py</code> מתארת את צורת ה-JSON שיוצא או נכנס.
+            FastAPI מאמת לפיה את הקלט, ומסנן לפיה את הפלט: מה שלא מופיע בה לא
+            נשלח ללקוח. זה כמו DTO עם class-validator ב-Nest, וגם כמו
+            ה-interface שהיית כותב ב-TypeScript.
+          </p>
+          <pre>
 # apps/recipe-service/app/recipes/schemas.py
 class RecipeSummary(BaseModel):
     id: uuid.UUID
@@ -229,9 +321,13 @@ class RecipeSummary(BaseModel):
     created_at: datetime
 </pre>
 
-  <h3>4. טבלאות SQLModel הן entities, ונפרדות מה-DTOs</h3>
-  <p>מחלקה עם <code>table=True</code> ב-<code>models.py</code> היא טבלה במסד הנתונים, כמו entity ב-TypeORM. היא לא נשלחת ללקוח ישירות: ה-service ממיר אותה ל-DTO. כך שינוי בטבלה לא שובר את ה-API, ולהפך.</p>
-<pre>
+          <h3>4. טבלאות SQLModel הן entities, ונפרדות מה-DTOs</h3>
+          <p>
+            מחלקה עם <code>table=True</code> ב-<code>models.py</code> היא טבלה
+            במסד הנתונים, כמו entity ב-TypeORM. היא לא נשלחת ללקוח ישירות:
+            ה-service ממיר אותה ל-DTO. כך שינוי בטבלה לא שובר את ה-API, ולהפך.
+          </p>
+          <pre>
 # apps/recipe-service/app/recipes/models.py
 class Recipe(SQLModel, table=True):
     __tablename__ = "recipe"
@@ -243,9 +339,13 @@ class Recipe(SQLModel, table=True):
     created_by: uuid.UUID | None = None   # נשמר בטבלה, לא נחשף ב-RecipeRead
 </pre>
 
-  <h3>5. בדיקה קוראת ל-API כמו לקוח ובודקת את ה-JSON</h3>
-  <p>בדיקה ב-pytest שולחת בקשת HTTP לאפליקציה (בלי לפתוח פורט) ובודקת את הסטטוס והגוף. כמו supertest ב-Nest. ה-<code>client</code> מגיע כפרמטר, ו-pytest מזריק אותו.</p>
-<pre>
+          <h3>5. בדיקה קוראת ל-API כמו לקוח ובודקת את ה-JSON</h3>
+          <p>
+            בדיקה ב-pytest שולחת בקשת HTTP לאפליקציה (בלי לפתוח פורט) ובודקת את
+            הסטטוס והגוף. כמו supertest ב-Nest. ה-<code>client</code> מגיע
+            כפרמטר, ו-pytest מזריק אותו.
+          </p>
+          <pre>
 # apps/recipe-service/tests/test_recipes_api.py
 def test_unknown_recipe_is_404_with_a_code(client: TestClient) -> None:
     response = client.get(f"/api/recipes/{uuid.uuid4()}")
@@ -253,13 +353,13 @@ def test_unknown_recipe_is_404_with_a_code(client: TestClient) -> None:
     assert response.json() == {"detail": "Recipe not found", "code": "recipe_not_found"}
 </pre>
 
-  <div class="tip">הכי טוב ללמוד: להריץ את השרת ולשחק ב-/docs</div>
-</section>
+          <div class="tip">הכי טוב ללמוד: להריץ את השרת ולשחק ב-/docs</div>
+        </section>
 
-<section id="big-picture">
-  <h2>1. התמונה הגדולה</h2>
-  <p class="he-sub">איך בקשה מהדפדפן מגיעה למסד הנתונים.</p>
-  <pre class="diagram">
+        <section id="big-picture">
+          <h2>1. התמונה הגדולה</h2>
+          <p class="he-sub">איך בקשה מהדפדפן מגיעה למסד הנתונים.</p>
+          <pre class="diagram">
   Browser (React SPA)
         │  GET /api/recipes/{id}
         ▼
@@ -286,49 +386,159 @@ def test_unknown_recipe_is_404_with_a_code(client: TestClient) -> None:
         ▼
   SQLite file  apps/recipe-service/data/app.db
   </pre>
-  <ul>
-    <li><strong>Browser</strong> – ה-SPA שלכם. הוא פשוט עושה <code>fetch('/api/...')</code>.</li>
-    <li><strong>Vite proxy</strong> – בפיתוח, Vite מעביר כל בקשה שמתחילה ב-<code>/api/</code> לשרת ה-FastAPI בפורט 8000 (<code>apps/web/vite.config.mts</code>). כך הדפדפן רואה מקור (origin) אחד, והעוגייה של ההתחברות עובדת בלי CORS.</li>
-    <li><strong>uvicorn</strong> – שרת ה-HTTP של Python. תפקידו דומה לשרת ה-HTTP של Node ש-Express רץ עליו: הוא מאזין לפורט ומעביר כל בקשה ל-FastAPI.</li>
-    <li><strong>FastAPI app</strong> – האובייקט <code>app</code> ב-<code>app/main.py</code>. הוא מכיל את כל ה-routes ואת ה-error handlers.</li>
-    <li><strong>router → service → repository</strong> – שלוש שכבות בכל מודול (AD-1). ה-router מדבר HTTP, ה-service מחליט, וה-repository שולף נתונים.</li>
-    <li><strong>SQLite</strong> – קובץ אחד על הדיסק. אין שרת מסד נתונים נפרד.</li>
-  </ul>
-</section>
+          <ul>
+            <li>
+              <strong>Browser</strong> – ה-SPA שלכם. הוא פשוט עושה
+              <code>fetch('/api/...')</code>.
+            </li>
+            <li>
+              <strong>Vite proxy</strong> – בפיתוח, Vite מעביר כל בקשה שמתחילה
+              ב-<code>/api/</code> לשרת ה-FastAPI בפורט 8000
+              (<code>apps/web/vite.config.mts</code>). כך הדפדפן רואה מקור
+              (origin) אחד, והעוגייה של ההתחברות עובדת בלי CORS.
+            </li>
+            <li>
+              <strong>uvicorn</strong> – שרת ה-HTTP של Python. תפקידו דומה לשרת
+              ה-HTTP של Node ש-Express רץ עליו: הוא מאזין לפורט ומעביר כל בקשה
+              ל-FastAPI.
+            </li>
+            <li>
+              <strong>FastAPI app</strong> – האובייקט
+              <code>app</code> ב-<code>app/main.py</code>. הוא מכיל את כל
+              ה-routes ואת ה-error handlers.
+            </li>
+            <li>
+              <strong>router → service → repository</strong> – שלוש שכבות בכל
+              מודול (AD-1). ה-router מדבר HTTP, ה-service מחליט, וה-repository
+              שולף נתונים.
+            </li>
+            <li>
+              <strong>SQLite</strong> – קובץ אחד על הדיסק. אין שרת מסד נתונים
+              נפרד.
+            </li>
+          </ul>
+        </section>
 
-<section id="cheatsheet">
-  <h2>2. מילון מהיר: Angular/Nest ↔ FastAPI</h2>
-  <p class="he-sub">המושגים שאתם מכירים, ומה שמקביל להם בעולם Python.</p>
-  <div class="table-wrap">
-  <table>
-    <thead>
-      <tr><th>בעולם שלכם (Angular / Nest)</th><th>ב-FastAPI / Python</th><th>הערות</th></tr>
-    </thead>
-    <tbody>
-      <tr><td>Controller</td><td><code>APIRouter</code> (<code>router.py</code>)</td><td>מגדיר <code>@router.get(...)</code> במקום <code>@Get()</code>.</td></tr>
-      <tr><td>DI, <code>inject()</code>, קונסטרקטור</td><td><code>Depends(...)</code></td><td>פונקציה שמחזירה ערך, FastAPI מזריק אותה לפרמטר.</td></tr>
-      <tr><td>DTO עם class-validator, interface</td><td>Pydantic <code>BaseModel</code> (<code>schemas.py</code>)</td><td>ולידציה בזמן ריצה וגם טיפוסים. גם מייצר את ה-OpenAPI.</td></tr>
-      <tr><td>Entity של TypeORM</td><td>SQLModel <code>table=True</code> (<code>models.py</code>)</td><td>מחלקה שמייצגת טבלה.</td></tr>
-      <tr><td>Migrations של TypeORM</td><td>Alembic (<code>app/migrations/</code>)</td><td>קבצי גרסאות שמשנים את הסכמה בסדר קבוע.</td></tr>
-      <tr><td><code>onModuleInit</code> / <code>APP_INITIALIZER</code></td><td><code>lifespan</code> (<code>app/main.py</code>)</td><td>קוד שרץ פעם אחת בעליית השרת, לפני הבקשה הראשונה, ופעם אחת בכיבוי.</td></tr>
-      <tr><td><code>ConfigModule</code> / <code>environment.ts</code></td><td><code>pydantic-settings</code> (<code>app/core/config.py</code>)</td><td>קורא משתני סביבה ו-<code>.env</code> ומאמת אותם.</td></tr>
-      <tr><td>Jest + supertest</td><td>pytest + <code>TestClient</code></td><td>בודק את האפליקציה בלי לפתוח פורט אמיתי.</td></tr>
-      <tr><td><code>npm</code></td><td><code>uv</code></td><td>מנהל חבילות ו-virtualenv (ב-Python אין node_modules).</td></tr>
-      <tr><td><code>package.json</code></td><td><code>pyproject.toml</code></td><td>שם, גרסה, תלויות וכלים.</td></tr>
-      <tr><td><code>package-lock.json</code></td><td><code>uv.lock</code></td><td>נעילת גרסאות מדויקת.</td></tr>
-      <tr><td><code>tsc --strict</code></td><td><code>mypy</code> (strict = true)</td><td>בדיקת טיפוסים סטטית.</td></tr>
-      <tr><td>ESLint + Prettier</td><td><code>ruff</code> (lint + format)</td><td>כלי אחד לשניהם.</td></tr>
-      <tr><td>Nx module boundaries (תגיות)</td><td><code>import-linter</code> (חוזים ב-<code>pyproject.toml</code>)</td><td>אוכף מי מותר לייבא מה. שבירה = כשל ב-lint.</td></tr>
-    </tbody>
-  </table>
-  </div>
-  <div class="tip">כלל אצבע: אם הכרתם Nest, החשיבה דומה. ההבדל המרכזי: ב-FastAPI הכול פונקציות, לא מחלקות עם דקורטורים בכל מקום.</div>
-</section>
+        <section id="cheatsheet">
+          <h2>2. מילון מהיר: Angular/Nest ↔ FastAPI</h2>
+          <p class="he-sub">
+            המושגים שאתם מכירים, ומה שמקביל להם בעולם Python.
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>בעולם שלכם (Angular / Nest)</th>
+                  <th>ב-FastAPI / Python</th>
+                  <th>הערות</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Controller</td>
+                  <td><code>APIRouter</code> (<code>router.py</code>)</td>
+                  <td>
+                    מגדיר <code>@router.get(...)</code> במקום
+                    <code>@Get()</code>.
+                  </td>
+                </tr>
+                <tr>
+                  <td>DI, <code>inject()</code>, קונסטרקטור</td>
+                  <td><code>Depends(...)</code></td>
+                  <td>פונקציה שמחזירה ערך, FastAPI מזריק אותה לפרמטר.</td>
+                </tr>
+                <tr>
+                  <td>DTO עם class-validator, interface</td>
+                  <td>
+                    Pydantic <code>BaseModel</code> (<code>schemas.py</code>)
+                  </td>
+                  <td>ולידציה בזמן ריצה וגם טיפוסים. גם מייצר את ה-OpenAPI.</td>
+                </tr>
+                <tr>
+                  <td>Entity של TypeORM</td>
+                  <td>
+                    SQLModel <code>table=True</code> (<code>models.py</code>)
+                  </td>
+                  <td>מחלקה שמייצגת טבלה.</td>
+                </tr>
+                <tr>
+                  <td>Migrations של TypeORM</td>
+                  <td>Alembic (<code>app/migrations/</code>)</td>
+                  <td>קבצי גרסאות שמשנים את הסכמה בסדר קבוע.</td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>onModuleInit</code> / <code>APP_INITIALIZER</code>
+                  </td>
+                  <td><code>lifespan</code> (<code>app/main.py</code>)</td>
+                  <td>
+                    קוד שרץ פעם אחת בעליית השרת, לפני הבקשה הראשונה, ופעם אחת
+                    בכיבוי.
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>ConfigModule</code> / <code>environment.ts</code>
+                  </td>
+                  <td>
+                    <code>pydantic-settings</code>
+                    (<code>app/core/config.py</code>)
+                  </td>
+                  <td>קורא משתני סביבה ו-<code>.env</code> ומאמת אותם.</td>
+                </tr>
+                <tr>
+                  <td>Jest + supertest</td>
+                  <td>pytest + <code>TestClient</code></td>
+                  <td>בודק את האפליקציה בלי לפתוח פורט אמיתי.</td>
+                </tr>
+                <tr>
+                  <td><code>npm</code></td>
+                  <td><code>uv</code></td>
+                  <td>מנהל חבילות ו-virtualenv (ב-Python אין node_modules).</td>
+                </tr>
+                <tr>
+                  <td><code>package.json</code></td>
+                  <td><code>pyproject.toml</code></td>
+                  <td>שם, גרסה, תלויות וכלים.</td>
+                </tr>
+                <tr>
+                  <td><code>package-lock.json</code></td>
+                  <td><code>uv.lock</code></td>
+                  <td>נעילת גרסאות מדויקת.</td>
+                </tr>
+                <tr>
+                  <td><code>tsc --strict</code></td>
+                  <td><code>mypy</code> (strict = true)</td>
+                  <td>בדיקת טיפוסים סטטית.</td>
+                </tr>
+                <tr>
+                  <td>ESLint + Prettier</td>
+                  <td><code>ruff</code> (lint + format)</td>
+                  <td>כלי אחד לשניהם.</td>
+                </tr>
+                <tr>
+                  <td>Nx module boundaries (תגיות)</td>
+                  <td>
+                    <code>import-linter</code> (חוזים
+                    ב-<code>pyproject.toml</code>)
+                  </td>
+                  <td>אוכף מי מותר לייבא מה. שבירה = כשל ב-lint.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tip">
+            כלל אצבע: אם הכרתם Nest, החשיבה דומה. ההבדל המרכזי: ב-FastAPI הכול
+            פונקציות, לא מחלקות עם דקורטורים בכל מקום.
+          </div>
+        </section>
 
-<section id="walkthrough">
-  <h2>3. בקשה אחת, צעד אחר צעד: <code>GET /api/recipes/{id}</code></h2>
-  <p class="he-sub">נלך על הבקשה הזו מההתחלה ועד התשובה, כולל מקרה ה-404.</p>
-  <pre class="diagram">
+        <section id="walkthrough">
+          <h2>3. בקשה אחת, צעד אחר צעד: <code>GET /api/recipes/{id}</code></h2>
+          <p class="he-sub">
+            נלך על הבקשה הזו מההתחלה ועד התשובה, כולל מקרה ה-404.
+          </p>
+          <pre class="diagram">
   Browser        Vite proxy     uvicorn/FastAPI      router          service           repository       SQLite
      │ 1. GET      │                  │                 │                │                  │              │
      │────────────▶│ 2. proxy         │                 │                │                  │              │
@@ -345,13 +555,19 @@ def test_unknown_recipe_is_404_with_a_code(client: TestClient) -> None:
      │             │                  │◀────────────────│ 12. JSON 200   │                  │              │
   </pre>
 
-  <ol class="steps">
-    <li>
-      <strong>הבקשה מגיעה ל-Vite.</strong> <code>apps/web/vite.config.mts</code> מכיל <code>'/api/': 'http://localhost:8000'</code>, אז Vite מעביר את הבקשה לשרת הפייתון.
-    </li>
-    <li>
-      <strong>uvicorn מעביר ל-FastAPI.</strong> <code>app/main.py</code> מרכיב את האפליקציה ב-<code>create_app()</code>, ומוסיף לכל router את הקידומת <code>/api</code>:
-<pre>
+          <ol class="steps">
+            <li>
+              <strong>הבקשה מגיעה ל-Vite.</strong>
+              <code>apps/web/vite.config.mts</code> מכיל
+              <code>'/api/': 'http://localhost:8000'</code>, אז Vite מעביר את
+              הבקשה לשרת הפייתון.
+            </li>
+            <li>
+              <strong>uvicorn מעביר ל-FastAPI.</strong>
+              <code>app/main.py</code> מרכיב את האפליקציה
+              ב-<code>create_app()</code>, ומוסיף לכל router את הקידומת
+              <code>/api</code>:
+              <pre>
 # apps/recipe-service/app/main.py
 API_PREFIX = "/api"
 ...
@@ -360,10 +576,11 @@ for router in ROUTERS:
     api.include_router(router)
 app.include_router(api)
 </pre>
-    </li>
-    <li>
-      <strong>FastAPI מתאים את ה-route.</strong> ב-<code>app/recipes/router.py</code>:
-<pre>
+            </li>
+            <li>
+              <strong>FastAPI מתאים את ה-route.</strong>
+              ב-<code>app/recipes/router.py</code>:
+              <pre>
 # apps/recipe-service/app/recipes/router.py
 router = APIRouter(prefix="/recipes", tags=["recipes"])
 
@@ -371,14 +588,26 @@ router = APIRouter(prefix="/recipes", tags=["recipes"])
 def get_recipe(recipe_id: uuid.UUID, service: ServiceDep) -> RecipeRead:
     return service.get_recipe(recipe_id)
 </pre>
-      הנתיב המלא הוא <code>/api/recipes/{recipe_id}</code>. ה-<code>responses=</code> רק מתעד ב-OpenAPI שיכול להיות 404.
-    </li>
-    <li>
-      <strong>ולידציה של הנתיב.</strong> <code>recipe_id: uuid.UUID</code> גורם ל-FastAPI לנסות להמיר את המחרוזת ל-UUID. מזהה לא תקין מחזיר <strong>422</strong> לפני שהקוד שלנו בכלל רץ (יש לזה בדיקה: <code>test_malformed_id_is_a_422</code>).
-    </li>
-    <li>
-      <strong>הזרקת תלויות.</strong> <code>ServiceDep</code> הוא <code>Annotated[RecipeService, Depends(get_recipe_service)]</code>. FastAPI מריץ את <code>get_recipe_service</code>, שדורש <code>get_session</code> ו-<code>get_tag_service</code>. כברירת מחדל FastAPI מריץ כל תלות פעם אחת לכל בקשה ומשתף את התוצאה, כך ששני השירותים מקבלים את <strong>אותו</strong> Session:
-<pre>
+              הנתיב המלא הוא <code>/api/recipes/{recipe_id}</code>. ה-<code
+                >responses=</code
+              >
+              רק מתעד ב-OpenAPI שיכול להיות 404.
+            </li>
+            <li>
+              <strong>ולידציה של הנתיב.</strong>
+              <code>recipe_id: uuid.UUID</code> גורם ל-FastAPI לנסות להמיר את
+              המחרוזת ל-UUID. מזהה לא תקין מחזיר <strong>422</strong> לפני שהקוד
+              שלנו בכלל רץ (יש לזה בדיקה:
+              <code>test_malformed_id_is_a_422</code>).
+            </li>
+            <li>
+              <strong>הזרקת תלויות.</strong> <code>ServiceDep</code> הוא
+              <code>Annotated[RecipeService, Depends(get_recipe_service)]</code
+              >. FastAPI מריץ את <code>get_recipe_service</code>, שדורש
+              <code>get_session</code> ו-<code>get_tag_service</code>. כברירת
+              מחדל FastAPI מריץ כל תלות פעם אחת לכל בקשה ומשתף את התוצאה, כך
+              ששני השירותים מקבלים את <strong>אותו</strong> Session:
+              <pre>
 # apps/recipe-service/app/recipes/service.py
 def get_recipe_service(
     session: Annotated[Session, Depends(get_session)],
@@ -386,14 +615,22 @@ def get_recipe_service(
 ) -> RecipeService:
     return RecipeService(RecipeRepository(session), tags)
 </pre>
-      <code>get_session</code> פותח Session חדש לבקשה וסוגר אותו אחרי שהתשובה נשלחה (ראו סעיף 7 על <code>yield</code>).
-    </li>
-    <li>
-      <strong>ה-router קורא ל-service.</strong> הפונקציה <code>get_recipe</code> לא מכילה לוגיקה – היא רק מעבירה את הקריאה הלאה (AD-1: "routers contain no business logic").
-    </li>
-    <li>
-      <strong>ה-service שואל את ה-repository.</strong> <code>RecipeService.get_recipe</code> קורא ל-<code>self._repository.get(recipe_id)</code>. ה-repository בונה שאילתה עם <code>selectinload</code> כדי לטעון גם את המצרכים ואת השלבים בשתי שאילתות נוספות, אחת לכל קשר, ולא שאילתה לכל שורה (בלי N+1):
-<pre>
+              <code>get_session</code> פותח Session חדש לבקשה וסוגר אותו אחרי
+              שהתשובה נשלחה (ראו סעיף 7 על <code>yield</code>).
+            </li>
+            <li>
+              <strong>ה-router קורא ל-service.</strong> הפונקציה
+              <code>get_recipe</code> לא מכילה לוגיקה – היא רק מעבירה את הקריאה
+              הלאה (AD-1: "routers contain no business logic").
+            </li>
+            <li>
+              <strong>ה-service שואל את ה-repository.</strong>
+              <code>RecipeService.get_recipe</code> קורא
+              ל-<code>self._repository.get(recipe_id)</code>. ה-repository בונה
+              שאילתה עם <code>selectinload</code> כדי לטעון גם את המצרכים ואת
+              השלבים בשתי שאילתות נוספות, אחת לכל קשר, ולא שאילתה לכל שורה (בלי
+              N+1):
+              <pre>
 # apps/recipe-service/app/recipes/repository.py
 statement = (
     select(Recipe)
@@ -405,44 +642,67 @@ statement = (
 )
 return self._session.exec(statement).first()
 </pre>
-    </li>
-    <li>
-      <strong>מקרה ה-404.</strong> אם <code>recipe is None</code>, השירות זורק <code>AppError</code>:
-<pre>
+            </li>
+            <li>
+              <strong>מקרה ה-404.</strong> אם <code>recipe is None</code>,
+              השירות זורק <code>AppError</code>:
+              <pre>
 # apps/recipe-service/app/recipes/service.py
 recipe = self._repository.get(recipe_id)
 if recipe is None:
     raise AppError(404, ErrorCode.RECIPE_NOT_FOUND, "Recipe not found")
 </pre>
-      הקוד מוגדר ב-<code>app/core/errors.py</code> כ-<code>ErrorCode.RECIPE_NOT_FOUND = "recipe_not_found"</code>. מכאן ואילך הביצוע <strong>קופץ החוצה</strong>: הקוד שלמטה לא רץ.
-    </li>
-    <li>
-      <strong>ה-handler הגלובלי ממיר לתשובה.</strong> <code>register_error_handlers(app)</code> רשם את <code>_app_error_handler</code>, שמחזיר JSON עם הסטטוס מהחריגה. הבדיקה מאשרת את הצורה המדויקת:
-<pre>
+              הקוד מוגדר ב-<code>app/core/errors.py</code> כ-<code
+                >ErrorCode.RECIPE_NOT_FOUND = "recipe_not_found"</code
+              >. מכאן ואילך הביצוע <strong>קופץ החוצה</strong>: הקוד שלמטה לא
+              רץ.
+            </li>
+            <li>
+              <strong>ה-handler הגלובלי ממיר לתשובה.</strong>
+              <code>register_error_handlers(app)</code> רשם את
+              <code>_app_error_handler</code>, שמחזיר JSON עם הסטטוס מהחריגה.
+              הבדיקה מאשרת את הצורה המדויקת:
+              <pre>
 # apps/recipe-service/tests/test_recipes_api.py
 assert response.status_code == 404
 assert response.json() == {"detail": "Recipe not found", "code": "recipe_not_found"}
 </pre>
-    </li>
-    <li>
-      <strong>המסלול המוצלח (הרשומה קיימת).</strong> השירות טוען את התגיות באמצעות <code>TagService.get_tags([recipe.id])</code>, שמריץ שאילתה אחת עם <code>JOIN</code> (ב-<code>TagRepository.list_for_recipes</code>) ומחזיר רשימת <code>TagRef</code> לכל מתכון, ממוינת לפי <code>sort_order</code> (מוצמדות קודם) ואז לפי שם.
-    </li>
-    <li>
-      <strong>בניית ה-DTO.</strong> השירות ממיר כל מצרך ושלב לסכמה (<code>_ingredient_read</code> ו-<code>StepRead</code>) ומחזיר <code>RecipeRead</code>. זה לא אותו אובייקט שמופיע בטבלה (ראו סעיף 6).
-    </li>
-    <li>
-      <strong>FastAPI מסריאליז.</strong> מכיוון שהפונקציה מוגדרת <code>-> RecipeRead</code>, FastAPI מכניס את התשובה לסכמה, ממיר <code>Decimal</code> למספר JSON, ומחזיר 200.
-    </li>
-    <li>
-      <strong>סגירת ה-Session.</strong> אחרי שהתשובה נשלחה, ה-<code>with Session(...)</code> ב-<code>get_session</code> מסתיים וסוגר את החיבור.
-    </li>
-  </ol>
-</section>
+            </li>
+            <li>
+              <strong>המסלול המוצלח (הרשומה קיימת).</strong> השירות טוען את
+              התגיות באמצעות <code>TagService.get_tags([recipe.id])</code>,
+              שמריץ שאילתה אחת עם
+              <code>JOIN</code> (ב-<code>TagRepository.list_for_recipes</code>)
+              ומחזיר רשימת <code>TagRef</code> לכל מתכון, ממוינת לפי
+              <code>sort_order</code> (מוצמדות קודם) ואז לפי שם.
+            </li>
+            <li>
+              <strong>בניית ה-DTO.</strong> השירות ממיר כל מצרך ושלב לסכמה
+              (<code>_ingredient_read</code> ו-<code>StepRead</code>) ומחזיר
+              <code>RecipeRead</code>. זה לא אותו אובייקט שמופיע בטבלה (ראו סעיף
+              6).
+            </li>
+            <li>
+              <strong>FastAPI מסריאליז.</strong> מכיוון שהפונקציה מוגדרת
+              <code>-> RecipeRead</code>, FastAPI מכניס את התשובה לסכמה, ממיר
+              <code>Decimal</code> למספר JSON, ומחזיר 200.
+            </li>
+            <li>
+              <strong>סגירת ה-Session.</strong> אחרי שהתשובה נשלחה, ה-<code
+                >with Session(...)</code
+              >
+              ב-<code>get_session</code> מסתיים וסוגר את החיבור.
+            </li>
+          </ol>
+        </section>
 
-<section id="folders">
-  <h2>4. סיור בתיקיות</h2>
-  <p class="he-sub">המבנה האמיתי של <code>apps/recipe-service</code> (ללא <code>.venv</code> ומטמונים).</p>
-  <pre>
+        <section id="folders">
+          <h2>4. סיור בתיקיות</h2>
+          <p class="he-sub">
+            המבנה האמיתי של <code>apps/recipe-service</code> (ללא
+            <code>.venv</code> ומטמונים).
+          </p>
+          <pre>
 apps/recipe-service/
 ├── app/                      קוד האפליקציה
 │   ├── main.py               נקודת הכניסה: create_app(), lifespan, הרכבת routers
@@ -477,27 +737,48 @@ apps/recipe-service/
 ├── .env.example              כל משתני הסביבה, עם הסברים (להעתיק ל-.env)
 └── README.md
   </pre>
-  <div class="tip">כל מודול עוקב אחרי אותו תבנית: <code>router.py</code>, <code>service.py</code>, <code>repository.py</code>, <code>models.py</code>, <code>schemas.py</code>. הבדיקה <code>test_feature_module_has_every_layer</code> מוודאת את זה.</div>
-</section>
+          <div class="tip">
+            כל מודול עוקב אחרי אותו תבנית: <code>router.py</code>,
+            <code>service.py</code>, <code>repository.py</code>,
+            <code>models.py</code>, <code>schemas.py</code>. הבדיקה
+            <code>test_feature_module_has_every_layer</code> מוודאת את זה.
+          </div>
+        </section>
 
-<section id="startup">
-  <h2>5. מה קורה כשמריצים <code>nx run recipe-service:serve</code></h2>
-  <p class="he-sub">הפקודה מפעילה את ה-target <code>serve</code> מתוך <code>project.json</code>, וזה בעצם:</p>
-<pre>
+        <section id="startup">
+          <h2>5. מה קורה כשמריצים <code>nx run recipe-service:serve</code></h2>
+          <p class="he-sub">
+            הפקודה מפעילה את ה-target <code>serve</code> מתוך
+            <code>project.json</code>, וזה בעצם:
+          </p>
+          <pre>
 # apps/recipe-service/project.json (serve)
 "command": "uv run uvicorn app.main:app --reload --port 8000",
 "cwd": "{projectRoot}"
 </pre>
-  <ol class="steps">
-    <li>
-      <strong>טעינת הקונפיגורציה.</strong> <code>app/main.py</code> מיובא, ובשורה <code>app = create_app()</code> בתחתית הקובץ נקרא <code>get_settings()</code>. זה קורא משתני סביבה ו-<code>.env</code> מתיקיית העבודה (<code>env_file=".env"</code>). אם <code>JWT_SECRET</code> חסר, או שיש <code>COOKIE_SECURE=false</code> בלי <code>ENV=dev</code>, התהליך נעצר עם הודעה ברורה (<code>load_settings</code> זורק <code>SystemExit</code>).
-    </li>
-    <li>
-      <strong>בניית האפליקציה.</strong> <code>create_app()</code> יוצר <code>FastAPI(...)</code>, רושם את ה-error handlers ומרכיב את כל ה-routers תחת <code>/api</code>.
-    </li>
-    <li>
-      <strong>הרצת ה-lifespan.</strong> לפני שמקבלים בקשה ראשונה, uvicorn מפעיל את <code>lifespan</code>:
-<pre>
+          <ol class="steps">
+            <li>
+              <strong>טעינת הקונפיגורציה.</strong>
+              <code>app/main.py</code> מיובא, ובשורה
+              <code>app = create_app()</code> בתחתית הקובץ נקרא
+              <code>get_settings()</code>. זה קורא משתני סביבה ו-<code
+                >.env</code
+              >
+              מתיקיית העבודה (<code>env_file=".env"</code>). אם
+              <code>JWT_SECRET</code> חסר, או שיש
+              <code>COOKIE_SECURE=false</code> בלי <code>ENV=dev</code>, התהליך
+              נעצר עם הודעה ברורה (<code>load_settings</code> זורק
+              <code>SystemExit</code>).
+            </li>
+            <li>
+              <strong>בניית האפליקציה.</strong> <code>create_app()</code> יוצר
+              <code>FastAPI(...)</code>, רושם את ה-error handlers ומרכיב את כל
+              ה-routers תחת <code>/api</code>.
+            </li>
+            <li>
+              <strong>הרצת ה-lifespan.</strong> לפני שמקבלים בקשה ראשונה,
+              uvicorn מפעיל את <code>lifespan</code>:
+              <pre>
 # apps/recipe-service/app/main.py
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
@@ -508,34 +789,54 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     finally:
         get_engine(data_dir).dispose()
 </pre>
-      הקוד שלפני <code>yield</code> רץ בעלייה, והקוד שב-<code>finally</code> רץ בכיבוי.
-    </li>
-    <li>
-      <strong>יצירת ה-engine ו-pragmas.</strong> <code>get_engine(data_dir)</code> יוצר את התיקייה <code>data/</code> אם היא חסרה, ובונה engine עבור <code>sqlite:///.../app.db</code> (הוא נקרא כבר מתוך <code>run_migrations</code>). על כל חיבור חדש נשלחות שתי פקודות:
-<pre>
+              הקוד שלפני <code>yield</code> רץ בעלייה, והקוד שב-<code
+                >finally</code
+              >
+              רץ בכיבוי.
+            </li>
+            <li>
+              <strong>יצירת ה-engine ו-pragmas.</strong>
+              <code>get_engine(data_dir)</code> יוצר את התיקייה
+              <code>data/</code> אם היא חסרה, ובונה engine עבור
+              <code>sqlite:///.../app.db</code> (הוא נקרא כבר מתוך
+              <code>run_migrations</code>). על כל חיבור חדש נשלחות שתי פקודות:
+              <pre>
 # apps/recipe-service/app/core/db.py
 cursor.execute("PRAGMA foreign_keys=ON")   # SQLite לא אוכף מפתחות זרים כברירת מחדל
 cursor.execute("PRAGMA journal_mode=WAL")  # Write-Ahead Log: קורא וכותב לא חוסמים זה את זה
 </pre>
-      בלי <code>foreign_keys=ON</code>, מחיקה בקסקדה לא הייתה עובדת. מצב ה-WAL נשמר בקובץ המסד עצמו, ולכן ליד <code>app.db</code> יופיעו גם <code>app.db-wal</code> ו-<code>app.db-shm</code>.
-    </li>
-    <li>
-      <strong>מיגרציות.</strong> <code>run_migrations</code> מעביר את החיבור ל-Alembic ומריץ <code>command.upgrade(config, "head")</code>. <code>app/migrations/env.py</code> משתמש בחיבור הזה ומריץ את המיגרציות. בקובץ <code>0001</code> נוצרות הטבלאות ושמונת סוגי הארוחה שמוגדרים כברירת מחדל (עם UUID קבועים ושמות בעברית). שגיאה במיגרציה עוצרת את השרת.
-    </li>
-    <li>
-      <strong>מוכן לשירות.</strong> uvicorn מתחיל להקשיב בפורט 8000. התיעוד זמין ב-<code>http://localhost:8000/docs</code>.
-    </li>
-    <li>
-      <strong>כיבוי.</strong> ב-Ctrl+C, ה-<code>finally</code> קורא ל-<code>dispose()</code> על ה-engine, וסוגר את כל החיבורים.
-    </li>
-  </ol>
-  <div class="tip"><code>--reload</code> גורם לשרת להתחיל מחדש בכל שמירה של קובץ Python, בדומה ל-<code>ng serve</code>.</div>
-</section>
+              בלי <code>foreign_keys=ON</code>, מחיקה בקסקדה לא הייתה עובדת. מצב
+              ה-WAL נשמר בקובץ המסד עצמו, ולכן ליד <code>app.db</code> יופיעו גם
+              <code>app.db-wal</code> ו-<code>app.db-shm</code>.
+            </li>
+            <li>
+              <strong>מיגרציות.</strong> <code>run_migrations</code> מעביר את
+              החיבור ל-Alembic ומריץ
+              <code>command.upgrade(config, "head")</code>.
+              <code>app/migrations/env.py</code> משתמש בחיבור הזה ומריץ את
+              המיגרציות. בקובץ <code>0001</code> נוצרות הטבלאות ושמונת סוגי
+              הארוחה שמוגדרים כברירת מחדל (עם UUID קבועים ושמות בעברית). שגיאה
+              במיגרציה עוצרת את השרת.
+            </li>
+            <li>
+              <strong>מוכן לשירות.</strong> uvicorn מתחיל להקשיב בפורט 8000.
+              התיעוד זמין ב-<code>http://localhost:8000/docs</code>.
+            </li>
+            <li>
+              <strong>כיבוי.</strong> ב-Ctrl+C, ה-<code>finally</code> קורא
+              ל-<code>dispose()</code> על ה-engine, וסוגר את כל החיבורים.
+            </li>
+          </ol>
+          <div class="tip">
+            <code>--reload</code> גורם לשרת להתחיל מחדש בכל שמירה של קובץ
+            Python, בדומה ל-<code>ng serve</code>.
+          </div>
+        </section>
 
-<section id="data-model">
-  <h2>6. מודל הנתונים</h2>
-  <p class="he-sub">הטבלאות, הקשרים, והסיבה שיש שני סוגי מחלקות.</p>
-  <pre class="diagram">
+        <section id="data-model">
+          <h2>6. מודל הנתונים</h2>
+          <p class="he-sub">הטבלאות, הקשרים, והסיבה שיש שני סוגי מחלקות.</p>
+          <pre class="diagram">
   recipe  1 ────────< N  ingredient      (recipe_id → recipe.id, ON DELETE CASCADE)
     │     1 ────────< N  step            (recipe_id → recipe.id, ON DELETE CASCADE)
     │
@@ -545,52 +846,187 @@ cursor.execute("PRAGMA journal_mode=WAL")  # Write-Ahead Log: קורא וכות�
         UNIQUE (lower(name))   ← אותו שם לא יכול להופיע פעמיים (בלי הבדל אותיות)
   </pre>
 
-  <h3>טבלת recipe (עמודות מרכזיות)</h3>
-  <div class="table-wrap"><table>
-    <thead><tr><th>עמודה</th><th>טיפוס / הערה</th></tr></thead>
-    <tbody>
-      <tr><td><code>id</code></td><td>UUID, מפתח ראשי (AD-5)</td></tr>
-      <tr><td><code>title</code></td><td>VARCHAR(120)</td></tr>
-      <tr><td><code>description</code>, <code>notes</code></td><td>TEXT, אופציונלי. <code>notes</code> הוא שדה ההערות החופשיות של המתכון.</td></tr>
-      <tr><td><code>base_servings</code></td><td>מספר מנות בסיס</td></tr>
-      <tr><td><code>prep_time_minutes</code>, <code>cook_time_minutes</code></td><td>INTEGER, אופציונלי</td></tr>
-      <tr><td><code>source_url</code></td><td>VARCHAR(2048), אופציונלי</td></tr>
-      <tr><td><code>created_by</code>, <code>updated_by</code></td><td>UUID בלי מפתח זר עדיין (יתווסף בסטורי 2.1)</td></tr>
-      <tr><td><code>created_at</code>, <code>updated_at</code></td><td>תאריכים תמיד ב-UTC (<code>UtcDateTime</code>)</td></tr>
-    </tbody>
-  </table></div>
+          <h3>טבלת recipe (עמודות מרכזיות)</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>עמודה</th>
+                  <th>טיפוס / הערה</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>id</code></td>
+                  <td>UUID, מפתח ראשי (AD-5)</td>
+                </tr>
+                <tr>
+                  <td><code>title</code></td>
+                  <td>VARCHAR(120)</td>
+                </tr>
+                <tr>
+                  <td><code>description</code>, <code>notes</code></td>
+                  <td>
+                    TEXT, אופציונלי. <code>notes</code> הוא שדה ההערות החופשיות
+                    של המתכון.
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>base_servings</code></td>
+                  <td>מספר מנות בסיס</td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>prep_time_minutes</code>,
+                    <code>cook_time_minutes</code>
+                  </td>
+                  <td>INTEGER, אופציונלי</td>
+                </tr>
+                <tr>
+                  <td><code>source_url</code></td>
+                  <td>VARCHAR(2048), אופציונלי</td>
+                </tr>
+                <tr>
+                  <td><code>created_by</code>, <code>updated_by</code></td>
+                  <td>UUID בלי מפתח זר עדיין (יתווסף בסטורי 2.1)</td>
+                </tr>
+                <tr>
+                  <td><code>created_at</code>, <code>updated_at</code></td>
+                  <td>תאריכים תמיד ב-UTC (<code>UtcDateTime</code>)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
 
-  <h3>טבלת ingredient</h3>
-  <div class="table-wrap"><table>
-    <thead><tr><th>עמודה</th><th>משמעות</th></tr></thead>
-    <tbody>
-      <tr><td><code>recipe_id</code>, <code>position</code></td><td>שייך למתכון, וסדר ההצגה</td></tr>
-      <tr><td><code>name</code>, <code>note</code></td><td>שם המצרך וההערה שלו</td></tr>
-      <tr><td><code>amount</code>, <code>unit</code></td><td>הכמות הנוכחית (NUMERIC(12,3)) והיחידה. <code>NULL</code> ב-<code>amount</code> = "לפי הטעם"</td></tr>
-      <tr><td><code>has_original</code>, <code>original_amount</code>, <code>original_unit</code></td><td>הערך המקורי לפני העריכה הראשונה (FR-7). <code>has_original</code> מבדיל בין "במקור לפי הטעם" (שני השדות NULL) לבין "אין מקור בכלל"</td></tr>
-      <tr><td><code>source_amount</code>, <code>source_unit</code></td><td>ערך אימפריאלי שמיבא המיר למטרי (FR-21). זה <strong>לא</strong> המקור של FR-7</td></tr>
-    </tbody>
-  </table></div>
+          <h3>טבלת ingredient</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>עמודה</th>
+                  <th>משמעות</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>recipe_id</code>, <code>position</code></td>
+                  <td>שייך למתכון, וסדר ההצגה</td>
+                </tr>
+                <tr>
+                  <td><code>name</code>, <code>note</code></td>
+                  <td>שם המצרך וההערה שלו</td>
+                </tr>
+                <tr>
+                  <td><code>amount</code>, <code>unit</code></td>
+                  <td>
+                    הכמות הנוכחית (NUMERIC(12,3)) והיחידה.
+                    <code>NULL</code> ב-<code>amount</code> = "לפי הטעם"
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>has_original</code>, <code>original_amount</code>,
+                    <code>original_unit</code>
+                  </td>
+                  <td>
+                    הערך המקורי לפני העריכה הראשונה (FR-7).
+                    <code>has_original</code> מבדיל בין "במקור לפי הטעם" (שני
+                    השדות NULL) לבין "אין מקור בכלל"
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>source_amount</code>, <code>source_unit</code></td>
+                  <td>
+                    ערך אימפריאלי שמיבא המיר למטרי (FR-21). זה
+                    <strong>לא</strong> המקור של FR-7
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
 
-  <h3>טבלת step ו-recipe_tag</h3>
-  <p><code>step</code>: <code>recipe_id</code>, <code>position</code>, <code>description</code> (TEXT), ו-<code>source_text</code> – הטקסט לפני המרת טמפרטורה, כשהייתה המרה.</p>
-  <p><code>recipe_tag</code>: רק שני מפתחות זרים, <code>recipe_id</code> ו-<code>tag_id</code>, שמרכיבים יחד את המפתח הראשי. הבעלות שלו היא של מודול tags (AD-25).</p>
+          <h3>טבלת step ו-recipe_tag</h3>
+          <p>
+            <code>step</code>: <code>recipe_id</code>, <code>position</code>,
+            <code>description</code> (TEXT), ו-<code>source_text</code> – הטקסט
+            לפני המרת טמפרטורה, כשהייתה המרה.
+          </p>
+          <p>
+            <code>recipe_tag</code>: רק שני מפתחות זרים,
+            <code>recipe_id</code> ו-<code>tag_id</code>, שמרכיבים יחד את המפתח
+            הראשי. הבעלות שלו היא של מודול tags (AD-25).
+          </p>
 
-  <h3>למה יש שני סוגי מחלקות?</h3>
-  <div class="table-wrap"><table>
-    <thead><tr><th>טבלאות (SQLModel <code>table=True</code>)</th><th>DTOs לקריאה (Pydantic, <code>schemas.py</code>)</th></tr></thead>
-    <tbody>
-      <tr><td>מייצגות את <strong>מבנה ה-DB</strong>: עמודות, מפתחות, אינדקסים.</td><td>מייצגות את <strong>מבנה ה-API</strong>: מה הלקוח רואה.</td></tr>
-      <tr><td><code>Recipe</code> מכיל <code>created_by</code> ו-<code>updated_by</code> שלא חושפים.</td><td><code>RecipeRead</code> לא מכיל אותם.</td></tr>
-      <tr><td>התגיות של מתכון לא קיימות כעמודה; הן בטבלת <code>tag</code> ומקושרות דרך <code>recipe_tag</code>.</td><td><code>tags</code> היא רשימת <code>TagRef</code> מוכנה, שהשירות בונה.</td></tr>
-      <tr><td><code>amount</code> ו-<code>original_amount</code> הם שני שדות נפרדים.</td><td><code>IngredientRead</code> מציג <code>original</code> כאובייקט אחד, ו-<code>source</code> רק כשיש ערך.</td></tr>
-      <tr><td>Decimal פנימי, מסד הנתונים מחזיק NUMERIC.</td><td>בתשובה JSON מספר רגיל (<code>Amount</code>, AD-31).</td></tr>
-      <tr><td><code>photo</code> לא קיים בטבלה של המתכון.</td><td><code>photo</code> כרגע <code>None</code>, עד סטורי 3.7.</td></tr>
-    </tbody>
-  </table></div>
-  <div class="tip">הסיבה להפרדה: ה-API הוא חוזה יציב עם הלקוח (AD-3), ואילו הסכמה של מסד הנתונים משתנה לפי צורכי האחסון. כשמשנים עמודה, לא שוברים את ה-API. וכשמשנים את ה-API, לא נוגעים בטבלאות. כמו שב-Nest לא מחזירים את ה-Entity של TypeORM ישירות אלא DTO.</div>
-  <p>ב-<code>app/recipes/models.py</code> מופיע הקשר בין הטבלאות:</p>
-<pre>
+          <h3>למה יש שני סוגי מחלקות?</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>טבלאות (SQLModel <code>table=True</code>)</th>
+                  <th>DTOs לקריאה (Pydantic, <code>schemas.py</code>)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    מייצגות את <strong>מבנה ה-DB</strong>: עמודות, מפתחות,
+                    אינדקסים.
+                  </td>
+                  <td>
+                    מייצגות את <strong>מבנה ה-API</strong>: מה הלקוח רואה.
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>Recipe</code> מכיל <code>created_by</code> ו-<code
+                      >updated_by</code
+                    >
+                    שלא חושפים.
+                  </td>
+                  <td><code>RecipeRead</code> לא מכיל אותם.</td>
+                </tr>
+                <tr>
+                  <td>
+                    התגיות של מתכון לא קיימות כעמודה; הן בטבלת
+                    <code>tag</code> ומקושרות דרך <code>recipe_tag</code>.
+                  </td>
+                  <td>
+                    <code>tags</code> היא רשימת <code>TagRef</code> מוכנה,
+                    שהשירות בונה.
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>amount</code> ו-<code>original_amount</code> הם שני
+                    שדות נפרדים.
+                  </td>
+                  <td>
+                    <code>IngredientRead</code> מציג
+                    <code>original</code> כאובייקט אחד, ו-<code>source</code> רק
+                    כשיש ערך.
+                  </td>
+                </tr>
+                <tr>
+                  <td>Decimal פנימי, מסד הנתונים מחזיק NUMERIC.</td>
+                  <td>בתשובה JSON מספר רגיל (<code>Amount</code>, AD-31).</td>
+                </tr>
+                <tr>
+                  <td><code>photo</code> לא קיים בטבלה של המתכון.</td>
+                  <td>
+                    <code>photo</code> כרגע <code>None</code>, עד סטורי 3.7.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tip">
+            הסיבה להפרדה: ה-API הוא חוזה יציב עם הלקוח (AD-3), ואילו הסכמה של
+            מסד הנתונים משתנה לפי צורכי האחסון. כשמשנים עמודה, לא שוברים את
+            ה-API. וכשמשנים את ה-API, לא נוגעים בטבלאות. כמו שב-Nest לא מחזירים
+            את ה-Entity של TypeORM ישירות אלא DTO.
+          </div>
+          <p>ב-<code>app/recipes/models.py</code> מופיע הקשר בין הטבלאות:</p>
+          <pre>
 # apps/recipe-service/app/recipes/models.py
 ingredients: list["Ingredient"] = Relationship(
     back_populates="recipe",
@@ -601,14 +1037,14 @@ ingredients: list["Ingredient"] = Relationship(
     },
 )
 </pre>
-</section>
+        </section>
 
-<section id="python">
-  <h2>7. תחביר Python שתפגשו</h2>
-  <p class="he-sub">כל דבר עם מקבילה ב-TypeScript.</p>
+        <section id="python">
+          <h2>7. תחביר Python שתפגשו</h2>
+          <p class="he-sub">כל דבר עם מקבילה ב-TypeScript.</p>
 
-  <h3>Type hints</h3>
-<pre>
+          <h3>Type hints</h3>
+          <pre>
 # Python
 def get(self, recipe_id: uuid.UUID) -> Recipe | None: ...
 tags: list[TagRef]
@@ -616,91 +1052,158 @@ tags: list[TagRef]
 get(recipeId: string): Recipe | null
 tags: TagRef[]
 </pre>
-  <p><code>X | None</code> = <code>X | null</code>. <code>list[X]</code> = <code>X[]</code>. ההבדל: ב-Python ה-type hints <strong>לא נבדקים בזמן ריצה</strong>. רק <code>mypy</code> בודק אותם, חוץ ממודלים של Pydantic ו-FastAPI שקוראים אותם וגם מאמתים לפיהם בזמן ריצה.</p>
+          <p>
+            <code>X | None</code> = <code>X | null</code>.
+            <code>list[X]</code> = <code>X[]</code>. ההבדל: ב-Python ה-type
+            hints <strong>לא נבדקים בזמן ריצה</strong>. רק
+            <code>mypy</code> בודק אותם, חוץ ממודלים של Pydantic ו-FastAPI
+            שקוראים אותם וגם מאמתים לפיהם בזמן ריצה.
+          </p>
 
-  <h3><code>async def</code> מול <code>def</code></h3>
-<pre>
+          <h3><code>async def</code> מול <code>def</code></h3>
+          <pre>
 # app/recipes/router.py – endpoint רגיל
 def list_recipes(service: ServiceDep) -> list[RecipeSummary]: ...
 
 # app/main.py – lifespan הוא async
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]: ...
 </pre>
-  <p>ה-endpoints של המתכונים הם <code>def</code> רגיל (סינכרוני). FastAPI מריץ פונקציה כזו ב-thread pool, ולכן גישה חוסמת ל-SQLite לא תוקעת את שאר הבקשות (ראו ההערה ב-<code>app/core/db.py</code> על <code>check_same_thread</code>). <code>async def</code> מקביל ל-<code>async function</code> ב-TS, אבל כאן הוא לא נחוץ. אפשר לערבב את שני הסגנונות באותה אפליקציה.</p>
+          <p>
+            ה-endpoints של המתכונים הם <code>def</code> רגיל (סינכרוני). FastAPI
+            מריץ פונקציה כזו ב-thread pool, ולכן גישה חוסמת ל-SQLite לא תוקעת את
+            שאר הבקשות (ראו ההערה ב-<code>app/core/db.py</code> על
+            <code>check_same_thread</code>). <code>async def</code> מקביל
+            ל-<code>async function</code> ב-TS, אבל כאן הוא לא נחוץ. אפשר לערבב
+            את שני הסגנונות באותה אפליקציה.
+          </p>
 
-  <h3>דקורטורים: <code>@router.get</code></h3>
-<pre>
+          <h3>דקורטורים: <code>@router.get</code></h3>
+          <pre>
 @router.get("/{recipe_id}", responses={404: {"model": ErrorResponse}})
 def get_recipe(...): ...
 </pre>
-  <p>דקורטור ב-Python הוא פונקציה שמקבלת פונקציה ומחזירה פונקציה. <code>@router.get(...)</code> דומה ל-<code>@Get(':id')</code> ב-Nest: הוא רושם את הפונקציה כ-route. ההבדל הוא שב-Python הדקורטור הוא קוד רגיל שרץ בזמן הייבוא, והפונקציה עצמה נשארת פונקציה רגילה שאפשר לקרוא לה.</p>
+          <p>
+            דקורטור ב-Python הוא פונקציה שמקבלת פונקציה ומחזירה פונקציה.
+            <code>@router.get(...)</code> דומה ל-<code>@Get(':id')</code>
+            ב-Nest: הוא רושם את הפונקציה כ-route. ההבדל הוא שב-Python הדקורטור
+            הוא קוד רגיל שרץ בזמן הייבוא, והפונקציה עצמה נשארת פונקציה רגילה
+            שאפשר לקרוא לה.
+          </p>
 
-  <h3><code>with</code> ו-<code>yield</code> (ב-dependencies)</h3>
-<pre>
+          <h3><code>with</code> ו-<code>yield</code> (ב-dependencies)</h3>
+          <pre>
 # app/core/db.py
 def get_session(...) -> Generator[Session]:
     with Session(get_engine(settings.data_dir)) as session:
         yield session
 </pre>
-  <p><code>with</code> דומה ל-<code>try/finally</code> שקורא ל-<code>close()</code> בסוף. <code>yield</code> בתוך dependency אומר: "מסור את הערך ל-endpoint, וכשהבקשה נגמרת חזור לכאן והמשך". הקוד שאחרי ה-<code>yield</code> (כאן: סגירת ה-Session ביציאה מה-<code>with</code>) רץ אחרי שה-endpoint סיים והתשובה נשלחה, גם אם נזרקה חריגה.</p>
+          <p>
+            <code>with</code> דומה ל-<code>try/finally</code> שקורא ל-<code
+              >close()</code
+            >
+            בסוף. <code>yield</code> בתוך dependency אומר: "מסור את הערך
+            ל-endpoint, וכשהבקשה נגמרת חזור לכאן והמשך". הקוד שאחרי ה-<code
+              >yield</code
+            >
+            (כאן: סגירת ה-Session ביציאה מה-<code>with</code>) רץ אחרי
+            שה-endpoint סיים והתשובה נשלחה, גם אם נזרקה חריגה.
+          </p>
 
-  <h3><code>Annotated</code></h3>
-<pre>
+          <h3><code>Annotated</code></h3>
+          <pre>
 ServiceDep = Annotated[RecipeService, Depends(get_recipe_service)]
 def list_recipes(service: ServiceDep) -> ...
 </pre>
-  <p>דומה להזרקה דרך הקונסטרקטור ב-Nest: <code>constructor(private service: RecipeService)</code>. <code>Annotated</code> מצמיד לטיפוס מטא-דאטה, כאן ההוראה "הזרק את התוצאה של <code>get_recipe_service</code>". ההגדרה <code>ServiceDep</code> נכתבת פעם אחת, ואז משתמשים בה כמו בטיפוס רגיל בכל endpoint.</p>
+          <p>
+            דומה להזרקה דרך הקונסטרקטור ב-Nest:
+            <code>constructor(private service: RecipeService)</code>.
+            <code>Annotated</code> מצמיד לטיפוס מטא-דאטה, כאן ההוראה "הזרק את
+            התוצאה של <code>get_recipe_service</code>". ההגדרה
+            <code>ServiceDep</code> נכתבת פעם אחת, ואז משתמשים בה כמו בטיפוס
+            רגיל בכל endpoint.
+          </p>
 
-  <h3>הטיפוס <code>X | None</code> כפרמטר</h3>
-<pre>
+          <h3>הטיפוס <code>X | None</code> כפרמטר</h3>
+          <pre>
 description: str | None = Field(default=None, sa_type=Text)
 </pre>
-  <p>שדה אופציונלי עם ברירת מחדל <code>None</code>, שקול ל-<code>description?: string | null</code>.</p>
+          <p>
+            שדה אופציונלי עם ברירת מחדל <code>None</code>, שקול ל-<code
+              >description?: string | null</code
+            >.
+          </p>
 
-  <h3>f-strings</h3>
-<pre>
+          <h3>f-strings</h3>
+          <pre>
 f"sqlite:///{data_dir / DB_FILENAME}"
 f"Route {route.path} has no tag; every router needs tags"
 </pre>
-  <p>שקול ל-template literal: <code>`sqlite:///${dataDir}`</code>. אפשר גם להוסיף עיצוב אחרי נקודתיים, למשל <code>{price:.2f}</code>.</p>
+          <p>
+            שקול ל-template literal: <code>`sqlite:///${dataDir}`</code>. אפשר
+            גם להוסיף עיצוב אחרי נקודתיים, למשל <code>{price:.2f}</code>.
+          </p>
 
-  <h3>Comprehensions</h3>
-<pre>
+          <h3>Comprehensions</h3>
+          <pre>
 # list comprehension
 [_ingredient_read(item) for item in recipe.ingredients]
 # dict comprehension
 {recipe_id: [] for recipe_id in recipe_ids}
 </pre>
-<pre>
+          <pre>
 // TypeScript
 recipe.ingredients.map((item) => ingredientRead(item));
 Object.fromEntries(recipeIds.map((id) => [id, []]));
 </pre>
-  <p>שימו לב: <code>prep or 0</code> ב-<code>total_minutes</code> דומה ל-<code>prep || 0</code> ב-JS ולא ל-<code>??</code>. הוא מחליף ב-<code>0</code> כל ערך "ריק" (<code>None</code>, <code>0</code>, מחרוזת ריקה), ולא רק <code>None</code>. כאן זה לא משנה, כי <code>0</code> מוחלף ב-<code>0</code>.</p>
+          <p>
+            שימו לב: <code>prep or 0</code> ב-<code>total_minutes</code> דומה
+            ל-<code>prep || 0</code> ב-JS ולא ל-<code>??</code>. הוא מחליף
+            ב-<code>0</code> כל ערך "ריק" (<code>None</code>, <code>0</code>,
+            מחרוזת ריקה), ולא רק <code>None</code>. כאן זה לא משנה, כי
+            <code>0</code> מוחלף ב-<code>0</code>.
+          </p>
 
-  <h3>פונקציות נוספות ששווה להכיר</h3>
-  <ul>
-    <li><code>self</code> ב-method הוא <code>this</code>, אבל מועבר במפורש. <code>__init__</code> הוא הקונסטרקטור.</li>
-    <li><code>_name</code> (קו תחתון) הוא "פרטי" בהסכמה בלבד, כמו <code>private</code> ב-TS, אבל לא נאכף.</li>
-    <li><code>True</code>/<code>False</code>/<code>None</code> = <code>true</code>/<code>false</code>/<code>null</code>.</li>
-    <li><code>class X(StrEnum)</code> הוא enum של מחרוזות (<code>Unit.KG == "kg"</code>).</li>
-    <li><code>lambda x: ...</code> = arrow function קצרה.</li>
-  </ul>
-</section>
+          <h3>פונקציות נוספות ששווה להכיר</h3>
+          <ul>
+            <li>
+              <code>self</code> ב-method הוא <code>this</code>, אבל מועבר
+              במפורש. <code>__init__</code> הוא הקונסטרקטור.
+            </li>
+            <li>
+              <code>_name</code> (קו תחתון) הוא "פרטי" בהסכמה בלבד, כמו
+              <code>private</code> ב-TS, אבל לא נאכף.
+            </li>
+            <li>
+              <code>True</code>/<code>False</code>/<code>None</code> =
+              <code>true</code>/<code>false</code>/<code>null</code>.
+            </li>
+            <li>
+              <code>class X(StrEnum)</code> הוא enum של מחרוזות (<code
+                >Unit.KG == "kg"</code
+              >).
+            </li>
+            <li><code>lambda x: ...</code> = arrow function קצרה.</li>
+          </ul>
+        </section>
 
-<section id="tests">
-  <h2>8. בדיקות</h2>
-  <p class="he-sub">איך <code>conftest.py</code> מקים DB זמני לכל בדיקה.</p>
+        <section id="tests">
+          <h2>8. בדיקות</h2>
+          <p class="he-sub">
+            איך <code>conftest.py</code> מקים DB זמני לכל בדיקה.
+          </p>
 
-  <h3>ה-fixtures ב-<code>tests/conftest.py</code></h3>
-<pre>
+          <h3>ה-fixtures ב-<code>tests/conftest.py</code></h3>
+          <pre>
 # apps/recipe-service/tests/conftest.py
 os.environ["JWT_SECRET"] = "test-secret"
 os.environ["ENV"] = "dev"
 from app.main import create_app   # רק אחרי ההגדרה למעלה
 </pre>
-  <p>ה-env מוגדר לפני ה-import, כי <code>app.main</code> בונה את האפליקציה (ואת ה-settings) בזמן ה-import.</p>
-<pre>
+          <p>
+            ה-env מוגדר לפני ה-import, כי <code>app.main</code> בונה את
+            האפליקציה (ואת ה-settings) בזמן ה-import.
+          </p>
+          <pre>
 @pytest.fixture(autouse=True)
 def isolated_settings(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)                # כל בדיקה ב-cwd זמני
@@ -724,110 +1227,283 @@ def session(client: TestClient) -> Iterator[Session]:
     with Session(get_engine(get_settings().data_dir)) as db_session:
         yield db_session                       # אותו DB שה-client מדבר איתו
 </pre>
-  <div class="tip"><code>autouse=True</code> אומר שה-fixture רץ בכל בדיקה בלי שמבקשים אותו. <code>tmp_path</code> ו-<code>monkeypatch</code> הם fixtures מובנים של pytest, כמו <code>beforeEach</code> עם מוקים של Jest.</div>
+          <div class="tip">
+            <code>autouse=True</code> אומר שה-fixture רץ בכל בדיקה בלי שמבקשים
+            אותו. <code>tmp_path</code> ו-<code>monkeypatch</code> הם fixtures
+            מובנים של pytest, כמו <code>beforeEach</code> עם מוקים של Jest.
+          </div>
 
-  <h3>בדיקה אמיתית</h3>
-<pre>
+          <h3>בדיקה אמיתית</h3>
+          <pre>
 # apps/recipe-service/tests/test_recipes_api.py
 def test_unknown_recipe_is_404_with_a_code(client: TestClient) -> None:
     response = client.get(f"/api/recipes/{uuid.uuid4()}")
     assert response.status_code == 404
     assert response.json() == {"detail": "Recipe not found", "code": "recipe_not_found"}
 </pre>
-  <ul>
-    <li><code>client</code> הוא fixture שמקבלים כפרמטר. pytest מזהה את השם ומזריק את הערך, בדומה ל-DI.</li>
-    <li><code>client.get(...)</code> מדמה בקשה HTTP בלי לפתוח פורט. זה כמו <code>request(app).get(...)</code> של supertest.</li>
-    <li>הבדיקה שולחת UUID אקראי, כלומר רשומה שלא קיימת, ובודקת שני דברים: את הסטטוס ואת הגוף. זה בדיוק מסלול ה-404 של סעיף 3.</li>
-    <li><code>assert</code> הוא ה-expect של Jest.</li>
-  </ul>
-  <p>יש גם <code>test_malformed_id_is_a_422</code> שבודק שמזהה לא תקין מחזיר 422.</p>
-</section>
+          <ul>
+            <li>
+              <code>client</code> הוא fixture שמקבלים כפרמטר. pytest מזהה את השם
+              ומזריק את הערך, בדומה ל-DI.
+            </li>
+            <li>
+              <code>client.get(...)</code> מדמה בקשה HTTP בלי לפתוח פורט. זה כמו
+              <code>request(app).get(...)</code> של supertest.
+            </li>
+            <li>
+              הבדיקה שולחת UUID אקראי, כלומר רשומה שלא קיימת, ובודקת שני דברים:
+              את הסטטוס ואת הגוף. זה בדיוק מסלול ה-404 של סעיף 3.
+            </li>
+            <li><code>assert</code> הוא ה-expect של Jest.</li>
+          </ul>
+          <p>
+            יש גם <code>test_malformed_id_is_a_422</code> שבודק שמזהה לא תקין
+            מחזיר 422.
+          </p>
+        </section>
 
-<section id="run">
-  <h2>9. הרצה והתנסות</h2>
-  <p class="he-sub">צעדים מעשיים. כל הפקודות מתוך שורש המאגר, אלא אם נכתב אחרת.</p>
+        <section id="run">
+          <h2>9. הרצה והתנסות</h2>
+          <p class="he-sub">
+            צעדים מעשיים. כל הפקודות מתוך שורש המאגר, אלא אם נכתב אחרת.
+          </p>
 
-  <h3>הכנה (פעם אחת)</h3>
-  <ol class="steps">
-    <li>התקינו את <code>uv</code>, כלי ניהול החבילות של Python (הדומה ל-npm).</li>
-    <li>התקינו תלויות של הפייתון:
-<pre>
+          <h3>הכנה (פעם אחת)</h3>
+          <ol class="steps">
+            <li>
+              התקינו את <code>uv</code>, כלי ניהול החבילות של Python (הדומה
+              ל-npm).
+            </li>
+            <li>
+              התקינו תלויות של הפייתון:
+              <pre>
 cd apps/recipe-service
 uv sync
 </pre>
-    </li>
-    <li>צרו קובץ <code>.env</code> מהדוגמה, והגדירו <code>JWT_SECRET</code>:
-<pre>
+            </li>
+            <li>
+              צרו קובץ <code>.env</code> מהדוגמה, והגדירו
+              <code>JWT_SECRET</code>:
+              <pre>
 cp .env.example .env
 </pre>
-      (אם כבר יש לכם <code>.env</code> עובד, אין צורך.) ערך ל-<code>JWT_SECRET</code> אפשר לייצר עם <code>uv run python -c "import secrets; print(secrets.token_urlsafe(48))"</code>.
-    </li>
-  </ol>
+              (אם כבר יש לכם <code>.env</code> עובד, אין צורך.) ערך ל-<code
+                >JWT_SECRET</code
+              >
+              אפשר לייצר עם
+              <code
+                >uv run python -c "import secrets;
+                print(secrets.token_urlsafe(48))"</code
+              >.
+            </li>
+          </ol>
 
-  <h3>הפעלת השרת</h3>
-<pre>
+          <h3>הפעלת השרת</h3>
+          <pre>
 npx nx run recipe-service:serve
 </pre>
-  <p>או ישירות: <code>cd apps/recipe-service</code> ואז <code>uv run uvicorn app.main:app --reload --port 8000</code>.</p>
-  <ul>
-    <li>Swagger UI: <a href="http://localhost:8000/docs">http://localhost:8000/docs</a> – כל ה-endpoints, ואפשר ללחוץ "Try it out". זה מה שמייצר את החוזה ל-Frontend (AD-3).</li>
-    <li>OpenAPI JSON: <a href="http://localhost:8000/openapi.json">http://localhost:8000/openapi.json</a>.</li>
-    <li>בדיקת בריאות: <a href="http://localhost:8000/api/health">http://localhost:8000/api/health</a>.</li>
-    <li>הערה: <code>localhost:8000/docs</code> ישירות, בלי ה-Vite proxy. ה-proxy רק עובר על <code>/api/</code>.</li>
-  </ul>
+          <p>
+            או ישירות: <code>cd apps/recipe-service</code> ואז
+            <code>uv run uvicorn app.main:app --reload --port 8000</code>.
+          </p>
+          <ul>
+            <li>
+              Swagger UI:
+              <a href="http://localhost:8000/docs"
+                >http://localhost:8000/docs</a
+              >
+              – כל ה-endpoints, ואפשר ללחוץ "Try it out". זה מה שמייצר את החוזה
+              ל-Frontend (AD-3).
+            </li>
+            <li>
+              OpenAPI JSON:
+              <a href="http://localhost:8000/openapi.json"
+                >http://localhost:8000/openapi.json</a
+              >.
+            </li>
+            <li>
+              בדיקת בריאות:
+              <a href="http://localhost:8000/api/health"
+                >http://localhost:8000/api/health</a
+              >.
+            </li>
+            <li>
+              הערה: <code>localhost:8000/docs</code> ישירות, בלי ה-Vite proxy.
+              ה-proxy רק עובר על <code>/api/</code>.
+            </li>
+          </ul>
 
-  <h3>צפייה במסד הנתונים</h3>
-  <ol class="steps">
-    <li>התקינו את <strong>DB Browser for SQLite</strong> (תוכנה חינמית).</li>
-    <li>פתחו את הקובץ <code>apps/recipe-service/data/app.db</code>.</li>
-    <li>טיפ: בזמן שהשרת רץ יש ליד הקובץ גם <code>app.db-wal</code>, שמכיל שינויים אחרונים שעוד לא הועברו לקובץ הראשי. פתחו את הקובץ במצב קריאה בלבד (Open Read Only) ואל תערכו נתונים בזמן שהשרת רץ. אל תעתיקו את <code>app.db</code> לבדו לשם גיבוי כשהשרת פועל, כי השינויים האחרונים עלולים להישאר ב-WAL.</li>
-    <li>ה-tables: <code>recipe</code>, <code>ingredient</code>, <code>step</code>, <code>tag</code>, <code>recipe_tag</code>, ו-<code>alembic_version</code> (איזו מיגרציה הורצה).</li>
-  </ol>
+          <h3>צפייה במסד הנתונים</h3>
+          <ol class="steps">
+            <li>
+              התקינו את <strong>DB Browser for SQLite</strong> (תוכנה חינמית).
+            </li>
+            <li>פתחו את הקובץ <code>apps/recipe-service/data/app.db</code>.</li>
+            <li>
+              טיפ: בזמן שהשרת רץ יש ליד הקובץ גם <code>app.db-wal</code>, שמכיל
+              שינויים אחרונים שעוד לא הועברו לקובץ הראשי. פתחו את הקובץ במצב
+              קריאה בלבד (Open Read Only) ואל תערכו נתונים בזמן שהשרת רץ. אל
+              תעתיקו את <code>app.db</code> לבדו לשם גיבוי כשהשרת פועל, כי
+              השינויים האחרונים עלולים להישאר ב-WAL.
+            </li>
+            <li>
+              ה-tables: <code>recipe</code>, <code>ingredient</code>,
+              <code>step</code>, <code>tag</code>, <code>recipe_tag</code>,
+              ו-<code>alembic_version</code> (איזו מיגרציה הורצה).
+            </li>
+          </ol>
 
-  <h3>הרצת הבדיקות וכלי האיכות</h3>
-<pre>
+          <h3>הרצת הבדיקות וכלי האיכות</h3>
+          <pre>
 npx nx run recipe-service:test        # pytest (כולל coverage ודוחות ב-../../coverage ו-../../reports)
 npx nx run recipe-service:lint        # ruff check + ruff format --check + lint-imports
 npx nx run recipe-service:typecheck   # mypy (strict)
 </pre>
-  <p>או ישירות בתיקיית השירות: <code>uv run pytest tests/</code>, <code>uv run ruff check app tests</code>, <code>uv run mypy</code>, <code>uv run lint-imports</code>.</p>
+          <p>
+            או ישירות בתיקיית השירות: <code>uv run pytest tests/</code>,
+            <code>uv run ruff check app tests</code>, <code>uv run mypy</code>,
+            <code>uv run lint-imports</code>.
+          </p>
 
-  <h3>הרצת מיגרציות ידנית</h3>
-<pre>
+          <h3>הרצת מיגרציות ידנית</h3>
+          <pre>
 cd apps/recipe-service
 uv run alembic current
 uv run alembic history
 </pre>
-  <p>שימו לב: השרת מריץ את המיגרציות לבד בעלייה (<code>app/core/migrate.py</code>). פקודות Alembic ידניות נדרשות רק כשיוצרים מיגרציה חדשה.</p>
-</section>
+          <p>
+            שימו לב: השרת מריץ את המיגרציות לבד בעלייה
+            (<code>app/core/migrate.py</code>). פקודות Alembic ידניות נדרשות רק
+            כשיוצרים מיגרציה חדשה.
+          </p>
+        </section>
 
-<section id="glossary">
-  <h2>10. מילון מונחים</h2>
-  <div class="table-wrap"><table>
-    <thead><tr><th>מונח</th><th>הסבר קצר</th></tr></thead>
-    <tbody>
-      <tr><td>ASGI</td><td>ממשק סטנדרטי בין שרת (כמו uvicorn) לאפליקציה (כמו FastAPI), כך שאפשר להחליף כל צד. דומה לחוזה <code>(req, res)</code> שבין שרת ה-HTTP של Node לבין Express.</td></tr>      <tr><td>uvicorn</td><td>השרת שמאזין לפורט ומריץ את אפליקציית ה-ASGI.</td></tr>
-      <tr><td>Pydantic</td><td>ספריית ולידציה וטיפוסים. מגדירה את הסכמות של הבקשות והתשובות.</td></tr>
-      <tr><td>pydantic-settings</td><td>קורא משתני סביבה ו-<code>.env</code> לתוך מחלקת Settings מאומתת.</td></tr>
-      <tr><td>SQLAlchemy</td><td>ה-ORM של Python: ממפה מחלקות לטבלאות, ומנהל את ה-engine והחיבורים למסד הנתונים.</td></tr>
-      <tr><td>SQLModel</td><td>שכבה מעל SQLAlchemy ו-Pydantic, שמאפשרת להגדיר מחלקה אחת שהיא גם טבלה וגם סכמה של Pydantic. בפרויקט הזה בוחרים להפריד: טבלאות ב-<code>models.py</code> ו-DTOs ב-<code>schemas.py</code>.</td></tr>
-      <tr><td>Session</td><td>יחידת עבודה מול ה-DB. נפתחת לכל בקשה ונסגרת בסוף.</td></tr>
-      <tr><td>Alembic</td><td>כלי מיגרציות ל-SQLAlchemy. כל שינוי סכמה הוא קובץ עם <code>upgrade()</code>.</td></tr>
-      <tr><td>Migration (מיגרציה)</td><td>קובץ גרסה שמשנה את הסכמה. רץ פעם אחת, ונרשם בטבלת <code>alembic_version</code>.</td></tr>
-      <tr><td>Dependency (<code>Depends</code>)</td><td>פונקציה שמזריקה ערך לפרמטר של endpoint. אפשר לשרשר.</td></tr>
-      <tr><td>Lifespan</td><td>הקשר async שרץ בעלייה ובכיבוי של האפליקציה.</td></tr>
-      <tr><td>Router (APIRouter)</td><td>קבוצת endpoints עם קידומת ו-tags, מקביל ל-Controller.</td></tr>
-      <tr><td>Aggregate (AD-4)</td><td>המתכון כיחידה אחת: המצרכים והשלבים שייכים אליו ונשמרים יחד.</td></tr>
-      <tr><td>WAL</td><td>Write-Ahead Log: מצב של SQLite שבו קריאות ממשיכות גם בזמן כתיבה.</td></tr>
-      <tr><td>Pragma</td><td>הגדרה ספציפית ל-SQLite, כמו <code>foreign_keys=ON</code>.</td></tr>
-      <tr><td>import-linter</td><td>כלי שאוכף כללי תלות בין מודולים, כמו תגיות Nx.</td></tr>
-      <tr><td>AD-xx</td><td>החלטת ארכיטקטורה מתוך ה-ARCHITECTURE-SPINE (<code>_bmad-output/planning-artifacts/architecture/</code>).</td></tr>
-      <tr><td>DTO</td><td>אובייקט העברה. במקרה שלנו: מחלקה ב-<code>schemas.py</code> לקלט או לפלט של ה-API.</td></tr>
-    </tbody>
-  </table></div>
-</section>
-
-</main>
-</div>
-</body>
+        <section id="glossary">
+          <h2>10. מילון מונחים</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>מונח</th>
+                  <th>הסבר קצר</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>ASGI</td>
+                  <td>
+                    ממשק סטנדרטי בין שרת (כמו uvicorn) לאפליקציה (כמו FastAPI),
+                    כך שאפשר להחליף כל צד. דומה לחוזה
+                    <code>(req, res)</code> שבין שרת ה-HTTP של Node לבין
+                    Express.
+                  </td>
+                </tr>
+                <tr>
+                  <td>uvicorn</td>
+                  <td>השרת שמאזין לפורט ומריץ את אפליקציית ה-ASGI.</td>
+                </tr>
+                <tr>
+                  <td>Pydantic</td>
+                  <td>
+                    ספריית ולידציה וטיפוסים. מגדירה את הסכמות של הבקשות
+                    והתשובות.
+                  </td>
+                </tr>
+                <tr>
+                  <td>pydantic-settings</td>
+                  <td>
+                    קורא משתני סביבה ו-<code>.env</code> לתוך מחלקת Settings
+                    מאומתת.
+                  </td>
+                </tr>
+                <tr>
+                  <td>SQLAlchemy</td>
+                  <td>
+                    ה-ORM של Python: ממפה מחלקות לטבלאות, ומנהל את ה-engine
+                    והחיבורים למסד הנתונים.
+                  </td>
+                </tr>
+                <tr>
+                  <td>SQLModel</td>
+                  <td>
+                    שכבה מעל SQLAlchemy ו-Pydantic, שמאפשרת להגדיר מחלקה אחת
+                    שהיא גם טבלה וגם סכמה של Pydantic. בפרויקט הזה בוחרים
+                    להפריד: טבלאות ב-<code>models.py</code> ו-DTOs
+                    ב-<code>schemas.py</code>.
+                  </td>
+                </tr>
+                <tr>
+                  <td>Session</td>
+                  <td>יחידת עבודה מול ה-DB. נפתחת לכל בקשה ונסגרת בסוף.</td>
+                </tr>
+                <tr>
+                  <td>Alembic</td>
+                  <td>
+                    כלי מיגרציות ל-SQLAlchemy. כל שינוי סכמה הוא קובץ עם
+                    <code>upgrade()</code>.
+                  </td>
+                </tr>
+                <tr>
+                  <td>Migration (מיגרציה)</td>
+                  <td>
+                    קובץ גרסה שמשנה את הסכמה. רץ פעם אחת, ונרשם בטבלת
+                    <code>alembic_version</code>.
+                  </td>
+                </tr>
+                <tr>
+                  <td>Dependency (<code>Depends</code>)</td>
+                  <td>פונקציה שמזריקה ערך לפרמטר של endpoint. אפשר לשרשר.</td>
+                </tr>
+                <tr>
+                  <td>Lifespan</td>
+                  <td>הקשר async שרץ בעלייה ובכיבוי של האפליקציה.</td>
+                </tr>
+                <tr>
+                  <td>Router (APIRouter)</td>
+                  <td>קבוצת endpoints עם קידומת ו-tags, מקביל ל-Controller.</td>
+                </tr>
+                <tr>
+                  <td>Aggregate (AD-4)</td>
+                  <td>
+                    המתכון כיחידה אחת: המצרכים והשלבים שייכים אליו ונשמרים יחד.
+                  </td>
+                </tr>
+                <tr>
+                  <td>WAL</td>
+                  <td>
+                    Write-Ahead Log: מצב של SQLite שבו קריאות ממשיכות גם בזמן
+                    כתיבה.
+                  </td>
+                </tr>
+                <tr>
+                  <td>Pragma</td>
+                  <td>
+                    הגדרה ספציפית ל-SQLite, כמו <code>foreign_keys=ON</code>.
+                  </td>
+                </tr>
+                <tr>
+                  <td>import-linter</td>
+                  <td>כלי שאוכף כללי תלות בין מודולים, כמו תגיות Nx.</td>
+                </tr>
+                <tr>
+                  <td>AD-xx</td>
+                  <td>
+                    החלטת ארכיטקטורה מתוך ה-ARCHITECTURE-SPINE
+                    (<code>_bmad-output/planning-artifacts/architecture/</code>).
+                  </td>
+                </tr>
+                <tr>
+                  <td>DTO</td>
+                  <td>
+                    אובייקט העברה. במקרה שלנו: מחלקה ב-<code>schemas.py</code>
+                    לקלט או לפלט של ה-API.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
 </html>

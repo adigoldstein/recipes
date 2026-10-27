@@ -127,14 +127,14 @@ index 659de4a..e312344 100644
 --- a/_bmad-output/implementation-artifacts/epic-1-context.md
 +++ b/_bmad-output/implementation-artifacts/epic-1-context.md
 @@ -4,7 +4,7 @@
- 
+
  ## Goal
- 
+
 -Anyone can open Bite & Board (ביס & סיר) on a phone or desktop — Hebrew, right-to-left, light or dark — browse seeded recipes, search them, filter by meal type, open a recipe and scale servings live, with the screen kept awake while cooking. The epic first reshapes the existing brownfield Nx 24 scaffold (FastAPI backend + React SPA) to the agreed architecture and lays the shared groundwork (libs, OpenAPI client pipeline, database and migrations, theme, app shell, seed data, CI) that every later epic builds on.
 +Anyone can open Bite & Board (ביס & סיר) on a phone or desktop — Hebrew, right-to-left, light or dark — browse seeded recipes, search them, filter by tag, open a recipe and scale servings live, with the screen kept awake while cooking. The epic first reshapes the existing brownfield Nx 24 scaffold (FastAPI backend + React SPA) to the agreed architecture and lays the shared groundwork (libs, OpenAPI client pipeline, database and migrations, theme, app shell, seed data, CI) that every later epic builds on.
- 
+
  ## Stories
- 
+
 @@ -16,16 +16,16 @@ Anyone can open Bite & Board (ביס & סיר) on a phone or desktop — Hebrew,
  - Story 1.6: Recipe data model and read API
  - Story 1.7: Generated API client pipeline
@@ -143,9 +143,9 @@ index 659de4a..e312344 100644
 +- Story 1.9: Recipe library with search and tag filter
  - Story 1.10: Recipe detail page
  - Story 1.11: Live serving scaling and kitchen mode
- 
+
  ## Requirements & Constraints
- 
+
 -- Library: every recipe as a card (title, meal type, tags, total time, photo), newest first; title search as you type (case-insensitive substring); one meal-type filter; filters live in the URL and survive navigation.
 +- Library: every recipe as a card (title, up to 2 tags plus +N, total time, photo), newest first; title search as you type (case-insensitive substring); multi-select pinned-tag chips (AND); filters live in the URL and survive navigation.
  - Detail page shows photo, ingredients (amount, unit, name, note; to-taste lines read "לפי הטעם") and numbered steps; unknown id → not-found page.
@@ -293,13 +293,13 @@ index b5ccebe..6a1e5c4 100644
    epic-1-retrospective: optional
 @@ -70,7 +70,7 @@ development_status:
    epic-3-retrospective: optional
- 
+
    epic-4: backlog
 -  4-1-manage-meal-types-and-tags: backlog
 +  4-1-manage-tags: backlog
    4-2-filter-the-library-by-tags: backlog
    epic-4-retrospective: optional
- 
+
 diff --git a/_bmad-output/planning-artifacts/architecture/architecture-recipes-2026-10-26/.memlog.md b/_bmad-output/planning-artifacts/architecture/architecture-recipes-2026-10-26/.memlog.md
 index c41e403..e6e5b49 100644
 --- a/_bmad-output/planning-artifacts/architecture/architecture-recipes-2026-10-26/.memlog.md
@@ -315,7 +315,7 @@ index 54f7ae2..d08cd77 100644
 --- a/_bmad-output/planning-artifacts/architecture/architecture-recipes-2026-10-26/ARCHITECTURE-SPINE.md
 +++ b/_bmad-output/planning-artifacts/architecture/architecture-recipes-2026-10-26/ARCHITECTURE-SPINE.md
 @@ -73,7 +73,7 @@ flowchart LR
- 
+
  - **Binds:** F2–F6, F10, FR-7–9
  - **Prevents:** two writers of ingredients, and the original-value rule implemented in two places.
 -- **Rule:** `GET/POST/PUT /api/recipes[/{id}]` read and write the **whole** recipe in one transaction: fields, ordered ingredients, ordered steps, meal-type id, tag ids and photo key. PUT replaces the full aggregate. Existing ingredients keep their `id`; new ones have none. Only `recipes.service` applies FR-7–9:
@@ -326,18 +326,18 @@ index 54f7ae2..d08cd77 100644
 @@ -99,11 +99,12 @@ flowchart LR
    - Passwords are hashed with Argon2id via pwdlib. The first admin is created by CLI only (AD-30).
    - Login is rate-limited (5 per minute).
- 
+
 -### AD-7 — Meal types and tags share one table [ADOPTED]
 +### AD-7 — Tags are one flat list [ADOPTED]
- 
+
  - **Binds:** F1, F10
  - **Prevents:** two taxonomies with two APIs, and duplicate tags.
 -- **Rule:** `tag(id, name, group ∈ {meal_type, tag})` is unique on `(group, lower(name))`, and `recipe_tag(recipe_id, tag_id)` links them. `recipes.service` enforces **exactly one** `meal_type` per recipe (otherwise 422). Only `tags.service` creates, renames or deletes tags. A `meal_type` still in use cannot be deleted. Deleting a `tag` detaches it from all recipes.
 +- **Rule:** `tag(id, name, pinned, sort_order)` is unique on `lower(name)`, and `recipe_tag(recipe_id, tag_id)` links it to recipes. There are no tag groups and no meal types: a recipe has any number of tags (0..n), and none is required. `pinned` tags are the quick-filter chips in the library, shown in `sort_order`; unpinned tags have no `sort_order`. Only `tags.service` creates, renames, pins or deletes tags. Deleting a tag detaches it from all recipes.
 +- **Supersedes:** the earlier "one table with `group`, exactly one meal type per recipe" rule (Adi, 2026-10-27).
- 
+
  ### AD-8 — State ownership on the client [ADOPTED]
- 
+
 @@ -112,7 +113,7 @@ flowchart LR
  - **Rule:**
    - **Server data:** TanStack Query only, through the generated hooks.
@@ -345,7 +345,7 @@ index 54f7ae2..d08cd77 100644
 -  - **List filters:** live in the **URL** (`?q=&meal=&tags=`).
 +  - **List filters:** live in the **URL** (`?q=&tags=`).
    - **Scaling:** local component state, never persisted (FR-11).
- 
+
  ### AD-9 — Forms and errors [ADOPTED]
 @@ -148,7 +149,7 @@ flowchart LR
      - `gemini`: free tier, the optional backup.
@@ -355,7 +355,7 @@ index 54f7ae2..d08cd77 100644
 +  - Every provider returns schema-constrained JSON, validated against the shared Pydantic `DraftRecipe`. The draft is Hebrew-translated, has units mapped to the app list, and suggests tags from the existing list (new tag names are proposed in the draft).
    - An import is **one synchronous request** with a per-provider timeout (`ollama` ≈ 180s, `gemini` 60s), and the client aborts it on cancel.
    - Drafts are **never persisted** (FR-19). A new provider means one adapter plus one config entry.
- 
+
 @@ -225,12 +226,12 @@ flowchart LR
      - An `id` from another recipe returns 422.
      - An omitted ingredient is deleted, and a row without an `id` is inserted.
@@ -369,11 +369,11 @@ index 54f7ae2..d08cd77 100644
 -  - **Read shapes:** read schemas embed `meal_type: {id, name}` and `tags: [{id, name}]`.
 +  - **Read shapes:** read schemas embed `tags: [{id, name}]`, ordered by `sort_order` (pinned first) and then name.
    - **Concurrency:** for the MVP, the last write wins [ASSUMPTION].
- 
+
  ### AD-21 — Session endpoints and 401 handling [ADOPTED]
 @@ -268,11 +269,12 @@ flowchart LR
  ### AD-24 — Persistence and bootstrap [ADOPTED]
- 
+
  - **Binds:** AD-18, F7, F10, NFR-6
 -- **Prevents:** a fresh database that can't save a recipe, silent no-op cascades, duplicate meal types, and timezone shifts.
 +- **Prevents:** a fresh database that can't save a recipe, silent no-op cascades, duplicate tags, and timezone shifts.
@@ -404,9 +404,9 @@ index 54f7ae2..d08cd77 100644
 -  - URL params hold IDs: `?q=&meal=<uuid>&tags=<uuid>,<uuid>`.
 +  - Search (case-insensitive substring on the title) and filtering (tags, with AND: a recipe must have all selected tags) run on the client over the cached list. This is one pure function, used with `useDeferredValue`.
 +  - URL params hold IDs: `?q=&tags=<uuid>,<uuid>`.
- 
+
  ### AD-27 — Photo lifecycle [ADOPTED]
- 
+
 @@ -390,7 +392,7 @@ flowchart LR
  | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
  | API paths     | `/api/<plural-noun>`, kebab-case. JSON fields are snake_case on the wire, and the generated client uses them as-is.                                                                                                                                                                                |
@@ -430,9 +430,9 @@ index 03371a0..a1aae4f 100644
 --- a/_bmad-output/planning-artifacts/epics.md
 +++ b/_bmad-output/planning-artifacts/epics.md
 @@ -19,9 +19,9 @@ This document breaks the requirements from the PRD, the UX design contract (DESI
- 
+
  ### Functional Requirements
- 
+
 -FR1: The library lists every recipe as a card showing the title, meal type, tags, total time (if known) and photo (if any), newest first. An empty state invites the user to create a recipe.
 +FR1: The library lists every recipe as a card showing the title, up to 2 tags plus "+N", total time (if known) and photo (if any), newest first. An empty state invites the user to create a recipe.
  FR2: Search filters recipes by title as you type (case-insensitive substring). When nothing matches, the library shows "no recipes found" with a way to clear the search.
@@ -513,7 +513,7 @@ index 03371a0..a1aae4f 100644
    UX-DR20: Responsive layouts:
  - library: 1 column below 640, 2 columns from `sm`, 3 from `lg`
 @@ -184,7 +184,7 @@ UX-DR4: App shell. One top bar with no sidebar:
- 
+
  FR1: Epic 1 - Library list with cards, newest first, empty state
  FR2: Epic 1 - Search by title as you type
 -FR3: Epic 1 (meal-type filter) + Epic 4 (tag filter) - Combined filters kept in the URL
@@ -535,47 +535,47 @@ index 03371a0..a1aae4f 100644
  FR26: Epic 2 - Change role, block, reset password; protect the last admin
  FR27: Epic 2 - Change your own password
 @@ -216,8 +216,8 @@ FR27: Epic 2 - Change your own password
- 
+
  ### Epic 1: Browse and cook from the phone
- 
+
 -Anyone can open ביס & סיר on a phone or desktop (Hebrew, RTL, light or dark), browse the seeded recipes, search them, filter by meal type, open a recipe and scale it live, with the screen staying awake in the kitchen. The groundwork comes first: adapting the scaffold, the shared libs, the OpenAPI pipeline, the database with its migrations and Hebrew meal types, the theme, the app shell, seed data and CI.
 -**FRs covered:** FR1, FR2, FR3 (meal type), FR5, FR11, FR12
 +Anyone can open ביס & סיר on a phone or desktop (Hebrew, RTL, light or dark), browse the seeded recipes, search them, filter by tag, open a recipe and scale it live, with the screen staying awake in the kitchen. The groundwork comes first: adapting the scaffold, the shared libs, the OpenAPI pipeline, the database with its migrations and pinned Hebrew tags, the theme, the app shell, seed data and CI.
 +**FRs covered:** FR1, FR2, FR3 (pinned tags), FR5, FR11, FR12
- 
+
  ### Epic 2: Accounts, login and roles
- 
+
 @@ -226,17 +226,17 @@ Adi bootstraps the admin account, and users log in and out. Visitors read, edito
- 
+
  ### Epic 3: Create, edit and delete recipes
- 
+
 -Editors create recipes in the full form: ingredient and step rows, fractions, validation, and an unsaved-changes guard. They pick the meal type and tags (creating new tags inline) and add a photo. Editing keeps "originally …" hints, with reset to original, and recipes can be deleted after a confirmation.
 +Editors create recipes in the full form: ingredient and step rows, fractions, validation, and an unsaved-changes guard. They pick tags (creating new tags inline) and add a photo. Editing keeps "originally …" hints, with reset to original, and recipes can be deleted after a confirmation.
  **FRs covered:** FR4, FR6, FR7, FR8, FR9, FR10, FR22
- 
+
 -### Epic 4: Organise with meal types and tags
 +### Epic 4: Organise with tags
- 
+
 -Editors manage meal types and tags (add, rename, delete, with usage counts), and everyone can filter the library by tags.
 +Editors manage tags (add, rename, delete, pin or unpin, with usage counts), and everyone can filter the library by tags.
  **FRs covered:** FR3 (tags), FR23
- 
+
  ### Epic 5: AI import
- 
+
 -Editors import a recipe from a link or from pasted text with Ollama (local) or Gemini. They get a Hebrew draft with a suggested meal type, tags and photo, review the flagged fields, and save. Progress, cancel and per-engine timeouts make slow local runs usable. Story 5.1 is the spike that compares Ollama and Gemini and confirms the default engine.
 +Editors import a recipe from a link or from pasted text with Ollama (local) or Gemini. They get a Hebrew draft with suggested tags and photo, review the flagged fields, and save. Progress, cancel and per-engine timeouts make slow local runs usable. Story 5.1 is the spike that compares Ollama and Gemini and confirms the default engine.
  **FRs covered:** FR17, FR18, FR19, FR20, FR21, FR24
- 
+
  ### Epic 6: Ready to show
 @@ -246,7 +246,7 @@ The app runs as one production container (`docker compose up`) with backups, str
- 
+
  ## Epic 1: Browse and cook from the phone
- 
+
 -Anyone can open ביס & סיר on a phone or desktop (Hebrew, RTL, light or dark), browse the seeded recipes, search them, filter by meal type, open a recipe and scale it live. The first stories adapt the existing scaffold to the architecture spine.
 +Anyone can open ביס & סיר on a phone or desktop (Hebrew, RTL, light or dark), browse the seeded recipes, search them, filter by tag, open a recipe and scale it live. The first stories adapt the existing scaffold to the architecture spine.
- 
+
  ### Story 1.1: Adapt the backend scaffold
- 
+
 @@ -367,12 +367,13 @@ So that the app has real data to show.
  - nullable `created_by`/`updated_by` UUID columns (their foreign key to `user` is added in Story 2.1, when that table exists)
  - `ON DELETE CASCADE` on child rows
@@ -584,16 +584,16 @@ index 03371a0..a1aae4f 100644
 +  **And** tags are one flat list: `tag(id, name, pinned, sort_order)` unique on `lower(name)`, with no groups and no meal types. A recipe has any number of tags, and none is required
 +  **And** a data migration inserts 13 pinned tags with fixed UUIDs, Hebrew names and `sort_order` 0-12, in this order: בוקר, בראנץ', צהריים, ערב, נשנוש, עיקרית, תוספת, מנה ראשונה/סלט, מרק, מאפה, קינוח, משקה, רוטב/ממרח
    **And** a failed migration exits the app non-zero
- 
+
  **Given** recipes exist
  **When** `GET /api/recipes` is called
 -**Then** it returns all `RecipeSummary` items, unpaginated, sorted by `created_at desc, id` (AD-26). Each summary has: id, title, meal_type `{id,name}`, tags `[{id,name}]`, total_minutes or null, photo or null, and created_at
 +**Then** it returns all `RecipeSummary` items, unpaginated, sorted by `created_at desc, id` (AD-26). Each summary has: id, title, tags `[{id,name}]` (ordered by `sort_order`, pinned first, then name), total_minutes or null, photo or null, and created_at
  **And** `GET /api/recipes/{id}` returns the full `RecipeRead` (AD-20, AD-31), with:
- 
+
  - `description` and `notes`, each a string or null
 @@ -408,23 +409,23 @@ So that it looks alive for demos and development (FR12).
- 
+
  **Given** a migrated database
  **When** `nx run recipe-service:seed` (`python -m app.cli seed`) runs
 -**Then** about 10 Hebrew recipes are created through `recipes.service`, not raw SQL. They cover every default meal type and several tags, such as על האש, פינגר פוד and מסיבות (AD-24)
@@ -603,24 +603,24 @@ index 03371a0..a1aae4f 100644
 -**And** the seed never creates meal types
 +**And** the seed never creates the default tags
  **And** an ingredient with an original value is added to the seed in Epic 3, once the original-value rule exists
- 
+
 -### Story 1.9: Recipe library with search and meal-type filter
 +### Story 1.9: Recipe library with search and tag filter
- 
+
  As a visitor,
 -I want to see all recipes as cards, search them and filter by meal type,
 +I want to see all recipes as cards, search them and filter by tag,
  So that I can quickly find what to cook (FR1, FR2, FR3).
- 
+
  **Acceptance Criteria:**
- 
+
  **Given** the seeded recipes
  **When** I open `/`
 -**Then** I see `RecipeCard`s, newest first: 1 column on phone, 2 from `sm`, 3 from `lg` (UX-DR6, UX-DR7, UX-DR20). Each card is a board with the slot, title, meal type, up to 3 tags and total time, with a larger title when there is no photo
 +**Then** I see `RecipeCard`s, newest first: 1 column on phone, 2 from `sm`, 3 from `lg` (UX-DR6, UX-DR7, UX-DR20). Each card is a board with the slot, title, up to 2 tags plus "+N" for the rest, and total time, with a larger title when there is no photo
  **And** the page lives in a new `libs/feature-recipes` (tag `type:feature`) as the lazy subpath export `@bite-and-board/feature-recipes/library`, replacing the placeholder home route in `apps/web` (AD-2, AD-11)
  **And** while loading I see 6 skeleton cards. With no recipes I see the visitor empty state "עוד אין כאן מתכונים" (UX-DR17)
- 
+
 @@ -432,8 +433,9 @@ So that I can quickly find what to cook (FR1, FR2, FR3).
  **When** I type in the search field
  **Then** only recipes whose title contains the text remain (case-insensitive). The list updates as I type, using `useDeferredValue` and no network call, and the value is kept in `?q=` (UX-DR11)
@@ -634,25 +634,25 @@ index 03371a0..a1aae4f 100644
  **And** filtering is one pure function in `libs/recipe-domain`, with unit tests (AD-26, AD-32)
  **And** with 200 recipes, filtering takes under 100 ms per keystroke (NFR-3)
 @@ -448,7 +450,7 @@ So that I can cook from it (FR5).
- 
+
  **Given** a recipe exists
  **When** I open `/recipes/:id`
 -**Then** I see the meal type, prep and cook time, the title in display style, the description under it if there is one, the ingredient board, numbered steps, and the source link if there is one (UX-DR6, UX-DR10)
 +**Then** I see the tags, prep and cook time, the title in display style, the description under it if there is one, the ingredient board, numbered steps, and the source link if there is one (UX-DR6, UX-DR10)
  **And** when the recipe has notes, a "הערות וטיפים" section follows the steps and shows them as plain text with line breaks kept (never as HTML); with no notes, the section is absent
  **And** each `IngredientLine` shows:
- 
+
 @@ -597,7 +599,7 @@ So that I can replace the starting password the admin gave me (FR27).
- 
+
  ## Epic 3: Create, edit and delete recipes
- 
+
 -Editors create recipes with the full form, attach meal type, tags and a photo, edit them while the app remembers the original quantities, reset to original, and delete.
 +Editors create recipes with the full form, attach tags and a photo, edit them while the app remembers the original quantities, reset to original, and delete.
- 
+
  ### Story 3.1: Create a recipe (API and basic form)
- 
+
 @@ -609,7 +611,7 @@ So that my recipes live in one place (FR4).
- 
+
  **Given** I'm signed in as an editor
  **When** I tap "מתכון חדש" (top bar, or "+" on phone)
 -**Then** `/recipes/new` shows a form with these fields: title, description, notes (a multi-line textarea, optional, "הערות וטיפים"), each of description and notes with a live character counter against its limit (500 and 5,000), meal type (required select), servings, prep and cook time, source URL (`dir="ltr"`), plus ingredient rows (amount as a number, unit select with Hebrew labels for the `Unit` enum, name, note) and step rows, with add and remove buttons
@@ -669,31 +669,31 @@ index 03371a0..a1aae4f 100644
  **And** leaving with unsaved changes (link, back or closing the tab) asks "לצאת בלי לשמור?" (UX-DR15)
  **And** a failed save (network or 5xx) keeps every value and shows a retry toast (UX-DR17)
 @@ -729,29 +730,30 @@ So that a variation takes seconds (FR4).
- 
+
  **Given** a recipe's detail page
  **When** I tap "שכפול"
 -**Then** the create form opens prefilled with that recipe's title (with " (עותק)" added), description, notes, meal type, servings, times, ingredients, steps and tags, through router state like the import draft (AD-22), and nothing is saved until "שמירה"
 +**Then** the create form opens prefilled with that recipe's title (with " (עותק)" added), description, notes, servings, times, ingredients, steps and tags, through router state like the import draft (AD-22), and nothing is saved until "שמירה"
  **And** the copy has no `original` hints, no photo and no `source` values, so it starts clean, and the source URL is kept
  **And** the story is optional: it can be dropped without affecting any other story
- 
+
 -## Epic 4: Organise with meal types and tags
 +## Epic 4: Organise with tags
- 
+
 -Editors manage the meal-type list and the tags, and everyone can filter the library by tags.
 +Editors manage the tags (add, rename, delete, pin), and everyone can filter the library by any tag.
- 
+
 -### Story 4.1: Manage meal types and tags
 +### Story 4.1: Manage tags
- 
+
  As an editor,
 -I want one screen to add, rename and delete meal types and tags,
 -So that my categories stay tidy (FR23).
 +I want one screen to add, rename, delete and pin tags,
 +So that my tags stay tidy and my quick filters match how I cook (FR23).
- 
+
  **Acceptance Criteria:**
- 
+
  **Given** I'm signed in as an editor
 -**When** I open "תגיות וסוגי ארוחה" from the account menu
 -**Then** `/tags` shows two lists, meal types and tags, each with inline rename and add (UX-DR18)
@@ -708,10 +708,10 @@ index 03371a0..a1aae4f 100644
 +**And** adding a tag with a name that exists (case-insensitive) returns 409 `tag_name_taken`
  **And** after any change, the tags, the library list and recipe details are invalidated (AD-19)
  **And** only `tags.service` changes tags (AD-7), and API tests cover every rule
- 
+
 @@ -764,10 +766,10 @@ So that I can find, for example, all barbecue party dishes (FR3 tags).
  **Acceptance Criteria:**
- 
+
  **Given** the library
 -**When** I tap "תגיות"
 -**Then** a sheet (phone) or popover (desktop) lists every tag with checkboxes (UX-DR11)
@@ -723,7 +723,7 @@ index 03371a0..a1aae4f 100644
 +**And** the filter combines with search and the quick-filter chips, is kept in the same `?tags=<uuid>,<uuid>`, ignores unknown ids, and survives going to a recipe and back
  **And** "ניקוי החיפוש" in the no-results state clears the tags too
  **And** the filter function in `libs/recipe-domain` gains tag tests
- 
+
 @@ -803,7 +805,7 @@ So that I don't retype recipes by hand (FR18, FR21, FR24).
  **And** the draft is in Hebrew (translated if the source is in another language), its units are mapped to the `Unit` enum, imperial units are converted by the deterministic table (oz→g, lb→g, fl oz→ml, friendly rounding; cups and spoons unchanged) with `source_amount`/`source_unit` kept, unquantifiable ingredients are to-taste, and units that are still unmappable are empty with the original text kept in the note (FR19, FR21)
  **And** a deterministic pass rewrites °F temperatures in the step text to °C, rounded to the nearest 5 (350°F becomes "180°C"), and keeps the unconverted step text as `source_text` for the "הצג מתכון מקורי" toggle; the conversions live in code with unit tests, never in the model's output (FR21)
@@ -748,7 +748,7 @@ index dcd0bf3..e23fa97 100644
 +++ b/_bmad-output/planning-artifacts/prds/prd-recipes-2026-10-26/prd.md
 @@ -45,7 +45,7 @@ source: docs/prd.md
  **MVP (first complete, showable version):**
- 
+
  - Recipe library: list, search and filter (F1)
 -- Meal types and owner-managed tags (F10)
 +- Owner-managed tags, with pinned quick-filter tags (F10)
@@ -756,39 +756,39 @@ index dcd0bf3..e23fa97 100644
  - Original-value hints on edited quantities (F4)
  - Serving scaling (F6)
 @@ -58,19 +58,19 @@ source: docs/prd.md
- 
+
  ## 5. User Journeys
- 
+
 -**UJ-1 — Saving a new recipe.** Adi finds a shakshuka recipe online, opens Bite & Board, clicks *New recipe*, types the title, picks the meal type *Breakfast* (suggested by the form), adds the tag *Brunch*, sets 4 servings, adds six ingredients and four steps, and saves. The recipe appears at the top of the library.
 +**UJ-1 — Saving a new recipe.** Adi finds a shakshuka recipe online, opens Bite & Board, clicks *New recipe*, types the title, adds the tags *Breakfast* and *Brunch*, sets 4 servings, adds six ingredients and four steps, and saves. The recipe appears at the top of the library.
- 
+
  **UJ-2 — Making it personal.** After cooking it twice, Adi thinks it needs more cumin and less salt. Adi opens the recipe, clicks *Edit*, changes cumin from 1 tsp to 2 tsp and salt from 1 tsp to ½ tsp, and saves. From now on the recipe shows *2 tsp cumin* with a small hint *originally 1 tsp*. Months later, wondering whether the original was better, Adi resets cumin to the original value with one click.
- 
+
  **UJ-3 — Cooking for a crowd.** Friends are coming over: 10 people. Adi opens the lasagna recipe (base 4 servings), sets servings to 10, and every quantity updates instantly. Eggs show as *5*, not *5.000*. "Salt — to taste" stays as it is.
- 
+
 -**UJ-4 — Finding a recipe.** Adi has 60 recipes, types "chick" into the search box and sees the chickpea curry and the roast chicken, then narrows the list with the *Dinner* meal-type filter.
 +**UJ-4 — Finding a recipe.** Adi has 60 recipes, types "chick" into the search box and sees the chickpea curry and the roast chicken, then narrows the list by tapping the pinned *Dinner* tag.
- 
+
  **UJ-5 — Cleaning up.** A recipe Adi tried once was bad. Adi deletes it, confirms in a dialog, and it is gone from the library.
- 
+
  **UJ-6 — Visitor, editor and admin.** A recruiter opens the app from Adi's CV and browses recipes and scales one to 6 servings, but sees no *New*, *Edit* or *Delete* buttons. Adi clicks *Log in*, enters email and password, and the editing controls appear. Adi opens *Users*, adds an editor account for their partner with a starting password, and the partner logs in and adds a recipe. A week later the session has expired and Adi logs in again.
- 
+
 -**UJ-7 — Importing from the web.** Adi finds a great focaccia recipe on a cooking site, copies the URL, clicks *Import*, and pastes it. A few seconds later the recipe form opens pre-filled: title, 8 servings, ingredients with amounts and units, and steps. The import read "a pinch of salt" as amount 1, unit pinch; the import pre-picked the meal type and suggested the existing tag *Bakery*; Adi adds a new tag *Party* and saves. Another site blocks the import, so Adi copies the recipe text from the page, pastes it into the *Paste text* tab instead, and gets the same pre-filled form.
 +**UJ-7 — Importing from the web.** Adi finds a great focaccia recipe on a cooking site, copies the URL, clicks *Import*, and pastes it. A few seconds later the recipe form opens pre-filled: title, 8 servings, ingredients with amounts and units, and steps. The import read "a pinch of salt" as amount 1, unit pinch; the import suggested the existing tag *Bakery* and proposed a new tag *Party*, which Adi accepts before saving. Another site blocks the import, so Adi copies the recipe text from the page, pastes it into the *Paste text* tab instead, and gets the same pre-filled form.
- 
+
  ## 6. Features and Functional Requirements
- 
+
 @@ -78,20 +78,20 @@ FR IDs are global and stable. Each FR lists its acceptance criteria (AC).
- 
+
  ### Recipe content (applies to F2–F5)
- 
+
 -A recipe has: title (required, 1–120 chars), optional description (a short intro, up to 500 chars), optional notes (free multi-line text for tips and personal remarks, up to 5,000 chars), a meal type (required, exactly one, from an owner-editable list seeded with Breakfast, Brunch, Lunch, Dinner, Dessert, Side, Drink, Other), any number of tags (optional, owner-managed free tags such as "BBQ", "Finger food", "Party"), base servings (required, integer 1–100), optional prep time and cook time (minutes), an optional source URL, an optional photo (one per recipe), an ordered list of ingredients (at least one) and an ordered list of instruction steps (at least one).
 +A recipe has: title (required, 1–120 chars), optional description (a short intro, up to 500 chars), optional notes (free multi-line text for tips and personal remarks, up to 5,000 chars), any number of tags (optional, 0..n, from one owner-managed list; some are pinned and seeded, such as Breakfast, Brunch, Lunch, Dinner, Snack, Main, Side, Starter/Salad, Soup, Pastry, Dessert, Drink, Sauce/Spread, and others are free tags such as "BBQ", "Finger food", "Party"), base servings (required, integer 1–100), optional prep time and cook time (minutes), an optional source URL, an optional photo (one per recipe), an ordered list of ingredients (at least one) and an ordered list of instruction steps (at least one).
- 
+
  An ingredient has: name (required), an optional amount (positive number), an optional unit (from a fixed list: g, kg, ml, l, tsp, tbsp, cup, unit, pinch, clove, slice, can, package), and an optional note (e.g. "finely chopped"), and, when it was converted on import, its source amount and unit (e.g. 8 oz). An ingredient without an amount is a **to-taste** ingredient (e.g. "Salt — to taste").
- 
+
  ### F1. Recipe library
- 
+
 -- **FR-1 — List recipes.** The library shows all recipes as cards with title, meal type, tags, total time (prep + cook, if known) and the photo if there is one, newest first.
 +- **FR-1 — List recipes.** The library shows all recipes as cards with title, up to 2 tags plus a "+N" for the rest, total time (prep + cook, if known) and the photo if there is one, newest first.
    - AC: With 0 recipes, an empty state with a *New recipe* call to action is shown.
@@ -801,22 +801,22 @@ index dcd0bf3..e23fa97 100644
 +- **FR-3 — Filter by tags.** The user can filter by one or more tags (a recipe must have all selected tags, AND). The pinned tags are shown as a quick-filter chip row that scrolls horizontally, and a "more tags" button opens every tag; filters and search combine.
 +  - AC: Selecting the pinned tag *Dinner* with search "chick" shows only recipes tagged *Dinner* whose title contains "chick"; adding the tag *BBQ* narrows it further to recipes that have both tags.
    - AC: Search text and filter survive navigating to a recipe and back.
- 
+
  ### F2. Create recipe
 @@ -141,12 +141,12 @@ An ingredient has: name (required), an optional amount (positive number), an opt
- 
+
  ### F7. Demo seed data
- 
+
 -- **FR-12 — Seed.** A single command loads about 10 realistic recipes, covering every seeded meal type and several tags, at least one to-taste ingredient, and at least one ingredient with an original-value hint.
 +- **FR-12 — Seed.** A single command loads about 10 realistic recipes, covering every pinned tag and several free tags, at least one to-taste ingredient, and at least one ingredient with an original-value hint.
    - AC: Running the seed on an empty database produces the demo set; running it again does not create duplicates.
- 
+
  ### F8. Users, roles and login
- 
+
 -There are three access levels. A **visitor** is not logged in and can only read: list, search, view and scale. An **editor** has an account and can also create, edit, reset, delete and import recipes, upload photos, and manage meal types and tags. The **admin** can do everything an editor can, and also manages users. In this PRD, "the owner" in F2–F10 means any signed-in user (an editor or the admin). Recipes form one shared library: every editor can edit every recipe, and each recipe records who created it and who last updated it.
 +There are three access levels. A **visitor** is not logged in and can only read: list, search, view and scale. An **editor** has an account and can also create, edit, reset, delete and import recipes, upload photos, and manage tags. The **admin** can do everything an editor can, and also manages users. In this PRD, "the owner" in F2–F10 means any signed-in user (an editor or the admin). Recipes form one shared library: every editor can edit every recipe, and each recipe records who created it and who last updated it.
- 
- 
+
+
  - **FR-13 — Create the admin account.** A command-line command creates the first admin account from an email and a password. There is no sign-up page.
 @@ -183,7 +183,7 @@ Owner-only (FR-16 applies). Import never saves anything by itself: it produces a
    - AC: Importing an English recipe yields a Hebrew draft whose amounts and units match the source, with imperial units converted (8 oz becomes 227 g and keeps "8 oz" as its source value).
@@ -830,12 +830,12 @@ index dcd0bf3..e23fa97 100644
 @@ -193,17 +193,18 @@ Owner-only (FR-16 applies). Import never saves anything by itself: it produces a
    - AC: An import that exceeds its engine's time limit is stopped with a clear message. Limits are set per AI engine (default: 60 seconds for a hosted model, about 180 seconds for a local model running on the laptop's CPU).
    - AC: LLM errors (provider down, quota exceeded, invalid output) show a readable message; nothing is saved and no partial recipe is created.
- 
+
 -### F10. Meal types and tags
 +### F10. Tags
- 
+
  Owner-only for changes (FR-16 applies); everyone can filter by them.
- 
+
 -- **FR-22 — Meal type and tags on a recipe.** The recipe form (FR-4/FR-6) requires one meal type and accepts any number of tags. When creating, the form suggests a meal type; tag input autocompletes from existing tags and can create a new tag inline.
 -  - AC: Saving without a meal type shows an inline error; the API returns 422.
 +- **FR-22 — Tags on a recipe.** The recipe form (FR-4/FR-6) accepts any number of tags (zero or more; none is required). Tag input autocompletes from existing tags and can create a new tag inline. There are no meal types or tag groups: a meal type like *Breakfast* is just a pinned tag.
@@ -850,9 +850,9 @@ index dcd0bf3..e23fa97 100644
 +  - AC: Deleting a tag removes it from all recipes after a confirmation that shows how many recipes use it.
 +  - AC: Pinning or unpinning a tag adds it to or removes it from the library's quick-filter chip row.
 +- **FR-24 — Import suggestions.** AI import (F9) suggests tags from the existing list; suggested new tag names are proposed in the draft, and are only created if the owner accepts them and saves.
- 
+
  ## 7. Non-Functional Requirements
- 
+
 @@ -239,7 +240,7 @@ These are kept so the architecture does not rule them out. None has a committed
  | OQ-3 | **Event menus.** Saved and reopenable, or temporary? Fields (date, guest count)? | Event menus, shopping list | When MVP is done |
  | OQ-4 | **Shopping list merging.** Exact name + unit, or unit conversion (g↔kg, tsp↔tbsp) and plural matching? Can items be ticked off or edited? | Shopping list | With OQ-3 |
@@ -860,7 +860,7 @@ index dcd0bf3..e23fa97 100644
 -| OQ-6 | ~~Tags.~~ **Resolved 2026-10-26 (Adi):** fixed category replaced by one meal type per recipe + free tags (F10). | — | — |
 +| OQ-6 | ~~Tags.~~ **Resolved 2026-10-26 (Adi):** fixed category replaced by one meal type per recipe + free tags (F10). **Superseded 2026-10-27 (Adi):** no meal types at all; one flat list of tags, some of them pinned as quick filters. | — | — |
  | OQ-7 | **Old PRD.** `docs/prd.md` predates this document. Keep, replace with a pointer, or delete? | Nothing | Next review |
- 
+
  ## 10. Constraints and Assumptions
 diff --git a/_bmad-output/planning-artifacts/ui-component-inventory.md b/_bmad-output/planning-artifacts/ui-component-inventory.md
 index fe3fc64..c4d8e60 100644
@@ -884,7 +884,7 @@ index fe3fc64..c4d8e60 100644
 -| Sheet + Checkbox              | tag filter (sheet on phone, popover on desktop)                        | library                            | 4.2 (just in time)                              |
 +| Sheet + Checkbox              | "עוד תגיות" all-tags filter (sheet on phone, popover on desktop)       | library                            | 4.2 (just in time)                              |
  | Tabs                          | import: "קישור" / "הדבקת טקסט"                                         | import                             | 5.2 (just in time)                              |
- 
+
  Notes from Story 1.5 (primitives are shadcn's, adapted only where the project rules require it):
 @@ -48,7 +48,7 @@ Built by the story that first renders them, in `libs/ui-components`.
  | Board (oak slab, radius 24, handle slot)                  | —                                 | 1.4           |
@@ -914,12 +914,12 @@ index 2338413..88e7ae2 100644
  - `quantity`: every ingredient amount and the servings value. Uses tabular figures so amounts line up as they scale.
 -- `label` / `hint`: form labels, meta (meal type, tags, time) and the original-value hint.
 +- `label` / `hint`: form labels, meta (tags, time) and the original-value hint.
- 
+
  Five visible sizes at most. No uppercase or letter-spaced labels (Hebrew has no case anyway). Numbers and units are wrapped for bidi isolation (see EXPERIENCE.md, *Right-to-left & Hebrew*).
- 
+
 @@ -232,12 +232,12 @@ Inputs use `rounded.sm` (8px) and dialogs `rounded.lg` (16px), so the form doesn
  ## Components
- 
+
  - **Board.** `{colors.board}` slab, `{rounded.board}`, padding `{spacing.board-pad}` with `{spacing.board-slot-top}` on top for the slot. It holds the ingredient list on the detail page. Lines are separated by 8px of space, with no rules. Amounts use `{typography.quantity}`, names use `body`, notes use `label` in `board-foreground` at reduced emphasis, and the hint sits under its line in `{colors.hint}`.
 -- **Recipe card.** A smaller board: slot, then the photo (4:3, `rounded.md`-ish 14px inset corners, `object-fit: cover`), then the title in `title` and the meal type, tags and total time in `label`. The whole card is the link. Without a photo, the title is set larger and there is no placeholder art. Hover is a 2% scale up and press a 2% scale down, with no shadow.
 +- **Recipe card.** A smaller board: slot, then the photo (4:3, `rounded.md`-ish 14px inset corners, `object-fit: cover`), then the title in `title` and up to 2 tags plus "+N" and the total time in `label`. The whole card is the link. Without a photo, the title is set larger and there is no placeholder art. Hover is a 2% scale up and press a 2% scale down, with no shadow.
@@ -937,7 +937,7 @@ index 7d25f7d..cb97fae 100644
 --- a/_bmad-output/planning-artifacts/ux-designs/ux-recipes-2026-10-26/EXPERIENCE.md
 +++ b/_bmad-output/planning-artifacts/ux-designs/ux-recipes-2026-10-26/EXPERIENCE.md
 @@ -27,12 +27,12 @@ sources:
- 
+
  | Surface | Route [ASSUMPTION] | Reached from | Who | Purpose | PRD |
  |---|---|---|---|---|---|
 -| Library | `/` | App open, the brand link | All | Recipe cards, search, meal-type and tag filters | FR-1–3 |
@@ -952,7 +952,7 @@ index 7d25f7d..cb97fae 100644
  | My account | `/account` | Account menu | Owner | Change own password | FR-27 |
  | Import review | `/recipes/new` (draft passed in router state, never in the URL; AD-22) | Successful import | Owner | Recipe form prefilled from the draft, unfilled fields flagged | FR-19 |
 @@ -79,13 +79,13 @@ Behavioural only. The visual specs are in `DESIGN.md.Components`.
- 
+
  | Component | Where | Behaviour |
  |---|---|---|
 -| Recipe card | Library | The whole card is one link to the detail page. It shows the photo (if any), title, meal type, up to 3 tags and total time (prep + cook). When neither time is known, the time is omitted rather than shown as "0". A card without a photo shows a larger title on the board and no placeholder image. Photos are lazy-loaded (NFR-11). |
@@ -971,7 +971,7 @@ index 7d25f7d..cb97fae 100644
  | Reset to original | Edit form | A small text action on hinted rows only: "חזרה למקור". It restores the amount and unit in the form. The hint stays until Save, and after Save the row is indistinguishable from an unedited one (FR-9). It can be undone before Save by retyping. |
 @@ -174,7 +174,7 @@ Failure: Adi types 0 or 150 → the value is clamped to 1 or 100, and a brief me
  ### Flow 3 — Importing from the web (UJ-7)
- 
+
  1. Adi copies a focaccia URL, taps "ייבוא" and pastes it into the "קישור" tab.
 -2. A progress message appears ("קוראים את הדף…") with a cancel button. A few seconds later the form opens prefilled. The top of the form says "שדה אחד דורש השלמה", and the meal type is pre-picked; the tag "מאפים" is suggested.
 +2. A progress message appears ("קוראים את הדף…") with a cancel button. A few seconds later the form opens prefilled. The top of the form says "שדה אחד דורש השלמה", and the tag "מאפים" is suggested.
@@ -995,7 +995,7 @@ index d680b75..5d610c0 100644
 @@ -27,6 +28,23 @@ cp .env.example .env   # then set JWT_SECRET
  `.env` is gitignored. `.env.example` documents every setting. The app refuses to
  start without `JWT_SECRET`, and `ENV` defaults to `production` when unset.
- 
+
 +## Database and migrations
 +
 +SQLite lives in `DATA_DIR/app.db`. Every connection turns on `foreign_keys` and WAL.
@@ -1014,7 +1014,7 @@ index d680b75..5d610c0 100644
 +Do not edit a revision that has shipped; add a new one.
 +
  ## Commands
- 
+
  ```bash
 diff --git a/apps/recipe-service/alembic.ini b/apps/recipe-service/alembic.ini
 new file mode 100644
@@ -1041,18 +1041,18 @@ index 2dbf704..0a38d9a 100644
  from pathlib import Path
 -from typing import Annotated
 +from typing import Annotated, Any
- 
+
  from fastapi import Depends
 -from sqlalchemy import Engine
 -from sqlmodel import Session, create_engine
 +from sqlalchemy import Column, Dialect, Engine, Enum, Numeric, event
 +from sqlalchemy.types import DateTime, TypeDecorator
 +from sqlmodel import Session, SQLModel, create_engine
- 
+
  from app.core.config import Settings, get_settings
- 
+
  DB_FILENAME = "app.db"
- 
+
 +# Stable constraint names, so Alembic batch mode can recreate SQLite tables.
 +# Set before any model is defined: models import this module.
 +NAMING_CONVENTION = {
@@ -1128,7 +1128,7 @@ index 2dbf704..0a38d9a 100644
 +    cursor.execute("PRAGMA journal_mode=WAL")
 +    cursor.close()
 +
- 
+
  @lru_cache
  def get_engine(data_dir: Path) -> Engine:
      """One engine per data dir, so overridden settings get their own database."""
@@ -1141,8 +1141,8 @@ index 2dbf704..0a38d9a 100644
      )
 +    event.listen(engine, "connect", _set_sqlite_pragmas)
 +    return engine
- 
- 
+
+
  def get_session(
 diff --git a/apps/recipe-service/app/core/errors.py b/apps/recipe-service/app/core/errors.py
 index 49aabe8..7815768 100644
@@ -1151,10 +1151,10 @@ index 49aabe8..7815768 100644
 @@ -8,6 +8,8 @@ from pydantic import BaseModel
  class ErrorCode(StrEnum):
      """Stable error codes; the client shows `errors.<code>` from he.json."""
- 
+
 +    RECIPE_NOT_FOUND = "recipe_not_found"
 +
- 
+
  class ErrorResponse(BaseModel):
      detail: str
 diff --git a/apps/recipe-service/app/core/migrate.py b/apps/recipe-service/app/core/migrate.py
@@ -1193,7 +1193,7 @@ index 3d078f5..0bb800e 100644
 +
  from fastapi import APIRouter, FastAPI
  from fastapi.routing import APIRoute
- 
+
  from app.auth.router import router as auth_router
  from app.core.config import get_settings
 +from app.core.db import get_engine
@@ -1205,8 +1205,8 @@ index 3d078f5..0bb800e 100644
  from app.recipes.router import router as recipes_router
 @@ -31,6 +36,17 @@ def generate_operation_id(route: APIRoute) -> str:
      return f"{route.tags[0]}_{route.name}"
- 
- 
+
+
 +@asynccontextmanager
 +async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
 +    """Migrate the database before serving; any failure stops startup (AD-29)."""
@@ -1228,7 +1228,7 @@ index 3d078f5..0bb800e 100644
 +        lifespan=lifespan,
      )
      register_error_handlers(app)
- 
+
 diff --git a/apps/recipe-service/app/migrations/__init__.py b/apps/recipe-service/app/migrations/__init__.py
 new file mode 100644
 index 0000000..ea39460
@@ -1717,7 +1717,7 @@ index bf7f30a..8d45eb4 100644
 +from app.core.errors import ErrorResponse
 +from app.recipes.schemas import RecipeRead, RecipeSummary
 +from app.recipes.service import RecipeService, get_recipe_service
- 
+
  router = APIRouter(prefix="/recipes", tags=["recipes"])
 +
 +ServiceDep = Annotated[RecipeService, Depends(get_recipe_service)]
@@ -2110,7 +2110,7 @@ index b268ae0..84c456f 100644
 +++ b/apps/recipe-service/pyproject.toml
 @@ -144,13 +144,12 @@ ignore_imports = [
  ]
- 
+
  [[tool.importlinter.contracts]]
 -name = "photos: router, repository, models and schemas are private to the module"
 +name = "photos: router, repository and models are private to the module"
@@ -2126,7 +2126,7 @@ index b268ae0..84c456f 100644
 @@ -173,14 +172,15 @@ ignore_imports = [
    "app.core.metadata -> app.recipes.models",
  ]
- 
+
 +# tags.schemas (TagRef) and photos.schemas (PhotoRead) are public: recipes embeds
 +# them in its read schemas. Everything else stays behind the service.
  [[tool.importlinter.contracts]]
@@ -2150,12 +2150,12 @@ index 3009571..8af9db5 100644
  from fastapi import FastAPI
  from fastapi.testclient import TestClient
 +from sqlmodel import Session
- 
+
  # Set before any `app` import: importing app.main validates config immediately.
  os.environ["JWT_SECRET"] = "test-secret"
 @@ -44,5 +45,14 @@ def app() -> FastAPI:
- 
- 
+
+
  @pytest.fixture
 -def client(app: FastAPI) -> TestClient:
 -    return TestClient(app)
@@ -2892,8 +2892,8 @@ index c5354f1..eff011e 100644
 +++ b/apps/recipe-service/tests/test_structure.py
 @@ -62,18 +62,18 @@ def test_every_route_is_under_api(app: FastAPI) -> None:
      assert all(path.startswith(f"{API_PREFIX}/") for path in paths)
- 
- 
+
+
 -class SampleCode(ErrorCode):
 -    SAMPLE = "sample"
 -
@@ -2921,7 +2921,7 @@ index c5354f1..eff011e 100644
      def get_boom() -> None:
 -        raise AppError(409, SampleCode.SAMPLE, "Conflict", params=params)
 +        raise AppError(409, ErrorCode.RECIPE_NOT_FOUND, "Conflict", params=params)
- 
+
      response = TestClient(app).get("/boom")
      assert response.status_code == 409
 diff --git a/tools/lint-checks/src/python-contracts.spec.ts b/tools/lint-checks/src/python-contracts.spec.ts
@@ -2946,6 +2946,6 @@ index 538cd89..c8636e2 100644
 +      }).status,
 +    ).toBe(0);
    });
- 
+
    it("allow calling another module's service", () => {
 ````

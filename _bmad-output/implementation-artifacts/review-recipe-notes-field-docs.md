@@ -1,3 +1,4 @@
+```diff
 diff --git a/_bmad-output/implementation-artifacts/deferred-work.md b/_bmad-output/implementation-artifacts/deferred-work.md
 index bb08e28..bd0b81a 100644
 --- a/_bmad-output/implementation-artifacts/deferred-work.md
@@ -22,7 +23,7 @@ index bb61edd..b5ccebe 100644
    3-7-recipe-photos-upload-replace-remove: backlog
 +  3-8-duplicate-a-recipe: backlog # stretch / optional: can be cut without affecting any other story
    epic-3-retrospective: optional
- 
+
    epic-4: backlog
 diff --git a/_bmad-output/planning-artifacts/architecture/architecture-recipes-2026-10-26/.memlog.md b/_bmad-output/planning-artifacts/architecture/architecture-recipes-2026-10-26/.memlog.md
 index 6dad705..c41e403 100644
@@ -47,7 +48,7 @@ index b69cc9b..54f7ae2 100644
 +    - **Import conversion:** a deterministic table in the imports service (`oz→g`, `lb→g`, `fl oz→ml`, friendly rounding; cups and spoons unchanged) plus a °F→°C pass over step text (rounded to 5; a converted step keeps its pre-conversion text in `source_text`). It runs after the LLM returns, so the model never does the arithmetic, and it has its own unit tests. Everything is stored metric. A converted ingredient keeps `source_amount` and `source_unit` (`SourceUnit`: `oz`, `lb`, `fl_oz`), kept apart from the FR-7 `original`. The detail page shows originals only through the "הצג מתכון מקורי" toggle, for recipes that have any. There is no metric/imperial display setting, so the table needs no TypeScript twin.
    - **Read shapes:** read schemas embed `meal_type: {id, name}` and `tags: [{id, name}]`.
    - **Concurrency:** for the MVP, the last write wins [ASSUMPTION].
- 
+
 @@ -253,6 +254,7 @@ flowchart LR
    - **Timeouts:** `GET /api/imports/providers` (editor) returns `[{name, timeout_s}]`. The client aborts at `timeout_s + 5`, which replaces the UX's flat 60 s. The Vite proxy and uvicorn timeouts are set above the largest provider timeout.
    - **Progress:** phase text is client-timed and cosmetic. There is no streaming in the MVP.
@@ -88,7 +89,7 @@ index 125daee..03371a0 100644
  - hinted rows show "חזרה למקור"
  - step rows
 @@ -362,6 +362,8 @@ So that the app has real data to show.
- 
+
  - UUID ids
  - UTC timestamps
 +- nullable `description` and `notes` text columns on `recipe` (`notes` holds free multi-line text for tips and personal remarks); the API limits them to 500 and 5,000 characters
@@ -99,7 +100,7 @@ index 125daee..03371a0 100644
 @@ -373,8 +375,9 @@ So that the app has real data to show.
  **Then** it returns all `RecipeSummary` items, unpaginated, sorted by `created_at desc, id` (AD-26). Each summary has: id, title, meal_type `{id,name}`, tags `[{id,name}]`, total_minutes or null, photo or null, and created_at
  **And** `GET /api/recipes/{id}` returns the full `RecipeRead` (AD-20, AD-31), with:
- 
+
 -- ordered ingredients: `amount` as a JSON number or null, `unit` from the `Unit` enum or null, name, note, and `original` or null
 -- ordered steps
 +- `description` and `notes`, each a string or null
@@ -117,14 +118,14 @@ index 125daee..03371a0 100644
  **And** filtering is one pure function in `libs/recipe-domain`, with unit tests (AD-26, AD-32)
  **And** with 200 recipes, filtering takes under 100 ms per keystroke (NFR-3)
 @@ -444,7 +448,8 @@ So that I can cook from it (FR5).
- 
+
  **Given** a recipe exists
  **When** I open `/recipes/:id`
 -**Then** I see the meal type, prep and cook time, the title in display style, the ingredient board, numbered steps, and the source link if there is one (UX-DR6, UX-DR10)
 +**Then** I see the meal type, prep and cook time, the title in display style, the description under it if there is one, the ingredient board, numbered steps, and the source link if there is one (UX-DR6, UX-DR10)
 +**And** when the recipe has notes, a "הערות וטיפים" section follows the steps and shows them as plain text with line breaks kept (never as HTML); with no notes, the section is absent
  **And** each `IngredientLine` shows:
- 
+
  - the amount in quantity style, wrapped in `<bdi>`
 @@ -452,7 +457,9 @@ So that I can cook from it (FR5).
  - the name and the note
@@ -142,11 +143,11 @@ index 125daee..03371a0 100644
    **And** while the detail page is open it requests a screen wake lock, and silently ignores a refusal (UX-DR22)
 +  **And** `formatAmount` shows common fractions as ½, ⅓, ⅔, ¼ and ¾ (with a whole part, e.g. "1½") when the value is within 0.01 of one, inside `<bdi>`, and otherwise keeps the FR11 decimals; 100% branch coverage includes these cases
 +  **And** a "שיתוף" button shares the recipe as plain text through the Web Share API, or copies it to the clipboard when sharing is unavailable, confirming with the toast "הועתק". The text is the title, the ingredients at the current servings, the steps and the page link, in Hebrew, built by one pure function in `libs/recipe-domain` with unit tests
- 
+
  ## Epic 2: Accounts, login and roles
- 
+
 @@ -600,9 +609,9 @@ So that my recipes live in one place (FR4).
- 
+
  **Given** I'm signed in as an editor
  **When** I tap "מתכון חדש" (top bar, or "+" on phone)
 -**Then** `/recipes/new` shows a form with these fields: title, description, meal type (required select), servings, prep and cook time, source URL (`dir="ltr"`), plus ingredient rows (amount as a number, unit select with Hebrew labels for the `Unit` enum, name, note) and step rows, with add and remove buttons
@@ -160,7 +161,7 @@ index 125daee..03371a0 100644
 @@ -710,6 +719,20 @@ So that recipes look appetising in the library and on the detail page (FR4 photo
  **And** `/media/*` is served by FastAPI and is never answered by the SPA fallback. Images are lazy-loaded with width and height set (NFR-11)
  **And** the seed adds openly licensed sample photos with their credits
- 
+
 +### Story 3.8: Duplicate a recipe (stretch, can be cut)
 +
 +As an editor,
@@ -176,7 +177,7 @@ index 125daee..03371a0 100644
 +**And** the story is optional: it can be dropped without affecting any other story
 +
  ## Epic 4: Organise with meal types and tags
- 
+
  Editors manage the meal-type list and the tags, and everyone can filter the library by tags.
 @@ -777,7 +800,9 @@ So that I don't retype recipes by hand (FR18, FR21, FR24).
  **Given** I'm signed in as an editor
@@ -194,43 +195,43 @@ index 2270a65..26b0c56 100644
 --- a/_bmad-output/planning-artifacts/prds/prd-recipes-2026-10-26/addendum.md
 +++ b/_bmad-output/planning-artifacts/prds/prd-recipes-2026-10-26/addendum.md
 @@ -36,9 +36,9 @@ Decided: shared libraries live under `libs/` (Adi, 2026-10-26).
- 
+
  ## Draft data model (original PRD, updated for the new requirements)
- 
+
 -- **Recipe:** id, title, description?, category, base_servings, prep_time_minutes?, cook_time_minutes?, created_at, updated_at.
 -- **Ingredient:** id, recipe_id, position, name, amount? (null = to taste), unit?, note?, **original_amount?**, **original_unit?** (set on first change — FR-7).
 -- **InstructionStep:** id, recipe_id, step_number, description.
 +- **Recipe:** id, title, description?, notes?, category, base_servings, prep_time_minutes?, cook_time_minutes?, created_at, updated_at.
 +- **Ingredient:** id, recipe_id, position, name, amount? (null = to taste), unit?, note?, **original_amount?**, **original_unit?** (set on first change — FR-7), **source_amount?**, **source_unit?** (set only when converted on import — FR-21; separate from the FR-7 original).
 +- **InstructionStep:** id, recipe_id, step_number, description, source_text? (the pre-conversion text, set only when an import converted a temperature).
- 
+
  Changes vs. the original: prep/cook time optional; amount optional (to-taste); explicit ingredient position; original-value fields; ID type to be decided in architecture (UUID vs. integer).
- 
+
 diff --git a/_bmad-output/planning-artifacts/prds/prd-recipes-2026-10-26/prd.md b/_bmad-output/planning-artifacts/prds/prd-recipes-2026-10-26/prd.md
 index 35e4847..dcd0bf3 100644
 --- a/_bmad-output/planning-artifacts/prds/prd-recipes-2026-10-26/prd.md
 +++ b/_bmad-output/planning-artifacts/prds/prd-recipes-2026-10-26/prd.md
 @@ -78,9 +78,9 @@ FR IDs are global and stable. Each FR lists its acceptance criteria (AC).
- 
+
  ### Recipe content (applies to F2–F5)
- 
+
 -A recipe has: title (required, 1–120 chars), optional description, a meal type (required, exactly one, from an owner-editable list seeded with Breakfast, Brunch, Lunch, Dinner, Dessert, Side, Drink, Other), any number of tags (optional, owner-managed free tags such as "BBQ", "Finger food", "Party"), base servings (required, integer 1–100), optional prep time and cook time (minutes), an optional source URL, an optional photo (one per recipe), an ordered list of ingredients (at least one) and an ordered list of instruction steps (at least one).
 +A recipe has: title (required, 1–120 chars), optional description (a short intro, up to 500 chars), optional notes (free multi-line text for tips and personal remarks, up to 5,000 chars), a meal type (required, exactly one, from an owner-editable list seeded with Breakfast, Brunch, Lunch, Dinner, Dessert, Side, Drink, Other), any number of tags (optional, owner-managed free tags such as "BBQ", "Finger food", "Party"), base servings (required, integer 1–100), optional prep time and cook time (minutes), an optional source URL, an optional photo (one per recipe), an ordered list of ingredients (at least one) and an ordered list of instruction steps (at least one).
- 
+
 -An ingredient has: name (required), an optional amount (positive number), an optional unit (from a fixed list: g, kg, ml, l, tsp, tbsp, cup, unit, pinch, clove, slice, can, package), and an optional note (e.g. "finely chopped"). An ingredient without an amount is a **to-taste** ingredient (e.g. "Salt — to taste").
 +An ingredient has: name (required), an optional amount (positive number), an optional unit (from a fixed list: g, kg, ml, l, tsp, tbsp, cup, unit, pinch, clove, slice, can, package), and an optional note (e.g. "finely chopped"), and, when it was converted on import, its source amount and unit (e.g. 8 oz). An ingredient without an amount is a **to-taste** ingredient (e.g. "Salt — to taste").
- 
+
  ### F1. Recipe library
- 
+
 @@ -104,7 +104,7 @@ An ingredient has: name (required), an optional amount (positive number), an opt
- 
+
  ### F3. View recipe
- 
+
 -- **FR-5 — Detail page.** Shows all recipe content (including the photo, if any), ingredients in order with amount, unit, name and note, and numbered steps.
 +- **FR-5 — Detail page.** Shows all recipe content (including the photo, if any), ingredients in order with amount, unit, name and note, numbered steps, and the recipe's notes in their own section after the steps (line breaks kept) when there are any.
    - AC: To-taste ingredients render as "Salt — to taste".
    - AC: Opening a recipe ID that does not exist shows a not-found page with a link back to the library.
- 
+
 @@ -179,12 +179,13 @@ Owner-only (FR-16 applies). Import never saves anything by itself: it produces a
    - AC: The recipe's main photo is taken from the page when available (schema.org `Recipe.image` first, then the page's `og:image`). How photos are stored (local copy vs. link to the source) is decided in the architecture step.
  - **FR-18 — Import from pasted text.** The owner pastes raw recipe text; the LLM extracts a draft recipe in the same format.
@@ -268,3 +269,4 @@ index 0c1d997..fe3fc64 100644
  | Popover + Command             | tag combobox with "יצירת תגית '{text}'"                                | recipe form, import review         | 3.3 (just in time)                              |
  | Sheet + Checkbox              | tag filter (sheet on phone, popover on desktop)                        | library                            | 4.2 (just in time)                              |
  | Tabs                          | import: "קישור" / "הדבקת טקסט"                                         | import                             | 5.2 (just in time)                              |
+```
