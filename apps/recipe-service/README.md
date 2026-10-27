@@ -51,4 +51,5 @@ Do not edit a revision that has shipped; add a new one.
 npx nx run recipe-service:serve   # http://localhost:8000/api/health
 npx nx run recipe-service:test
 npx nx run recipe-service:lint
+npx nx run recipe-service:openapi   # writes libs/data-access/openapi.json (use data-access:generate for the client)
 ```

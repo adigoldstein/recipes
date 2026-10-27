@@ -68,6 +68,7 @@ export default [
       '**/dist',
       '**/out-tsc',
       '**/storybook-static',
+      '**/src/generated',
       '**/vite.config.*.timestamp*',
       '**/vitest.config.*.timestamp*',
     ],

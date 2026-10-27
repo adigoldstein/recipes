@@ -15,6 +15,26 @@
   },
   "nx": {
     "name": "data-access",
+    "targets": {
+      "generate": {
+        "executor": "nx:run-commands",
+        "dependsOn": [
+          "recipe-service:openapi"
+        ],
+        "inputs": [
+          "{projectRoot}/openapi.json",
+          "{projectRoot}/openapi-ts.config.ts"
+        ],
+        "outputs": [
+          "{projectRoot}/src/generated"
+        ],
+        "options": {
+          "command": "openapi-ts",
+          "cwd": "{projectRoot}"
+        },
+        "cache": true
+      }
+    },
     "tags": [
       "type:data-access"
     ]

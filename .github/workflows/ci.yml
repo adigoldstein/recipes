@@ -49,5 +49,10 @@ jobs:
       # Base = last green CI run on main, so `affected` checks everything since then.
       - uses: nrwl/nx-set-shas@v5
 
+      # OpenAPI is the only contract (AD-3): regenerate and fail if the committed
+      # openapi.json or generated client is stale.
+      - run: npx nx run data-access:generate --skip-nx-cache
+      - run: git diff --exit-code
+
       - run: npx nx format:check
       - run: npx nx affected -t lint typecheck test build build-storybook

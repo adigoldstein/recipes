@@ -83,6 +83,15 @@
       },
       "cache": true
     },
+    "openapi": {
+      "executor": "@nxlv/python:run-commands",
+      "outputs": ["{workspaceRoot}/libs/data-access/openapi.json"],
+      "options": {
+        "command": "uv run python -m app.openapi_export ../../libs/data-access/openapi.json",
+        "cwd": "{projectRoot}"
+      },
+      "cache": true
+    },
     "install": {
       "executor": "@nxlv/python:install",
       "options": {
