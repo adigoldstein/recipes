@@ -166,7 +166,7 @@ protected_modules = [
   "app.recipes.models",
   "app.recipes.schemas",
 ]
-allowed_importers = ["app.recipes"]
+allowed_importers = ["app.recipes", "app.seed"]
 ignore_imports = [
   "app.main -> app.recipes.router",
   "app.core.metadata -> app.recipes.models",

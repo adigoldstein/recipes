@@ -45,11 +45,18 @@ Revisions must not import app code: they have to run the same way forever. Alemb
 cannot see SQLite expression indexes, so write those by hand (see revision `0001`).
 Do not edit a revision that has shipped; add a new one.
 
+## Demo data
+
+`npx nx run recipe-service:seed` (`python -m app.cli seed`) migrates the database, then
+creates about 10 Hebrew demo recipes through `recipes.service`. It is idempotent by title
+and never creates the default tags. Needs a `.env` (see Configuration).
+
 ## Commands
 
 ```bash
 npx nx run recipe-service:serve   # http://localhost:8000/api/health
 npx nx run recipe-service:test
+npx nx run recipe-service:seed    # demo recipes
 npx nx run recipe-service:lint
 npx nx run recipe-service:openapi   # writes libs/data-access/openapi.json (use data-access:generate for the client)
 ```

@@ -43,7 +43,7 @@ development_status:
   1-5-ui-kit-shadcn-primitives-in-ui-components: done
   1-6-recipe-data-model-and-read-api: done
   1-7-generated-api-client-pipeline: done
-  1-8-demo-seed-data: backlog
+  1-8-demo-seed-data: done
   1-9-recipe-library-with-search-and-tag-filter: backlog
   1-10-recipe-detail-page: backlog
   1-11-live-serving-scaling-and-kitchen-mode: backlog

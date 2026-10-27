@@ -9,7 +9,7 @@ export type ClientOptions = {
  *
  * Stable error codes; the client shows `errors.<code>` from he.json.
  */
-export type ErrorCode = 'recipe_not_found';
+export type ErrorCode = 'recipe_not_found' | 'tag_not_found';
 
 /**
  * ErrorResponse

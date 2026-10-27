@@ -26,6 +26,18 @@ class RecipeRepository:
         )
         return self._session.exec(statement).all()
 
+    def add(self, recipe: Recipe) -> Recipe:
+        """Stage the recipe with its ingredients and steps; the caller commits."""
+        self._session.add(recipe)
+        self._session.flush()
+        return recipe
+
+    def commit(self) -> None:
+        self._session.commit()
+
+    def rollback(self) -> None:
+        self._session.rollback()
+
     def get(self, recipe_id: uuid.UUID) -> Recipe | None:
         """One recipe with its ingredients and steps, both ordered by position."""
         statement = (

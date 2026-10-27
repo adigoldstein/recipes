@@ -8,11 +8,12 @@ from sqlmodel import Session
 
 from app.core.db import get_session
 from app.core.errors import AppError, ErrorCode
-from app.recipes.models import Ingredient
+from app.recipes.models import Ingredient, Recipe, Step
 from app.recipes.repository import RecipeRepository
 from app.recipes.schemas import (
     IngredientRead,
     OriginalValue,
+    RecipeCreate,
     RecipeRead,
     RecipeSummary,
     SourceValue,
@@ -71,6 +72,41 @@ class RecipeService:
             )
             for recipe in recipes
         ]
+
+    def create_recipe(self, data: RecipeCreate) -> RecipeRead:
+        """Create a recipe, its ingredients, steps and tags in one transaction."""
+        recipe = Recipe(
+            title=data.title,
+            description=data.description,
+            notes=data.notes,
+            base_servings=data.base_servings,
+            prep_time_minutes=data.prep_time_minutes,
+            cook_time_minutes=data.cook_time_minutes,
+            source_url=data.source_url,
+        )
+        recipe.ingredients = [
+            Ingredient(
+                recipe_id=recipe.id,
+                position=position,
+                name=item.name,
+                amount=item.amount,
+                unit=item.unit,
+                note=item.note,
+            )
+            for position, item in enumerate(data.ingredients)
+        ]
+        recipe.steps = [
+            Step(recipe_id=recipe.id, position=position, description=item.description)
+            for position, item in enumerate(data.steps)
+        ]
+        try:
+            self._repository.add(recipe)
+            self._tags.assign_to_recipe(recipe.id, data.tags)
+            self._repository.commit()
+        except Exception:
+            self._repository.rollback()
+            raise
+        return self.get_recipe(recipe.id)
 
     def get_recipe(self, recipe_id: uuid.UUID) -> RecipeRead:
         recipe = self._repository.get(recipe_id)
