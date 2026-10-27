@@ -9,6 +9,7 @@ class ErrorCode(StrEnum):
     """Stable error codes; the client shows `errors.<code>` from he.json."""
 
     RECIPE_NOT_FOUND = "recipe_not_found"
+    TAG_NOT_FOUND = "tag_not_found"
 
 
 class ErrorResponse(BaseModel):

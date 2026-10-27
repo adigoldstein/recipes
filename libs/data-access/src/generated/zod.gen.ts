@@ -7,7 +7,7 @@ import * as z from 'zod';
  *
  * Stable error codes; the client shows `errors.<code>` from he.json.
  */
-export const zErrorCode = z.enum(['recipe_not_found']);
+export const zErrorCode = z.enum(['recipe_not_found', 'tag_not_found']);
 
 /**
  * ErrorResponse

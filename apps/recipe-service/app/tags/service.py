@@ -8,8 +8,10 @@ from fastapi import Depends
 from sqlmodel import Session
 
 from app.core.db import get_session
+from app.core.errors import AppError, ErrorCode
+from app.tags.models import Tag
 from app.tags.repository import TagRepository
-from app.tags.schemas import TagRef
+from app.tags.schemas import TagInput, TagRef
 
 
 class TagService:
@@ -26,6 +28,29 @@ class TagService:
         for recipe_id, tag in self._repository.list_for_recipes(recipe_ids):
             tags[recipe_id].append(TagRef(id=tag.id, name=tag.name))
         return tags
+
+    def assign_to_recipe(self, recipe_id: uuid.UUID, refs: Sequence[TagInput]) -> None:
+        """Link the recipe to each tag, creating tags given by a new name (AD-25).
+
+        Flushes but never commits: the caller's transaction owns the commit.
+        """
+        linked: set[uuid.UUID] = set()
+        for ref in refs:
+            tag = self._resolve(ref)
+            if tag.id not in linked:
+                linked.add(tag.id)
+                self._repository.link(recipe_id, tag.id)
+
+    def _resolve(self, ref: TagInput) -> Tag:
+        if ref.id is not None:
+            tag = self._repository.get(ref.id)
+            if tag is None:
+                raise AppError(404, ErrorCode.TAG_NOT_FOUND, "Tag not found")
+            return tag
+        name = ref.name or ""  # TagInput guarantees a normalized name when no id.
+        return self._repository.get_by_name(name) or self._repository.add(
+            Tag(name=name)
+        )
 
 
 def get_tag_service(session: Annotated[Session, Depends(get_session)]) -> TagService:

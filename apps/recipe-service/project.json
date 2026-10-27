@@ -92,6 +92,16 @@
       },
       "cache": true
     },
+    "seed": {
+      "executor": "@nxlv/python:run-commands",
+      "options": {
+        "command": "uv run python -m app.cli seed",
+        "cwd": "{projectRoot}",
+        "env": {
+          "PYTHONUTF8": "1"
+        }
+      }
+    },
     "install": {
       "executor": "@nxlv/python:install",
       "options": {
