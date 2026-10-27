@@ -2,7 +2,7 @@
 title: 'Story 1.7: Generated API client pipeline'
 type: 'feature'
 created: '2026-10-27'
-status: 'review'
+status: 'done'
 route: 'dispatch'
 baseline_commit: 'faefd07'
 context:
