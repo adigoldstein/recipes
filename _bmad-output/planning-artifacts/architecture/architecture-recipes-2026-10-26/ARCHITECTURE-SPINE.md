@@ -73,7 +73,7 @@ flowchart LR
 
 - **Binds:** F2–F6, F10, FR-7–9
 - **Prevents:** two writers of ingredients, and the original-value rule implemented in two places.
-- **Rule:** `GET/POST/PUT /api/recipes[/{id}]` read and write the **whole** recipe in one transaction: fields, ordered ingredients, ordered steps, meal-type id, tag ids and photo key. PUT replaces the full aggregate. Existing ingredients keep their `id`; new ones have none. Only `recipes.service` applies FR-7–9:
+- **Rule:** `GET/POST/PUT /api/recipes[/{id}]` read and write the **whole** recipe in one transaction: fields, ordered ingredients, ordered steps, tag ids and photo key. PUT replaces the full aggregate. Existing ingredients keep their `id`; new ones have none. Only `recipes.service` applies FR-7–9:
   - On the first change to an existing ingredient's amount or unit, it stores `original_amount/original_unit`.
   - If the amount and unit are set back to equal the original, it clears both original fields (this is "reset to original").
   - New ingredients never get originals.
@@ -99,11 +99,12 @@ flowchart LR
   - Passwords are hashed with Argon2id via pwdlib. The first admin is created by CLI only (AD-30).
   - Login is rate-limited (5 per minute).
 
-### AD-7 — Meal types and tags share one table [ADOPTED]
+### AD-7 — Tags are one flat list [ADOPTED]
 
 - **Binds:** F1, F10
 - **Prevents:** two taxonomies with two APIs, and duplicate tags.
-- **Rule:** `tag(id, name, group ∈ {meal_type, tag})` is unique on `(group, lower(name))`, and `recipe_tag(recipe_id, tag_id)` links them. `recipes.service` enforces **exactly one** `meal_type` per recipe (otherwise 422). Only `tags.service` creates, renames or deletes tags. A `meal_type` still in use cannot be deleted. Deleting a `tag` detaches it from all recipes.
+- **Rule:** `tag(id, name, pinned, sort_order)` is unique on `lower(name)`, and `recipe_tag(recipe_id, tag_id)` links it to recipes. There are no tag groups and no meal types: a recipe has any number of tags (0..n), and none is required. `pinned` tags are the quick-filter chips in the library, shown in `sort_order`; unpinned tags have no `sort_order`. Only `tags.service` creates, renames, pins or deletes tags. Deleting a tag detaches it from all recipes.
+- **Supersedes:** the earlier "one table with `group`, exactly one meal type per recipe" rule (Adi, 2026-10-27).
 
 ### AD-8 — State ownership on the client [ADOPTED]
 
@@ -112,7 +113,7 @@ flowchart LR
 - **Rule:**
   - **Server data:** TanStack Query only, through the generated hooks.
   - **Client state:** React Context plus hooks, for the auth session view and the theme only. Zustand is added only on a proven need.
-  - **List filters:** live in the **URL** (`?q=&meal=&tags=`).
+  - **List filters:** live in the **URL** (`?q=&tags=`).
   - **Scaling:** local component state, never persisted (FR-11).
 
 ### AD-9 — Forms and errors [ADOPTED]
@@ -148,7 +149,7 @@ flowchart LR
     - `gemini`: free tier, the optional backup.
     - `fake`: used by tests and CI, which never call a real model.
   - The import dialog lists the enabled providers and offers a one-click "retry with Gemini".
-  - Every provider returns schema-constrained JSON, validated against the shared Pydantic `DraftRecipe`. The draft is Hebrew-translated, has units mapped to the app list, and suggests a meal type and tags.
+  - Every provider returns schema-constrained JSON, validated against the shared Pydantic `DraftRecipe`. The draft is Hebrew-translated, has units mapped to the app list, and suggests tags from the existing list (new tag names are proposed in the draft).
   - An import is **one synchronous request** with a per-provider timeout (`ollama` ≈ 180s, `gemini` 60s), and the client aborts it on cancel.
   - Drafts are **never persisted** (FR-19). A new provider means one adapter plus one config entry.
 
@@ -225,12 +226,12 @@ flowchart LR
     - An `id` from another recipe returns 422.
     - An omitted ingredient is deleted, and a row without an `id` is inserted.
     - Array order is the only order.
-  - **Originals:** `IngredientRead.original` is `{amount, unit} | null`, and `{null, null}` means "originally to taste". Going from null to a value, or back, counts as a change. Name-only or note-only edits never create an original.
+  - **Originals:** `IngredientRead.original` is `{amount, unit} | null`, and `{null, null}` means "originally to taste". Going from null to a value, or back, counts as a change. Name-only or note-only edits never create an original. Storage: `original_amount`, `original_unit` and a `has_original` flag, because two NULLs alone could not tell "originally to taste" from "no original".
   - **Units:** `Unit` is one Python `StrEnum` of the PRD's English codes, used by every schema including `DraftRecipe` and published as an OpenAPI enum.
     - Hebrew labels live only in `he.json` (`units.<code>_one/_other`), and a test checks that every code has its labels.
     - The countable set (`unit, clove, slice, can, package`, rounded to the nearest ½) is defined once beside the enum.
     - **Import conversion:** a deterministic table in the imports service (`oz→g`, `lb→g`, `fl oz→ml`, friendly rounding; cups and spoons unchanged) plus a °F→°C pass over step text (rounded to 5; a converted step keeps its pre-conversion text in `source_text`). It runs after the LLM returns, so the model never does the arithmetic, and it has its own unit tests. Everything is stored metric. A converted ingredient keeps `source_amount` and `source_unit` (`SourceUnit`: `oz`, `lb`, `fl_oz`), kept apart from the FR-7 `original`. The detail page shows originals only through the "הצג מתכון מקורי" toggle, for recipes that have any. There is no metric/imperial display setting, so the table needs no TypeScript twin.
-  - **Read shapes:** read schemas embed `meal_type: {id, name}` and `tags: [{id, name}]`.
+  - **Read shapes:** read schemas embed `tags: [{id, name}]`, ordered by `sort_order` (pinned first) and then name.
   - **Concurrency:** for the MVP, the last write wins [ASSUMPTION].
 
 ### AD-21 — Session endpoints and 401 handling [ADOPTED]
@@ -268,11 +269,12 @@ flowchart LR
 ### AD-24 — Persistence and bootstrap [ADOPTED]
 
 - **Binds:** AD-18, F7, F10, NFR-6
-- **Prevents:** a fresh database that can't save a recipe, silent no-op cascades, duplicate meal types, and timezone shifts.
+- **Prevents:** a fresh database that can't save a recipe, silent no-op cascades, duplicate tags, and timezone shifts.
 - **Rule:**
   - **SQLite settings:** `app/core/db` sets `PRAGMA foreign_keys=ON` and `journal_mode=WAL` on every connection. Child rows use `ON DELETE CASCADE`. Alembic uses `render_as_batch=True`. Tests run `alembic upgrade head`.
-  - **Default meal types:** created by an Alembic data migration, with fixed UUIDs and Hebrew names.
-  - **Demo seed:** goes through services only (create, then update, to produce an original). It is idempotent by recipe title and never creates meal types.
+  - **Default pinned tags:** 13 tags (בוקר … רוטב/ממרח) created by an Alembic data migration, with fixed UUIDs, Hebrew names, `pinned=true` and a `tag.sort_order` (0-12) that keeps their display order.
+  - **Migrations:** `app/migrations/` (inside the package), `alembic.ini` at the project root for the CLI, and `app/core/migrate.py` applies `upgrade head` from the FastAPI lifespan.
+  - **Demo seed:** goes through services only (create, then update, to produce an original). It is idempotent by recipe title and never creates the default tags.
   - **CLI:** one entry point, `python -m app.cli seed|create-admin|backup`, exposed as Nx targets.
   - **Time:** timestamps are UTC and always serialized with `Z`. The daily import cap resets at midnight in `APP_TIMEZONE` (default `Asia/Jerusalem`).
   - **Tag names:** `tags.service` normalizes them (NFC, trim, collapse spaces, max 40 characters) before comparing or storing.
@@ -282,7 +284,7 @@ flowchart LR
 - **Binds:** AD-7, FR-22, FR-24
 - **Prevents:** orphan tags from cancelled forms, half-saved imports, and a recipes ↔ tags import cycle.
 - **Rule:**
-  - Recipe writes carry `meal_type_id` and `tags: [{id} | {name}]`.
+  - Recipe writes carry `tags: [{id} | {name}]`.
   - `recipes.service` resolves names through `tags.service.get_or_create` inside the recipe transaction. The recipe form never calls `POST /api/tags`; only `/tags` does.
   - The `tags` module owns `recipe_tag`. `recipes` depends on `tags`, and `tags` never imports `recipes`.
   - The module graph (`recipes → tags, photos`; `imports → tags`) is enforced by import-linter in lint.
@@ -293,8 +295,8 @@ flowchart LR
 - **Prevents:** one story paging on the server while another filters on the client.
 - **Rule:**
   - `GET /api/recipes` returns all `RecipeSummary` items, unpaginated (a few hundred at most), sorted by `created_at desc, id`.
-  - Search (case-insensitive substring on the title) and filtering (meal type; tags with AND) run on the client over the cached list. This is one pure function, used with `useDeferredValue`.
-  - URL params hold IDs: `?q=&meal=<uuid>&tags=<uuid>,<uuid>`.
+  - Search (case-insensitive substring on the title) and filtering (tags, with AND: a recipe must have all selected tags) run on the client over the cached list. This is one pure function, used with `useDeferredValue`.
+  - URL params hold IDs: `?q=&tags=<uuid>,<uuid>`.
 
 ### AD-27 — Photo lifecycle [ADOPTED]
 
@@ -390,7 +392,7 @@ flowchart LR
 | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | API paths     | `/api/<plural-noun>`, kebab-case. JSON fields are snake_case on the wire, and the generated client uses them as-is.                                                                                                                                                                                |
 | Timestamps    | UTC ISO-8601 (`created_at`, `updated_at`)                                                                                                                                                                                                                                                          |
-| Errors        | 422 validation; 400 bad input or credentials; 401 no session on a protected call; 403 CSRF or insufficient role; 404 missing; 409 conflict (duplicate tag rename, meal type in use); 413 upload too large; 429 rate limit or import cap; 502/504 provider failure or timeout. Body shape per AD-28 |
+| Errors        | 422 validation; 400 bad input or credentials; 401 no session on a protected call; 403 CSRF or insufficient role; 404 missing; 409 conflict (duplicate tag name); 413 upload too large; 429 rate limit or import cap; 502/504 provider failure or timeout. Body shape per AD-28 |
 | Python naming | modules `snake_case`; schemas `RecipeCreate / RecipeRead / RecipeUpdate`                                                                                                                                                                                                                           |
 | TS naming     | components `PascalCase.tsx`; hooks `useX`; route modules `libs/feature-<name>/src/routes/<page>.tsx`                                                                                                                                                                                               |
 | Config        | env vars only, read once in `app/core/config` (pydantic-settings); no secrets in the repo                                                                                                                                                                                                          |
@@ -464,7 +466,7 @@ libs/
 | F6 scaling                  | libs/recipe-domain                                           | AD-31, AD-32       |
 | F8 users, roles, login      | auth + users modules · libs/feature-auth, libs/feature-users | AD-6, AD-21, AD-30 |
 | F9 AI import                | imports module + providers · libs/feature-import             | AD-12, AD-13       |
-| F10 meal types & tags       | tags module · libs/feature-tags                              | AD-7               |
+| F10 tags                    | tags module · libs/feature-tags                              | AD-7               |
 | Photos                      | photos module                                                | AD-14              |
 | NFR-6 one-command run       | compose + nx dev target                                      | AD-15, AD-18       |
 | NFR-1/2 quality, CI         | all projects                                                 | AD-16, AD-17       |

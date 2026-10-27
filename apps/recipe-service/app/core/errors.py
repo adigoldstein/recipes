@@ -8,6 +8,8 @@ from pydantic import BaseModel
 class ErrorCode(StrEnum):
     """Stable error codes; the client shows `errors.<code>` from he.json."""
 
+    RECIPE_NOT_FOUND = "recipe_not_found"
+
 
 class ErrorResponse(BaseModel):
     detail: str

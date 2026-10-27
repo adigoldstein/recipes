@@ -84,9 +84,16 @@ describe('import-linter contracts', () => {
       'recipes/service.py': importing('tags', 'repository'),
     });
     expect(status).not.toBe(0);
-    expect(output).toContain(
-      'tags: router, repository, models and schemas are private',
-    );
+    expect(output).toContain('tags: router, repository and models are private');
+  });
+
+  it('allow using the public schemas of tags and photos', () => {
+    expect(
+      lintImports({
+        'recipes/schemas.py':
+          importing('tags', 'schemas') + importing('photos', 'schemas'),
+      }).status,
+    ).toBe(0);
   });
 
   it("allow calling another module's service", () => {

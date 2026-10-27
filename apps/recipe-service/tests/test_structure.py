@@ -62,18 +62,18 @@ def test_every_route_is_under_api(app: FastAPI) -> None:
     assert all(path.startswith(f"{API_PREFIX}/") for path in paths)
 
 
-class SampleCode(ErrorCode):
-    SAMPLE = "sample"
-
-
 @pytest.mark.parametrize(
     ("params", "expected"),
     [
         (
             {"count": 2},
-            {"detail": "Conflict", "code": "sample", "params": {"count": 2}},
+            {
+                "detail": "Conflict",
+                "code": "recipe_not_found",
+                "params": {"count": 2},
+            },
         ),
-        (None, {"detail": "Conflict", "code": "sample"}),
+        (None, {"detail": "Conflict", "code": "recipe_not_found"}),
     ],
 )
 def test_app_error_returns_code_shape(
@@ -81,7 +81,7 @@ def test_app_error_returns_code_shape(
 ) -> None:
     @app.get("/boom", tags=["test"])
     def get_boom() -> None:
-        raise AppError(409, SampleCode.SAMPLE, "Conflict", params=params)
+        raise AppError(409, ErrorCode.RECIPE_NOT_FOUND, "Conflict", params=params)
 
     response = TestClient(app).get("/boom")
     assert response.status_code == 409

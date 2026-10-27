@@ -13,6 +13,7 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-1-1-adapt-the-backend-scaffold.md`
   summary: Dispose the SQLite engine on app shutdown (lifespan).
   evidence: Engine is cached without a shutdown hook; Story 1.6 adds DB/lifespan.
+  resolved: Story 1.6 — `app.main.lifespan` migrates on startup and disposes the engine on shutdown.
 - source_spec: `_bmad-output/implementation-artifacts/spec-1-2-adapt-the-frontend-scaffold-and-shared-libs.md`
   summary: Add an automated lint fixture test (ESLint Node API) proving each Nx boundary rule fails a forbidden import (ui → data-access, ui → react-router, domain → react, feature → feature), and re-check the `@tanstack/*`/`@hey-api/*` bans once Story 1.7 installs them.
   evidence: Rules were verified with throwaway probes only; removing a constraint keeps `nx lint` green because no file violates it yet. Natural home Story 1.3.
@@ -48,3 +49,6 @@
 - source_spec: `_bmad-output/planning-artifacts/brainstorm-quick-wins.md`
   summary: Open Graph link previews (title and photo when a recipe link is shared in WhatsApp), which needs server-set meta tags per recipe page in the production container.
   evidence: Adi (2026-10-26) put it in the future; the SPA serves one HTML shell today, so it is a Story 6.x decision.
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-6-recipe-data-model-and-read-api.md`
+  summary: Move `Unit` and `SourceUnit` (and the countable set) from `app/recipes/units.py` to a shared core module before the Epic 5 import work, or relax the import-linter contract.
+  evidence: AD-20 has `DraftRecipe` use the same `Unit` enum, but import-linter forbids `app.imports` from depending on `app.recipes`; Story 1.6 left the enums in `recipes` and did not decide this.

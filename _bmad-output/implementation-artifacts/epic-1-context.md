@@ -4,7 +4,7 @@
 
 ## Goal
 
-Anyone can open Bite & Board (ביס & סיר) on a phone or desktop — Hebrew, right-to-left, light or dark — browse seeded recipes, search them, filter by meal type, open a recipe and scale servings live, with the screen kept awake while cooking. The epic first reshapes the existing brownfield Nx 24 scaffold (FastAPI backend + React SPA) to the agreed architecture and lays the shared groundwork (libs, OpenAPI client pipeline, database and migrations, theme, app shell, seed data, CI) that every later epic builds on.
+Anyone can open Bite & Board (ביס & סיר) on a phone or desktop — Hebrew, right-to-left, light or dark — browse seeded recipes, search them, filter by tag, open a recipe and scale servings live, with the screen kept awake while cooking. The epic first reshapes the existing brownfield Nx 24 scaffold (FastAPI backend + React SPA) to the agreed architecture and lays the shared groundwork (libs, OpenAPI client pipeline, database and migrations, theme, app shell, seed data, CI) that every later epic builds on.
 
 ## Stories
 
@@ -16,16 +16,16 @@ Anyone can open Bite & Board (ביס & סיר) on a phone or desktop — Hebrew,
 - Story 1.6: Recipe data model and read API
 - Story 1.7: Generated API client pipeline
 - Story 1.8: Demo seed data
-- Story 1.9: Recipe library with search and meal-type filter
+- Story 1.9: Recipe library with search and tag filter
 - Story 1.10: Recipe detail page
 - Story 1.11: Live serving scaling and kitchen mode
 
 ## Requirements & Constraints
 
-- Library: every recipe as a card (title, meal type, tags, total time, photo), newest first; title search as you type (case-insensitive substring); one meal-type filter; filters live in the URL and survive navigation.
+- Library: every recipe as a card (title, up to 2 tags plus +N, total time, photo), newest first; title search as you type (case-insensitive substring); multi-select pinned-tag chips (AND); filters live in the URL and survive navigation.
 - Detail page shows photo, ingredients (amount, unit, name, note; to-taste lines read "לפי הטעם") and numbered steps; unknown id → not-found page.
 - Servings scaling 1–100 runs on the client only; to-taste never scales; rounding: integers without decimals, else ≤ 2 decimals, countable units to nearest ½.
-- One idempotent seed command creates ~10 Hebrew recipes covering every meal type.
+- One idempotent seed command creates ~10 Hebrew recipes covering every pinned tag.
 - Quality: TS strict, mypy strict, lint/format enforced, CI on every push. Backend API tests for every endpoint; scaling/rounding at 100% branch coverage.
 - Performance (200 recipes, local): library first render < 1 s, search < 100 ms per keystroke, detail < 500 ms.
 - Mobile-first (375 px), keyboard accessible, visible focus, WCAG AA; Hebrew RTL throughout; design tokens only.
@@ -37,7 +37,7 @@ Anyone can open Bite & Board (ביס & סיר) on a phone or desktop — Hebrew,
 - **Config:** env vars only, read once in `app/core/config` via pydantic-settings. Settings: `ENV, DATA_DIR, JWT_SECRET (fail fast if missing), COOKIE_SECURE, LLM_PROVIDERS, OLLAMA_URL, GEMINI_API_KEY, GEMINI_MODEL, IMPORT_DAILY_CAP, LLM_MAX_TOKENS, APP_TIMEZONE (default Asia/Jerusalem), LOG_LEVEL`. `COOKIE_SECURE` defaults true, may be false only when `ENV=dev`. Committed `.env.example`.
 - **Health:** `GET /api/health` (moved from `/health`); container HEALTHCHECK target.
 - **API conventions:** paths `/api/<plural-noun>`; snake_case JSON; operation IDs `{tag}_{function}` via `generate_unique_id_function`, every router declares `tags=[<module>]`, route functions named `verb_noun`, a test asserts the pattern. Errors `{detail, code, params?}` with an `ErrorCode` StrEnum (422 keeps FastAPI's shape).
-- **Persistence:** SQLite, UUID v4 ids, UTC timestamps serialized with `Z`; every connection `PRAGMA foreign_keys=ON` + WAL; Alembic `render_as_batch=True`, auto-applied at startup (failure exits non-zero); default Hebrew meal types via data migration with fixed UUIDs. Meal types and tags share one `tag` table with a `group` column.
+- **Persistence:** SQLite, UUID v4 ids, UTC timestamps serialized with `Z`; every connection `PRAGMA foreign_keys=ON` + WAL; Alembic `render_as_batch=True`, auto-applied at startup (failure exits non-zero); 13 default pinned Hebrew tags via data migration with fixed UUIDs. Tags are one flat list: a `tag` table with `pinned` and `sort_order`, no groups, no meal types.
 - **Recipe read API:** `GET /api/recipes` returns all summaries unpaginated, sorted `created_at desc, id`; `GET /api/recipes/{id}` returns the full aggregate. `amount` is NUMERIC quantized to 3 decimals, JSON number or null; `Unit` is a StrEnum of English codes; countable set `unit, clove, slice, can, package`.
 - **CLI:** `python -m app.cli seed|create-admin|backup`, exposed as Nx targets.
 - **Frontend:** React 19 + Vite 8, React Router 8 data mode with lazy route modules, TanStack Query for server data, URL for filters, i18next with `he.json`. "Thin app, thick libs": `apps/web` is only the shell (router, providers, top bar). Pages and containers live in feature libs `libs/feature-{recipes,auth,users,tags,import}` (tag `type:feature`, never importing each other). Each feature lib is created by the first story that needs it, and each page is a lazy subpath export (e.g. `@bite-and-board/feature-recipes/library`). Shared libs: `data-access` (hey-api generated client/hooks/Zod), `ui-components` (presentational, tokens only), `recipe-domain` (pure TS: scale, format, parse, filter; 100% branch coverage). All libs are non-buildable and consumed from source. Nx tags `type:app|feature|data-access|ui|domain`. depConstraints: app → feature/data-access/ui/domain, feature → data-access/ui/domain, ui → domain, data-access and domain → nothing. `bannedExternalImports` keep `domain` free of React/IO and `ui` free of query/client/router packages.

@@ -144,13 +144,12 @@ ignore_imports = [
 ]
 
 [[tool.importlinter.contracts]]
-name = "photos: router, repository, models and schemas are private to the module"
+name = "photos: router, repository and models are private to the module"
 type = "protected"
 protected_modules = [
   "app.photos.router",
   "app.photos.repository",
   "app.photos.models",
-  "app.photos.schemas",
 ]
 allowed_importers = ["app.photos"]
 ignore_imports = [
@@ -173,14 +172,15 @@ ignore_imports = [
   "app.core.metadata -> app.recipes.models",
 ]
 
+# tags.schemas (TagRef) and photos.schemas (PhotoRead) are public: recipes embeds
+# them in its read schemas. Everything else stays behind the service.
 [[tool.importlinter.contracts]]
-name = "tags: router, repository, models and schemas are private to the module"
+name = "tags: router, repository and models are private to the module"
 type = "protected"
 protected_modules = [
   "app.tags.router",
   "app.tags.repository",
   "app.tags.models",
-  "app.tags.schemas",
 ]
 allowed_importers = ["app.tags"]
 ignore_imports = [

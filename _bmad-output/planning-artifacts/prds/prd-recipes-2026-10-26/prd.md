@@ -45,7 +45,7 @@ source: docs/prd.md
 **MVP (first complete, showable version):**
 
 - Recipe library: list, search and filter (F1)
-- Meal types and owner-managed tags (F10)
+- Owner-managed tags, with pinned quick-filter tags (F10)
 - Create, view, edit and delete recipes (F2–F5)
 - Original-value hints on edited quantities (F4)
 - Serving scaling (F6)
@@ -58,19 +58,19 @@ source: docs/prd.md
 
 ## 5. User Journeys
 
-**UJ-1 — Saving a new recipe.** Adi finds a shakshuka recipe online, opens Bite & Board, clicks *New recipe*, types the title, picks the meal type *Breakfast* (suggested by the form), adds the tag *Brunch*, sets 4 servings, adds six ingredients and four steps, and saves. The recipe appears at the top of the library.
+**UJ-1 — Saving a new recipe.** Adi finds a shakshuka recipe online, opens Bite & Board, clicks *New recipe*, types the title, adds the tags *Breakfast* and *Brunch*, sets 4 servings, adds six ingredients and four steps, and saves. The recipe appears at the top of the library.
 
 **UJ-2 — Making it personal.** After cooking it twice, Adi thinks it needs more cumin and less salt. Adi opens the recipe, clicks *Edit*, changes cumin from 1 tsp to 2 tsp and salt from 1 tsp to ½ tsp, and saves. From now on the recipe shows *2 tsp cumin* with a small hint *originally 1 tsp*. Months later, wondering whether the original was better, Adi resets cumin to the original value with one click.
 
 **UJ-3 — Cooking for a crowd.** Friends are coming over: 10 people. Adi opens the lasagna recipe (base 4 servings), sets servings to 10, and every quantity updates instantly. Eggs show as *5*, not *5.000*. "Salt — to taste" stays as it is.
 
-**UJ-4 — Finding a recipe.** Adi has 60 recipes, types "chick" into the search box and sees the chickpea curry and the roast chicken, then narrows the list with the *Dinner* meal-type filter.
+**UJ-4 — Finding a recipe.** Adi has 60 recipes, types "chick" into the search box and sees the chickpea curry and the roast chicken, then narrows the list by tapping the pinned *Dinner* tag.
 
 **UJ-5 — Cleaning up.** A recipe Adi tried once was bad. Adi deletes it, confirms in a dialog, and it is gone from the library.
 
 **UJ-6 — Visitor, editor and admin.** A recruiter opens the app from Adi's CV and browses recipes and scales one to 6 servings, but sees no *New*, *Edit* or *Delete* buttons. Adi clicks *Log in*, enters email and password, and the editing controls appear. Adi opens *Users*, adds an editor account for their partner with a starting password, and the partner logs in and adds a recipe. A week later the session has expired and Adi logs in again.
 
-**UJ-7 — Importing from the web.** Adi finds a great focaccia recipe on a cooking site, copies the URL, clicks *Import*, and pastes it. A few seconds later the recipe form opens pre-filled: title, 8 servings, ingredients with amounts and units, and steps. The import read "a pinch of salt" as amount 1, unit pinch; the import pre-picked the meal type and suggested the existing tag *Bakery*; Adi adds a new tag *Party* and saves. Another site blocks the import, so Adi copies the recipe text from the page, pastes it into the *Paste text* tab instead, and gets the same pre-filled form.
+**UJ-7 — Importing from the web.** Adi finds a great focaccia recipe on a cooking site, copies the URL, clicks *Import*, and pastes it. A few seconds later the recipe form opens pre-filled: title, 8 servings, ingredients with amounts and units, and steps. The import read "a pinch of salt" as amount 1, unit pinch; the import suggested the existing tag *Bakery* and proposed a new tag *Party*, which Adi accepts before saving. Another site blocks the import, so Adi copies the recipe text from the page, pastes it into the *Paste text* tab instead, and gets the same pre-filled form.
 
 ## 6. Features and Functional Requirements
 
@@ -78,20 +78,20 @@ FR IDs are global and stable. Each FR lists its acceptance criteria (AC).
 
 ### Recipe content (applies to F2–F5)
 
-A recipe has: title (required, 1–120 chars), optional description (a short intro, up to 500 chars), optional notes (free multi-line text for tips and personal remarks, up to 5,000 chars), a meal type (required, exactly one, from an owner-editable list seeded with Breakfast, Brunch, Lunch, Dinner, Dessert, Side, Drink, Other), any number of tags (optional, owner-managed free tags such as "BBQ", "Finger food", "Party"), base servings (required, integer 1–100), optional prep time and cook time (minutes), an optional source URL, an optional photo (one per recipe), an ordered list of ingredients (at least one) and an ordered list of instruction steps (at least one).
+A recipe has: title (required, 1–120 chars), optional description (a short intro, up to 500 chars), optional notes (free multi-line text for tips and personal remarks, up to 5,000 chars), any number of tags (optional, 0..n, from one owner-managed list; some are pinned and seeded, such as Breakfast, Brunch, Lunch, Dinner, Snack, Main, Side, Starter/Salad, Soup, Pastry, Dessert, Drink, Sauce/Spread, and others are free tags such as "BBQ", "Finger food", "Party"), base servings (required, integer 1–100), optional prep time and cook time (minutes), an optional source URL, an optional photo (one per recipe), an ordered list of ingredients (at least one) and an ordered list of instruction steps (at least one).
 
 An ingredient has: name (required), an optional amount (positive number), an optional unit (from a fixed list: g, kg, ml, l, tsp, tbsp, cup, unit, pinch, clove, slice, can, package), and an optional note (e.g. "finely chopped"), and, when it was converted on import, its source amount and unit (e.g. 8 oz). An ingredient without an amount is a **to-taste** ingredient (e.g. "Salt — to taste").
 
 ### F1. Recipe library
 
-- **FR-1 — List recipes.** The library shows all recipes as cards with title, meal type, tags, total time (prep + cook, if known) and the photo if there is one, newest first.
+- **FR-1 — List recipes.** The library shows all recipes as cards with title, up to 2 tags plus a "+N" for the rest, total time (prep + cook, if known) and the photo if there is one, newest first.
   - AC: With 0 recipes, an empty state with a *New recipe* call to action is shown.
   - AC: With 60+ recipes the list loads in under 1 second locally (NFR-3).
 - **FR-2 — Search.** A search box filters recipes by title, case-insensitive substring match, as the user types.
   - AC: "chick" matches "Chickpea Curry" and "Roast Chicken"; it does not match "Lasagna".
   - AC: No matches shows a "No recipes found" message with a way to clear the search.
-- **FR-3 — Filter by meal type and tags.** The user can filter by one meal type and by one or more tags (a recipe must have all selected tags); filters and search combine.
-  - AC: Selecting *Dinner* with search "chick" shows only dinner recipes whose title contains "chick"; adding the tag *BBQ* narrows it further.
+- **FR-3 — Filter by tags.** The user can filter by one or more tags (a recipe must have all selected tags, AND). The pinned tags are shown as a quick-filter chip row that scrolls horizontally, and a "more tags" button opens every tag; filters and search combine.
+  - AC: Selecting the pinned tag *Dinner* with search "chick" shows only recipes tagged *Dinner* whose title contains "chick"; adding the tag *BBQ* narrows it further to recipes that have both tags.
   - AC: Search text and filter survive navigating to a recipe and back.
 
 ### F2. Create recipe
@@ -141,12 +141,12 @@ An ingredient has: name (required), an optional amount (positive number), an opt
 
 ### F7. Demo seed data
 
-- **FR-12 — Seed.** A single command loads about 10 realistic recipes, covering every seeded meal type and several tags, at least one to-taste ingredient, and at least one ingredient with an original-value hint.
+- **FR-12 — Seed.** A single command loads about 10 realistic recipes, covering every pinned tag and several free tags, at least one to-taste ingredient, and at least one ingredient with an original-value hint.
   - AC: Running the seed on an empty database produces the demo set; running it again does not create duplicates.
 
 ### F8. Users, roles and login
 
-There are three access levels. A **visitor** is not logged in and can only read: list, search, view and scale. An **editor** has an account and can also create, edit, reset, delete and import recipes, upload photos, and manage meal types and tags. The **admin** can do everything an editor can, and also manages users. In this PRD, "the owner" in F2–F10 means any signed-in user (an editor or the admin). Recipes form one shared library: every editor can edit every recipe, and each recipe records who created it and who last updated it.
+There are three access levels. A **visitor** is not logged in and can only read: list, search, view and scale. An **editor** has an account and can also create, edit, reset, delete and import recipes, upload photos, and manage tags. The **admin** can do everything an editor can, and also manages users. In this PRD, "the owner" in F2–F10 means any signed-in user (an editor or the admin). Recipes form one shared library: every editor can edit every recipe, and each recipe records who created it and who last updated it.
 
 
 - **FR-13 — Create the admin account.** A command-line command creates the first admin account from an email and a password. There is no sign-up page.
@@ -183,7 +183,7 @@ Owner-only (FR-16 applies). Import never saves anything by itself: it produces a
   - AC: Importing an English recipe yields a Hebrew draft whose amounts and units match the source, with imperial units converted (8 oz becomes 227 g and keeps "8 oz" as its source value).
   - AC: A step that says "350°F" reads "180°C" in the draft and keeps the original step text; the conversion is deterministic code, not model arithmetic.
 - **FR-19 — Review before save.** A successful import opens the recipe create form (FR-4) pre-filled with the draft; nothing is saved until the owner clicks *Save*.
-  - AC: The draft goes through the same validation as FR-4; fields the import could not fill (e.g. meal type, servings) are left empty and flagged for the owner to complete.
+  - AC: The draft goes through the same validation as FR-4; fields the import could not fill (e.g. servings) are left empty and flagged for the owner to complete.
   - AC: Ingredients the import could not quantify become to-taste ingredients rather than invented amounts.
   - AC: Units are mapped to the app's unit list, imperial units are converted (FR-21); a unit that is still unmappable is left empty and the original text is kept in the ingredient note.
   - AC: The source URL (if any) is stored with the saved recipe and shown on its detail page as a link.
@@ -193,17 +193,18 @@ Owner-only (FR-16 applies). Import never saves anything by itself: it produces a
   - AC: An import that exceeds its engine's time limit is stopped with a clear message. Limits are set per AI engine (default: 60 seconds for a hosted model, about 180 seconds for a local model running on the laptop's CPU).
   - AC: LLM errors (provider down, quota exceeded, invalid output) show a readable message; nothing is saved and no partial recipe is created.
 
-### F10. Meal types and tags
+### F10. Tags
 
 Owner-only for changes (FR-16 applies); everyone can filter by them.
 
-- **FR-22 — Meal type and tags on a recipe.** The recipe form (FR-4/FR-6) requires one meal type and accepts any number of tags. When creating, the form suggests a meal type; tag input autocompletes from existing tags and can create a new tag inline.
-  - AC: Saving without a meal type shows an inline error; the API returns 422.
+- **FR-22 — Tags on a recipe.** The recipe form (FR-4/FR-6) accepts any number of tags (zero or more; none is required). Tag input autocompletes from existing tags and can create a new tag inline. There are no meal types or tag groups: a meal type like *Breakfast* is just a pinned tag.
+  - AC: A recipe can be saved with no tags.
   - AC: Typing a tag name that already exists (case-insensitive) reuses it instead of creating a duplicate.
-- **FR-23 — Manage meal types and tags.** A management screen lets the owner add, rename and delete meal types and tags.
-  - AC: Renaming updates every recipe that uses it.
-  - AC: Deleting a tag removes it from all recipes after a confirmation that shows how many recipes use it. A meal type that is still used by recipes cannot be deleted; the message says how many recipes use it.
-- **FR-24 — Import suggestions.** AI import (F9) pre-picks a meal type and suggests tags, preferring existing ones; suggested new tags are only created if the owner keeps them and saves.
+- **FR-23 — Manage tags.** A management screen lets the owner add, rename, delete and pin or unpin tags. Pinned tags appear as the quick-filter chips in the library (FR-3).
+  - AC: Renaming updates every recipe that uses it, and a name that already exists (case-insensitive) is refused.
+  - AC: Deleting a tag removes it from all recipes after a confirmation that shows how many recipes use it.
+  - AC: Pinning or unpinning a tag adds it to or removes it from the library's quick-filter chip row.
+- **FR-24 — Import suggestions.** AI import (F9) suggests tags from the existing list; suggested new tag names are proposed in the draft, and are only created if the owner accepts them and saves.
 
 ## 7. Non-Functional Requirements
 
@@ -239,7 +240,7 @@ These are kept so the architecture does not rule them out. None has a committed 
 | OQ-3 | **Event menus.** Saved and reopenable, or temporary? Fields (date, guest count)? | Event menus, shopping list | When MVP is done |
 | OQ-4 | **Shopping list merging.** Exact name + unit, or unit conversion (g↔kg, tsp↔tbsp) and plural matching? Can items be ticked off or edited? | Shopping list | With OQ-3 |
 | OQ-5 | **Smart substitution.** In or out; rule-based or AI? | Substitution | After OQ-2 |
-| OQ-6 | ~~Tags.~~ **Resolved 2026-10-26 (Adi):** fixed category replaced by one meal type per recipe + free tags (F10). | — | — |
+| OQ-6 | ~~Tags.~~ **Resolved 2026-10-26 (Adi):** fixed category replaced by one meal type per recipe + free tags (F10). **Superseded 2026-10-27 (Adi):** no meal types at all; one flat list of tags, some of them pinned as quick filters. | — | — |
 | OQ-7 | **Old PRD.** `docs/prd.md` predates this document. Keep, replace with a pointer, or delete? | Nothing | Next review |
 
 ## 10. Constraints and Assumptions

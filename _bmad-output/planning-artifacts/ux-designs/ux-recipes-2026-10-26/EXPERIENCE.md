@@ -27,12 +27,12 @@ sources:
 
 | Surface | Route [ASSUMPTION] | Reached from | Who | Purpose | PRD |
 |---|---|---|---|---|---|
-| Library | `/` | App open, the brand link | All | Recipe cards, search, meal-type and tag filters | FR-1–3 |
+| Library | `/` | App open, the brand link | All | Recipe cards, search, pinned-tag chips and tag filters | FR-1–3 |
 | Recipe detail | `/recipes/:id` | Library card | All | Full recipe, serving scaling, original-value hints, source link | FR-5, FR-8, FR-11 |
 | New recipe | `/recipes/new` | "מתכון חדש" in the top bar and the empty state | Owner | Recipe form | FR-4 |
 | Edit recipe | `/recipes/:id/edit` | "עריכה" on the detail page | Owner | The same form, prefilled, with hints and reset | FR-6–9 |
 | Import | `/import` (dialog over the library on desktop, full page on phone) [ASSUMPTION] | "ייבוא" in the top bar | Owner | URL tab, pasted-text tab, progress | FR-17, 18, 20 |
-| Meal types & tags | `/tags` | Account menu | Owner | Add, rename, delete meal types and tags | FR-22–24 |
+| Tags | `/tags` | Account menu | Owner | Add, rename, delete and pin tags | FR-22–24 |
 | Users | `/users` | Account menu | Admin | List users; add user (email, name, role, starting password); change role; block/unblock; reset password | FR-25–26 |
 | My account | `/account` | Account menu | Owner | Change own password | FR-27 |
 | Import review | `/recipes/new` (draft passed in router state, never in the URL; AD-22) | Successful import | Owner | Recipe form prefilled from the draft, unfilled fields flagged | FR-19 |
@@ -79,13 +79,13 @@ Behavioural only. The visual specs are in `DESIGN.md.Components`.
 
 | Component | Where | Behaviour |
 |---|---|---|
-| Recipe card | Library | The whole card is one link to the detail page. It shows the photo (if any), title, meal type, up to 3 tags and total time (prep + cook). When neither time is known, the time is omitted rather than shown as "0". A card without a photo shows a larger title on the board and no placeholder image. Photos are lazy-loaded (NFR-11). |
+| Recipe card | Library | The whole card is one link to the detail page. It shows the photo (if any), title, up to 2 tags plus "+N" for the rest, and total time (prep + cook). When neither time is known, the time is omitted rather than shown as "0". A card without a photo shows a larger title on the board and no placeholder image. Photos are lazy-loaded (NFR-11). |
 | Recipe photo | Detail, form, import review | One optional photo per recipe. It comes from an import (schema.org `Recipe.image`, then `og:image`) or a manual upload in the form. In the form: "הוספת תמונה" / "החלפה" / "הסרה". A removed photo is dropped on Save, and "החזרת התמונה" is available until then. An imported photo shows the source domain as credit on the detail page. Storage, resizing and format are architecture decisions (OQ-UX-6). |
 | Search field | Library | Filters as you type, with no submit. Matching is a case-insensitive substring on the title. Input stays responsive (deferred filtering). Includes a clear (×) control. The value is kept in the URL query (`?q=`) so it survives navigating back (FR-3). |
-| Meal-type filter | Library | A single-select chip row with "הכל" plus the owner's meal types. On phone it scrolls horizontally inside its own row. Stored in the URL (`?meal=`). Combines with search and tags. |
+| Tag filter | Library | A multi-select chip row with "הכל" plus the pinned tags, followed by an "עוד תגיות" button that opens every tag. It scrolls horizontally inside its own row. A recipe must have all the selected tags (AND). Stored in the URL (`?tags=`). Combines with search. |
 | Tag filter | Library | A "תגיות" button opens a sheet (phone) or popover (desktop) of tag checkboxes. The selected tags show as removable chips under the search; a recipe must have all of them. Stored in the URL (`?tags=`). |
-| Meal type + tag input | Form | The meal type is a required single select. On create it is preselected from a suggestion [ASSUMPTION: by time of day: morning→בוקר, evening→ערב]. Tags use a combobox that autocompletes existing tags (case-insensitive) and offers "יצירת תגית '{text}'" for a new one. Chosen tags are removable chips. |
-| Manage meal types & tags | `/tags` (owner) | Two lists with inline rename and add. Deleting a tag asks for confirmation and states how many recipes use it. A meal type that is in use cannot be deleted, and the message says how many recipes use it (FR-23). Reached from the account menu. |
+| Tag input | Form | Tags are optional, any number. They use a combobox that autocompletes existing tags (case-insensitive) and offers "יצירת תגית '{text}'" for a new one. Chosen tags are removable chips. |
+| Manage tags | `/tags` (owner) | One list with inline rename, add, a pin toggle and delete. Pinned tags are the library's quick-filter chips. Deleting a tag asks for confirmation, states how many recipes use it and removes it from them (FR-23). Reached from the account menu. |
 | Servings stepper | Detail | − / value / + plus direct typing, clamped to 1–100. Every amount updates on each change, with no network call. A "חזרה ל־{base}" link appears only when the value differs from the base. Not persisted: a reload returns to the base (FR-11). |
 | Ingredient line | Detail, form | Shows amount, unit, name and note. A to-taste line reads "מלח — לפי הטעם" and never scales. When an original exists, a hint line "במקור {amount} {unit}" sits under it, visually secondary (`{colors.hint}`), scaled by the same ratio, and announced to screen readers as part of the line. |
 | Reset to original | Edit form | A small text action on hinted rows only: "חזרה למקור". It restores the amount and unit in the form. The hint stays until Save, and after Save the row is indistinguishable from an unedited one (FR-9). It can be undone before Save by retyping. |
@@ -174,7 +174,7 @@ Failure: Adi types 0 or 150 → the value is clamped to 1 or 100, and a brief me
 ### Flow 3 — Importing from the web (UJ-7)
 
 1. Adi copies a focaccia URL, taps "ייבוא" and pastes it into the "קישור" tab.
-2. A progress message appears ("קוראים את הדף…") with a cancel button. A few seconds later the form opens prefilled. The top of the form says "שדה אחד דורש השלמה", and the meal type is pre-picked; the tag "מאפים" is suggested.
+2. A progress message appears ("קוראים את הדף…") with a cancel button. A few seconds later the form opens prefilled. The top of the form says "שדה אחד דורש השלמה", and the tag "מאפים" is suggested.
 3. Adi picks "מאפים" and taps "שמירה".
 4. A second site blocks the fetch, and the message offers "הדבקת טקסט". Adi pastes the copied recipe text into that tab and gets the same prefilled form.
 5. **Climax:** Two recipes from two sites, saved in under a minute each, with nothing typed by hand except one new tag.

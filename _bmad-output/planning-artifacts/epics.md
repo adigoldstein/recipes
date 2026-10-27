@@ -19,9 +19,9 @@ This document breaks the requirements from the PRD, the UX design contract (DESI
 
 ### Functional Requirements
 
-FR1: The library lists every recipe as a card showing the title, meal type, tags, total time (if known) and photo (if any), newest first. An empty state invites the user to create a recipe.
+FR1: The library lists every recipe as a card showing the title, up to 2 tags plus "+N", total time (if known) and photo (if any), newest first. An empty state invites the user to create a recipe.
 FR2: Search filters recipes by title as you type (case-insensitive substring). When nothing matches, the library shows "no recipes found" with a way to clear the search.
-FR3: Filter by one meal type and by one or more tags (AND). The filters combine with search and survive navigating to a recipe and back.
+FR3: Filter by one or more tags (AND: a recipe must have all of them). Pinned tags are a quick-filter chip row. The filters combine with search and survive navigating to a recipe and back.
 FR4: Create a recipe through a form with every content field. Ingredients and steps can be added, removed and reordered. The form validates inline, and the API rejects the same errors with 422. Leaving with unsaved changes asks for confirmation. The user can add, replace or remove the photo.
 FR5: The detail page shows all recipe content: photo, ingredients (amount, unit, name, note), numbered steps and the recipe's notes after the steps. To-taste ingredients read "Salt — to taste". An unknown recipe id shows a not-found page.
 FR6: Edit a recipe with the same form as FR4; saving overwrites it in place and updates `updated_at`.
@@ -30,7 +30,7 @@ FR8: An ingredient that has an original shows the hint "originally {amount} {uni
 FR9: "Reset to original" in the edit form restores the original amount and unit. After saving, the ingredient looks exactly as if it had never been edited.
 FR10: Delete a recipe after a confirmation dialog that names it. Cancelling changes nothing. Confirming permanently removes the recipe and its children. Deleting a recipe that is already gone returns 404 and shows a non-blocking message.
 FR11: Scale servings (1–100) on the detail page. Scaling happens instantly on the client, never scales to-taste ingredients, and uses the rounding rules (whole numbers as integers, otherwise up to 2 decimals, countable units to the nearest ½). It is view-only; a Reset control returns to the base servings.
-FR12: One idempotent command seeds about 10 recipes covering every meal type and several tags. The set includes at least one to-taste ingredient and at least one ingredient with an original value.
+FR12: One idempotent command seeds about 10 recipes covering every pinned tag and several free tags. The set includes at least one to-taste ingredient and at least one ingredient with an original value.
 FR13: A CLI command creates the first admin (a duplicate fails, or with a flag it changes the password). Passwords are hashed, at least 8 characters, and never returned by any API.
 FR14: Log in with email and password. On success the controls for the user's role appear. A wrong email or password gives one generic error. The session expires after 7 days, and the user is then sent back to where they were after logging in again.
 FR15: Log out ends the session, and the editing controls disappear.
@@ -40,9 +40,9 @@ FR18: Import from pasted text through the LLM. Text without a recognisable recip
 FR19: Review before saving. The import opens the create form prefilled, and nothing is saved until Save. Unfilled fields are flagged. Ingredients the LLM can't quantify become to-taste. An unmappable unit is left empty, with the original text kept in the note. The source URL is stored and shown. The imported photo can be kept or removed. Cancelling discards the draft.
 FR20: The import shows progress and can be cancelled. It stops at its engine's time limit (60 s hosted, about 180 s local). LLM errors are shown in readable form, and nothing is saved.
 FR21: Imports in another language produce a Hebrew draft. Amounts and units are mapped to the app's units, imperial units (oz, lb, fl oz) are converted to g and ml with the source value kept, °F in the steps becomes °C with the original step text kept, and the source URL is kept.
-FR22: Every recipe needs exactly one meal type and can have any number of tags. On create the form suggests a meal type. Tag input autocompletes and creates new tags inline, reusing an existing tag regardless of case.
-FR23: A management screen adds, renames and deletes meal types and tags. A rename applies everywhere. Deleting a tag asks for confirmation and shows how many recipes use it. A meal type that is still in use can't be deleted.
-FR24: Import pre-picks a meal type and suggests tags, preferring existing ones. A suggested new tag is created only if the user keeps it and saves.
+FR22: A recipe can have any number of tags (none is required). There are no meal types: they are pinned tags. Tag input autocompletes and creates new tags inline, reusing an existing tag regardless of case.
+FR23: A management screen adds, renames, deletes and pins or unpins tags. A rename applies everywhere. Deleting a tag asks for confirmation, shows how many recipes use it and removes it from them. Pinned tags are the library's quick-filter chips.
+FR24: Import suggests tags from the existing list and proposes new tag names in the draft. A new tag is created only if the user accepts it and saves.
 FR25: On the Users screen the admin lists users and adds a user (email, name, role, starting password). Emails are unique, compared without case.
 FR26: The admin can change a user's role, block or unblock a user, and reset their password. A blocked user's session stops working on the next request. The last active admin can't be demoted or blocked.
 FR27: Any signed-in user can change their own password by entering their current one.
@@ -79,7 +79,7 @@ From ARCHITECTURE-SPINE.md (AD-1 to AD-33). There is **no starter template**: th
   - The client is configured once (credentials and the CSRF header), and invalidation goes through one map (AD-19).
 - Database setup:
   - SQLite with `foreign_keys=ON` and WAL; Alembic in batch mode; tests run `alembic upgrade head` (AD-24).
-  - The default Hebrew meal types come from a data migration with fixed UUIDs (AD-24).
+  - The 13 default pinned Hebrew tags come from a data migration with fixed UUIDs (AD-24).
   - The CLI `app.cli seed|create-admin|backup` is exposed as Nx targets (AD-24, AD-29).
 - Recipe API (AD-4, AD-20, AD-31):
   - The recipe aggregate is read and written whole.
@@ -126,7 +126,7 @@ UX-DR4: App shell. One top bar with no sidebar:
 - the wordmark "ביס & סיר", linking to the library
 - for signed-in users, "מתכון חדש" and "ייבוא" (on phone, one "+" menu)
 - the theme toggle
-- "כניסה", or an account menu with "תגיות וסוגי ארוחה", "משתמשים" (admin only), "החשבון שלי" and "יציאה"
+- "כניסה", or an account menu with "תגיות", "משתמשים" (admin only), "החשבון שלי" and "יציאה"
   UX-DR5: RTL foundation:
 - `<html lang="he" dir="rtl">` and Radix `DirectionProvider`.
 - Logical utilities only.
@@ -135,17 +135,17 @@ UX-DR4: App shell. One top bar with no sidebar:
 - `dir="auto"` on user content.
 - The URL, email and password fields are `dir="ltr"`.
   UX-DR6: Board component. An oak slab with radius 24, padding 18 and 36 at the top for the handle slot (a 44×12 pill in the ground colour, centred 12 px from the top). It is used only for food surfaces.
-  UX-DR7: RecipeCard. A board with the slot, a 4:3 photo (14 px corners, cover), then the title, meal type, up to 3 tags and total time. The whole card is the link. Without a photo, the title is larger and there is no placeholder. Hover scales up 2% and press scales down 2%, with no shadow.
+  UX-DR7: RecipeCard. A board with the slot, a 4:3 photo (14 px corners, cover), then the title, up to 2 tags plus "+N" for the rest, and total time. The whole card is the link. Without a photo, the title is larger and there is no placeholder. Hover scales up 2% and press scales down 2%, with no shadow.
   UX-DR8: Board-shaped photo on the detail page and in import review. Board radius with the handle slot cut through the image, 4:3 on phone and 16:9 on desktop. Imported photos show the credit "מקור: {domain}".
   UX-DR9: ServingsStepper. Round 44 px − and + buttons, typing allowed, clamped to 1–100 with a range message. "חזרה ל־{base}" appears only when the value differs from the base. A polite live region announces the servings.
   UX-DR10: IngredientLine. Shows the amount in the quantity role, the unit label (singular or plural), the name and the note. To-taste lines read "לפי הטעם". The hint "במקור …" sits under the line in `hint` colour, scaled, and linked with `aria-describedby`.
   UX-DR11: Library filters:
 - a pill search field with clear (×), kept in `?q=`, focused with `/` on desktop
-- a single-select meal-type chip row ("הכל" plus the meal types; horizontal scroll on phone)
-- a "תגיות" button that opens a sheet (phone) or popover (desktop) of tag checkboxes, with the selected tags shown as removable chips
+- a multi-select chip row of the pinned tags ("הכל" clears it; scrolls horizontally), followed by an "עוד תגיות" button
+- the "עוד תגיות" button opens a sheet (phone) or popover (desktop) of every tag as checkboxes, with the selected unpinned tags shown as removable chips
 - all state kept in the URL
   UX-DR12: Recipe form:
-- fields: title, description, notes (a textarea for tips and remarks), meal type select, tag combobox (autocomplete, case-insensitive reuse, "יצירת תגית '{text}'"), servings, prep and cook time, source URL, photo (add, replace, remove, with an upload thumbnail and progress, limits shown beside the field)
+- fields: title, description, notes (a textarea for tips and remarks), tag combobox (multi-select, optional; autocomplete, case-insensitive reuse, "יצירת תגית '{text}'"), servings, prep and cook time, source URL, photo (add, replace, remove, with an upload thumbnail and progress, limits shown beside the field)
 - ingredient rows (amount as text accepting ½ and ⅓, unit select, name, note; stacked on phone, one row from `sm`) with add, remove and up/down reorder, and Enter in the last row adding a row
 - hinted rows show "חזרה למקור"
 - step rows
@@ -164,7 +164,7 @@ UX-DR4: App shell. One top bar with no sidebar:
 - blocked user
 - login errors, generic and rate-limited
 - save failed (values kept)
-  UX-DR18: Tags management screen at `/tags`: two lists (meal types, tags) with inline rename and add. Deletes are confirmed and show usage counts. A meal type in use can't be deleted.
+  UX-DR18: Tags management screen at `/tags`: one list of tags with inline rename, add, a pin toggle and delete. Deletes are confirmed and show usage counts.
   UX-DR19: Users screen at `/users` (admin): a list, add user (email, name, role, starting password), role change, block or unblock, and reset password. The controls on the last admin are disabled with a reason. `/account` lets a user change their own password.
   UX-DR20: Responsive layouts:
 - library: 1 column below 640, 2 columns from `sm`, 3 from `lg`
@@ -184,7 +184,7 @@ UX-DR4: App shell. One top bar with no sidebar:
 
 FR1: Epic 1 - Library list with cards, newest first, empty state
 FR2: Epic 1 - Search by title as you type
-FR3: Epic 1 (meal-type filter) + Epic 4 (tag filter) - Combined filters kept in the URL
+FR3: Epic 1 (pinned-tag chips, AND) + Epic 4 (all-tags sheet) - Combined filters kept in the URL
 FR4: Epic 3 - Create a recipe through the form (incl. photo)
 FR5: Epic 1 - Recipe detail page
 FR6: Epic 3 - Edit a recipe with the same form
@@ -203,9 +203,9 @@ FR18: Epic 5 - Import from pasted text
 FR19: Epic 5 - Review the import before saving
 FR20: Epic 5 - Import progress, cancel and per-engine timeouts
 FR21: Epic 5 - Hebrew drafts from other languages
-FR22: Epic 3 - Meal type and tags on a recipe, with inline new tags
-FR23: Epic 4 - Manage meal types and tags
-FR24: Epic 5 - Import suggests a meal type and tags
+FR22: Epic 3 - Tags on a recipe, with inline new tags
+FR23: Epic 4 - Manage tags (add, rename, delete, pin)
+FR24: Epic 5 - Import suggests tags
 FR25: Epic 2 - Users screen: list and add users
 FR26: Epic 2 - Change role, block, reset password; protect the last admin
 FR27: Epic 2 - Change your own password
@@ -216,8 +216,8 @@ FR27: Epic 2 - Change your own password
 
 ### Epic 1: Browse and cook from the phone
 
-Anyone can open ביס & סיר on a phone or desktop (Hebrew, RTL, light or dark), browse the seeded recipes, search them, filter by meal type, open a recipe and scale it live, with the screen staying awake in the kitchen. The groundwork comes first: adapting the scaffold, the shared libs, the OpenAPI pipeline, the database with its migrations and Hebrew meal types, the theme, the app shell, seed data and CI.
-**FRs covered:** FR1, FR2, FR3 (meal type), FR5, FR11, FR12
+Anyone can open ביס & סיר on a phone or desktop (Hebrew, RTL, light or dark), browse the seeded recipes, search them, filter by tag, open a recipe and scale it live, with the screen staying awake in the kitchen. The groundwork comes first: adapting the scaffold, the shared libs, the OpenAPI pipeline, the database with its migrations and pinned Hebrew tags, the theme, the app shell, seed data and CI.
+**FRs covered:** FR1, FR2, FR3 (pinned tags), FR5, FR11, FR12
 
 ### Epic 2: Accounts, login and roles
 
@@ -226,17 +226,17 @@ Adi bootstraps the admin account, and users log in and out. Visitors read, edito
 
 ### Epic 3: Create, edit and delete recipes
 
-Editors create recipes in the full form: ingredient and step rows, fractions, validation, and an unsaved-changes guard. They pick the meal type and tags (creating new tags inline) and add a photo. Editing keeps "originally …" hints, with reset to original, and recipes can be deleted after a confirmation.
+Editors create recipes in the full form: ingredient and step rows, fractions, validation, and an unsaved-changes guard. They pick tags (creating new tags inline) and add a photo. Editing keeps "originally …" hints, with reset to original, and recipes can be deleted after a confirmation.
 **FRs covered:** FR4, FR6, FR7, FR8, FR9, FR10, FR22
 
-### Epic 4: Organise with meal types and tags
+### Epic 4: Organise with tags
 
-Editors manage meal types and tags (add, rename, delete, with usage counts), and everyone can filter the library by tags.
+Editors manage tags (add, rename, delete, pin or unpin, with usage counts), and everyone can filter the library by tags.
 **FRs covered:** FR3 (tags), FR23
 
 ### Epic 5: AI import
 
-Editors import a recipe from a link or from pasted text with Ollama (local) or Gemini. They get a Hebrew draft with a suggested meal type, tags and photo, review the flagged fields, and save. Progress, cancel and per-engine timeouts make slow local runs usable. Story 5.1 is the spike that compares Ollama and Gemini and confirms the default engine.
+Editors import a recipe from a link or from pasted text with Ollama (local) or Gemini. They get a Hebrew draft with suggested tags and photo, review the flagged fields, and save. Progress, cancel and per-engine timeouts make slow local runs usable. Story 5.1 is the spike that compares Ollama and Gemini and confirms the default engine.
 **FRs covered:** FR17, FR18, FR19, FR20, FR21, FR24
 
 ### Epic 6: Ready to show
@@ -246,7 +246,7 @@ The app runs as one production container (`docker compose up`) with backups, str
 
 ## Epic 1: Browse and cook from the phone
 
-Anyone can open ביס & סיר on a phone or desktop (Hebrew, RTL, light or dark), browse the seeded recipes, search them, filter by meal type, open a recipe and scale it live. The first stories adapt the existing scaffold to the architecture spine.
+Anyone can open ביס & סיר on a phone or desktop (Hebrew, RTL, light or dark), browse the seeded recipes, search them, filter by tag, open a recipe and scale it live. The first stories adapt the existing scaffold to the architecture spine.
 
 ### Story 1.1: Adapt the backend scaffold
 
@@ -367,12 +367,13 @@ So that the app has real data to show.
 - nullable `created_by`/`updated_by` UUID columns (their foreign key to `user` is added in Story 2.1, when that table exists)
 - `ON DELETE CASCADE` on child rows
   **And** every connection has `PRAGMA foreign_keys=ON` and WAL enabled
-  **And** a data migration inserts the default meal types with fixed UUIDs and Hebrew names (בוקר, בראנץ', צהריים, ערב, קינוח, תוספת, משקה, אחר)
+  **And** tags are one flat list: `tag(id, name, pinned, sort_order)` unique on `lower(name)`, with no groups and no meal types. A recipe has any number of tags, and none is required
+  **And** a data migration inserts 13 pinned tags with fixed UUIDs, Hebrew names and `sort_order` 0-12, in this order: בוקר, בראנץ', צהריים, ערב, נשנוש, עיקרית, תוספת, מנה ראשונה/סלט, מרק, מאפה, קינוח, משקה, רוטב/ממרח
   **And** a failed migration exits the app non-zero
 
 **Given** recipes exist
 **When** `GET /api/recipes` is called
-**Then** it returns all `RecipeSummary` items, unpaginated, sorted by `created_at desc, id` (AD-26). Each summary has: id, title, meal_type `{id,name}`, tags `[{id,name}]`, total_minutes or null, photo or null, and created_at
+**Then** it returns all `RecipeSummary` items, unpaginated, sorted by `created_at desc, id` (AD-26). Each summary has: id, title, tags `[{id,name}]` (ordered by `sort_order`, pinned first, then name), total_minutes or null, photo or null, and created_at
 **And** `GET /api/recipes/{id}` returns the full `RecipeRead` (AD-20, AD-31), with:
 
 - `description` and `notes`, each a string or null
@@ -408,23 +409,23 @@ So that it looks alive for demos and development (FR12).
 
 **Given** a migrated database
 **When** `nx run recipe-service:seed` (`python -m app.cli seed`) runs
-**Then** about 10 Hebrew recipes are created through `recipes.service`, not raw SQL. They cover every default meal type and several tags, such as על האש, פינגר פוד and מסיבות (AD-24)
+**Then** about 10 Hebrew recipes are created through `recipes.service`, not raw SQL. They cover every default pinned tag, and several free tags such as על האש, פינגר פוד and מסיבות (AD-24)
 **And** at least one recipe has a to-taste ingredient, and the recipes include fractions such as ½ and ⅓
 **And** running the seed again creates no duplicates (keyed by title)
-**And** the seed never creates meal types
+**And** the seed never creates the default tags
 **And** an ingredient with an original value is added to the seed in Epic 3, once the original-value rule exists
 
-### Story 1.9: Recipe library with search and meal-type filter
+### Story 1.9: Recipe library with search and tag filter
 
 As a visitor,
-I want to see all recipes as cards, search them and filter by meal type,
+I want to see all recipes as cards, search them and filter by tag,
 So that I can quickly find what to cook (FR1, FR2, FR3).
 
 **Acceptance Criteria:**
 
 **Given** the seeded recipes
 **When** I open `/`
-**Then** I see `RecipeCard`s, newest first: 1 column on phone, 2 from `sm`, 3 from `lg` (UX-DR6, UX-DR7, UX-DR20). Each card is a board with the slot, title, meal type, up to 3 tags and total time, with a larger title when there is no photo
+**Then** I see `RecipeCard`s, newest first: 1 column on phone, 2 from `sm`, 3 from `lg` (UX-DR6, UX-DR7, UX-DR20). Each card is a board with the slot, title, up to 2 tags plus "+N" for the rest, and total time, with a larger title when there is no photo
 **And** the page lives in a new `libs/feature-recipes` (tag `type:feature`) as the lazy subpath export `@bite-and-board/feature-recipes/library`, replacing the placeholder home route in `apps/web` (AD-2, AD-11)
 **And** while loading I see 6 skeleton cards. With no recipes I see the visitor empty state "עוד אין כאן מתכונים" (UX-DR17)
 
@@ -432,8 +433,9 @@ So that I can quickly find what to cook (FR1, FR2, FR3).
 **When** I type in the search field
 **Then** only recipes whose title contains the text remain (case-insensitive). The list updates as I type, using `useDeferredValue` and no network call, and the value is kept in `?q=` (UX-DR11)
 **And** with no matches I see "לא נמצאו מתכונים ל־'{q}'" with "ניקוי החיפוש", which clears both search and filter
-**And** a meal-type chip row ("הכל" plus the meal types) filters to one meal type, combines with search, and is kept in `?meal=<uuid>`
-**And** a "עד 30 דקות" chip keeps only recipes whose total time is known and at most 30 minutes, combines with search and the meal-type chips, and is kept in `?fast=1`; the test is part of the same pure filter function
+**And** `GET /api/tags` (public) returns every tag as `[{id, name, pinned}]`, ordered by `sort_order` (pinned first) and then name, and the library reads it through the generated hook
+**And** a chip row of the pinned tags ("הכל" clears it) scrolls horizontally. The chips are multi-select, and a recipe must have all the selected tags (AND). The filter combines with search and is kept in `?tags=<uuid>,<uuid>`, ignoring unknown ids
+**And** a "עד 30 דקות" chip keeps only recipes whose total time is known and at most 30 minutes, combines with search and the tag chips, and is kept in `?fast=1`; the test is part of the same pure filter function
 **And** after I open a recipe and go back, the search and filter are still applied
 **And** filtering is one pure function in `libs/recipe-domain`, with unit tests (AD-26, AD-32)
 **And** with 200 recipes, filtering takes under 100 ms per keystroke (NFR-3)
@@ -448,7 +450,7 @@ So that I can cook from it (FR5).
 
 **Given** a recipe exists
 **When** I open `/recipes/:id`
-**Then** I see the meal type, prep and cook time, the title in display style, the description under it if there is one, the ingredient board, numbered steps, and the source link if there is one (UX-DR6, UX-DR10)
+**Then** I see the tags, prep and cook time, the title in display style, the description under it if there is one, the ingredient board, numbered steps, and the source link if there is one (UX-DR6, UX-DR10)
 **And** when the recipe has notes, a "הערות וטיפים" section follows the steps and shows them as plain text with line breaks kept (never as HTML); with no notes, the section is absent
 **And** each `IngredientLine` shows:
 
@@ -597,7 +599,7 @@ So that I can replace the starting password the admin gave me (FR27).
 
 ## Epic 3: Create, edit and delete recipes
 
-Editors create recipes with the full form, attach meal type, tags and a photo, edit them while the app remembers the original quantities, reset to original, and delete.
+Editors create recipes with the full form, attach tags and a photo, edit them while the app remembers the original quantities, reset to original, and delete.
 
 ### Story 3.1: Create a recipe (API and basic form)
 
@@ -609,7 +611,7 @@ So that my recipes live in one place (FR4).
 
 **Given** I'm signed in as an editor
 **When** I tap "מתכון חדש" (top bar, or "+" on phone)
-**Then** `/recipes/new` shows a form with these fields: title, description, notes (a multi-line textarea, optional, "הערות וטיפים"), each of description and notes with a live character counter against its limit (500 and 5,000), meal type (required select), servings, prep and cook time, source URL (`dir="ltr"`), plus ingredient rows (amount as a number, unit select with Hebrew labels for the `Unit` enum, name, note) and step rows, with add and remove buttons
+**Then** `/recipes/new` shows a form with these fields: title, description, notes (a multi-line textarea, optional, "הערות וטיפים"), each of description and notes with a live character counter against its limit (500 and 5,000), tags (a multi-select combobox, optional, any number, see Story 3.3), servings, prep and cook time, source URL (`dir="ltr"`), plus ingredient rows (amount as a number, unit select with Hebrew labels for the `Unit` enum, name, note) and step rows, with add and remove buttons
 **And** the form uses React Hook Form with its own `RecipeFormValues` type and the two mapping functions `toFormValues` and `toWritePayload`, validated by the generated write Zod schema (AD-22)
 **And** `POST /api/recipes` (editor) validates with Pydantic (`extra="forbid"`, `description` up to 500 and `notes` up to 5,000 characters, at least one ingredient and one step, servings 1–100, title 1–120). It stores amounts quantized to 3 decimals, sets `created_by` and `updated_by` to me, and returns the `RecipeRead` (AD-20, AD-31)
 **And** invalid input returns 422, and the errors appear on the matching fields, mapped by `loc` and `type` to Hebrew messages (AD-9, AD-28)
@@ -630,7 +632,6 @@ So that typing a recipe while cooking or reading is easy (FR4).
 **Then** "1.5", "½", "⅓", "1 ½" and "1/3" are accepted and parsed by `parseAmount` in `libs/recipe-domain` (unit-tested), and anything else shows a field error
 **And** ingredient rows stack amount and unit over name and note on phone, and sit on one row from `sm` (UX-DR12, UX-DR20)
 **And** Enter in the last ingredient row adds a new row, and rows can be moved up or down with buttons that work from the keyboard
-**And** the meal type is preselected by time of day (morning → בוקר, evening → ערב) [ASSUMPTION from UX]
 **And** errors appear on blur and on submit, and focus moves to the first error
 **And** leaving with unsaved changes (link, back or closing the tab) asks "לצאת בלי לשמור?" (UX-DR15)
 **And** a failed save (network or 5xx) keeps every value and shows a retry toast (UX-DR17)
@@ -729,29 +730,30 @@ So that a variation takes seconds (FR4).
 
 **Given** a recipe's detail page
 **When** I tap "שכפול"
-**Then** the create form opens prefilled with that recipe's title (with " (עותק)" added), description, notes, meal type, servings, times, ingredients, steps and tags, through router state like the import draft (AD-22), and nothing is saved until "שמירה"
+**Then** the create form opens prefilled with that recipe's title (with " (עותק)" added), description, notes, servings, times, ingredients, steps and tags, through router state like the import draft (AD-22), and nothing is saved until "שמירה"
 **And** the copy has no `original` hints, no photo and no `source` values, so it starts clean, and the source URL is kept
 **And** the story is optional: it can be dropped without affecting any other story
 
-## Epic 4: Organise with meal types and tags
+## Epic 4: Organise with tags
 
-Editors manage the meal-type list and the tags, and everyone can filter the library by tags.
+Editors manage the tags (add, rename, delete, pin), and everyone can filter the library by any tag.
 
-### Story 4.1: Manage meal types and tags
+### Story 4.1: Manage tags
 
 As an editor,
-I want one screen to add, rename and delete meal types and tags,
-So that my categories stay tidy (FR23).
+I want one screen to add, rename, delete and pin tags,
+So that my tags stay tidy and my quick filters match how I cook (FR23).
 
 **Acceptance Criteria:**
 
 **Given** I'm signed in as an editor
-**When** I open "תגיות וסוגי ארוחה" from the account menu
-**Then** `/tags` shows two lists, meal types and tags, each with inline rename and add (UX-DR18)
+**When** I open "תגיות" from the account menu
+**Then** `/tags` shows one list of all tags, with inline rename, an add field, a pin toggle and a delete button per tag, and the pinned tags first in their `sort_order` (UX-DR18)
 **And** the page lives in a new `libs/feature-tags` (tag `type:feature`) as a lazy subpath export (AD-2, AD-11)
 **And** renaming updates every recipe that uses it, and a duplicate name (after normalization) returns 409 `tag_name_taken`
-**And** deleting a tag opens a confirm dialog with its usage count ("התגית משויכת ל־7 מתכונים"), and confirming detaches it from all recipes
-**And** deleting a meal type that recipes use returns 409 `meal_type_in_use` with the count in `params`, and the UI explains it. An unused meal type can be deleted
+**And** pinning or unpinning a tag adds it to or removes it from the library's quick-filter chip row. A newly pinned tag goes last in the row
+**And** deleting a tag opens a confirm dialog with its usage count ("התגית משויכת ל־7 מתכונים"), and confirming deletes the tag and removes it from all recipes
+**And** adding a tag with a name that exists (case-insensitive) returns 409 `tag_name_taken`
 **And** after any change, the tags, the library list and recipe details are invalidated (AD-19)
 **And** only `tags.service` changes tags (AD-7), and API tests cover every rule
 
@@ -764,10 +766,10 @@ So that I can find, for example, all barbecue party dishes (FR3 tags).
 **Acceptance Criteria:**
 
 **Given** the library
-**When** I tap "תגיות"
-**Then** a sheet (phone) or popover (desktop) lists every tag with checkboxes (UX-DR11)
-**And** selected tags appear as removable chips under the search field, and a recipe must have all of them (AND)
-**And** the tag filter combines with search and meal type, is kept in `?tags=<uuid>,<uuid>`, ignores unknown ids, and survives going to a recipe and back
+**When** I tap "עוד תגיות" at the end of the chip row
+**Then** a sheet (phone) or popover (desktop) lists every tag with checkboxes, pinned or not (UX-DR11)
+**And** selected unpinned tags appear as removable chips next to the pinned ones, and a recipe must have all the selected tags (AND, as in Story 1.9)
+**And** the filter combines with search and the quick-filter chips, is kept in the same `?tags=<uuid>,<uuid>`, ignores unknown ids, and survives going to a recipe and back
 **And** "ניקוי החיפוש" in the no-results state clears the tags too
 **And** the filter function in `libs/recipe-domain` gains tag tests
 
@@ -803,7 +805,7 @@ So that I don't retype recipes by hand (FR18, FR21, FR24).
 **And** the draft is in Hebrew (translated if the source is in another language), its units are mapped to the `Unit` enum, imperial units are converted by the deterministic table (oz→g, lb→g, fl oz→ml, friendly rounding; cups and spoons unchanged) with `source_amount`/`source_unit` kept, unquantifiable ingredients are to-taste, and units that are still unmappable are empty with the original text kept in the note (FR19, FR21)
 **And** a deterministic pass rewrites °F temperatures in the step text to °C, rounded to the nearest 5 (350°F becomes "180°C"), and keeps the unconverted step text as `source_text` for the "הצג מתכון מקורי" toggle; the conversions live in code with unit tests, never in the model's output (FR21)
 **And** the draft's description comes from the source's description when it has one, and its notes stay empty unless the source has notes or tips of its own (FR19)
-**And** the draft pre-picks a meal type and suggests tags, preferring existing ones (FR24)
+**And** the draft suggests tags chosen from the existing tag list. A tag name that is not in the list is proposed as a new tag in the draft, and is created only if the editor accepts it and saves (FR24)
 **And** the create form opens prefilled through router state (never the URL), via `draftToFormValues()`, and nothing is saved until "שמירה" (AD-22)
 **And** text with no recipe returns `no_recipe_found` ("לא נמצא מתכון בטקסט הזה"), and the text stays for editing
 **And** every import writes an `import_log` row (user, provider, ms, tokens, outcome), and the daily cap returns 429 `import_cap_reached` (AD-29)

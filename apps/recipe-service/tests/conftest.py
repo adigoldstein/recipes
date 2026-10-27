@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from sqlmodel import Session
 
 # Set before any `app` import: importing app.main validates config immediately.
 os.environ["JWT_SECRET"] = "test-secret"
@@ -44,5 +45,14 @@ def app() -> FastAPI:
 
 
 @pytest.fixture
-def client(app: FastAPI) -> TestClient:
-    return TestClient(app)
+def client(app: FastAPI) -> Iterator[TestClient]:
+    """Entering the client runs the lifespan, which migrates the temp database."""
+    with TestClient(app) as test_client:
+        yield test_client
+
+
+@pytest.fixture
+def session(client: TestClient) -> Iterator[Session]:
+    """A session on the same migrated database the client talks to."""
+    with Session(get_engine(get_settings().data_dir)) as db_session:
+        yield db_session
