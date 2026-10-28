@@ -1,5 +1,7 @@
 """Business rules for users; other modules call this layer, never the repository."""
 
+import uuid
+from functools import lru_cache
 from typing import Annotated
 
 from fastapi import Depends
@@ -8,7 +10,7 @@ from sqlmodel import Session
 
 from app.core.db import get_session
 from app.core.errors import AppError, ErrorCode
-from app.core.security import hash_password
+from app.core.security import hash_password, verify_password
 from app.users.models import User
 from app.users.repository import UserRepository
 from app.users.schemas import UserCreate, UserRead
@@ -48,6 +50,12 @@ def _read(user: User) -> UserRead:
     )
 
 
+@lru_cache
+def _decoy_hash() -> str:
+    """A real hash nobody has the password to, so an unknown email costs as much."""
+    return hash_password(uuid.uuid4().hex)
+
+
 def _email_taken() -> AppError:
     return AppError(409, ErrorCode.EMAIL_TAKEN, "A user with this email already exists")
 
@@ -77,6 +85,28 @@ class UserService:
         except Exception:
             self._repository.rollback()
             raise
+        return _read(user)
+
+    def authenticate(self, email: str, password: str) -> UserRead | None:
+        """The active user whose email and password match, else None.
+
+        Unknown email, wrong password and a blocked account all look the same to the
+        caller. A decoy hash is verified for an unknown email, so the response time
+        does not reveal which emails have an account.
+        """
+        user = self._repository.get_by_email(email)
+        if user is None:
+            verify_password(password, _decoy_hash())
+            return None
+        if not verify_password(password, user.password_hash) or user.is_blocked:
+            return None
+        return _read(user)
+
+    def get_active_user(self, user_id: uuid.UUID) -> UserRead | None:
+        """The user as they are in the database now; None if gone or blocked."""
+        user = self._repository.get_by_id(user_id)
+        if user is None or user.is_blocked:
+            return None
         return _read(user)
 
     def reset_password(self, email: str, password: str) -> UserRead:

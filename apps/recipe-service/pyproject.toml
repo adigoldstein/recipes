@@ -29,6 +29,8 @@ dependencies = [
     "pwdlib[argon2]>=0.3.1",
     "pydantic>=2",
     "pydantic-settings>=2.16.1",
+    "pyjwt>=2.13",
+    "slowapi>=0.1.10",
     "sqlmodel>=0.0.48",
     "uvicorn[standard]>=0.54.0",
 ]
@@ -199,7 +201,9 @@ protected_modules = [
   "app.users.models",
   "app.users.schemas",
 ]
-allowed_importers = ["app.users", "app.cli"]
+# app.auth signs users in through users.service and UserRead only; the contract can't
+# narrow it to those names, so the repository and models stay out of reach by review.
+allowed_importers = ["app.users", "app.cli", "app.auth"]
 ignore_imports = [
   "app.main -> app.users.router",
   "app.core.metadata -> app.users.models",

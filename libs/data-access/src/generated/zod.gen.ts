@@ -13,7 +13,9 @@ export const zErrorCode = z.enum([
     'email_taken',
     'user_not_found',
     'password_too_short',
-    'password_too_long'
+    'password_too_long',
+    'invalid_credentials',
+    'rate_limited'
 ]);
 
 /**
@@ -36,6 +38,16 @@ export const zHealthRead = z.object({
 });
 
 /**
+ * LoginRequest
+ *
+ * Plain strings on purpose: a malformed email is just wrong credentials.
+ */
+export const zLoginRequest = z.object({
+    email: z.string().min(1).max(254),
+    password: z.string().min(1).max(128)
+});
+
+/**
  * PhotoRead
  *
  * The photo shape that read schemas embed (AD-27); URLs are built server-side.
@@ -44,6 +56,34 @@ export const zPhotoRead = z.object({
     credit_domain: z.string().nullable(),
     thumb_url: z.string(),
     url: z.string()
+});
+
+/**
+ * Role
+ *
+ * A visitor has no session, so there is no viewer role (AD-30).
+ */
+export const zRole = z.enum(['editor', 'admin']);
+
+/**
+ * SessionUser
+ *
+ * What the client may know about the signed-in user (AD-21).
+ */
+export const zSessionUser = z.object({
+    email: z.string(),
+    id: z.uuid(),
+    name: z.string(),
+    role: zRole
+});
+
+/**
+ * SessionResponse
+ *
+ * `user` is null for a visitor.
+ */
+export const zSessionResponse = z.object({
+    user: zSessionUser.nullable()
 });
 
 /**
@@ -188,6 +228,23 @@ export const zValidationError = z.object({
 export const zHttpValidationError = z.object({
     detail: z.array(zValidationError).optional()
 });
+
+export const zAuthLoginBody = zLoginRequest;
+
+/**
+ * Successful Response
+ */
+export const zAuthLoginResponse = zSessionResponse;
+
+/**
+ * Successful Response
+ */
+export const zAuthLogoutResponse = z.void();
+
+/**
+ * Successful Response
+ */
+export const zAuthSessionResponse = zSessionResponse;
 
 /**
  * Successful Response

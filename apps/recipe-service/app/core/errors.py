@@ -3,6 +3,7 @@ from enum import StrEnum
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+from slowapi.errors import RateLimitExceeded
 
 
 class ErrorCode(StrEnum):
@@ -14,6 +15,8 @@ class ErrorCode(StrEnum):
     USER_NOT_FOUND = "user_not_found"
     PASSWORD_TOO_SHORT = "password_too_short"
     PASSWORD_TOO_LONG = "password_too_long"
+    INVALID_CREDENTIALS = "invalid_credentials"
+    RATE_LIMITED = "rate_limited"
 
 
 class ErrorResponse(BaseModel):
@@ -46,5 +49,17 @@ async def _app_error_handler(_request: Request, exc: Exception) -> JSONResponse:
     )
 
 
+async def _rate_limit_handler(_request: Request, exc: Exception) -> JSONResponse:
+    if not isinstance(exc, RateLimitExceeded):
+        raise exc
+    body = ErrorResponse(detail="Too many attempts", code=ErrorCode.RATE_LIMITED)
+    return JSONResponse(
+        status_code=429,
+        content=body.model_dump(mode="json", exclude_none=True),
+        headers={"Retry-After": "60"},
+    )
+
+
 def register_error_handlers(app: FastAPI) -> None:
     app.add_exception_handler(AppError, _app_error_handler)
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_handler)

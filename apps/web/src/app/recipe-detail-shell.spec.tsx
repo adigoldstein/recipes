@@ -48,6 +48,7 @@ const server = setupServer(
     ]),
   ),
   http.get('*/api/tags', () => HttpResponse.json([])),
+  http.get('*/api/auth/session', () => HttpResponse.json({ user: null })),
   http.get('*/api/recipes/:id', ({ params }) =>
     params.id === 'r1'
       ? HttpResponse.json(RECIPE)

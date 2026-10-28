@@ -9,4 +9,5 @@ export * as schemas from './generated/zod.gen';
 export { client } from './generated/client.gen';
 export { CSRF_HEADER, CSRF_VALUE, configureClient } from './client';
 export { getErrorCode } from './errors';
+export { useSession } from './session';
 export { invalidationMap, type Invalidator } from './invalidation';

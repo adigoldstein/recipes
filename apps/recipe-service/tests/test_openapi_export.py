@@ -25,6 +25,8 @@ def test_export_writes_stable_sorted_json(tmp_path: Path) -> None:
         "user_not_found",
         "password_too_short",
         "password_too_long",
+        "invalid_credentials",
+        "rate_limited",
     ]
 
 

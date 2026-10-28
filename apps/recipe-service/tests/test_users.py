@@ -459,3 +459,19 @@ def test_cli_stops_cleanly_when_the_prompt_is_cancelled(
     assert main(CREATE) == 1
     assert "cancelled" in capsys.readouterr().err
     assert _users(session) == []
+
+
+def test_authenticate_still_verifies_a_hash_for_an_unknown_email(
+    service: UserService, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Same work for an unknown email, so timing does not reveal who has an account."""
+    verified: list[str] = []
+
+    def spy(password: str, password_hash: str) -> bool:
+        verified.append(password_hash)
+        return False
+
+    monkeypatch.setattr("app.users.service.verify_password", spy)
+    assert service.authenticate("nobody@example.com", PASSWORD) is None
+    assert len(verified) == 1
+    assert verified[0].startswith("$argon2id$")

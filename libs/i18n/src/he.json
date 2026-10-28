@@ -47,6 +47,21 @@
       "moreTags_other": "{{count}} תגיות נוספות"
     }
   },
+  "auth": {
+    "login": {
+      "title": "כניסה",
+      "email": "אימייל",
+      "password": "סיסמה",
+      "submit": "כניסה",
+      "submitting": "נכנסים",
+      "emailRequired": "יש להזין אימייל",
+      "passwordRequired": "יש להזין סיסמה"
+    },
+    "menu": {
+      "login": "כניסה",
+      "logout": "יציאה"
+    }
+  },
   "notFound": {
     "title": "הדף לא נמצא",
     "body": "אופס...העמוד לא נמצא",
@@ -63,6 +78,8 @@
     "user_not_found": "המשתמש לא נמצא",
     "password_too_short": "הסיסמה חייבת להכיל לפחות {{min}} תווים",
     "password_too_long": "הסיסמה יכולה להכיל עד {{max}} תווים",
+    "invalid_credentials": "אימייל או סיסמה שגויים",
+    "rate_limited": "יותר מדי ניסיונות. אפשר לנסות שוב בעוד דקה.",
     "unknown": "משהו השתבש, אפשר לנסות שוב"
   },
   "units": {

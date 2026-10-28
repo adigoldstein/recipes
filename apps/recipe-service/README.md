@@ -28,6 +28,20 @@ cp .env.example .env   # then set JWT_SECRET
 `.env` is gitignored. `.env.example` documents every setting. The app refuses to
 start without `JWT_SECRET`, and `ENV` defaults to `production` when unset.
 
+## Sessions and login
+
+`POST /api/auth/login` sets a signed JWT (`HS256`, 7 days) in an `httpOnly; SameSite=Lax`
+cookie named `session`; `Secure` follows `COOKIE_SECURE`. The token only holds the user
+id, so the role and the blocked flag are read from the database on every request.
+`GET /api/auth/session` is public and always returns 200 (`user: null` for a visitor).
+`POST /api/auth/logout` clears the cookie.
+
+Login is limited to 5 attempts a minute per client IP (slowapi, in memory, so a restart
+clears it). Behind a reverse proxy the app sees the proxy's address, so every user would
+share one bucket. In production start uvicorn with `--proxy-headers` and
+`--forwarded-allow-ips` set to the proxy's address only (not `*`, or the header can be
+spoofed to dodge the limit). That is set up with the container in Story 6.1.
+
 ## Database and migrations
 
 SQLite lives in `DATA_DIR/app.db`. Every connection turns on `foreign_keys` and WAL.

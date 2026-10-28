@@ -10,6 +10,7 @@ from app.core.db import get_engine
 from app.core.errors import register_error_handlers
 from app.core.health import router as health_router
 from app.core.migrate import run_migrations
+from app.core.rate_limit import limiter
 from app.imports.router import router as imports_router
 from app.photos.router import router as photos_router
 from app.recipes.router import router as recipes_router
@@ -56,6 +57,7 @@ def create_app() -> FastAPI:
         generate_unique_id_function=generate_operation_id,
         lifespan=lifespan,
     )
+    app.state.limiter = limiter
     register_error_handlers(app)
 
     api = APIRouter(prefix=API_PREFIX)
