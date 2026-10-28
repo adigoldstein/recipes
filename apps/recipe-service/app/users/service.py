@@ -10,10 +10,10 @@ from sqlmodel import Session
 
 from app.core.db import get_session
 from app.core.errors import AppError, ErrorCode
-from app.core.security import hash_password, verify_password
+from app.core.security import Role, hash_password, verify_password
 from app.users.models import User
 from app.users.repository import UserRepository
-from app.users.schemas import UserCreate, UserRead
+from app.users.schemas import UserCreate, UserRead, UserUpdate
 
 MIN_PASSWORD_LENGTH = 8
 # Argon2 has no built-in length limit, so cap it: a huge password is only a way to
@@ -91,26 +91,82 @@ class UserService:
         """All users, oldest account first. There are only a handful (FR-25)."""
         return [_read(user) for user in self._repository.list_all()]
 
-    def authenticate(self, email: str, password: str) -> UserRead | None:
-        """The active user whose email and password match, else None.
+    def authenticate(self, email: str, password: str) -> tuple[UserRead, int] | None:
+        """The user and their session version when the email and password match.
 
-        Unknown email, wrong password and a blocked account all look the same to the
-        caller. A decoy hash is verified for an unknown email, so the response time
-        does not reveal which emails have an account.
+        An unknown email and a wrong password look the same to the caller (None), and
+        a decoy hash is verified for an unknown email, so the response time does not
+        reveal which emails have an account. A blocked account is only revealed to
+        someone who knows its password: that raises 403 `account_blocked`, so the
+        login page can say why (Story 2.5).
         """
         user = self._repository.get_by_email(email)
         if user is None:
             verify_password(password, _decoy_hash())
             return None
-        if not verify_password(password, user.password_hash) or user.is_blocked:
+        if not verify_password(password, user.password_hash):
+            return None
+        if user.is_blocked:
+            raise AppError(403, ErrorCode.ACCOUNT_BLOCKED, "This account is blocked")
+        return _read(user), user.session_version
+
+    def get_active_user(
+        self, user_id: uuid.UUID, session_version: int
+    ) -> UserRead | None:
+        """The user as they are in the database now.
+
+        None if the user is gone or blocked, or if the token is from an older session
+        generation (their password was reset since it was issued).
+        """
+        user = self._repository.get_by_id(user_id)
+        if user is None or user.is_blocked or user.session_version != session_version:
             return None
         return _read(user)
 
-    def get_active_user(self, user_id: uuid.UUID) -> UserRead | None:
-        """The user as they are in the database now; None if gone or blocked."""
+    def update_user(self, user_id: uuid.UUID, changes: UserUpdate) -> UserRead:
+        """Change a user's role, blocked flag and/or password (FR-26).
+
+        The last active admin cannot be demoted or blocked (AD-30). The check happens
+        after the write but before the commit: the write takes SQLite's single write
+        lock, so a second admin changing someone at the same moment waits for this
+        transaction, and then counts the admins that are really left.
+        """
+        if changes.password is not None:
+            check_password_policy(changes.password)
         user = self._repository.get_by_id(user_id)
-        if user is None or user.is_blocked:
-            return None
+        if user is None:
+            raise AppError(404, ErrorCode.USER_NOT_FOUND, "User not found")
+
+        was_active_admin = user.role == Role.ADMIN and not user.is_blocked
+        if changes.role is not None:
+            user.role = changes.role
+        if changes.is_blocked is not None:
+            # Blocking also ends the user's sessions, so unblocking later cannot
+            # bring an old cookie back to life.
+            if changes.is_blocked and not user.is_blocked:
+                user.session_version += 1
+            user.is_blocked = changes.is_blocked
+        if changes.password is not None:
+            user.password_hash = hash_password(changes.password)
+            user.session_version += 1
+
+        try:
+            self._repository.add(user)
+            still_active_admin = user.role == Role.ADMIN and not user.is_blocked
+            if (
+                was_active_admin
+                and not still_active_admin
+                and self._repository.count_active_admins() == 0
+            ):
+                raise AppError(
+                    409,
+                    ErrorCode.LAST_ADMIN,
+                    "At least one active admin must remain",
+                )
+            self._repository.commit()
+        except Exception:
+            self._repository.rollback()
+            raise
         return _read(user)
 
     def reset_password(self, email: str, password: str) -> UserRead:
@@ -120,6 +176,7 @@ class UserService:
         if user is None:
             raise AppError(404, ErrorCode.USER_NOT_FOUND, "User not found")
         user.password_hash = hash_password(password)
+        user.session_version += 1
         try:
             self._repository.add(user)
             self._repository.commit()

@@ -29,26 +29,32 @@ class AuthService:
     def login(self, email: str, password: str) -> tuple[SessionUser, str]:
         """The user and a fresh session token, or a generic 400 (AD-21).
 
-        The error never says which part was wrong.
+        The error never says which part was wrong. A blocked account whose password
+        was right is the one exception: it raises 403 `account_blocked`.
         """
-        user = self._users.authenticate(email, password)
-        if user is None:
+        found = self._users.authenticate(email, password)
+        if found is None:
             raise AppError(
                 400, ErrorCode.INVALID_CREDENTIALS, "Invalid email or password"
             )
-        return _session_user(user), create_session_token(user.id, self._secret)
+        user, session_version = found
+        token = create_session_token(
+            user.id, self._secret, session_version=session_version
+        )
+        return _session_user(user), token
 
     def current_user(self, token: str | None) -> SessionUser | None:
         """Who the cookie belongs to, looked up fresh; None for a visitor.
 
-        A bad, expired, forged or orphaned token, and a blocked user, all give None.
+        A bad, expired, forged, orphaned or superseded token (the password was reset
+        since), and a blocked user, all give None.
         """
         if token is None:
             return None
-        user_id = read_session_token(token, self._secret)
-        if user_id is None:
+        claims = read_session_token(token, self._secret)
+        if claims is None:
             return None
-        user = self._users.get_active_user(user_id)
+        user = self._users.get_active_user(claims.user_id, claims.session_version)
         return None if user is None else _session_user(user)
 
 

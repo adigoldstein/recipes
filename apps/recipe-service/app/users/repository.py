@@ -5,6 +5,7 @@ import uuid
 from sqlalchemy import func
 from sqlmodel import Session, col, select
 
+from app.core.security import Role
 from app.users.models import User
 
 
@@ -28,6 +29,15 @@ class UserRepository:
         """Every user, oldest account first."""
         statement = select(User).order_by(col(User.created_at), col(User.email))
         return list(self._session.exec(statement).all())
+
+    def count_active_admins(self) -> int:
+        """How many admins can sign in right now (admin role, not blocked)."""
+        statement = (
+            select(func.count())
+            .select_from(User)
+            .where(col(User.role) == Role.ADMIN, col(User.is_blocked).is_(False))
+        )
+        return self._session.exec(statement).one()
 
     def add(self, user: User) -> User:
         """Stage the user; the caller commits."""

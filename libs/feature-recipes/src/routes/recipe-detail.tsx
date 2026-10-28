@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import type { ParseKeys } from 'i18next';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { ArrowRight } from 'lucide-react';
-import { Link, useLocation, useNavigate, useParams } from 'react-router';
+import { Link, useParams } from 'react-router';
 import {
   getErrorCode,
+  useBackNavigation,
   recipesGetRecipeOptions,
   type IngredientRead,
   type RecipeRead,
@@ -14,6 +14,7 @@ import {
 } from '@bite-and-board/data-access';
 import { formatAmount, scaleAmount } from '@bite-and-board/recipe-domain';
 import {
+  BackLink,
   Button,
   EmptyState,
   IngredientBoard,
@@ -91,10 +92,9 @@ export function RecipeDetailPage() {
 function RecipeDetail({ recipe }: { recipe: RecipeRead }) {
   const { t } = useTranslation();
   const formatTime = useFormatTime();
-  const navigate = useNavigate();
-  // A router location key other than "default" means we arrived by navigating
-  // inside the app, so going back lands on the library with its filters.
-  const cameFromApp = useLocation().key !== 'default';
+  // Arriving by navigating inside the app means going back lands on the library
+  // with its filters.
+  const { cameFromApp, onBack } = useBackNavigation();
   const title = useRef<HTMLHeadingElement>(null);
   const checks = useCookingChecks(recipe.id);
   const [showOriginal, setShowOriginal] = useState(false);
@@ -152,19 +152,14 @@ function RecipeDetail({ recipe }: { recipe: RecipeRead }) {
     <article className="mx-auto max-w-detail pb-8">
       <title>{t('app.pageTitle', { page: recipe.title })}</title>
       <div className="flex flex-col gap-3 pt-4 pb-6">
-        <Button asChild variant="ghost" className="w-fit">
-          <Link
-            to="/"
-            onClick={(event) => {
-              if (!cameFromApp) return;
-              event.preventDefault();
-              void navigate(-1);
-            }}
-          >
-            <ArrowRight aria-hidden="true" className="ltr:rotate-180" />
-            {t('detail.back')}
-          </Link>
-        </Button>
+        <BackLink
+          label={t('detail.back')}
+          link={(children) => (
+            <Link to="/" onClick={onBack}>
+              {children}
+            </Link>
+          )}
+        />
         {recipe.tags.length > 0 || prep || cook ? (
           <div className="flex flex-wrap items-center gap-2">
             {recipe.tags.map((tag) => (

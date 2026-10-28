@@ -2,14 +2,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { Navigate, useSearchParams } from 'react-router';
+import { Link, Navigate, useSearchParams } from 'react-router';
 import { z } from 'zod';
 import {
   authLoginMutation,
   authSessionQueryKey,
+  useBackNavigation,
   useSession,
 } from '@bite-and-board/data-access';
-import { Button, Input, Label } from '@bite-and-board/ui-components';
+import { BackLink, Button, Input, Label } from '@bite-and-board/ui-components';
 import { safeNext } from '../shared/safe-next';
 import { useErrorMessage } from '../shared/use-error-message';
 
@@ -20,6 +21,7 @@ export function LoginPage() {
   const queryClient = useQueryClient();
   const [params] = useSearchParams();
   const session = useSession();
+  const { onBack } = useBackNavigation();
   const login = useMutation(authLoginMutation());
 
   const schema = z.object({
@@ -55,8 +57,16 @@ export function LoginPage() {
   return (
     <>
       <title>{t('app.pageTitle', { page: t('auth.login.title') })}</title>
-      <div className="mx-auto flex max-w-sm flex-col pt-8">
-        <h1 tabIndex={-1} className="pb-6 text-title outline-none">
+      <div className="mx-auto flex max-w-sm flex-col pt-4">
+        <BackLink
+          label={t('auth.login.back')}
+          link={(children) => (
+            <Link to="/" onClick={onBack}>
+              {children}
+            </Link>
+          )}
+        />
+        <h1 tabIndex={-1} className="py-6 text-title outline-none">
           {t('auth.login.title')}
         </h1>
         <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">

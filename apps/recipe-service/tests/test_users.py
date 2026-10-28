@@ -210,6 +210,19 @@ def test_reset_password_changes_only_the_hash(
     assert stored.id == user_id
 
 
+def test_reset_password_ends_the_users_old_sessions(
+    service: UserService, session: Session
+) -> None:
+    user = add_user(session, password=PASSWORD)
+    user_id = user.id
+    assert service.get_active_user(user_id, 0) is not None
+
+    service.reset_password("adi@example.com", "a brand new one")
+
+    assert service.get_active_user(user_id, 0) is None
+    assert service.get_active_user(user_id, 1) is not None
+
+
 def test_reset_password_for_an_unknown_email(service: UserService) -> None:
     with pytest.raises(AppError) as error:
         service.reset_password("nobody@example.com", PASSWORD)

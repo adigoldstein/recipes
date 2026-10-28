@@ -2,6 +2,7 @@ import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { server } from '../testing/server';
+import { toast } from '@bite-and-board/ui-components';
 import { ADI, renderAt, serveSession } from '../testing/render-auth';
 import { AccountMenu } from './account-menu';
 
@@ -10,6 +11,8 @@ function renderMenu(path = '/') {
 }
 
 describe('AccountMenu', () => {
+  afterEach(() => vi.restoreAllMocks());
+
   it('shows nothing until the session is known', () => {
     serveSession(null);
     renderMenu();
@@ -89,5 +92,45 @@ describe('AccountMenu', () => {
     await waitFor(() =>
       expect(screen.queryByRole('button', { name: 'Adi' })).toBeNull(),
     );
+  });
+
+  it('confirms a logout with a toast', async () => {
+    const user = userEvent.setup();
+    const success = vi.spyOn(toast, 'success');
+    serveSession(ADI);
+    server.use(
+      http.post(
+        '*/api/auth/logout',
+        () => new HttpResponse(null, { status: 204 }),
+      ),
+    );
+    renderMenu();
+    await user.click(await screen.findByRole('button', { name: 'Adi' }));
+    await user.click(await screen.findByRole('menuitem', { name: 'יציאה' }));
+
+    await waitFor(() => expect(success).toHaveBeenCalledWith('התנתקת בהצלחה'));
+  });
+
+  it('shows no toast when the logout fails, and stays signed in', async () => {
+    const user = userEvent.setup();
+    const success = vi.spyOn(toast, 'success');
+    serveSession(ADI);
+    let logoutCalls = 0;
+    server.use(
+      http.post('*/api/auth/logout', () => {
+        logoutCalls += 1;
+        return HttpResponse.json(
+          { detail: 'x', code: 'forbidden' },
+          { status: 403 },
+        );
+      }),
+    );
+    renderMenu();
+    await user.click(await screen.findByRole('button', { name: 'Adi' }));
+    await user.click(await screen.findByRole('menuitem', { name: 'יציאה' }));
+
+    await waitFor(() => expect(logoutCalls).toBe(1));
+    expect(success).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: 'Adi' })).toBeTruthy();
   });
 });

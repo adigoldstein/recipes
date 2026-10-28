@@ -52,16 +52,37 @@ def test_verify_never_matches_a_value_that_is_not_an_argon2_hash(stored: str) ->
 SECRET = "test-secret-test-secret-test-secret"
 
 
-def test_a_session_token_round_trips_the_user_id() -> None:
+def test_a_session_token_round_trips_the_user_id_and_session_version() -> None:
     user_id = uuid.uuid4()
-    token = create_session_token(user_id, SECRET)
-    assert read_session_token(token, SECRET) == user_id
+    token = create_session_token(user_id, SECRET, session_version=3)
+    assert read_session_token(token, SECRET) == (user_id, 3)
+
+
+def test_a_token_without_a_session_version_counts_as_version_0() -> None:
+    """Tokens issued before versions existed must survive the upgrade."""
+    user_id = uuid.uuid4()
+    claims = {"sub": str(user_id), "exp": datetime.now(UTC) + timedelta(days=1)}
+    token = jwt.encode(claims, SECRET, algorithm="HS256")
+    assert read_session_token(token, SECRET) == (user_id, 0)
+
+
+@pytest.mark.parametrize("version", ["1", 1.5, True, None])
+def test_a_token_with_a_malformed_session_version_is_rejected(
+    version: object,
+) -> None:
+    claims = {
+        "sub": str(uuid.uuid4()),
+        "sv": version,
+        "exp": datetime.now(UTC) + timedelta(days=1),
+    }
+    token = jwt.encode(claims, SECRET, algorithm="HS256")
+    assert read_session_token(token, SECRET) is None
 
 
 def test_a_session_token_carries_no_role_or_blocked_flag() -> None:
     token = create_session_token(uuid.uuid4(), SECRET)
     claims = jwt.decode(token, SECRET, algorithms=["HS256"])
-    assert set(claims) == {"sub", "iat", "exp"}
+    assert set(claims) == {"sub", "sv", "iat", "exp"}
 
 
 def test_a_session_token_lasts_seven_days() -> None:

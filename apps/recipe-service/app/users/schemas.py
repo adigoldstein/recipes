@@ -4,7 +4,7 @@ import unicodedata
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, field_validator, model_validator
 
 from app.core.security import Role
 from app.users.models import NAME_MAX_LENGTH
@@ -44,6 +44,28 @@ class UserCreateRequest(UserCreate):
     """
 
     password: str
+
+
+class UserUpdate(BaseModel):
+    """The body of `PATCH /api/users/{id}`: any of these, at least one.
+
+    A field that is left out stays as it is. `password` is a reset: it replaces the
+    current one and ends every session the user has.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    role: Role | None = None
+    is_blocked: bool | None = None
+    password: str | None = None
+
+    @model_validator(mode="after")
+    def _something_to_change(self) -> "UserUpdate":
+        if not self.model_fields_set:
+            raise ValueError("send at least one of role, is_blocked or password")
+        if any(getattr(self, name) is None for name in self.model_fields_set):
+            raise ValueError("role, is_blocked and password cannot be null")
+        return self
 
 
 class UserRead(BaseModel):

@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Controller, useForm } from 'react-hook-form';
@@ -19,7 +18,6 @@ import {
   DialogHeader,
   DialogTitle,
   Input,
-  Label,
   Select,
   SelectContent,
   SelectItem,
@@ -28,6 +26,7 @@ import {
   toast,
 } from '@bite-and-board/ui-components';
 import { useErrorMessage } from '../shared/use-error-message';
+import { Field } from './field';
 
 // Matches the server's policy (FR-13); the server stays the authority.
 const MIN_PASSWORD_LENGTH = 8;
@@ -38,31 +37,6 @@ const FIELD_ERRORS = ['email_taken', 'password_too_short', 'password_too_long'];
 export interface AddUserDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-}
-
-/** A field's label, control and error line. The control points at `${id}-error`. */
-function Field({
-  id,
-  label,
-  error,
-  children,
-}: {
-  id: string;
-  label: string;
-  error?: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className="flex flex-col gap-2">
-      <Label htmlFor={id}>{label}</Label>
-      {children}
-      {error ? (
-        <p id={`${id}-error`} className="text-sm text-destructive">
-          {error}
-        </p>
-      ) : null}
-    </div>
-  );
 }
 
 function AddUserForm({ onDone }: { onDone: () => void }) {

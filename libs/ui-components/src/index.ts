@@ -32,6 +32,11 @@ export {
   type TagFilterProps,
 } from './components/tag-filter';
 export { EmptyState, type EmptyStateProps } from './components/empty-state';
+export { BackLink, type BackLinkProps } from './components/back-link';
+export {
+  ConfirmDialog,
+  type ConfirmDialogProps,
+} from './components/confirm-dialog';
 export { Toggle, toggleVariants } from './components/ui/toggle';
 export {
   IngredientLine,

@@ -3,7 +3,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Index, false, func
+from sqlalchemy import Index, false, func, text
 from sqlmodel import Field, SQLModel
 
 from app.core.db import UtcDateTime, enum_column, utcnow
@@ -26,6 +26,11 @@ class User(SQLModel, table=True):
     password_hash: str
     is_blocked: bool = Field(
         default=False, sa_column_kwargs={"server_default": false()}
+    )
+    # Every session token carries the value it was issued with; bumping it signs the
+    # user out everywhere (password reset, block).
+    session_version: int = Field(
+        default=0, sa_column_kwargs={"server_default": text("0")}
     )
     created_at: datetime = Field(default_factory=utcnow, sa_type=UtcDateTime)
 

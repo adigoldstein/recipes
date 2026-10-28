@@ -9,7 +9,7 @@ export type ClientOptions = {
  *
  * Stable error codes; the client shows `errors.<code>` from he.json.
  */
-export type ErrorCode = 'recipe_not_found' | 'tag_not_found' | 'email_taken' | 'user_not_found' | 'password_too_short' | 'password_too_long' | 'invalid_credentials' | 'rate_limited' | 'unauthorized' | 'forbidden' | 'csrf_header_missing';
+export type ErrorCode = 'recipe_not_found' | 'tag_not_found' | 'email_taken' | 'user_not_found' | 'password_too_short' | 'password_too_long' | 'invalid_credentials' | 'account_blocked' | 'last_admin' | 'rate_limited' | 'unauthorized' | 'forbidden' | 'csrf_header_missing';
 
 /**
  * ErrorResponse
@@ -378,6 +378,26 @@ export type UserRead = {
 };
 
 /**
+ * UserUpdate
+ *
+ * The body of `PATCH /api/users/{id}`: any of these, at least one.
+ *
+ * A field that is left out stays as it is. `password` is a reset: it replaces the
+ * current one and ends every session the user has.
+ */
+export type UserUpdate = {
+    /**
+     * Is Blocked
+     */
+    is_blocked?: boolean | null;
+    /**
+     * Password
+     */
+    password?: string | null;
+    role?: Role | null;
+};
+
+/**
  * ValidationError
  */
 export type ValidationError = {
@@ -603,3 +623,41 @@ export type UsersCreateUserResponses = {
 };
 
 export type UsersCreateUserResponse = UsersCreateUserResponses[keyof UsersCreateUserResponses];
+
+export type UsersUpdateUserData = {
+    body: UserUpdate;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/api/users/{user_id}';
+};
+
+export type UsersUpdateUserErrors = {
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UsersUpdateUserError = UsersUpdateUserErrors[keyof UsersUpdateUserErrors];
+
+export type UsersUpdateUserResponses = {
+    /**
+     * Successful Response
+     */
+    200: UserRead;
+};
+
+export type UsersUpdateUserResponse = UsersUpdateUserResponses[keyof UsersUpdateUserResponses];

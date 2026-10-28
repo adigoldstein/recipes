@@ -54,7 +54,7 @@ development_status:
   2-2-log-in-and-log-out: done
   2-3-role-guards-and-protected-areas: done
   2-4-users-screen-list-and-add-users: done
-  2-5-change-role-block-reset-password: backlog
+  2-5-change-role-block-reset-password: done
   2-6-my-account-change-my-password: backlog
   epic-2-retrospective: optional
 
@@ -92,4 +92,5 @@ development_status:
 
   epic-7: backlog # optional / nice to have: can be cut
   7-1-kitchen-mode-extras: backlog # optional: wake lock, pretty fractions, share as text (split out of 1.11)
+  7-2-edit-user-details: backlog # optional: admin edits a user's name and email (nice to have)
   epic-7-retrospective: optional

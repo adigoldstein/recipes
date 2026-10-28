@@ -14,6 +14,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  toast,
 } from '@bite-and-board/ui-components';
 
 /**
@@ -33,6 +34,9 @@ export function AccountMenu() {
       // Visitor right away, then confirm with the server.
       queryClient.setQueryData(authSessionQueryKey(), { user: null });
       await queryClient.invalidateQueries({ queryKey: authSessionQueryKey() });
+      // Only this menu logs out on purpose; an expired session and a self-block
+      // have their own messages. A failed logout shows nothing, as before.
+      toast.success(t('auth.logoutDone'));
     },
   });
 

@@ -15,5 +15,6 @@ export {
 } from './client';
 export { getErrorCode, getErrorParams } from './errors';
 export { requireRole } from './guards';
+export { useBackNavigation } from './navigation';
 export { roleAtLeast, useCan, useSession } from './session';
 export { invalidationMap, type Invalidator } from './invalidation';
