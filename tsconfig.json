@@ -23,6 +23,9 @@
     },
     {
       "path": "./libs/feature-recipes"
+    },
+    {
+      "path": "./libs/feature-auth"
     }
   ],
   "compilerOptions": {}

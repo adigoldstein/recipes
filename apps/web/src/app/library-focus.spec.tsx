@@ -21,6 +21,7 @@ const server = setupServer(
     ]),
   ),
   http.get('*/api/tags', () => HttpResponse.json([])),
+  http.get('*/api/auth/session', () => HttpResponse.json({ user: null })),
 );
 
 beforeAll(() => {

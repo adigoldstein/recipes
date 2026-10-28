@@ -7,12 +7,16 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlmodel import Session
 
+# Long enough that PyJWT does not warn about a weak HMAC key.
+TEST_SECRET = "test-secret-test-secret-test-secret"
+
 # Set before any `app` import: importing app.main validates config immediately.
-os.environ["JWT_SECRET"] = "test-secret"
+os.environ["JWT_SECRET"] = TEST_SECRET
 os.environ["ENV"] = "dev"
 
 from app.core.config import Settings, get_settings  # noqa: E402
 from app.core.db import get_engine  # noqa: E402
+from app.core.rate_limit import limiter  # noqa: E402
 from app.main import create_app  # noqa: E402
 
 
@@ -28,10 +32,14 @@ def isolated_settings(
     monkeypatch.chdir(tmp_path)
     for name in Settings.model_fields:
         monkeypatch.delenv(name.upper(), raising=False)
-    monkeypatch.setenv("JWT_SECRET", "test-secret")
+    monkeypatch.setenv("JWT_SECRET", TEST_SECRET)
     monkeypatch.setenv("ENV", "dev")
+    # TestClient talks plain http, and a Secure cookie would never be sent back.
+    monkeypatch.setenv("COOKIE_SECURE", "false")
     monkeypatch.setenv("DATA_DIR", str(tmp_path / "data"))
     get_settings.cache_clear()
+    # The login limiter is process-wide, so one test's attempts must not leak.
+    limiter.reset()
     yield
     get_settings.cache_clear()
     # Close pooled SQLite handles so Windows can delete tmp_path afterwards.

@@ -1,8 +1,15 @@
-import { useEffect, useRef } from 'react';
+import { lazy, Suspense, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, Outlet, useLocation } from 'react-router';
 import { ThemeToggle, TopBar, Wordmark } from '@bite-and-board/ui-components';
 import { useTheme } from './theme';
+
+// Its own chunk: the account menu reads the session through the API client, which
+// the first load of a visitor browsing recipes should not wait for (AD-11).
+const AccountMenu = lazy(async () => ({
+  default: (await import('@bite-and-board/feature-auth/account-menu'))
+    .AccountMenu,
+}));
 
 /** The shell around every page: top bar, then the page in `<main>`. */
 export function AppLayout() {
@@ -31,11 +38,19 @@ export function AppLayout() {
           </Wordmark>
         }
         actions={
-          <ThemeToggle
-            value={mode}
-            onValueChange={setMode}
-            label={t(`theme.toggle.${mode}`)}
-          />
+          <>
+            <ThemeToggle
+              value={mode}
+              onValueChange={setMode}
+              label={t(`theme.toggle.${mode}`)}
+            />
+            {/* Same size as the "כניסה" button, so the bar does not jump. */}
+            <Suspense
+              fallback={<div aria-hidden="true" className="h-11 w-20" />}
+            >
+              <AccountMenu />
+            </Suspense>
+          </>
         }
       />
       <main ref={main} className="mx-auto max-w-library px-4 pb-12 lg:px-8">

@@ -9,7 +9,7 @@ export type ClientOptions = {
  *
  * Stable error codes; the client shows `errors.<code>` from he.json.
  */
-export type ErrorCode = 'recipe_not_found' | 'tag_not_found' | 'email_taken' | 'user_not_found' | 'password_too_short' | 'password_too_long';
+export type ErrorCode = 'recipe_not_found' | 'tag_not_found' | 'email_taken' | 'user_not_found' | 'password_too_short' | 'password_too_long' | 'invalid_credentials' | 'rate_limited';
 
 /**
  * ErrorResponse
@@ -71,6 +71,22 @@ export type IngredientRead = {
     original: OriginalValue | null;
     source: SourceValue | null;
     unit: Unit | null;
+};
+
+/**
+ * LoginRequest
+ *
+ * Plain strings on purpose: a malformed email is just wrong credentials.
+ */
+export type LoginRequest = {
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Password
+     */
+    password: string;
 };
 
 /**
@@ -195,6 +211,43 @@ export type RecipeSummary = {
 };
 
 /**
+ * Role
+ *
+ * A visitor has no session, so there is no viewer role (AD-30).
+ */
+export type Role = 'editor' | 'admin';
+
+/**
+ * SessionResponse
+ *
+ * `user` is null for a visitor.
+ */
+export type SessionResponse = {
+    user: SessionUser | null;
+};
+
+/**
+ * SessionUser
+ *
+ * What the client may know about the signed-in user (AD-21).
+ */
+export type SessionUser = {
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Name
+     */
+    name: string;
+    role: Role;
+};
+
+/**
  * SourceUnit
  *
  * Imperial units an import converted to metric; kept as the 'source' value.
@@ -298,6 +351,72 @@ export type ValidationError = {
      */
     type: string;
 };
+
+export type AuthLoginData = {
+    body: LoginRequest;
+    path?: never;
+    query?: never;
+    url: '/api/auth/login';
+};
+
+export type AuthLoginErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AuthLoginError = AuthLoginErrors[keyof AuthLoginErrors];
+
+export type AuthLoginResponses = {
+    /**
+     * Successful Response
+     */
+    200: SessionResponse;
+};
+
+export type AuthLoginResponse = AuthLoginResponses[keyof AuthLoginResponses];
+
+export type AuthLogoutData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/auth/logout';
+};
+
+export type AuthLogoutResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type AuthLogoutResponse = AuthLogoutResponses[keyof AuthLogoutResponses];
+
+export type AuthSessionData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/auth/session';
+};
+
+export type AuthSessionErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AuthSessionError = AuthSessionErrors[keyof AuthSessionErrors];
+
+export type AuthSessionResponses = {
+    /**
+     * Successful Response
+     */
+    200: SessionResponse;
+};
+
+export type AuthSessionResponse = AuthSessionResponses[keyof AuthSessionResponses];
 
 export type HealthGetHealthData = {
     body?: never;

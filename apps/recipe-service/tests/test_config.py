@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from app.core.config import Environment, Settings, get_settings, load_settings
+from tests.conftest import TEST_SECRET
 
 SERVICE_ROOT = Path(__file__).resolve().parents[1]
 
@@ -13,6 +14,7 @@ SERVICE_ROOT = Path(__file__).resolve().parents[1]
 def test_defaults(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("ENV")
     monkeypatch.delenv("DATA_DIR")
+    monkeypatch.delenv("COOKIE_SECURE")
     settings = load_settings()
     assert settings.env is Environment.PRODUCTION
     assert settings.data_dir == Path("./data")
@@ -43,7 +45,7 @@ def test_env_vars_override_env_file(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     (tmp_path / ".env").write_text("JWT_SECRET=from-file\n", encoding="utf-8")
-    assert load_settings().jwt_secret.get_secret_value() == "test-secret"
+    assert load_settings().jwt_secret.get_secret_value() == TEST_SECRET
 
 
 @pytest.mark.parametrize("value", [None, "", "   "])

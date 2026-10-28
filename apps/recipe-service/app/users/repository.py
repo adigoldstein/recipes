@@ -1,5 +1,7 @@
 """Database access for users; used only by this module's service."""
 
+import uuid
+
 from sqlalchemy import func
 from sqlmodel import Session, col, select
 
@@ -9,6 +11,9 @@ from app.users.models import User
 class UserRepository:
     def __init__(self, session: Session) -> None:
         self._session = session
+
+    def get_by_id(self, user_id: uuid.UUID) -> User | None:
+        return self._session.get(User, user_id)
 
     def get_by_email(self, email: str) -> User | None:
         """The user with this email, compared case-insensitively (AD-30).

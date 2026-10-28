@@ -21,6 +21,10 @@ export const routes: RouteObject[] = [
         lazy: () => import('@bite-and-board/feature-recipes/recipe-detail'),
       },
       // Inside the layout, so the top bar stays on unknown paths.
+      {
+        path: 'login',
+        lazy: () => import('@bite-and-board/feature-auth/login'),
+      },
       { path: '*', Component: NotFound },
     ],
   },

@@ -1,0 +1,25 @@
+{
+  "name": "@bite-and-board/feature-auth",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./login": {
+      "types": "./src/routes/login.tsx",
+      "import": "./src/routes/login.tsx",
+      "default": "./src/routes/login.tsx"
+    },
+    "./account-menu": {
+      "types": "./src/routes/account-menu.tsx",
+      "import": "./src/routes/account-menu.tsx",
+      "default": "./src/routes/account-menu.tsx"
+    },
+    "./package.json": "./package.json"
+  },
+  "nx": {
+    "name": "feature-auth",
+    "tags": [
+      "type:feature"
+    ]
+  }
+}
