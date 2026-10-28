@@ -1,0 +1,2 @@
+# Store and check out LF everywhere, so tools that write LF never look like changes.
+* text=auto eol=lf
