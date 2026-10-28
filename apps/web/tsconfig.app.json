@@ -47,6 +47,9 @@
       "path": "../../libs/feature-recipes/tsconfig.lib.json"
     },
     {
+      "path": "../../libs/feature-users/tsconfig.lib.json"
+    },
+    {
       "path": "../../libs/i18n/tsconfig.lib.json"
     },
     {

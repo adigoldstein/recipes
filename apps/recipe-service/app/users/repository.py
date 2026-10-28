@@ -24,6 +24,11 @@ class UserRepository:
         statement = select(User).where(func.lower(col(User.email)) == func.lower(email))
         return self._session.exec(statement).first()
 
+    def list_all(self) -> list[User]:
+        """Every user, oldest account first."""
+        statement = select(User).order_by(col(User.created_at), col(User.email))
+        return list(self._session.exec(statement).all())
+
     def add(self, user: User) -> User:
         """Stage the user; the caller commits."""
         self._session.add(user)

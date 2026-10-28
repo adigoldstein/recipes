@@ -2,7 +2,7 @@
 
 import { client } from './client.gen.js';
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client/index.js';
-import type { AuthLoginData, AuthLoginErrors, AuthLoginResponses, AuthLogoutData, AuthLogoutResponses, AuthSessionData, AuthSessionErrors, AuthSessionResponses, HealthGetHealthData, HealthGetHealthResponses, RecipesGetRecipeData, RecipesGetRecipeErrors, RecipesGetRecipeResponses, RecipesListRecipesData, RecipesListRecipesResponses, TagsListTagsData, TagsListTagsResponses } from './types.gen.js';
+import type { AuthLoginData, AuthLoginErrors, AuthLoginResponses, AuthLogoutData, AuthLogoutResponses, AuthSessionData, AuthSessionErrors, AuthSessionResponses, HealthGetHealthData, HealthGetHealthResponses, RecipesGetRecipeData, RecipesGetRecipeErrors, RecipesGetRecipeResponses, RecipesListRecipesData, RecipesListRecipesResponses, TagsListTagsData, TagsListTagsResponses, UsersCreateUserData, UsersCreateUserErrors, UsersCreateUserResponses, UsersListUsersData, UsersListUsersResponses } from './types.gen.js';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -63,3 +63,20 @@ export const recipesGetRecipe = <ThrowOnError extends boolean = false>(options: 
  * List Tags
  */
 export const tagsListTags = <ThrowOnError extends boolean = false>(options?: Options<TagsListTagsData, ThrowOnError>): RequestResult<TagsListTagsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<TagsListTagsResponses, unknown, ThrowOnError>({ url: '/api/tags', ...options });
+
+/**
+ * List Users
+ */
+export const usersListUsers = <ThrowOnError extends boolean = false>(options?: Options<UsersListUsersData, ThrowOnError>): RequestResult<UsersListUsersResponses, unknown, ThrowOnError> => (options?.client ?? client).get<UsersListUsersResponses, unknown, ThrowOnError>({ url: '/api/users', ...options });
+
+/**
+ * Create User
+ */
+export const usersCreateUser = <ThrowOnError extends boolean = false>(options: Options<UsersCreateUserData, ThrowOnError>): RequestResult<UsersCreateUserResponses, UsersCreateUserErrors, ThrowOnError> => (options.client ?? client).post<UsersCreateUserResponses, UsersCreateUserErrors, ThrowOnError>({
+    url: '/api/users',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});

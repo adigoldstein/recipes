@@ -1,0 +1,20 @@
+{
+  "name": "@bite-and-board/feature-users",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./users": {
+      "types": "./src/routes/users.tsx",
+      "import": "./src/routes/users.tsx",
+      "default": "./src/routes/users.tsx"
+    },
+    "./package.json": "./package.json"
+  },
+  "nx": {
+    "name": "feature-users",
+    "tags": [
+      "type:feature"
+    ]
+  }
+}

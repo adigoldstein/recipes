@@ -2,10 +2,11 @@ import type { QueryClient } from '@tanstack/react-query';
 import type { RouteObject } from 'react-router';
 import { AppLayout } from './app-layout';
 import { NotFound } from './not-found';
+import { protectedRoute } from './protected-route';
 import { RouteError } from './route-error';
 
-/** The route table. Guarded areas are built with `protectedRoute` (Story 2.4 adds `/users`). */
-export function createRoutes(_queryClient: QueryClient): RouteObject[] {
+/** The route table. Guarded areas are built with `protectedRoute`. */
+export function createRoutes(queryClient: QueryClient): RouteObject[] {
   return [
     {
       path: '/',
@@ -28,6 +29,13 @@ export function createRoutes(_queryClient: QueryClient): RouteObject[] {
           path: 'login',
           lazy: () => import('@bite-and-board/feature-auth/login'),
         },
+        // Admin only: an editor sees the not-found page, a visitor goes to /login.
+        protectedRoute(queryClient, 'admin', [
+          {
+            path: 'users',
+            lazy: () => import('@bite-and-board/feature-users/users'),
+          },
+        ]),
         { path: '*', Component: NotFound },
       ],
     },
