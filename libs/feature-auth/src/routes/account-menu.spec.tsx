@@ -49,6 +49,24 @@ describe('AccountMenu', () => {
     expect(screen.queryByRole('link', { name: 'כניסה' })).toBeNull();
   });
 
+  it('gives the admin a link to the Users screen', async () => {
+    const user = userEvent.setup();
+    serveSession(ADI);
+    renderMenu();
+    await user.click(await screen.findByRole('button', { name: 'Adi' }));
+    const item = await screen.findByRole('menuitem', { name: 'משתמשים' });
+    expect(item.getAttribute('href')).toBe('/users');
+  });
+
+  it('leaves the Users link out for an editor', async () => {
+    const user = userEvent.setup();
+    serveSession({ ...ADI, role: 'editor' });
+    renderMenu();
+    await user.click(await screen.findByRole('button', { name: 'Adi' }));
+    expect(await screen.findByRole('menuitem', { name: 'יציאה' })).toBeTruthy();
+    expect(screen.queryByRole('menuitem', { name: 'משתמשים' })).toBeNull();
+  });
+
   it('logs out and turns back into "כניסה" without a reload', async () => {
     const user = userEvent.setup();
     let signedIn = true;

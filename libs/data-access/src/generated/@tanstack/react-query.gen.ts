@@ -3,8 +3,8 @@
 import { type DefaultError, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen.js';
-import { authLogin, authLogout, authSession, healthGetHealth, type Options, recipesGetRecipe, recipesListRecipes, tagsListTags } from '../sdk.gen.js';
-import type { AuthLoginData, AuthLoginError, AuthLoginResponse, AuthLogoutData, AuthLogoutResponse, AuthSessionData, AuthSessionError, AuthSessionResponse, HealthGetHealthData, HealthGetHealthResponse, RecipesGetRecipeData, RecipesGetRecipeError, RecipesGetRecipeResponse, RecipesListRecipesData, RecipesListRecipesResponse, TagsListTagsData, TagsListTagsResponse } from '../types.gen.js';
+import { authLogin, authLogout, authSession, healthGetHealth, type Options, recipesGetRecipe, recipesListRecipes, tagsListTags, usersCreateUser, usersListUsers } from '../sdk.gen.js';
+import type { AuthLoginData, AuthLoginError, AuthLoginResponse, AuthLogoutData, AuthLogoutResponse, AuthSessionData, AuthSessionError, AuthSessionResponse, HealthGetHealthData, HealthGetHealthResponse, RecipesGetRecipeData, RecipesGetRecipeError, RecipesGetRecipeResponse, RecipesListRecipesData, RecipesListRecipesResponse, TagsListTagsData, TagsListTagsResponse, UsersCreateUserData, UsersCreateUserError, UsersCreateUserResponse, UsersListUsersData, UsersListUsersResponse } from '../types.gen.js';
 
 /**
  * Login
@@ -166,3 +166,38 @@ export const tagsListTagsOptions = (options?: Options<TagsListTagsData>) => quer
     },
     queryKey: tagsListTagsQueryKey(options)
 });
+
+export const usersListUsersQueryKey = (options?: Options<UsersListUsersData>) => createQueryKey('usersListUsers', options);
+
+/**
+ * List Users
+ */
+export const usersListUsersOptions = (options?: Options<UsersListUsersData>) => queryOptions<UsersListUsersResponse, DefaultError, UsersListUsersResponse, ReturnType<typeof usersListUsersQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await usersListUsers({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: usersListUsersQueryKey(options)
+});
+
+/**
+ * Create User
+ */
+export const usersCreateUserMutation = (options?: Partial<Options<UsersCreateUserData>>): UseMutationOptions<UsersCreateUserResponse, UsersCreateUserError, Options<UsersCreateUserData>> => {
+    const mutationOptions: UseMutationOptions<UsersCreateUserResponse, UsersCreateUserError, Options<UsersCreateUserData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await usersCreateUser({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};

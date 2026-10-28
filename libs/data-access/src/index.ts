@@ -13,7 +13,7 @@ export {
   SESSION_EXPIRED_EVENT,
   configureClient,
 } from './client';
-export { getErrorCode } from './errors';
+export { getErrorCode, getErrorParams } from './errors';
 export { requireRole } from './guards';
 export { roleAtLeast, useCan, useSession } from './session';
 export { invalidationMap, type Invalidator } from './invalidation';

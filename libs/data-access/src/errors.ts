@@ -13,3 +13,17 @@ export function getErrorCode(error: unknown): ErrorCode | undefined {
   const { code } = error as { code?: unknown };
   return typeof code === 'string' ? (code as ErrorCode) : undefined;
 }
+
+/**
+ * Reads the `params` of an API error body, the values its message needs (for
+ * example `{min: 8}` for `password_too_short`). Empty when there are none.
+ */
+export function getErrorParams(
+  error: unknown,
+): Record<string, string | number> {
+  if (typeof error !== 'object' || error === null) return {};
+  const { params } = error as { params?: unknown };
+  return typeof params === 'object' && params !== null
+    ? (params as Record<string, string | number>)
+    : {};
+}

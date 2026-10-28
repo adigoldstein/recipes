@@ -215,6 +215,35 @@ export const zRecipeRead = z.object({
 });
 
 /**
+ * UserCreateRequest
+ *
+ * The body of `POST /api/users`: an account plus its starting password.
+ *
+ * The confirmation field of the form is checked in the browser only; the server
+ * just enforces the password policy (FR-13).
+ */
+export const zUserCreateRequest = z.object({
+    email: z.email(),
+    name: z.string(),
+    password: z.string(),
+    role: zRole
+});
+
+/**
+ * UserRead
+ *
+ * A user as returned to callers. There is deliberately no password field.
+ */
+export const zUserRead = z.object({
+    created_at: z.iso.datetime(),
+    email: z.string(),
+    id: z.uuid(),
+    is_blocked: z.boolean(),
+    name: z.string(),
+    role: zRole
+});
+
+/**
  * ValidationError
  */
 export const zValidationError = z.object({
@@ -276,3 +305,17 @@ export const zRecipesGetRecipeResponse = zRecipeRead;
  * Successful Response
  */
 export const zTagsListTagsResponse = z.array(zTagRead);
+
+/**
+ * Response Users List Users
+ *
+ * Successful Response
+ */
+export const zUsersListUsersResponse = z.array(zUserRead);
+
+export const zUsersCreateUserBody = zUserCreateRequest;
+
+/**
+ * Successful Response
+ */
+export const zUsersCreateUserResponse = zUserRead;

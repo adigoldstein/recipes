@@ -325,6 +325,59 @@ export type TagRef = {
 export type Unit = 'g' | 'kg' | 'ml' | 'l' | 'tsp' | 'tbsp' | 'cup' | 'unit' | 'pinch' | 'clove' | 'slice' | 'can' | 'package';
 
 /**
+ * UserCreateRequest
+ *
+ * The body of `POST /api/users`: an account plus its starting password.
+ *
+ * The confirmation field of the form is checked in the browser only; the server
+ * just enforces the password policy (FR-13).
+ */
+export type UserCreateRequest = {
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Password
+     */
+    password: string;
+    role: Role;
+};
+
+/**
+ * UserRead
+ *
+ * A user as returned to callers. There is deliberately no password field.
+ */
+export type UserRead = {
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Is Blocked
+     */
+    is_blocked: boolean;
+    /**
+     * Name
+     */
+    name: string;
+    role: Role;
+};
+
+/**
  * ValidationError
  */
 export type ValidationError = {
@@ -503,3 +556,50 @@ export type TagsListTagsResponses = {
 };
 
 export type TagsListTagsResponse = TagsListTagsResponses[keyof TagsListTagsResponses];
+
+export type UsersListUsersData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/users';
+};
+
+export type UsersListUsersResponses = {
+    /**
+     * Response Users List Users
+     *
+     * Successful Response
+     */
+    200: Array<UserRead>;
+};
+
+export type UsersListUsersResponse = UsersListUsersResponses[keyof UsersListUsersResponses];
+
+export type UsersCreateUserData = {
+    body: UserCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/api/users';
+};
+
+export type UsersCreateUserErrors = {
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UsersCreateUserError = UsersCreateUserErrors[keyof UsersCreateUserErrors];
+
+export type UsersCreateUserResponses = {
+    /**
+     * Successful Response
+     */
+    201: UserRead;
+};
+
+export type UsersCreateUserResponse = UsersCreateUserResponses[keyof UsersCreateUserResponses];

@@ -59,9 +59,41 @@
     },
     "menu": {
       "login": "כניסה",
-      "logout": "יציאה"
+      "logout": "יציאה",
+      "users": "משתמשים"
     },
     "sessionExpired": "פג תוקף החיבור"
+  },
+  "users": {
+    "title": "משתמשים",
+    "list": "רשימת המשתמשים",
+    "loading": "טוען משתמשים",
+    "retry": "לנסות שוב",
+    "blocked": "חסום",
+    "role": {
+      "editor": "עורך",
+      "admin": "מנהל"
+    },
+    "add": {
+      "open": "הוספת משתמש",
+      "title": "הוספת משתמש",
+      "description": "המשתמש החדש יוכל להיכנס מיד עם הסיסמה ההתחלתית.",
+      "email": "אימייל",
+      "name": "שם",
+      "role": "תפקיד",
+      "password": "סיסמה התחלתית",
+      "confirm": "אימות סיסמה",
+      "submit": "הוספה",
+      "submitting": "מוסיפים",
+      "cancel": "ביטול",
+      "close": "סגירה",
+      "emailRequired": "יש להזין אימייל",
+      "emailInvalid": "כתובת האימייל אינה תקינה",
+      "nameRequired": "יש להזין שם",
+      "passwordRequired": "יש להזין סיסמה",
+      "passwordMismatch": "הסיסמאות אינן זהות",
+      "created": "{{name}} נוסף"
+    }
   },
   "notFound": {
     "title": "הדף לא נמצא",

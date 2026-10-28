@@ -87,6 +87,10 @@ class UserService:
             raise
         return _read(user)
 
+    def list_users(self) -> list[UserRead]:
+        """All users, oldest account first. There are only a handful (FR-25)."""
+        return [_read(user) for user in self._repository.list_all()]
+
     def authenticate(self, email: str, password: str) -> UserRead | None:
         """The active user whose email and password match, else None.
 

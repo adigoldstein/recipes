@@ -36,6 +36,16 @@ class UserCreate(BaseModel):
         return value
 
 
+class UserCreateRequest(UserCreate):
+    """The body of `POST /api/users`: an account plus its starting password.
+
+    The confirmation field of the form is checked in the browser only; the server
+    just enforces the password policy (FR-13).
+    """
+
+    password: str
+
+
 class UserRead(BaseModel):
     """A user as returned to callers. There is deliberately no password field."""
 

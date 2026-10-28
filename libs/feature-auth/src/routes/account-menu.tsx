@@ -5,6 +5,7 @@ import { Link, useLocation } from 'react-router';
 import {
   authLogoutMutation,
   authSessionQueryKey,
+  useCan,
   useSession,
 } from '@bite-and-board/data-access';
 import {
@@ -25,6 +26,7 @@ export function AccountMenu() {
   const queryClient = useQueryClient();
   const location = useLocation();
   const session = useSession();
+  const isAdmin = useCan('admin');
   const logout = useMutation({
     ...authLogoutMutation(),
     onSuccess: async () => {
@@ -45,6 +47,11 @@ export function AccountMenu() {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          {isAdmin ? (
+            <DropdownMenuItem asChild>
+              <Link to="/users">{t('auth.menu.users')}</Link>
+            </DropdownMenuItem>
+          ) : null}
           <DropdownMenuItem onSelect={() => logout.mutate({})}>
             {t('auth.menu.logout')}
           </DropdownMenuItem>

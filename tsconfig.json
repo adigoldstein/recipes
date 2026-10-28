@@ -26,6 +26,9 @@
     },
     {
       "path": "./libs/feature-auth"
+    },
+    {
+      "path": "./libs/feature-users"
     }
   ],
   "compilerOptions": {}
