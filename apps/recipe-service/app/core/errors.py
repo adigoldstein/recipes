@@ -10,6 +10,10 @@ class ErrorCode(StrEnum):
 
     RECIPE_NOT_FOUND = "recipe_not_found"
     TAG_NOT_FOUND = "tag_not_found"
+    EMAIL_TAKEN = "email_taken"
+    USER_NOT_FOUND = "user_not_found"
+    PASSWORD_TOO_SHORT = "password_too_short"
+    PASSWORD_TOO_LONG = "password_too_long"
 
 
 class ErrorResponse(BaseModel):

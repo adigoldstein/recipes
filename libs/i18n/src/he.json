@@ -59,6 +59,10 @@
   "errors": {
     "recipe_not_found": "המתכון לא נמצא",
     "tag_not_found": "התגית לא נמצאה",
+    "email_taken": "כבר קיים משתמש עם האימייל הזה",
+    "user_not_found": "המשתמש לא נמצא",
+    "password_too_short": "הסיסמה חייבת להכיל לפחות {{min}} תווים",
+    "password_too_long": "הסיסמה יכולה להכיל עד {{max}} תווים",
     "unknown": "משהו השתבש, אפשר לנסות שוב"
   },
   "units": {

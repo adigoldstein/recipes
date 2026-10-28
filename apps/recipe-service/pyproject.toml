@@ -23,8 +23,10 @@ requires-python = ">=3.13,<3.14"
 readme = 'README.md'
 dependencies = [
     "alembic>=1.20.1",
+    "email-validator>=2.3.0",
     "fastapi>=0.162.0",
     "httpx>=0.28.1",
+    "pwdlib[argon2]>=0.3.1",
     "pydantic>=2",
     "pydantic-settings>=2.16.1",
     "sqlmodel>=0.0.48",
@@ -197,7 +199,7 @@ protected_modules = [
   "app.users.models",
   "app.users.schemas",
 ]
-allowed_importers = ["app.users"]
+allowed_importers = ["app.users", "app.cli"]
 ignore_imports = [
   "app.main -> app.users.router",
   "app.core.metadata -> app.users.models",

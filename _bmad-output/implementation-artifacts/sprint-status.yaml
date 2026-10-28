@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-26-2026 13:09
-last_updated: 10-28-2026 08:40
+last_updated: 10-28-2026 08:55
 project: recipes
 project_key: NOKEY
 tracking_system: file-system
@@ -49,8 +49,8 @@ development_status:
   1-11-live-serving-scaling: done
   epic-1-retrospective: optional
 
-  epic-2: backlog
-  2-1-admin-account-from-the-command-line: backlog
+  epic-2: in-progress
+  2-1-admin-account-from-the-command-line: done
   2-2-log-in-and-log-out: backlog
   2-3-role-guards-and-protected-areas: backlog
   2-4-users-screen-list-and-add-users: backlog

@@ -1,4 +1,4 @@
-"""Helpers that insert recipes straight into the migrated test database."""
+"""Helpers that insert recipes and users straight into the migrated test database."""
 
 import uuid
 from collections.abc import Sequence
@@ -7,8 +7,10 @@ from typing import Any
 
 from sqlmodel import Session, select
 
+from app.core.security import Role, hash_password
 from app.recipes.models import Ingredient, Recipe, Step
 from app.tags.models import RecipeTag, Tag
+from app.users.models import User
 
 
 def seeded_tag(session: Session, name: str) -> Tag:
@@ -57,3 +59,24 @@ def ingredient(position: int, name: str, **fields: Any) -> Ingredient:
 
 def step(position: int, description: str, **fields: Any) -> Step:
     return Step(recipe_id=_UNSET, position=position, description=description, **fields)
+
+
+def add_user(
+    session: Session,
+    *,
+    email: str = "adi@example.com",
+    name: str = "Adi",
+    role: Role = Role.EDITOR,
+    password: str = "correct horse",
+    **fields: Any,
+) -> User:
+    user = User(
+        email=email,
+        name=name,
+        role=role,
+        password_hash=hash_password(password),
+        **fields,
+    )
+    session.add(user)
+    session.commit()
+    return user
