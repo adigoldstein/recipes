@@ -27,6 +27,9 @@ def test_export_writes_stable_sorted_json(tmp_path: Path) -> None:
         "password_too_long",
         "invalid_credentials",
         "rate_limited",
+        "unauthorized",
+        "forbidden",
+        "csrf_header_missing",
     ]
 
 

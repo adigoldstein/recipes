@@ -1,11 +1,12 @@
 import { renderHook } from '@testing-library/react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
-import { AppProviders } from './app-providers';
+import { AppProviders, createAppQueryClient } from './app-providers';
 import { useApiErrorMessage } from './use-api-error-message';
 
+const queryClient = createAppQueryClient();
 const wrapper = ({ children }: { children: ReactNode }) => (
-  <AppProviders>{children}</AppProviders>
+  <AppProviders queryClient={queryClient}>{children}</AppProviders>
 );
 
 describe('useApiErrorMessage', () => {

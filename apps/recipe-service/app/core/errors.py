@@ -17,6 +17,9 @@ class ErrorCode(StrEnum):
     PASSWORD_TOO_LONG = "password_too_long"
     INVALID_CREDENTIALS = "invalid_credentials"
     RATE_LIMITED = "rate_limited"
+    UNAUTHORIZED = "unauthorized"
+    FORBIDDEN = "forbidden"
+    CSRF_HEADER_MISSING = "csrf_header_missing"
 
 
 class ErrorResponse(BaseModel):

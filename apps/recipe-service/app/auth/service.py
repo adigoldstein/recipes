@@ -2,12 +2,17 @@
 
 from typing import Annotated
 
-from fastapi import Depends
+from fastapi import Cookie, Depends
 
 from app.auth.schemas import SessionUser
 from app.core.config import Settings, get_settings
 from app.core.errors import AppError, ErrorCode
-from app.core.security import create_session_token, read_session_token
+from app.core.security import (
+    SESSION_COOKIE,
+    CurrentUser,
+    create_session_token,
+    read_session_token,
+)
 from app.users.schemas import UserRead
 from app.users.service import UserService, get_user_service
 
@@ -53,3 +58,14 @@ def get_auth_service(
 ) -> AuthService:
     """Provider, like a Nest injectable: `Depends(get_auth_service)`."""
     return AuthService(users, settings.jwt_secret.get_secret_value())
+
+
+def get_current_user(
+    service: Annotated[AuthService, Depends(get_auth_service)],
+    token: Annotated[str | None, Cookie(alias=SESSION_COOKIE)] = None,
+) -> CurrentUser | None:
+    """Answers `core.security.get_session_user`; `main.py` wires it in."""
+    user = service.current_user(token)
+    if user is None:
+        return None
+    return CurrentUser(id=user.id, email=user.email, name=user.name, role=user.role)

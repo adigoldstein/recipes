@@ -5,15 +5,23 @@ import {
   waitFor,
   within,
 } from '@testing-library/react';
-import { createMemoryRouter, data, RouterProvider } from 'react-router';
-import { AppProviders } from './app-providers';
+import {
+  createMemoryRouter,
+  data,
+  RouterProvider,
+  type RouteObject,
+} from 'react-router';
+import { AppProviders, createAppQueryClient } from './app-providers';
 import { RouteError } from './route-error';
-import { routes } from './router';
+import { createRoutes } from './router';
 
-function renderApp(path: string, appRoutes = routes) {
-  const router = createMemoryRouter(appRoutes, { initialEntries: [path] });
+function renderApp(path: string, appRoutes?: RouteObject[]) {
+  const queryClient = createAppQueryClient();
+  const router = createMemoryRouter(appRoutes ?? createRoutes(queryClient), {
+    initialEntries: [path],
+  });
   render(
-    <AppProviders>
+    <AppProviders queryClient={queryClient}>
       <RouterProvider router={router} />
     </AppProviders>,
   );

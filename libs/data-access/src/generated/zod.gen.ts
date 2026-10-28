@@ -15,7 +15,10 @@ export const zErrorCode = z.enum([
     'password_too_short',
     'password_too_long',
     'invalid_credentials',
-    'rate_limited'
+    'rate_limited',
+    'unauthorized',
+    'forbidden',
+    'csrf_header_missing'
 ]);
 
 /**

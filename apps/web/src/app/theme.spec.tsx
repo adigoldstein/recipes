@@ -3,8 +3,8 @@ import { join } from 'node:path';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { setSystemDark } from '../test-setup';
-import { routes } from './router';
-import { AppProviders } from './app-providers';
+import { createRoutes } from './router';
+import { AppProviders, createAppQueryClient } from './app-providers';
 import { THEME_STORAGE_KEY } from './theme';
 
 const LABELS = {
@@ -16,9 +16,12 @@ const LABELS = {
 const isDark = () => document.documentElement.classList.contains('dark');
 
 async function renderApp() {
-  const router = createMemoryRouter(routes, { initialEntries: ['/'] });
+  const queryClient = createAppQueryClient();
+  const router = createMemoryRouter(createRoutes(queryClient), {
+    initialEntries: ['/'],
+  });
   render(
-    <AppProviders>
+    <AppProviders queryClient={queryClient}>
       <RouterProvider router={router} />
     </AppProviders>,
   );
