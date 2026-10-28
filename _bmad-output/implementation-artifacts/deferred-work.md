@@ -52,3 +52,9 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-1-6-recipe-data-model-and-read-api.md`
   summary: Move `Unit` and `SourceUnit` (and the countable set) from `app/recipes/units.py` to a shared core module before the Epic 5 import work, or relax the import-linter contract.
   evidence: AD-20 has `DraftRecipe` use the same `Unit` enum, but import-linter forbids `app.imports` from depending on `app.recipes`; Story 1.6 left the enums in `recipes` and did not decide this.
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-10-recipe-detail-page.md`
+  summary: Board-shaped recipe photo with the handle slot and "מקור: {domain}" credit on the detail page (UX-DR8).
+  evidence: Story 1.10's acceptance criteria do not list the photo, so Adi approved leaving it out (D6); no story in Epic 1 builds it yet, so it needs a home (Epic 2 or a 1.x follow-up).
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-10-recipe-detail-page.md`
+  summary: Hebrew fractions in amounts ("חצי כוס" instead of "0.5 כוסות") and unit forms for 2 ("שתי כפות").
+  evidence: Unit labels only have `_one`/`_other` (singular for exactly 1), as AD-20 describes; richer Hebrew grammar is a polish decision for Story 1.11's rounding rules.

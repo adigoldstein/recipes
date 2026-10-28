@@ -52,6 +52,27 @@ export const RecipeCards: Story = {
   ),
 };
 
+export const RecipeCardsEqualHeight: Story = {
+  name: 'RecipeCard (equal height per row)',
+  render: () => (
+    <ul className="grid max-w-library gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {[
+        { title: 'עוף', tags: ['ערב'], time: '40 דק׳' },
+        {
+          title: 'פשטידת תרד וגבינות עם בצל מקורמל וקרוסטה פריכה של פירורי לחם',
+          tags: ['ערב', 'צמחוני'],
+          time: '1 שע׳ 10 דק׳',
+        },
+        { title: 'סלט', tags: [], time: undefined },
+      ].map((recipe) => (
+        <li key={recipe.title}>
+          <RecipeCard {...recipe} renderLink={link} />
+        </li>
+      ))}
+    </ul>
+  ),
+};
+
 export const RecipeCardSkeletons: Story = {
   name: 'RecipeCardSkeleton',
   render: () => (

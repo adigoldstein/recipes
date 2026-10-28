@@ -9,6 +9,11 @@
       "import": "./src/routes/library.tsx",
       "default": "./src/routes/library.tsx"
     },
+    "./recipe-detail": {
+      "types": "./src/routes/recipe-detail.tsx",
+      "import": "./src/routes/recipe-detail.tsx",
+      "default": "./src/routes/recipe-detail.tsx"
+    },
     "./package.json": "./package.json"
   },
   "nx": {

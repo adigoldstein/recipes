@@ -40,6 +40,24 @@ describe('RecipeCard', () => {
     expect(screen.getByText('30 דק׳')).toBeTruthy();
   });
 
+  it('fills its grid cell, with the tags and time pinned to the bottom', () => {
+    const { container } = render(
+      <RecipeCard
+        title="לזניה"
+        tags={['ערב']}
+        time="30 דק׳"
+        renderLink={link}
+      />,
+    );
+    expect(screen.getByRole('link').className).toContain('h-full');
+    expect(
+      container.querySelector('[data-slot="recipe-card"]')?.className,
+    ).toContain('h-full');
+    expect(container.querySelector('.text-label')?.className).toContain(
+      'mt-auto',
+    );
+  });
+
   it('shows a lazy photo and the regular title size when it has one', () => {
     const { container } = render(
       <RecipeCard

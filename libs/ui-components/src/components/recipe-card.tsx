@@ -42,7 +42,7 @@ export function RecipeCard({
   const hidden = tags.length - shown.length;
   return renderLink({
     className: cn(
-      'block rounded-board outline-none transition-transform hover:scale-102 focus-visible:ring-3 focus-visible:ring-ring active:scale-98',
+      'block h-full rounded-board outline-none transition-transform hover:scale-102 focus-visible:ring-3 focus-visible:ring-ring active:scale-98',
       className,
     ),
     children: (
