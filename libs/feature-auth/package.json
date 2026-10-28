@@ -14,6 +14,11 @@
       "import": "./src/routes/account-menu.tsx",
       "default": "./src/routes/account-menu.tsx"
     },
+    "./account": {
+      "types": "./src/routes/account.tsx",
+      "import": "./src/routes/account.tsx",
+      "default": "./src/routes/account.tsx"
+    },
     "./package.json": "./package.json"
   },
   "nx": {

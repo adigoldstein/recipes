@@ -20,6 +20,17 @@ class LoginRequest(BaseModel):
     password: str = Field(min_length=1, max_length=PASSWORD_MAX_LENGTH)
 
 
+class ChangePasswordRequest(BaseModel):
+    """The signed-in user's own password change (Story 2.6).
+
+    The new password's length is checked by the password policy in the service, so
+    the client gets the same `password_too_short` error as an admin reset.
+    """
+
+    current_password: str = Field(min_length=1, max_length=PASSWORD_MAX_LENGTH)
+    new_password: str = Field(min_length=1, max_length=PASSWORD_MAX_LENGTH)
+
+
 class SessionUser(BaseModel):
     """What the client may know about the signed-in user (AD-21)."""
 

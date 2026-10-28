@@ -1,6 +1,29 @@
 {
   "components": {
     "schemas": {
+      "ChangePasswordRequest": {
+        "description": "The signed-in user's own password change (Story 2.6).\n\nThe new password's length is checked by the password policy in the service, so\nthe client gets the same `password_too_short` error as an admin reset.",
+        "properties": {
+          "current_password": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Current Password",
+            "type": "string"
+          },
+          "new_password": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "New Password",
+            "type": "string"
+          }
+        },
+        "required": [
+          "current_password",
+          "new_password"
+        ],
+        "title": "ChangePasswordRequest",
+        "type": "object"
+      },
       "ErrorCode": {
         "description": "Stable error codes; the client shows `errors.<code>` from he.json.",
         "enum": [
@@ -825,6 +848,48 @@
           }
         },
         "summary": "Logout",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/password": {
+      "post": {
+        "description": "Change my own password (FR-27); any signed-in user, editor or admin.\n\nThe old cookie dies with the version bump, so the answer sets a new one: this\ndevice stays signed in and every other device is signed out.",
+        "operationId": "auth_change_password",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Change Password",
         "tags": [
           "auth"
         ]

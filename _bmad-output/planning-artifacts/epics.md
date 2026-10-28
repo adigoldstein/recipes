@@ -246,7 +246,7 @@ The app runs as one production container (`docker compose up`) with backups, str
 
 ### Epic 7 (optional, nice to have): Kitchen mode extras
 
-Small comforts for cooking on the phone: the screen stays awake, amounts show as pretty fractions, and a recipe can be shared as text. Split out of Story 1.11 (2026-10-28); it can be cut without affecting any other story. It also holds one optional admin story: editing a user's name and email (Story 7.2).
+Small comforts for cooking on the phone: the screen stays awake, amounts show as pretty fractions, and a recipe can be shared as text. Split out of Story 1.11 (2026-10-28); it can be cut without affecting any other story. It also holds one optional admin story: editing a user's name and email (Story 7.2), and one REQUIRED story: data caching tuning (Story 7.3), which must not be cut with the rest.
 **FRs covered:** none (UX-DR22)
 
 ## Epic 1: Browse and cook from the phone
@@ -965,8 +965,8 @@ So that cooking from my phone is more comfortable (UX-DR22).
 
 ### Story 7.2: Edit user details (optional)
 
-As the admin,
-I want to correct a user's name or email from the Users screen,
+As the admin, or as any signed-in user for my own account,
+I want to correct a name or email (from the Users screen, or from "החשבון שלי")
 So that a typo or a changed address doesn't mean deleting and re-creating an account.
 
 **Acceptance Criteria:**
@@ -976,4 +976,21 @@ So that a typo or a changed address doesn't mean deleting and re-creating an acc
 **Then** `PATCH /api/users/{id}` (admin) stores them and the list updates (extends the Story 2.5 endpoint with optional `name` and `email`)
 **And** the name and email follow the same rules as when adding a user: the name is trimmed and 1-80 characters, the email is valid, and a duplicate email (compared without case) returns 409 `email_taken`, shown on the email field
 **And** changing an email doesn't end that user's sessions or change their password, and the user can log in with the new email straight away
-**And** API tests cover the name change, the email change, the 409, and invalid values; the dialog works at 375 px
+**And** any signed-in user can edit their own name and email in a "פרטים אישיים" section added to the "החשבון שלי" page (Story 2.6, which stays password-only and is laid out so a second section fits); changing one's own email requires the current password (wrong password returns 400 `invalid_credentials`, shown on that field), follows the same rules and the same 409 `email_taken`, and keeps the session valid
+**And** API tests cover the name change, the email change, the 409, and invalid values, including the self-edit with and without the right password; the dialog and the section work at 375 px
+
+### Story 7.3: Data caching tuning (REQUIRED)
+
+> Not optional, unlike the rest of Epic 7. Added 2026-10-28; details to be agreed with Adi when the app is further along.
+
+As a user,
+I want reference data like tags to load once and stay fresh,
+So that screens don't refetch the same data on every mount and focus.
+
+**Acceptance Criteria:**
+
+**Given** reference queries such as tags use the default `staleTime` of 0 and refetch several times (on mount and on window focus)
+**When** the caching is tuned
+**Then** each reference query has its own `staleTime` (tags long, or `Infinity`), and the defaults are reviewed per query
+**And** editing the data invalidates the query (e.g. the Epic 4 tag editor invalidates the tags query), so edits show immediately
+**And** a test or network check shows that opening several screens in a row fetches tags once

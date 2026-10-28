@@ -3,8 +3,8 @@
 import { type DefaultError, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen.js';
-import { authLogin, authLogout, authSession, healthGetHealth, type Options, recipesGetRecipe, recipesListRecipes, tagsListTags, usersCreateUser, usersListUsers, usersUpdateUser } from '../sdk.gen.js';
-import type { AuthLoginData, AuthLoginError, AuthLoginResponse, AuthLogoutData, AuthLogoutResponse, AuthSessionData, AuthSessionError, AuthSessionResponse, HealthGetHealthData, HealthGetHealthResponse, RecipesGetRecipeData, RecipesGetRecipeError, RecipesGetRecipeResponse, RecipesListRecipesData, RecipesListRecipesResponse, TagsListTagsData, TagsListTagsResponse, UsersCreateUserData, UsersCreateUserError, UsersCreateUserResponse, UsersListUsersData, UsersListUsersResponse, UsersUpdateUserData, UsersUpdateUserError, UsersUpdateUserResponse } from '../types.gen.js';
+import { authChangePassword, authLogin, authLogout, authSession, healthGetHealth, type Options, recipesGetRecipe, recipesListRecipes, tagsListTags, usersCreateUser, usersListUsers, usersUpdateUser } from '../sdk.gen.js';
+import type { AuthChangePasswordData, AuthChangePasswordError, AuthChangePasswordResponse, AuthLoginData, AuthLoginError, AuthLoginResponse, AuthLogoutData, AuthLogoutResponse, AuthSessionData, AuthSessionError, AuthSessionResponse, HealthGetHealthData, HealthGetHealthResponse, RecipesGetRecipeData, RecipesGetRecipeError, RecipesGetRecipeResponse, RecipesListRecipesData, RecipesListRecipesResponse, TagsListTagsData, TagsListTagsResponse, UsersCreateUserData, UsersCreateUserError, UsersCreateUserResponse, UsersListUsersData, UsersListUsersResponse, UsersUpdateUserData, UsersUpdateUserError, UsersUpdateUserResponse } from '../types.gen.js';
 
 /**
  * Login
@@ -32,6 +32,28 @@ export const authLogoutMutation = (options?: Partial<Options<AuthLogoutData>>): 
     const mutationOptions: UseMutationOptions<AuthLogoutResponse, DefaultError, Options<AuthLogoutData>> = {
         mutationFn: async (fnOptions) => {
             const { data } = await authLogout({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Change Password
+ *
+ * Change my own password (FR-27); any signed-in user, editor or admin.
+ *
+ * The old cookie dies with the version bump, so the answer sets a new one: this
+ * device stays signed in and every other device is signed out.
+ */
+export const authChangePasswordMutation = (options?: Partial<Options<AuthChangePasswordData>>): UseMutationOptions<AuthChangePasswordResponse, AuthChangePasswordError, Options<AuthChangePasswordData>> => {
+    const mutationOptions: UseMutationOptions<AuthChangePasswordResponse, AuthChangePasswordError, Options<AuthChangePasswordData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await authChangePassword({
                 ...options,
                 ...fnOptions,
                 throwOnError: true

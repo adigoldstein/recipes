@@ -3,6 +3,19 @@
 import * as z from 'zod';
 
 /**
+ * ChangePasswordRequest
+ *
+ * The signed-in user's own password change (Story 2.6).
+ *
+ * The new password's length is checked by the password policy in the service, so
+ * the client gets the same `password_too_short` error as an admin reset.
+ */
+export const zChangePasswordRequest = z.object({
+    current_password: z.string().min(1).max(128),
+    new_password: z.string().min(1).max(128)
+});
+
+/**
  * ErrorCode
  *
  * Stable error codes; the client shows `errors.<code>` from he.json.
@@ -288,6 +301,13 @@ export const zAuthLoginResponse = zSessionResponse;
  * Successful Response
  */
 export const zAuthLogoutResponse = z.void();
+
+export const zAuthChangePasswordBody = zChangePasswordRequest;
+
+/**
+ * Successful Response
+ */
+export const zAuthChangePasswordResponse = zSessionResponse;
 
 /**
  * Successful Response

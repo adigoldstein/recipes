@@ -74,3 +74,19 @@ describe('/users', () => {
     expect(router.state.location.search).toBe('?next=%2Fusers');
   });
 });
+
+describe('/account', () => {
+  it('shows the account page to an editor', async () => {
+    sessionUser = { ...ADMIN, role: 'editor' };
+    renderAt('/account');
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'החשבון שלי' }),
+    ).toBeTruthy();
+  });
+
+  it('sends a visitor to the login page, remembering /account', async () => {
+    const router = renderAt('/account');
+    await waitFor(() => expect(router.state.location.pathname).toBe('/login'));
+    expect(router.state.location.search).toBe('?next=%2Faccount');
+  });
+});

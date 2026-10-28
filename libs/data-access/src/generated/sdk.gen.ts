@@ -2,7 +2,7 @@
 
 import { client } from './client.gen.js';
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client/index.js';
-import type { AuthLoginData, AuthLoginErrors, AuthLoginResponses, AuthLogoutData, AuthLogoutResponses, AuthSessionData, AuthSessionErrors, AuthSessionResponses, HealthGetHealthData, HealthGetHealthResponses, RecipesGetRecipeData, RecipesGetRecipeErrors, RecipesGetRecipeResponses, RecipesListRecipesData, RecipesListRecipesResponses, TagsListTagsData, TagsListTagsResponses, UsersCreateUserData, UsersCreateUserErrors, UsersCreateUserResponses, UsersListUsersData, UsersListUsersResponses, UsersUpdateUserData, UsersUpdateUserErrors, UsersUpdateUserResponses } from './types.gen.js';
+import type { AuthChangePasswordData, AuthChangePasswordErrors, AuthChangePasswordResponses, AuthLoginData, AuthLoginErrors, AuthLoginResponses, AuthLogoutData, AuthLogoutResponses, AuthSessionData, AuthSessionErrors, AuthSessionResponses, HealthGetHealthData, HealthGetHealthResponses, RecipesGetRecipeData, RecipesGetRecipeErrors, RecipesGetRecipeResponses, RecipesListRecipesData, RecipesListRecipesResponses, TagsListTagsData, TagsListTagsResponses, UsersCreateUserData, UsersCreateUserErrors, UsersCreateUserResponses, UsersListUsersData, UsersListUsersResponses, UsersUpdateUserData, UsersUpdateUserErrors, UsersUpdateUserResponses } from './types.gen.js';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -36,6 +36,23 @@ export const authLogin = <ThrowOnError extends boolean = false>(options: Options
  * Always succeeds, signed in or not.
  */
 export const authLogout = <ThrowOnError extends boolean = false>(options?: Options<AuthLogoutData, ThrowOnError>): RequestResult<AuthLogoutResponses, unknown, ThrowOnError> => (options?.client ?? client).post<AuthLogoutResponses, unknown, ThrowOnError>({ url: '/api/auth/logout', ...options });
+
+/**
+ * Change Password
+ *
+ * Change my own password (FR-27); any signed-in user, editor or admin.
+ *
+ * The old cookie dies with the version bump, so the answer sets a new one: this
+ * device stays signed in and every other device is signed out.
+ */
+export const authChangePassword = <ThrowOnError extends boolean = false>(options: Options<AuthChangePasswordData, ThrowOnError>): RequestResult<AuthChangePasswordResponses, AuthChangePasswordErrors, ThrowOnError> => (options.client ?? client).post<AuthChangePasswordResponses, AuthChangePasswordErrors, ThrowOnError>({
+    url: '/api/auth/password',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
  * Session

@@ -5,6 +5,25 @@ export type ClientOptions = {
 };
 
 /**
+ * ChangePasswordRequest
+ *
+ * The signed-in user's own password change (Story 2.6).
+ *
+ * The new password's length is checked by the password policy in the service, so
+ * the client gets the same `password_too_short` error as an admin reset.
+ */
+export type ChangePasswordRequest = {
+    /**
+     * Current Password
+     */
+    current_password: string;
+    /**
+     * New Password
+     */
+    new_password: string;
+};
+
+/**
  * ErrorCode
  *
  * Stable error codes; the client shows `errors.<code>` from he.json.
@@ -465,6 +484,31 @@ export type AuthLogoutResponses = {
 };
 
 export type AuthLogoutResponse = AuthLogoutResponses[keyof AuthLogoutResponses];
+
+export type AuthChangePasswordData = {
+    body: ChangePasswordRequest;
+    path?: never;
+    query?: never;
+    url: '/api/auth/password';
+};
+
+export type AuthChangePasswordErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AuthChangePasswordError = AuthChangePasswordErrors[keyof AuthChangePasswordErrors];
+
+export type AuthChangePasswordResponses = {
+    /**
+     * Successful Response
+     */
+    200: SessionResponse;
+};
+
+export type AuthChangePasswordResponse = AuthChangePasswordResponses[keyof AuthChangePasswordResponses];
 
 export type AuthSessionData = {
     body?: never;

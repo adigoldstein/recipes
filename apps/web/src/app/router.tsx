@@ -29,6 +29,13 @@ export function createRoutes(queryClient: QueryClient): RouteObject[] {
           path: 'login',
           lazy: () => import('@bite-and-board/feature-auth/login'),
         },
+        // Any signed-in user: a visitor goes to /login.
+        protectedRoute(queryClient, 'editor', [
+          {
+            path: 'account',
+            lazy: () => import('@bite-and-board/feature-auth/account'),
+          },
+        ]),
         // Admin only: an editor sees the not-found page, a visitor goes to /login.
         protectedRoute(queryClient, 'admin', [
           {
