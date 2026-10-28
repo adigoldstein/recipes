@@ -16,6 +16,8 @@ class ErrorCode(StrEnum):
     PASSWORD_TOO_SHORT = "password_too_short"
     PASSWORD_TOO_LONG = "password_too_long"
     INVALID_CREDENTIALS = "invalid_credentials"
+    ACCOUNT_BLOCKED = "account_blocked"
+    LAST_ADMIN = "last_admin"
     RATE_LIMITED = "rate_limited"
     UNAUTHORIZED = "unauthorized"
     FORBIDDEN = "forbidden"

@@ -108,6 +108,28 @@ describe('LoginPage', () => {
     expect((email() as HTMLInputElement).value).toBe('adi@example.com');
   });
 
+  it('tells a blocked user to contact the admin, and stays on the form', async () => {
+    const user = userEvent.setup();
+    server.use(
+      http.post('*/api/auth/login', () =>
+        HttpResponse.json(
+          { detail: 'This account is blocked', code: 'account_blocked' },
+          { status: 403 },
+        ),
+      ),
+    );
+    renderLogin();
+    await fill(user);
+    await user.click(submit());
+    expect(
+      await screen.findByText('החשבון חסום. יש לפנות למנהל.'),
+    ).toBeTruthy();
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'כניסה' }),
+    ).toBeTruthy();
+    expect((email() as HTMLInputElement).value).toBe('adi@example.com');
+  });
+
   it('says to wait when rate limited', async () => {
     const user = userEvent.setup();
     server.use(
@@ -174,6 +196,35 @@ describe('LoginPage', () => {
       { path: '/login', element: <LoginPage /> },
       { path: '/recipes/:id', element: <p>recipe stub</p> },
     ]);
+    await waitFor(() =>
+      expect(router.state.location.pathname).toBe('/recipes/r1'),
+    );
+  });
+});
+
+describe('the back button', () => {
+  it('links to the library on a direct visit, even with ?next=', async () => {
+    const user = userEvent.setup();
+    const { router } = renderLogin('/login?next=%2Fusers');
+
+    const back = await screen.findByRole('link', { name: 'חזרה למתכונים' });
+    expect(back.getAttribute('href')).toBe('/');
+    expect(back.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
+    await user.click(back);
+
+    await waitFor(() => expect(router.state.location.pathname).toBe('/'));
+  });
+
+  it('returns to the page the visitor came from after an in-app visit', async () => {
+    const user = userEvent.setup();
+    const { router } = renderLogin();
+    await router.navigate('/recipes/r1');
+    await router.navigate('/login?next=%2Frecipes%2Fr1');
+
+    await user.click(
+      await screen.findByRole('link', { name: 'חזרה למתכונים' }),
+    );
+
     await waitFor(() =>
       expect(router.state.location.pathname).toBe('/recipes/r1'),
     );

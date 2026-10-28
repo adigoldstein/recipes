@@ -11,6 +11,8 @@
           "password_too_short",
           "password_too_long",
           "invalid_credentials",
+          "account_blocked",
+          "last_admin",
           "rate_limited",
           "unauthorized",
           "forbidden",
@@ -684,6 +686,46 @@
         "title": "UserRead",
         "type": "object"
       },
+      "UserUpdate": {
+        "additionalProperties": false,
+        "description": "The body of `PATCH /api/users/{id}`: any of these, at least one.\n\nA field that is left out stays as it is. `password` is a reset: it replaces the\ncurrent one and ends every session the user has.",
+        "properties": {
+          "is_blocked": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Blocked"
+          },
+          "password": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Password"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Role"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "UserUpdate",
+        "type": "object"
+      },
       "ValidationError": {
         "properties": {
           "ctx": {
@@ -1031,6 +1073,79 @@
           }
         },
         "summary": "Create User",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/users/{user_id}": {
+      "patch": {
+        "operationId": "users_update_user",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "User Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update User",
         "tags": [
           "users"
         ]

@@ -109,11 +109,22 @@ def test_wrong_password_and_unknown_email_get_the_same_400(
     assert "set-cookie" not in wrong_password.headers
 
 
-def test_a_blocked_user_cannot_log_in_and_is_not_told_why(
+def test_a_blocked_user_with_the_right_password_is_told_the_account_is_blocked(
     client: TestClient, session: Session
 ) -> None:
     add_user(session, is_blocked=True)
     response = _login(client)
+    assert response.status_code == 403
+    assert response.json()["code"] == "account_blocked"
+    assert "set-cookie" not in response.headers
+
+
+def test_a_blocked_user_with_a_wrong_password_gets_the_generic_400(
+    client: TestClient, session: Session
+) -> None:
+    """The blocked state is only revealed to someone who knows the password."""
+    add_user(session, is_blocked=True)
+    response = _login(client, password="not the password")
     assert response.status_code == 400
     assert response.json()["code"] == "invalid_credentials"
     assert "set-cookie" not in response.headers

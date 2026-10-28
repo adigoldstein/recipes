@@ -3,8 +3,8 @@
 import { type DefaultError, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen.js';
-import { authLogin, authLogout, authSession, healthGetHealth, type Options, recipesGetRecipe, recipesListRecipes, tagsListTags, usersCreateUser, usersListUsers } from '../sdk.gen.js';
-import type { AuthLoginData, AuthLoginError, AuthLoginResponse, AuthLogoutData, AuthLogoutResponse, AuthSessionData, AuthSessionError, AuthSessionResponse, HealthGetHealthData, HealthGetHealthResponse, RecipesGetRecipeData, RecipesGetRecipeError, RecipesGetRecipeResponse, RecipesListRecipesData, RecipesListRecipesResponse, TagsListTagsData, TagsListTagsResponse, UsersCreateUserData, UsersCreateUserError, UsersCreateUserResponse, UsersListUsersData, UsersListUsersResponse } from '../types.gen.js';
+import { authLogin, authLogout, authSession, healthGetHealth, type Options, recipesGetRecipe, recipesListRecipes, tagsListTags, usersCreateUser, usersListUsers, usersUpdateUser } from '../sdk.gen.js';
+import type { AuthLoginData, AuthLoginError, AuthLoginResponse, AuthLogoutData, AuthLogoutResponse, AuthSessionData, AuthSessionError, AuthSessionResponse, HealthGetHealthData, HealthGetHealthResponse, RecipesGetRecipeData, RecipesGetRecipeError, RecipesGetRecipeResponse, RecipesListRecipesData, RecipesListRecipesResponse, TagsListTagsData, TagsListTagsResponse, UsersCreateUserData, UsersCreateUserError, UsersCreateUserResponse, UsersListUsersData, UsersListUsersResponse, UsersUpdateUserData, UsersUpdateUserError, UsersUpdateUserResponse } from '../types.gen.js';
 
 /**
  * Login
@@ -192,6 +192,23 @@ export const usersCreateUserMutation = (options?: Partial<Options<UsersCreateUse
     const mutationOptions: UseMutationOptions<UsersCreateUserResponse, UsersCreateUserError, Options<UsersCreateUserData>> = {
         mutationFn: async (fnOptions) => {
             const { data } = await usersCreateUser({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Update User
+ */
+export const usersUpdateUserMutation = (options?: Partial<Options<UsersUpdateUserData>>): UseMutationOptions<UsersUpdateUserResponse, UsersUpdateUserError, Options<UsersUpdateUserData>> => {
+    const mutationOptions: UseMutationOptions<UsersUpdateUserResponse, UsersUpdateUserError, Options<UsersUpdateUserData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await usersUpdateUser({
                 ...options,
                 ...fnOptions,
                 throwOnError: true

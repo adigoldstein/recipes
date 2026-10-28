@@ -2,7 +2,13 @@ import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { server } from '../testing/server';
-import { ADI, DANA, renderUsers, serveUsers } from '../testing/render-users';
+import {
+  ADI,
+  DANA,
+  renderUsers,
+  serveSession,
+  serveUsers,
+} from '../testing/render-users';
 
 type User = ReturnType<typeof userEvent.setup>;
 
@@ -23,6 +29,8 @@ async function fillValid(user: User) {
 }
 
 const submit = () => screen.getByRole('button', { name: 'הוספה' });
+
+beforeEach(() => serveSession());
 
 describe('UsersPage', () => {
   it('lists every user with name, role, email and blocked state', async () => {
@@ -262,5 +270,34 @@ describe('Add user dialog', () => {
 
     await openDialog(user);
     expect((screen.getByLabelText('שם') as HTMLInputElement).value).toBe('');
+  });
+});
+
+describe('the back button', () => {
+  it('links to the library on a direct visit', async () => {
+    const user = userEvent.setup();
+    serveUsers([ADI]);
+    const { router } = renderUsers();
+
+    const back = await screen.findByRole('link', { name: 'חזרה למתכונים' });
+    expect(back.getAttribute('href')).toBe('/');
+    expect(back.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
+    await user.click(back);
+
+    await waitFor(() => expect(router.state.location.pathname).toBe('/'));
+  });
+
+  it('returns to the page the admin came from after an in-app visit', async () => {
+    const user = userEvent.setup();
+    serveUsers([ADI]);
+    const { router } = renderUsers();
+    await router.navigate('/other');
+    await router.navigate('/users');
+
+    await user.click(
+      await screen.findByRole('link', { name: 'חזרה למתכונים' }),
+    );
+
+    await waitFor(() => expect(router.state.location.pathname).toBe('/other'));
   });
 });

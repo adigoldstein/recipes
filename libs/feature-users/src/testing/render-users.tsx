@@ -28,6 +28,22 @@ export const DANA: UserRead = {
   created_at: '2026-10-02T08:00:00Z',
 };
 
+/** Serves GET /api/auth/session as this user (the signed-in admin by default). */
+export function serveSession(me: UserRead | null = ADI) {
+  server.use(
+    http.get('*/api/auth/session', () =>
+      HttpResponse.json({
+        user: me && {
+          id: me.id,
+          email: me.email,
+          name: me.name,
+          role: me.role,
+        },
+      }),
+    ),
+  );
+}
+
 /** Serves GET /api/users with these users. */
 export function serveUsers(users: UserRead[]) {
   server.use(http.get('*/api/users', () => HttpResponse.json(users)));
@@ -35,7 +51,11 @@ export function serveUsers(users: UserRead[]) {
 
 export function renderUsers() {
   const router = createMemoryRouter(
-    [{ path: '/users', element: <UsersPage /> }],
+    [
+      { path: '/users', element: <UsersPage /> },
+      { path: '/', element: <p>home</p> },
+      { path: '/other', element: <p>other</p> },
+    ],
     { initialEntries: ['/users'] },
   );
   const queryClient = new QueryClient({

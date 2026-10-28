@@ -222,6 +222,7 @@ def test_user_columns(connection: Connection) -> None:
         "role",
         "password_hash",
         "is_blocked",
+        "session_version",
         "created_at",
     }
     assert all(not column["nullable"] for column in columns.values())
@@ -360,3 +361,45 @@ def test_a_failing_migration_still_turns_foreign_keys_back_on(
     with pytest.raises(ValueError, match="boom"), migration_transaction(connection):
         raise ValueError("boom")
     assert connection.execute(text("PRAGMA foreign_keys")).scalar_one() == 1
+
+
+def test_upgrading_keeps_users_and_starts_them_at_session_version_0(
+    connection: Connection,
+) -> None:
+    config = _alembic_config(connection)
+    command.downgrade(config, "0002")
+    connection.commit()
+    connection.execute(
+        text(
+            "INSERT INTO user (id, email, name, role, password_hash, created_at) "
+            "VALUES ('u1', 'a@x.com', 'Adi', 'admin', 'h', '2026-01-01')"
+        )
+    )
+    connection.commit()
+
+    with migration_transaction(connection):
+        command.upgrade(config, "head")
+
+    row = connection.execute(
+        text("SELECT email, role, session_version FROM user")
+    ).one()
+    assert tuple(row) == ("a@x.com", "admin", 0)
+
+
+def test_the_case_insensitive_email_index_survives_both_directions(
+    connection: Connection,
+) -> None:
+    """Rebuilding `user` through reflection would silently lose this index."""
+    config = _alembic_config(connection)
+    index = text(
+        "SELECT count(*) FROM sqlite_master WHERE name = 'uq_user_lower_email'"
+    )
+    assert connection.execute(index).scalar_one() == 1
+
+    command.downgrade(config, "0002")
+    assert connection.execute(index).scalar_one() == 1
+    columns = {c["name"] for c in inspect(connection).get_columns("user")}
+    assert "session_version" not in columns
+
+    command.upgrade(config, "head")
+    assert connection.execute(index).scalar_one() == 1

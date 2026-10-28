@@ -15,6 +15,8 @@ export const zErrorCode = z.enum([
     'password_too_short',
     'password_too_long',
     'invalid_credentials',
+    'account_blocked',
+    'last_admin',
     'rate_limited',
     'unauthorized',
     'forbidden',
@@ -244,6 +246,20 @@ export const zUserRead = z.object({
 });
 
 /**
+ * UserUpdate
+ *
+ * The body of `PATCH /api/users/{id}`: any of these, at least one.
+ *
+ * A field that is left out stays as it is. `password` is a reset: it replaces the
+ * current one and ends every session the user has.
+ */
+export const zUserUpdate = z.object({
+    is_blocked: z.boolean().nullish(),
+    password: z.string().nullish(),
+    role: zRole.nullish()
+});
+
+/**
  * ValidationError
  */
 export const zValidationError = z.object({
@@ -319,3 +335,14 @@ export const zUsersCreateUserBody = zUserCreateRequest;
  * Successful Response
  */
 export const zUsersCreateUserResponse = zUserRead;
+
+export const zUsersUpdateUserBody = zUserUpdate;
+
+export const zUsersUpdateUserPath = z.object({
+    user_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zUsersUpdateUserResponse = zUserRead;

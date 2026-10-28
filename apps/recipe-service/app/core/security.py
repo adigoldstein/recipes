@@ -5,7 +5,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from enum import StrEnum
-from typing import Annotated
+from typing import Annotated, NamedTuple
 
 import jwt
 from fastapi import Depends, Request
@@ -50,24 +50,44 @@ _JWT_ALGORITHM = "HS256"
 
 
 def create_session_token(
-    user_id: uuid.UUID, secret: str, *, now: datetime | None = None
+    user_id: uuid.UUID,
+    secret: str,
+    *,
+    session_version: int = 0,
+    now: datetime | None = None,
 ) -> str:
-    """A signed JWT that only says who the user is and when it expires.
+    """A signed JWT that says who the user is, which session generation it belongs
+    to, and when it expires.
 
     The role and the blocked flag are deliberately not in it: they are read from the
     database on every request, so a demotion or a block takes effect at once (AD-30).
+    The version is what lets the server end every old session of one user: bumping
+    `user.session_version` makes all earlier tokens stop matching (Story 2.5).
     """
     issued_at = now or datetime.now(UTC)
     claims = {
         "sub": str(user_id),
+        "sv": session_version,
         "iat": issued_at,
         "exp": issued_at + SESSION_LIFETIME,
     }
     return jwt.encode(claims, secret, algorithm=_JWT_ALGORITHM)
 
 
-def read_session_token(token: str, secret: str) -> uuid.UUID | None:
-    """The user id inside a valid, unexpired token; None for anything else."""
+class SessionClaims(NamedTuple):
+    """What a valid session token vouches for."""
+
+    user_id: uuid.UUID
+    session_version: int
+
+
+def read_session_token(token: str, secret: str) -> SessionClaims | None:
+    """The user id and session version inside a valid, unexpired token, else None.
+
+    A token issued before versions existed has no `sv` and counts as version 0,
+    which is what every existing user starts at, so nobody is signed out by the
+    upgrade.
+    """
     try:
         claims = jwt.decode(
             token,
@@ -76,7 +96,10 @@ def read_session_token(token: str, secret: str) -> uuid.UUID | None:
             algorithms=[_JWT_ALGORITHM],
             options={"require": ["sub", "exp"]},
         )
-        return uuid.UUID(claims["sub"])
+        version = claims.get("sv", 0)
+        if not isinstance(version, int) or isinstance(version, bool):
+            return None
+        return SessionClaims(uuid.UUID(claims["sub"]), version)
     except (jwt.InvalidTokenError, ValueError):
         return None
 

@@ -246,7 +246,7 @@ The app runs as one production container (`docker compose up`) with backups, str
 
 ### Epic 7 (optional, nice to have): Kitchen mode extras
 
-Small comforts for cooking on the phone: the screen stays awake, amounts show as pretty fractions, and a recipe can be shared as text. Split out of Story 1.11 (2026-10-28); it can be cut without affecting any other story.
+Small comforts for cooking on the phone: the screen stays awake, amounts show as pretty fractions, and a recipe can be shared as text. Split out of Story 1.11 (2026-10-28); it can be cut without affecting any other story. It also holds one optional admin story: editing a user's name and email (Story 7.2).
 **FRs covered:** none (UX-DR22)
 
 ## Epic 1: Browse and cook from the phone
@@ -962,3 +962,18 @@ So that cooking from my phone is more comfortable (UX-DR22).
 **Then** it requests a screen wake lock, and silently ignores a refusal (UX-DR22)
 **And** `formatAmount` shows common fractions as ½, ⅓, ⅔, ¼ and ¾ (with a whole part, e.g. "1½") when the value is within 0.01 of one, inside `<bdi>`, and otherwise keeps the FR11 decimals; 100% branch coverage includes these cases
 **And** a "שיתוף" button shares the recipe as plain text through the Web Share API, or copies it to the clipboard when sharing is unavailable, confirming with the toast "הועתק". The text is the title, the ingredients at the current servings, the steps and the page link, in Hebrew, built by one pure function in `libs/recipe-domain` with unit tests
+
+### Story 7.2: Edit user details (optional)
+
+As the admin,
+I want to correct a user's name or email from the Users screen,
+So that a typo or a changed address doesn't mean deleting and re-creating an account.
+
+**Acceptance Criteria:**
+
+**Given** the Users screen
+**When** I choose "עריכת פרטים" in a user's "⋮" menu, change the name and/or email in a dialog, and save
+**Then** `PATCH /api/users/{id}` (admin) stores them and the list updates (extends the Story 2.5 endpoint with optional `name` and `email`)
+**And** the name and email follow the same rules as when adding a user: the name is trimmed and 1-80 characters, the email is valid, and a duplicate email (compared without case) returns 409 `email_taken`, shown on the email field
+**And** changing an email doesn't end that user's sessions or change their password, and the user can log in with the new email straight away
+**And** API tests cover the name change, the email change, the 409, and invalid values; the dialog works at 375 px
