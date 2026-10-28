@@ -111,6 +111,15 @@ describe('the recipe detail page inside the app shell', () => {
     expect(document.activeElement).toBe(box);
   });
 
+  it('scales servings inside the real shell without leaving the page', async () => {
+    const router = renderApp('/recipes/r1');
+    await screen.findByRole('checkbox', { name: '4 עגבניות' });
+    await userEvent.click(screen.getByRole('button', { name: 'יותר מנות' }));
+    expect(screen.getByRole('checkbox', { name: '5 עגבניות' })).toBeTruthy();
+    expect(screen.getAllByRole('banner')[0]).toBeTruthy();
+    expect(router.state.location.pathname).toBe('/recipes/r1');
+  });
+
   it('shows "not found" inside the shell for an unknown id', async () => {
     renderApp('/recipes/nope');
     expect(await screen.findByText('המתכון לא נמצא')).toBeTruthy();

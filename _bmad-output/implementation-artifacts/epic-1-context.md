@@ -18,13 +18,13 @@ Anyone can open Bite & Board (ביס & סיר) on a phone or desktop — Hebrew,
 - Story 1.8: Demo seed data
 - Story 1.9: Recipe library with search and tag filter
 - Story 1.10: Recipe detail page
-- Story 1.11: Live serving scaling and kitchen mode
+- Story 1.11: Live serving scaling (kitchen-mode extras moved to optional Story 7.1)
 
 ## Requirements & Constraints
 
 - Library: every recipe as a card (title, up to 2 tags plus +N, total time, photo), newest first; title search as you type (case-insensitive substring); multi-select pinned-tag chips (AND); filters live in the URL and survive navigation.
 - Detail page shows photo, ingredients (amount, unit, name, note; to-taste lines read "לפי הטעם") and numbered steps; unknown id → not-found page.
-- Servings scaling 1–100 runs on the client only; to-taste never scales; rounding: integers without decimals, else ≤ 2 decimals, countable units to nearest ½.
+- Servings scaling 1–100 runs on the client only; to-taste never scales; rounding: integers without decimals, else ≤ 2 decimals, countable units to the nearest of ¼ ⅓ ½ ⅔ ¾, minimum ¼.
 - One idempotent seed command creates ~10 Hebrew recipes covering every pinned tag.
 - Quality: TS strict, mypy strict, lint/format enforced, CI on every push. Backend API tests for every endpoint; scaling/rounding at 100% branch coverage.
 - Performance (200 recipes, local): library first render < 1 s, search < 100 ms per keystroke, detail < 500 ms.

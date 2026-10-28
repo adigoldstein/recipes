@@ -46,7 +46,7 @@ development_status:
   1-8-demo-seed-data: done
   1-9-recipe-library-with-search-and-tag-filter: done
   1-10-recipe-detail-page: done
-  1-11-live-serving-scaling-and-kitchen-mode: backlog
+  1-11-live-serving-scaling: done
   epic-1-retrospective: optional
 
   epic-2: backlog
@@ -89,3 +89,7 @@ development_status:
   6-4-performance-budgets: backlog
   6-5-readme-for-recruiters: backlog
   epic-6-retrospective: optional
+
+  epic-7: backlog # optional / nice to have: can be cut
+  7-1-kitchen-mode-extras: backlog # optional: wake lock, pretty fractions, share as text (split out of 1.11)
+  epic-7-retrospective: optional

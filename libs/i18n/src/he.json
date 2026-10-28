@@ -108,6 +108,15 @@
     "originalHint": "במקור {{value}}",
     "originalToTaste": "במקור: לפי הטעם",
     "stepOriginal": "במקור: {{text}}",
-    "back": "חזרה למתכונים"
+    "back": "חזרה למתכונים",
+    "servings": {
+      "label": "מספר מנות",
+      "decrease": "פחות מנות",
+      "increase": "יותר מנות",
+      "reset": "חזרה ל־{{value}}",
+      "range": "אפשר להזין מספר בין {{min}} ל־{{max}}",
+      "announce_one": "מנה אחת",
+      "announce_other": "{{count}} מנות"
+    }
   }
 }

@@ -12,20 +12,25 @@ import {
   type SourceUnit,
   type Unit,
 } from '@bite-and-board/data-access';
-import { formatAmount } from '@bite-and-board/recipe-domain';
+import { formatAmount, scaleAmount } from '@bite-and-board/recipe-domain';
 import {
   Button,
   EmptyState,
   IngredientBoard,
   IngredientLine,
   RecipeDetailSkeleton,
+  ServingsStepper,
   StepItem,
   Toggle,
   type IngredientQuantity,
 } from '@bite-and-board/ui-components';
 import { useCookingChecks } from '../detail/use-cooking-checks';
+import { useServings } from '../detail/use-servings';
 import { useErrorMessage } from '../shared/use-error-message';
 import { useFormatTime } from '../shared/use-format-time';
+
+const MIN_SERVINGS = 1;
+const MAX_SERVINGS = 100;
 
 const TAG = 'rounded-full bg-secondary px-3 py-1 text-label';
 
@@ -93,6 +98,13 @@ function RecipeDetail({ recipe }: { recipe: RecipeRead }) {
   const title = useRef<HTMLHeadingElement>(null);
   const checks = useCookingChecks(recipe.id);
   const [showOriginal, setShowOriginal] = useState(false);
+  // View-only: kept for this tab's session, never saved to the recipe.
+  const [servings, setServings] = useServings(
+    recipe.id,
+    recipe.base_servings,
+    MIN_SERVINGS,
+    MAX_SERVINGS,
+  );
 
   // The app shell moves focus to the h1 on navigation, but the recipe loads after
   // that, so the title takes focus itself once it exists (not on a first load).
@@ -109,13 +121,16 @@ function RecipeDetail({ recipe }: { recipe: RecipeRead }) {
   const sourceUnitLabel = (unit: SourceUnit) =>
     t(`sourceUnits.${unit}` as ParseKeys);
 
+  const scale = (amount: number, unit: Unit | SourceUnit | null) =>
+    scaleAmount(amount, unit, recipe.base_servings, servings);
+
   const quantityOf = (
     amount: number,
     unit: Unit | null,
-  ): IngredientQuantity => ({
-    amount: formatAmount(amount),
-    unit: unitLabel(unit, amount),
-  });
+  ): IngredientQuantity => {
+    const scaled = scale(amount, unit);
+    return { amount: formatAmount(scaled), unit: unitLabel(unit, scaled) };
+  };
 
   const originalHint = ({ original }: IngredientRead) => {
     if (!original) return undefined;
@@ -204,6 +219,25 @@ function RecipeDetail({ recipe }: { recipe: RecipeRead }) {
 
       <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
         <div className="lg:sticky lg:top-6 lg:w-board lg:shrink-0">
+          <ServingsStepper
+            className="pb-4"
+            value={servings}
+            base={recipe.base_servings}
+            min={MIN_SERVINGS}
+            max={MAX_SERVINGS}
+            onChange={setServings}
+            label={t('detail.servings.label')}
+            decreaseLabel={t('detail.servings.decrease')}
+            increaseLabel={t('detail.servings.increase')}
+            resetLabel={t('detail.servings.reset', {
+              value: recipe.base_servings,
+            })}
+            rangeMessage={t('detail.servings.range', {
+              min: MIN_SERVINGS,
+              max: MAX_SERVINGS,
+            })}
+            announcement={t('detail.servings.announce', { count: servings })}
+          />
           <IngredientBoard title={t('detail.ingredients')}>
             {recipe.ingredients.map((ingredient) => (
               <IngredientLine
@@ -218,7 +252,9 @@ function RecipeDetail({ recipe }: { recipe: RecipeRead }) {
                 source={
                   showOriginal && ingredient.source
                     ? {
-                        amount: formatAmount(ingredient.source.amount),
+                        amount: formatAmount(
+                          scale(ingredient.source.amount, null),
+                        ),
                         unit: sourceUnitLabel(ingredient.source.unit),
                       }
                     : undefined
