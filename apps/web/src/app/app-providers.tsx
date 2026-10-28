@@ -21,7 +21,22 @@ function AppToaster() {
  */
 export function AppProviders({ children }: { children: ReactNode }) {
   // One cache per mounted app; state keeps it stable across renders.
-  const [queryClient] = useState(() => new QueryClient());
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            // An API error body with a `code` is a final answer ("recipe not
+            // found"); only network and server failures are worth retrying. This
+            // reads the code by hand: importing data-access here would pull the
+            // whole API client into the initial chunk.
+            retry: (failures, error) =>
+              (error as { code?: unknown } | null)?.code === undefined &&
+              failures < 3,
+          },
+        },
+      }),
+  );
   return (
     <QueryClientProvider client={queryClient}>
       <DirectionProvider dir="rtl">

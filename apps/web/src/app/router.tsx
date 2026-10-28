@@ -16,6 +16,10 @@ export const routes: RouteObject[] = [
         // The page is its own chunk, loaded when the route first matches (AD-11).
         lazy: () => import('@bite-and-board/feature-recipes/library'),
       },
+      {
+        path: 'recipes/:id',
+        lazy: () => import('@bite-and-board/feature-recipes/recipe-detail'),
+      },
       // Inside the layout, so the top bar stays on unknown paths.
       { path: '*', Component: NotFound },
     ],

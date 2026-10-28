@@ -16,11 +16,11 @@ import {
   SearchField,
   TagFilter,
 } from '@bite-and-board/ui-components';
-import { useErrorMessage } from '../library/use-error-message';
+import { useErrorMessage } from '../shared/use-error-message';
+import { useFormatTime } from '../shared/use-format-time';
 import { useLibraryFilters } from '../library/use-library-filters';
 
 const SKELETON_COUNT = 6;
-const MINUTES_PER_HOUR = 60;
 
 const GRID = 'grid gap-4 sm:grid-cols-2 lg:grid-cols-3';
 
@@ -36,6 +36,7 @@ function isTypingTarget(target: EventTarget | null) {
 export function LibraryPage() {
   const { t } = useTranslation();
   const errorMessage = useErrorMessage();
+  const formatTime = useFormatTime();
   const search = useRef<HTMLInputElement>(null);
 
   const recipes = useQuery(recipesListRecipesOptions());
@@ -64,16 +65,6 @@ export function LibraryPage() {
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
   }, []);
-
-  const formatTime = (minutes: number | null) => {
-    if (minutes === null) return undefined;
-    const hours = Math.floor(minutes / MINUTES_PER_HOUR);
-    const rest = minutes % MINUTES_PER_HOUR;
-    if (hours === 0) return t('library.card.minutes', { minutes: rest });
-    return rest === 0
-      ? t('library.card.hours', { hours })
-      : t('library.card.hoursMinutes', { hours, minutes: rest });
-  };
 
   const renderBody = () => {
     // Waiting for the tags too, so a tag filter in the URL never flashes the full list.

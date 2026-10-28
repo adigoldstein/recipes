@@ -45,7 +45,7 @@ development_status:
   1-7-generated-api-client-pipeline: done
   1-8-demo-seed-data: done
   1-9-recipe-library-with-search-and-tag-filter: done
-  1-10-recipe-detail-page: backlog
+  1-10-recipe-detail-page: done
   1-11-live-serving-scaling-and-kitchen-mode: backlog
   epic-1-retrospective: optional
 

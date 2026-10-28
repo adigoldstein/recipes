@@ -110,6 +110,8 @@
   /* Content widths (DESIGN.md Layout): library 1200px, detail ~1040px. */
   --container-library: 75rem;
   --container-detail: 65rem;
+  /* The sticky ingredient column on the detail page (UX-DR20): 400px. */
+  --container-board: 25rem;
 
   /* Typography roles; `-lg` sizes are applied with the `lg:` variant. */
   --text-display: 2.5rem;
