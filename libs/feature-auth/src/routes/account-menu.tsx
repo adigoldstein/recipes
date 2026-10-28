@@ -51,6 +51,9 @@ export function AccountMenu() {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          <DropdownMenuItem asChild>
+            <Link to="/account">{t('auth.menu.account')}</Link>
+          </DropdownMenuItem>
           {isAdmin ? (
             <DropdownMenuItem asChild>
               <Link to="/users">{t('auth.menu.users')}</Link>

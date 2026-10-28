@@ -1,5 +1,6 @@
 """Business rules for auth; other modules call this layer, never the repository."""
 
+import uuid
 from typing import Annotated
 
 from fastapi import Cookie, Depends
@@ -38,6 +39,22 @@ class AuthService:
                 400, ErrorCode.INVALID_CREDENTIALS, "Invalid email or password"
             )
         user, session_version = found
+        token = create_session_token(
+            user.id, self._secret, session_version=session_version
+        )
+        return _session_user(user), token
+
+    def change_password(
+        self, user_id: uuid.UUID, current_password: str, new_password: str
+    ) -> tuple[SessionUser, str]:
+        """Change the user's own password; returns a token for the new session.
+
+        The old token stops matching (the version moved on), so the caller must set
+        the new cookie or the current device would be signed out too.
+        """
+        user, session_version = self._users.change_own_password(
+            user_id, current_password, new_password
+        )
         token = create_session_token(
             user.id, self._secret, session_version=session_version
         )

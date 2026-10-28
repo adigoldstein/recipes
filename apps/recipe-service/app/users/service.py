@@ -169,6 +169,32 @@ class UserService:
             raise
         return _read(user)
 
+    def change_own_password(
+        self, user_id: uuid.UUID, current_password: str, new_password: str
+    ) -> tuple[UserRead, int]:
+        """Replace the user's own password after checking the current one (FR-27).
+
+        Returns the user and the new session version, so the caller can issue a
+        fresh token: the bump ends every other device's session, not this one.
+        """
+        user = self._repository.get_by_id(user_id)
+        if user is None or user.is_blocked:
+            raise AppError(404, ErrorCode.USER_NOT_FOUND, "User not found")
+        if not verify_password(current_password, user.password_hash):
+            raise AppError(
+                400, ErrorCode.INVALID_CREDENTIALS, "Current password is wrong"
+            )
+        check_password_policy(new_password)
+        user.password_hash = hash_password(new_password)
+        user.session_version += 1
+        try:
+            self._repository.add(user)
+            self._repository.commit()
+        except Exception:
+            self._repository.rollback()
+            raise
+        return _read(user), user.session_version
+
     def reset_password(self, email: str, password: str) -> UserRead:
         """Replace one user's password. Nothing else about them changes."""
         check_password_policy(password)

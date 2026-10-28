@@ -61,10 +61,28 @@
     "menu": {
       "login": "כניסה",
       "logout": "יציאה",
-      "users": "משתמשים"
+      "users": "משתמשים",
+      "account": "החשבון שלי"
     },
     "logoutDone": "התנתקת בהצלחה",
     "sessionExpired": "פג תוקף החיבור"
+  },
+  "account": {
+    "title": "החשבון שלי",
+    "back": "חזרה למתכונים",
+    "password": {
+      "title": "שינוי סיסמה",
+      "current": "סיסמה נוכחית",
+      "new": "סיסמה חדשה",
+      "confirm": "אימות הסיסמה החדשה",
+      "submit": "עדכון סיסמה",
+      "submitting": "מעדכנים",
+      "currentRequired": "יש להזין את הסיסמה הנוכחית",
+      "newRequired": "יש להזין סיסמה חדשה",
+      "mismatch": "הסיסמאות אינן זהות",
+      "currentWrong": "הסיסמה הנוכחית שגויה",
+      "done": "הסיסמה עודכנה"
+    }
   },
   "users": {
     "title": "משתמשים",
