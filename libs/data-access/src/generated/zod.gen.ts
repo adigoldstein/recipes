@@ -70,6 +70,15 @@ export const zStepRead = z.object({
 });
 
 /**
+ * TagRead
+ */
+export const zTagRead = z.object({
+    id: z.uuid(),
+    name: z.string(),
+    pinned: z.boolean()
+});
+
+/**
  * TagRef
  *
  * A tag as embedded in recipe read schemas (AD-20).
@@ -193,3 +202,10 @@ export const zRecipesGetRecipePath = z.object({
  * Successful Response
  */
 export const zRecipesGetRecipeResponse = zRecipeRead;
+
+/**
+ * Response Tags List Tags
+ *
+ * Successful Response
+ */
+export const zTagsListTagsResponse = z.array(zTagRead);

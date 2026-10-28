@@ -21,6 +21,12 @@ class TagRef(BaseModel):
     name: str
 
 
+class TagRead(BaseModel):
+    id: uuid.UUID
+    name: str
+    pinned: bool
+
+
 class TagInput(BaseModel):
     """A tag in a recipe write: an existing tag by id, or a name to find or create."""
 

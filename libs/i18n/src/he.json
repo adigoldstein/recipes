@@ -13,8 +13,39 @@
   "toast": {
     "region": "התראות"
   },
-  "home": {
-    "title": "מתכונים"
+  "library": {
+    "title": "מתכונים",
+    "search": {
+      "label": "חיפוש מתכונים",
+      "placeholder": "חיפוש מתכונים",
+      "clear": "ניקוי שדה החיפוש"
+    },
+    "filter": {
+      "label": "סינון לפי תגיות",
+      "all": "הכל",
+      "fast": "עד 30 דקות"
+    },
+    "loading": "טוען מתכונים",
+    "empty": {
+      "title": "עוד אין כאן מתכונים"
+    },
+    "noResults": {
+      "title": "לא נמצאו מתכונים ל־'{{q}}'",
+      "titleFilter": "לא נמצאו מתכונים מתאימים",
+      "clearSearch": "ניקוי החיפוש",
+      "clearFilter": "ניקוי הסינון"
+    },
+    "error": {
+      "retry": "לנסות שוב"
+    },
+    "card": {
+      "minutes": "{{minutes}} דק׳",
+      "hours": "{{hours}} שע׳",
+      "hoursMinutes": "{{hours}} שע׳ {{minutes}} דק׳",
+      "moreTags_one": "תגית נוספת אחת",
+      "moreTags_two": "שתי תגיות נוספות",
+      "moreTags_other": "{{count}} תגיות נוספות"
+    }
   },
   "notFound": {
     "title": "הדף לא נמצא",

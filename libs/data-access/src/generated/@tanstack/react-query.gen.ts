@@ -3,8 +3,8 @@
 import { type DefaultError, queryOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen.js';
-import { healthGetHealth, type Options, recipesGetRecipe, recipesListRecipes } from '../sdk.gen.js';
-import type { HealthGetHealthData, HealthGetHealthResponse, RecipesGetRecipeData, RecipesGetRecipeError, RecipesGetRecipeResponse, RecipesListRecipesData, RecipesListRecipesResponse } from '../types.gen.js';
+import { healthGetHealth, type Options, recipesGetRecipe, recipesListRecipes, tagsListTags } from '../sdk.gen.js';
+import type { HealthGetHealthData, HealthGetHealthResponse, RecipesGetRecipeData, RecipesGetRecipeError, RecipesGetRecipeResponse, RecipesListRecipesData, RecipesListRecipesResponse, TagsListTagsData, TagsListTagsResponse } from '../types.gen.js';
 
 export type QueryKey<TOptions extends Options> = [
     Pick<TOptions, 'baseUrl' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -91,4 +91,22 @@ export const recipesGetRecipeOptions = (options: Options<RecipesGetRecipeData>) 
         return data;
     },
     queryKey: recipesGetRecipeQueryKey(options)
+});
+
+export const tagsListTagsQueryKey = (options?: Options<TagsListTagsData>) => createQueryKey('tagsListTags', options);
+
+/**
+ * List Tags
+ */
+export const tagsListTagsOptions = (options?: Options<TagsListTagsData>) => queryOptions<TagsListTagsResponse, DefaultError, TagsListTagsResponse, ReturnType<typeof tagsListTagsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await tagsListTags({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: tagsListTagsQueryKey(options)
 });

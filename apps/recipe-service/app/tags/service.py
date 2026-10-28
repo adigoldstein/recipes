@@ -11,7 +11,7 @@ from app.core.db import get_session
 from app.core.errors import AppError, ErrorCode
 from app.tags.models import Tag
 from app.tags.repository import TagRepository
-from app.tags.schemas import TagInput, TagRef
+from app.tags.schemas import TagInput, TagRead, TagRef
 
 
 class TagService:
@@ -28,6 +28,13 @@ class TagService:
         for recipe_id, tag in self._repository.list_for_recipes(recipe_ids):
             tags[recipe_id].append(TagRef(id=tag.id, name=tag.name))
         return tags
+
+    def list_tags(self) -> list[TagRead]:
+        """Every tag, pinned first, then by name."""
+        return [
+            TagRead(id=tag.id, name=tag.name, pinned=tag.pinned)
+            for tag in self._repository.list_all()
+        ]
 
     def assign_to_recipe(self, recipe_id: uuid.UUID, refs: Sequence[TagInput]) -> None:
         """Link the recipe to each tag, creating tags given by a new name (AD-25).

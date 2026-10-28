@@ -233,6 +233,24 @@ export type StepRead = {
 };
 
 /**
+ * TagRead
+ */
+export type TagRead = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Pinned
+     */
+    pinned: boolean;
+};
+
+/**
  * TagRef
  *
  * A tag as embedded in recipe read schemas (AD-20).
@@ -348,3 +366,21 @@ export type RecipesGetRecipeResponses = {
 };
 
 export type RecipesGetRecipeResponse = RecipesGetRecipeResponses[keyof RecipesGetRecipeResponses];
+
+export type TagsListTagsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/tags';
+};
+
+export type TagsListTagsResponses = {
+    /**
+     * Response Tags List Tags
+     *
+     * Successful Response
+     */
+    200: Array<TagRead>;
+};
+
+export type TagsListTagsResponse = TagsListTagsResponses[keyof TagsListTagsResponses];

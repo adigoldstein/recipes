@@ -49,14 +49,17 @@ export const SkeletonCards: Story = {
   ),
 };
 
-export const MealTypeChips: Story = {
+export const TagChips: Story = {
   name: 'ToggleGroup',
   render: () => (
-    <ToggleGroup type="single" defaultValue="all" aria-label="סוג ארוחה">
-      <ToggleGroupItem value="all">הכל</ToggleGroupItem>
-      <ToggleGroupItem value="breakfast">בוקר</ToggleGroupItem>
-      <ToggleGroupItem value="lunch">צהריים</ToggleGroupItem>
-      <ToggleGroupItem value="dinner">ערב</ToggleGroupItem>
+    <ToggleGroup
+      type="multiple"
+      defaultValue={['quick']}
+      aria-label="סינון לפי תגיות"
+    >
+      <ToggleGroupItem value="quick">מהיר</ToggleGroupItem>
+      <ToggleGroupItem value="grill">על האש</ToggleGroupItem>
+      <ToggleGroupItem value="party">מסיבות</ToggleGroupItem>
       <ToggleGroupItem value="dessert">קינוח</ToggleGroupItem>
     </ToggleGroup>
   ),
