@@ -102,6 +102,16 @@
         }
       }
     },
+    "create-admin": {
+      "executor": "@nxlv/python:run-commands",
+      "options": {
+        "command": "uv run python -m app.cli create-admin",
+        "cwd": "{projectRoot}",
+        "env": {
+          "PYTHONUTF8": "1"
+        }
+      }
+    },
     "install": {
       "executor": "@nxlv/python:install",
       "options": {

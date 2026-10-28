@@ -22,9 +22,14 @@ class Recipe(SQLModel, table=True):
     prep_time_minutes: int | None = None
     cook_time_minutes: int | None = None
     source_url: str | None = Field(default=None, max_length=2048)
-    # Their foreign key to `user` arrives in Story 2.1.
-    created_by: uuid.UUID | None = None
-    updated_by: uuid.UUID | None = None
+    # String reference: recipes must not import the users module. A removed user
+    # leaves their recipes behind with no author.
+    created_by: uuid.UUID | None = Field(
+        default=None, foreign_key="user.id", ondelete="SET NULL"
+    )
+    updated_by: uuid.UUID | None = Field(
+        default=None, foreign_key="user.id", ondelete="SET NULL"
+    )
     created_at: datetime = Field(default_factory=utcnow, sa_type=UtcDateTime)
     updated_at: datetime = Field(default_factory=utcnow, sa_type=UtcDateTime)
 

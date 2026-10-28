@@ -45,6 +45,27 @@ Revisions must not import app code: they have to run the same way forever. Alemb
 cannot see SQLite expression indexes, so write those by hand (see revision `0001`).
 Do not edit a revision that has shipped; add a new one.
 
+SQLite changes a table by copying it and dropping the old one. With foreign keys on,
+dropping a parent such as `recipe` would delete its ingredients, steps and tag links, so
+migrations run through `migration_transaction` (`app/core/migrate.py`): enforcement is
+off while they run, `PRAGMA foreign_key_check` must come back empty before the commit, and
+enforcement is always switched back on. Both the app and `alembic upgrade` use it.
+
+## Accounts
+
+There is no sign-up. The first admin comes from the command line (AD-30), in an
+interactive terminal:
+
+```bash
+npx nx run recipe-service:create-admin -- --email you@example.com --name "Your Name"
+```
+
+It migrates the database if needed, asks for the password twice (hidden, 8 to 128
+characters) and stores only its Argon2id hash. The password is never an argument, never
+printed and never logged. If the email already exists it fails; with `--reset-password`
+(no `--name` needed) it instead changes only that user's password. Emails are unique
+ignoring case. It needs a real console: without one the password prompt cannot read input.
+
 ## Demo data
 
 `npx nx run recipe-service:seed` (`python -m app.cli seed`) migrates the database, then
@@ -57,6 +78,7 @@ and never creates the default tags. Needs a `.env` (see Configuration).
 npx nx run recipe-service:serve   # http://localhost:8000/api/health
 npx nx run recipe-service:test
 npx nx run recipe-service:seed    # demo recipes
+npx nx run recipe-service:create-admin -- --email … --name …   # first admin
 npx nx run recipe-service:lint
 npx nx run recipe-service:openapi   # writes libs/data-access/openapi.json (use data-access:generate for the client)
 ```

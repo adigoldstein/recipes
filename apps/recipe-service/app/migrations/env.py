@@ -8,6 +8,7 @@ from sqlmodel.sql.sqltypes import AutoString
 from app.core.config import get_settings
 from app.core.db import Quantity, UtcDateTime, get_engine
 from app.core.metadata import metadata
+from app.core.migrate import migration_transaction
 
 
 def _render_item(
@@ -46,7 +47,10 @@ def run_migrations_online() -> None:
     if connection is not None:
         _run(connection)
         return
-    with get_engine(get_settings().data_dir).begin() as new_connection:
+    with (
+        get_engine(get_settings().data_dir).connect() as new_connection,
+        migration_transaction(new_connection),
+    ):
         _run(new_connection)
 
 
