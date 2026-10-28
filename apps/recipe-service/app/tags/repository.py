@@ -45,3 +45,12 @@ class TagRepository:
             )
         )
         return [(recipe_id, tag) for recipe_id, tag in self._session.exec(statement)]
+
+    def list_all(self) -> Sequence[Tag]:
+        """Every tag, pinned first, then by name."""
+        statement = select(Tag).order_by(
+            col(Tag.sort_order).asc().nulls_last(),
+            func.lower(col(Tag.name)),
+            col(Tag.id),
+        )
+        return self._session.exec(statement).all()

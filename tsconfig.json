@@ -20,6 +20,9 @@
     },
     {
       "path": "./libs/i18n"
+    },
+    {
+      "path": "./libs/feature-recipes"
     }
   ],
   "compilerOptions": {}

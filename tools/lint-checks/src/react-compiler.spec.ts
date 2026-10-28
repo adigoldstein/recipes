@@ -15,9 +15,7 @@ it('compiles app components with the React Compiler', async () => {
     server: { middlewareMode: true, hmr: false },
   });
   try {
-    const result = await server.transformRequest(
-      '/src/app/placeholder-home.tsx',
-    );
+    const result = await server.transformRequest('/src/app/app-layout.tsx');
     expect(result?.code).toMatch(COMPILED);
   } finally {
     await server.close();

@@ -10,15 +10,17 @@ export function AppLayout() {
   const { mode, setMode } = useTheme();
   const location = useLocation();
   const main = useRef<HTMLElement>(null);
-  const shownKey = useRef(location.key);
+  const shownPath = useRef(location.pathname);
 
-  // After a navigation (not the first load), move focus to the new page's h1
-  // so screen readers announce it and keyboard users start at the content.
+  // After a navigation to another page (not the first load), move focus to the
+  // new page's h1 so screen readers announce it and keyboard users start at the
+  // content. Only the path counts: a page that keeps its state in the query
+  // string (the library's search) navigates on every keystroke and must keep focus.
   useEffect(() => {
-    if (shownKey.current === location.key) return;
-    shownKey.current = location.key;
+    if (shownPath.current === location.pathname) return;
+    shownPath.current = location.pathname;
     main.current?.querySelector('h1')?.focus();
-  }, [location.key]);
+  }, [location.pathname]);
 
   return (
     <div className="min-h-dvh bg-background text-foreground">

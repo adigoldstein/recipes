@@ -13,9 +13,8 @@ export const routes: RouteObject[] = [
     children: [
       {
         index: true,
-        lazy: async () => ({
-          Component: (await import('./placeholder-home')).PlaceholderHome,
-        }),
+        // The page is its own chunk, loaded when the route first matches (AD-11).
+        lazy: () => import('@bite-and-board/feature-recipes/library'),
       },
       // Inside the layout, so the top bar stays on unknown paths.
       { path: '*', Component: NotFound },

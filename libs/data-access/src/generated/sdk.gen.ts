@@ -2,7 +2,7 @@
 
 import { client } from './client.gen.js';
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client/index.js';
-import type { HealthGetHealthData, HealthGetHealthResponses, RecipesGetRecipeData, RecipesGetRecipeErrors, RecipesGetRecipeResponses, RecipesListRecipesData, RecipesListRecipesResponses } from './types.gen.js';
+import type { HealthGetHealthData, HealthGetHealthResponses, RecipesGetRecipeData, RecipesGetRecipeErrors, RecipesGetRecipeResponses, RecipesListRecipesData, RecipesListRecipesResponses, TagsListTagsData, TagsListTagsResponses } from './types.gen.js';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -32,3 +32,8 @@ export const recipesListRecipes = <ThrowOnError extends boolean = false>(options
  * Get Recipe
  */
 export const recipesGetRecipe = <ThrowOnError extends boolean = false>(options: Options<RecipesGetRecipeData, ThrowOnError>): RequestResult<RecipesGetRecipeResponses, RecipesGetRecipeErrors, ThrowOnError> => (options.client ?? client).get<RecipesGetRecipeResponses, RecipesGetRecipeErrors, ThrowOnError>({ url: '/api/recipes/{recipe_id}', ...options });
+
+/**
+ * List Tags
+ */
+export const tagsListTags = <ThrowOnError extends boolean = false>(options?: Options<TagsListTagsData, ThrowOnError>): RequestResult<TagsListTagsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<TagsListTagsResponses, unknown, ThrowOnError>({ url: '/api/tags', ...options });

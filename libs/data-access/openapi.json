@@ -462,6 +462,30 @@
         "title": "StepRead",
         "type": "object"
       },
+      "TagRead": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "pinned": {
+            "title": "Pinned",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "pinned"
+        ],
+        "title": "TagRead",
+        "type": "object"
+      },
       "TagRef": {
         "description": "A tag as embedded in recipe read schemas (AD-20).",
         "properties": {
@@ -645,6 +669,31 @@
         "summary": "Get Recipe",
         "tags": [
           "recipes"
+        ]
+      }
+    },
+    "/api/tags": {
+      "get": {
+        "operationId": "tags_list_tags",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TagRead"
+                  },
+                  "title": "Response Tags List Tags",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Tags",
+        "tags": [
+          "tags"
         ]
       }
     }

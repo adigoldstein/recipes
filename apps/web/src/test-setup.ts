@@ -1,3 +1,8 @@
+import { configure } from '@testing-library/react';
+
+// The first render loads the lazy page chunk, which is slow on a cold test run.
+configure({ asyncUtilTimeout: 5000 });
+
 type Listener = (event: MediaQueryListEvent) => void;
 
 const listeners = new Set<Listener>();

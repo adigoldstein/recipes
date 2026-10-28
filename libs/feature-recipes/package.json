@@ -1,0 +1,20 @@
+{
+  "name": "@bite-and-board/feature-recipes",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./library": {
+      "types": "./src/routes/library.tsx",
+      "import": "./src/routes/library.tsx",
+      "default": "./src/routes/library.tsx"
+    },
+    "./package.json": "./package.json"
+  },
+  "nx": {
+    "name": "feature-recipes",
+    "tags": [
+      "type:feature"
+    ]
+  }
+}
