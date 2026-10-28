@@ -8,6 +8,23 @@
 
 🚀 If you haven't connected to Nx Cloud yet, [complete your setup here](https://cloud.nx.app/get-started). Get faster builds with remote caching, distributed task execution, and self-healing CI. [See how your workspace can benefit](#nx-cloud).
 
+## Scripts
+
+Everyday commands, run from the repo root with `npm run <script>`. They wrap `nx`.
+
+| Script            | What it does                                                                                           |
+| ----------------- | ------------------------------------------------------------------------------------------------------ |
+| `dev`             | Front end (`localhost:4200`) and back end (`localhost:8000`) together                                  |
+| `dev:web`         | Front end only                                                                                         |
+| `dev:api`         | Back end only                                                                                          |
+| `storybook`       | Component workshop for `libs/ui-components` (`localhost:6006`)                                         |
+| `test`            | Run every test, front end and back end                                                                 |
+| `verify`          | Lint, type-check, test and build everything, like CI                                                   |
+| `prettify`        | Tidy the formatting of all files (Prettier for the front end, ruff for the back end)                   |
+| `api:types`       | After a back-end API change: export the OpenAPI schema and regenerate the client in `libs/data-access` |
+| `db:mock-recipes` | Fill the dev database with a set of demo recipes                                                       |
+| `create-admin`    | Create the admin account: `npm run create-admin -- --email you@example.com --name "Your Name"`         |
+
 ## Generate a library
 
 ```sh

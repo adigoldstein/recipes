@@ -3,7 +3,16 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "dev": "nx run-many -t serve -p recipe-service web"
+    "dev": "nx run-many -t serve -p recipe-service web",
+    "dev:web": "nx serve web",
+    "dev:api": "nx serve recipe-service",
+    "storybook": "nx storybook ui-components",
+    "test": "nx run-many -t test",
+    "verify": "nx run-many -t lint typecheck test build",
+    "prettify": "nx format:write && nx run recipe-service:format",
+    "api:types": "nx run data-access:generate",
+    "db:mock-recipes": "nx run recipe-service:seed",
+    "create-admin": "nx run recipe-service:create-admin"
   },
   "private": true,
   "engines": {
