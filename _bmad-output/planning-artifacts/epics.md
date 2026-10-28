@@ -29,7 +29,7 @@ FR7: The first change to an existing ingredient's amount or unit stores its orig
 FR8: An ingredient that has an original shows the hint "originally {amount} {unit}" on the detail page and in the edit form. The hint is secondary, readable by screen readers, and scaled together with the amounts.
 FR9: "Reset to original" in the edit form restores the original amount and unit. After saving, the ingredient looks exactly as if it had never been edited.
 FR10: Delete a recipe after a confirmation dialog that names it. Cancelling changes nothing. Confirming permanently removes the recipe and its children. Deleting a recipe that is already gone returns 404 and shows a non-blocking message.
-FR11: Scale servings (1–100) on the detail page. Scaling happens instantly on the client, never scales to-taste ingredients, and uses the rounding rules (whole numbers as integers, otherwise up to 2 decimals, countable units to the nearest ½). It is view-only; a Reset control returns to the base servings.
+FR11: Scale servings (1–100) on the detail page. Scaling happens instantly on the client, never scales to-taste ingredients, and uses the rounding rules (whole numbers as integers, otherwise up to 2 decimals, countable units to the nearest of ¼ ⅓ ½ ⅔ ¾ (with a whole part, e.g. 1⅓), minimum ¼). It is view-only; a Reset control returns to the base servings.
 FR12: One idempotent command seeds about 10 recipes covering every pinned tag and several free tags. The set includes at least one to-taste ingredient and at least one ingredient with an original value.
 FR13: A CLI command creates the first admin (a duplicate fails, or with a flag it changes the password). Passwords are hashed, at least 8 characters, and never returned by any API.
 FR14: Log in with email and password. On success the controls for the user's role appear. A wrong email or password gives one generic error. The session expires after 7 days, and the user is then sent back to where they were after logging in again.
@@ -216,7 +216,7 @@ FR27: Epic 2 - Change your own password
 
 ### Epic 1: Browse and cook from the phone
 
-Anyone can open ביס & סיר on a phone or desktop (Hebrew, RTL, light or dark), browse the seeded recipes, search them, filter by tag, open a recipe and scale it live, with the screen staying awake in the kitchen. The groundwork comes first: adapting the scaffold, the shared libs, the OpenAPI pipeline, the database with its migrations and pinned Hebrew tags, the theme, the app shell, seed data and CI.
+Anyone can open ביס & סיר on a phone or desktop (Hebrew, RTL, light or dark), browse the seeded recipes, search them, filter by tag, open a recipe and scale it live. The groundwork comes first: adapting the scaffold, the shared libs, the OpenAPI pipeline, the database with its migrations and pinned Hebrew tags, the theme, the app shell, seed data and CI.
 **FRs covered:** FR1, FR2, FR3 (pinned tags), FR5, FR11, FR12
 
 ### Epic 2: Accounts, login and roles
@@ -243,6 +243,11 @@ Editors import a recipe from a link or from pasted text with Ollama (local) or G
 
 The app runs as one production container (`docker compose up`) with backups, structured logging and an env template. Performance budgets (bundle size, Lighthouse) and the Playwright e2e flows run in CI. A README explains the app and its architecture for recruiters.
 **NFRs completed:** NFR3, NFR6, NFR9, NFR11 (NFR1, 2, 4, 5, 7, 8, 10 and 12 are met inside every epic's stories)
+
+### Epic 7 (optional, nice to have): Kitchen mode extras
+
+Small comforts for cooking on the phone: the screen stays awake, amounts show as pretty fractions, and a recipe can be shared as text. Split out of Story 1.11 (2026-10-28); it can be cut without affecting any other story.
+**FRs covered:** none (UX-DR22)
 
 ## Epic 1: Browse and cook from the phone
 
@@ -466,7 +471,7 @@ So that I can cook from it (FR5).
   **And** a skeleton shows while loading, and the page renders in under 500 ms locally (NFR-3)
   **And** the route is lazy-loaded in its own chunk (AD-11)
 
-### Story 1.11: Live serving scaling and kitchen mode
+### Story 1.11: Live serving scaling
 
 As a cook,
 I want to change the number of servings and see every amount update instantly,
@@ -481,13 +486,10 @@ So that I can cook for any group without doing the maths (FR11).
 
 - whole numbers have no decimals ("5", not "5.000")
 - other numbers have at most 2 decimals
-- countable units (unit, clove, slice, can, package) round to the nearest ½
+- countable units (unit, clove, slice, can, package) round to the nearest of ¼ ⅓ ½ ⅔ ¾ (with a whole part, e.g. 1⅓), minimum ¼; ⅓ and ⅔ show as 0.33 and 0.67 until Story 7.1 adds the fraction glyphs
   **And** the `ServingsStepper` has 44 px − and + buttons and a typeable value clamped to 1–100 with a range message. A polite live region announces the new servings count (UX-DR9)
-  **And** "חזרה ל־4" appears only when the value differs from the base, and it restores the base. A reload also returns to the base
+  **And** "חזרה ל־4" appears only when the value differs from the base, and it restores the base. The servings are remembered per recipe on this device (localStorage, failures ignored); "חזרה ל־4" resets them and forgets the saved value
   **And** `scaleAmount` and `formatAmount` live in `libs/recipe-domain` with 100% branch coverage. `IngredientLine` uses them for both the amount and any original hint (AD-32, NFR-2)
-  **And** while the detail page is open it requests a screen wake lock, and silently ignores a refusal (UX-DR22)
-  **And** `formatAmount` shows common fractions as ½, ⅓, ⅔, ¼ and ¾ (with a whole part, e.g. "1½") when the value is within 0.01 of one, inside `<bdi>`, and otherwise keeps the FR11 decimals; 100% branch coverage includes these cases
-  **And** a "שיתוף" button shares the recipe as plain text through the Web Share API, or copies it to the clipboard when sharing is unavailable, confirming with the toast "הועתק". The text is the title, the ingredients at the current servings, the steps and the page link, in Hebrew, built by one pure function in `libs/recipe-domain` with unit tests
 
 ## Epic 2: Accounts, login and roles
 
@@ -942,3 +944,21 @@ So that a reviewer can follow the project quickly (NFR9).
 **And** it lists the quality gates (CI, tests, budgets) and the tech stack with the reasons behind each choice
 **And** the built Storybook of `libs/ui-components` is published (e.g. GitHub Pages) and the README links to it
 **And** a reader new to the project can follow the architecture in under 10 minutes
+
+## Epic 7 (optional, nice to have): Kitchen mode extras
+
+> Optional. Split out of Story 1.11 on 2026-10-28 so live scaling could ship alone. Nothing else depends on this epic; it can be cut.
+
+### Story 7.1: Kitchen mode extras (optional)
+
+As a cook,
+I want the screen to stay awake, amounts shown as familiar fractions, and a way to share the recipe,
+So that cooking from my phone is more comfortable (UX-DR22).
+
+**Acceptance Criteria:**
+
+**Given** the detail page is open
+**When** I cook from it
+**Then** it requests a screen wake lock, and silently ignores a refusal (UX-DR22)
+**And** `formatAmount` shows common fractions as ½, ⅓, ⅔, ¼ and ¾ (with a whole part, e.g. "1½") when the value is within 0.01 of one, inside `<bdi>`, and otherwise keeps the FR11 decimals; 100% branch coverage includes these cases
+**And** a "שיתוף" button shares the recipe as plain text through the Web Share API, or copies it to the clipboard when sharing is unavailable, confirming with the toast "הועתק". The text is the title, the ingredients at the current servings, the steps and the page link, in Hebrew, built by one pure function in `libs/recipe-domain` with unit tests

@@ -135,7 +135,7 @@ An ingredient has: name (required), an optional amount (positive number), an opt
 - **FR-11 — Scale servings.** On the detail page the user sets a target number of servings (1–100) and all ingredient amounts update immediately, without a page reload or server call.
   - AC: Scaled amount = base amount × target servings ÷ base servings.
   - AC: To-taste ingredients are never scaled.
-  - AC: Display rounding: whole numbers show without decimals ("5", not "5.000"); otherwise at most 2 significant decimals ("1.5", "0.33"); `unit`-type ingredients (eggs, cloves) are shown to the nearest ½.
+  - AC: Display rounding: whole numbers show without decimals ("5", not "5.000"); otherwise at most 2 significant decimals ("1.5", "0.33"); `unit`-type ingredients (eggs, cloves) are shown to the nearest of ¼ ⅓ ½ ⅔ ¾ (with a whole part, e.g. 1⅓), minimum ¼ (⅓ and ⅔ display as 0.33 and 0.67 until fraction glyphs ship).
   - AC: Scaling is view-only — it never changes the saved recipe. Reloading the page returns to base servings.
   - AC: A *Reset* control returns to base servings.
 

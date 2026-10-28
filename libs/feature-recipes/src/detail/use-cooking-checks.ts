@@ -1,31 +1,6 @@
-import { useState } from 'react';
+import { useStoredState } from '../shared/use-stored-state';
 
-const storageKey = (recipeId: string) => `bb:checks:${recipeId}`;
-
-function load(recipeId: string): ReadonlySet<string> {
-  try {
-    const stored: unknown = JSON.parse(
-      localStorage.getItem(storageKey(recipeId)) ?? '[]',
-    );
-    return new Set(
-      Array.isArray(stored)
-        ? stored.filter((id): id is string => typeof id === 'string')
-        : [],
-    );
-  } catch {
-    return new Set();
-  }
-}
-
-function save(recipeId: string, checked: ReadonlySet<string>) {
-  try {
-    if (checked.size === 0) localStorage.removeItem(storageKey(recipeId));
-    else
-      localStorage.setItem(storageKey(recipeId), JSON.stringify([...checked]));
-  } catch {
-    // Private mode or a full disk: ticks just last for this visit.
-  }
-}
+const NONE: ReadonlySet<string> = new Set();
 
 /**
  * Which ingredients and steps are ticked off while cooking, kept in this
@@ -33,12 +8,18 @@ function save(recipeId: string, checked: ReadonlySet<string>) {
  * `key={recipeId}` so a new recipe reads its own ticks.
  */
 export function useCookingChecks(recipeId: string) {
-  const [checked, setChecked] = useState(() => load(recipeId));
-
-  const update = (next: ReadonlySet<string>) => {
-    setChecked(next);
-    save(recipeId, next);
-  };
+  const [checked, setChecked] = useStoredState<ReadonlySet<string>>(
+    `bb:checks:${recipeId}`,
+    NONE,
+    {
+      parse: (stored) =>
+        Array.isArray(stored)
+          ? new Set(stored.filter((id): id is string => typeof id === 'string'))
+          : undefined,
+      serialize: (ids) => [...ids],
+      isDefault: (ids) => ids.size === 0,
+    },
+  );
 
   return {
     isChecked: (id: string) => checked.has(id),
@@ -46,9 +27,9 @@ export function useCookingChecks(recipeId: string) {
       const next = new Set(checked);
       if (on) next.add(id);
       else next.delete(id);
-      update(next);
+      setChecked(next);
     },
-    clear: () => update(new Set()),
+    clear: () => setChecked(NONE),
     any: checked.size > 0,
   };
 }

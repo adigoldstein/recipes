@@ -44,3 +44,7 @@ export {
   RecipeDetailSkeleton,
   type IngredientBoardProps,
 } from './components/ingredient-board';
+export {
+  ServingsStepper,
+  type ServingsStepperProps,
+} from './components/servings-stepper';

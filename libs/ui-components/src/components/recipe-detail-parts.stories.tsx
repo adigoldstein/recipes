@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { IngredientBoard, RecipeDetailSkeleton } from './ingredient-board';
 import { IngredientLine } from './ingredient-line';
+import { ServingsStepper } from './servings-stepper';
 import { StepItem } from './step-item';
 
 const meta = { title: 'Detail/Pieces' } satisfies Meta;
@@ -73,4 +74,26 @@ export const StepItems: Story = {
 export const DetailSkeleton: Story = {
   name: 'RecipeDetailSkeleton',
   render: () => <RecipeDetailSkeleton />,
+};
+
+export const ServingsStepperStory: Story = {
+  name: 'ServingsStepper',
+  render: function Render() {
+    const [servings, setServings] = useState(4);
+    return (
+      <ServingsStepper
+        value={servings}
+        base={4}
+        min={1}
+        max={100}
+        onChange={setServings}
+        label="מספר מנות"
+        decreaseLabel="פחות מנות"
+        increaseLabel="יותר מנות"
+        resetLabel="חזרה ל־4"
+        rangeMessage="אפשר להזין מספר בין 1 ל־100"
+        announcement={`${servings} מנות`}
+      />
+    );
+  },
 };

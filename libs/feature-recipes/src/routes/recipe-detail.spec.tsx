@@ -52,7 +52,9 @@ function serve(r: RecipeRead) {
   server.use(http.get('*/api/recipes/:id', () => HttpResponse.json(r)));
 }
 
-afterEach(() => localStorage.clear());
+afterEach(() => {
+  localStorage.clear();
+});
 
 describe('RecipeDetailPage', () => {
   it('shows tags, times, title, ingredients, numbered steps', async () => {
@@ -301,6 +303,126 @@ describe('RecipeDetailPage', () => {
     });
   });
 
+  describe('scaling servings', () => {
+    const scalable = recipe({
+      ingredients: [
+        { ...recipe().ingredients[0], note: null, amount: 2, unit: 'cup' },
+        {
+          ...recipe().ingredients[0],
+          id: 'i2',
+          name: 'שום',
+          note: null,
+          amount: 1,
+          unit: 'clove',
+        },
+        {
+          ...recipe().ingredients[0],
+          id: 'i3',
+          name: 'גבינה',
+          note: null,
+          amount: 227,
+          unit: 'g',
+          source: { amount: 8, unit: 'oz' },
+          original: { amount: 1, unit: 'cup' },
+        },
+        {
+          ...recipe().ingredients[0],
+          id: 'i4',
+          name: 'מלח',
+          note: null,
+          amount: null,
+          unit: null,
+        },
+      ],
+    });
+
+    it('scales every amount without a server call and never touches to-taste', async () => {
+      serve(scalable);
+      renderDetail('r1');
+      const more = await screen.findByRole('button', { name: 'יותר מנות' });
+      const requests = vi.fn();
+      server.events.on('request:start', requests);
+      for (let n = 0; n < 6; n++) await userEvent.click(more);
+      server.events.removeListener('request:start', requests);
+
+      expect(requests).not.toHaveBeenCalled();
+      expect(
+        (screen.getByRole('textbox', { name: 'מספר מנות' }) as HTMLInputElement)
+          .value,
+      ).toBe('10');
+      expect(screen.getByRole('status').textContent).toBe('10 מנות');
+      expect(
+        screen.getByRole('checkbox', { name: '5 כוסות קמח' }),
+      ).toBeTruthy();
+      // 1 × 10/4 = 2.5, a countable unit in halves
+      expect(
+        screen.getByRole('checkbox', { name: '2.5 שיניים שום' }),
+      ).toBeTruthy();
+      expect(
+        screen.getByRole('checkbox', { name: '567.5 גרם גבינה' }),
+      ).toBeTruthy();
+      expect(screen.getByText('במקור 2.5 כוסות')).toBeTruthy();
+      expect(
+        screen.getByRole('checkbox', { name: 'מלח — לפי הטעם' }),
+      ).toBeTruthy();
+    });
+
+    it('scales the source value too', async () => {
+      serve(scalable);
+      renderDetail('r1');
+      await userEvent.click(
+        await screen.findByRole('button', { name: 'הצג מתכון מקורי' }),
+      );
+      await userEvent.click(screen.getByRole('button', { name: 'יותר מנות' }));
+      await userEvent.click(screen.getByRole('button', { name: 'יותר מנות' }));
+      expect(
+        screen.getByRole('checkbox', { name: '12 oz (340.5 גרם) גבינה' }),
+      ).toBeTruthy();
+    });
+
+    it('offers a way back to the base servings, only when changed', async () => {
+      serve(scalable);
+      renderDetail('r1');
+      await screen.findByRole('heading', { level: 1 });
+      expect(screen.queryByRole('button', { name: 'חזרה ל־4' })).toBeNull();
+      await userEvent.click(screen.getByRole('button', { name: 'יותר מנות' }));
+      expect(
+        screen.getByRole('checkbox', { name: '2.5 כוסות קמח' }),
+      ).toBeTruthy();
+      await userEvent.click(screen.getByRole('button', { name: 'חזרה ל־4' }));
+      expect(
+        screen.getByRole('checkbox', { name: '2 כוסות קמח' }),
+      ).toBeTruthy();
+    });
+
+    it('remembers the servings per recipe across a reload', async () => {
+      serve(scalable);
+      const { unmount } = renderDetail('r1');
+      await userEvent.click(
+        await screen.findByRole('button', { name: 'יותר מנות' }),
+      );
+      unmount();
+      renderDetail('r1');
+      expect(
+        await screen.findByRole('checkbox', { name: '2.5 כוסות קמח' }),
+      ).toBeTruthy();
+    });
+
+    it('accepts a typed value and explains the range', async () => {
+      serve(scalable);
+      renderDetail('r1');
+      const field = await screen.findByRole('textbox', { name: 'מספר מנות' });
+      await userEvent.clear(field);
+      await userEvent.type(field, '200');
+      expect(screen.getByText('אפשר להזין מספר בין 1 ל־100')).toBeTruthy();
+      await userEvent.clear(field);
+      await userEvent.type(field, '8');
+      expect(
+        screen.getByRole('checkbox', { name: '4 כוסות קמח' }),
+      ).toBeTruthy();
+    });
+  });
+
   describe('ticking off', () => {
     it('keeps ticks per recipe in this browser and clears them', async () => {
       serve(recipe());
@@ -372,7 +494,7 @@ describe('RecipeDetailPage', () => {
     renderDetail('r1');
     expect(screen.getByRole('status', { name: 'טוען מתכון' })).toBeTruthy();
     await screen.findByRole('heading', { level: 1, name: 'פנקייק' });
-    expect(screen.queryByRole('status')).toBeNull();
+    expect(screen.queryByRole('status', { name: 'טוען מתכון' })).toBeNull();
   });
 
   it('says the recipe was not found and links back to the list', async () => {
