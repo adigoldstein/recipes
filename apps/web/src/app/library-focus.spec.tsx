@@ -4,8 +4,8 @@ import { HttpResponse, http } from 'msw';
 import { setupServer } from 'msw/node';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { client } from '@bite-and-board/data-access';
-import { AppProviders } from './app-providers';
-import { routes } from './router';
+import { AppProviders, createAppQueryClient } from './app-providers';
+import { createRoutes } from './router';
 
 const server = setupServer(
   http.get('*/api/recipes', () =>
@@ -36,9 +36,12 @@ afterAll(() => server.close());
 // The shell must not treat that as a new page and pull focus away.
 describe('the library inside the app shell', () => {
   it('keeps focus in the search field while typing', async () => {
-    const router = createMemoryRouter(routes, { initialEntries: ['/'] });
+    const queryClient = createAppQueryClient();
+    const router = createMemoryRouter(createRoutes(queryClient), {
+      initialEntries: ['/'],
+    });
     render(
-      <AppProviders>
+      <AppProviders queryClient={queryClient}>
         <RouterProvider router={router} />
       </AppProviders>,
     );
@@ -55,9 +58,12 @@ describe('the library inside the app shell', () => {
   });
 
   it('still moves focus to the heading when the page changes', async () => {
-    const router = createMemoryRouter(routes, { initialEntries: ['/nope'] });
+    const queryClient = createAppQueryClient();
+    const router = createMemoryRouter(createRoutes(queryClient), {
+      initialEntries: ['/nope'],
+    });
     render(
-      <AppProviders>
+      <AppProviders queryClient={queryClient}>
         <RouterProvider router={router} />
       </AppProviders>,
     );

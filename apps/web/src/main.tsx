@@ -2,10 +2,11 @@ import { StrictMode } from 'react';
 import * as ReactDOM from 'react-dom/client';
 import { createBrowserRouter } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
-import { AppProviders } from './app/app-providers';
-import { routes } from './app/router';
+import { AppProviders, createAppQueryClient } from './app/app-providers';
+import { createRoutes } from './app/router';
 
-const router = createBrowserRouter(routes);
+const queryClient = createAppQueryClient();
+const router = createBrowserRouter(createRoutes(queryClient));
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement,
@@ -13,7 +14,7 @@ const root = ReactDOM.createRoot(
 
 root.render(
   <StrictMode>
-    <AppProviders>
+    <AppProviders queryClient={queryClient}>
       <RouterProvider router={router} />
     </AppProviders>
   </StrictMode>,

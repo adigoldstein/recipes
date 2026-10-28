@@ -17,6 +17,7 @@ os.environ["ENV"] = "dev"
 from app.core.config import Settings, get_settings  # noqa: E402
 from app.core.db import get_engine  # noqa: E402
 from app.core.rate_limit import limiter  # noqa: E402
+from app.core.security import CSRF_HEADER, CSRF_VALUE  # noqa: E402
 from app.main import create_app  # noqa: E402
 
 
@@ -54,7 +55,17 @@ def app() -> FastAPI:
 
 @pytest.fixture
 def client(app: FastAPI) -> Iterator[TestClient]:
-    """Entering the client runs the lifespan, which migrates the temp database."""
+    """Acts like the SPA, which sends the CSRF header on every non-GET call (AD-19).
+
+    Entering the client runs the lifespan, which migrates the temp database.
+    """
+    with TestClient(app, headers={CSRF_HEADER: CSRF_VALUE}) as test_client:
+        yield test_client
+
+
+@pytest.fixture
+def bare_client(app: FastAPI) -> Iterator[TestClient]:
+    """A caller that sends no CSRF header, like a cross-site form post."""
     with TestClient(app) as test_client:
         yield test_client
 

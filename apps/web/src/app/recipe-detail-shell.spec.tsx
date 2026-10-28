@@ -4,8 +4,8 @@ import { HttpResponse, http } from 'msw';
 import { setupServer } from 'msw/node';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { client } from '@bite-and-board/data-access';
-import { AppProviders } from './app-providers';
-import { routes } from './router';
+import { AppProviders, createAppQueryClient } from './app-providers';
+import { createRoutes } from './router';
 
 const RECIPE = {
   id: 'r1',
@@ -70,9 +70,12 @@ afterEach(() => {
 afterAll(() => server.close());
 
 function renderApp(path: string) {
-  const router = createMemoryRouter(routes, { initialEntries: [path] });
+  const queryClient = createAppQueryClient();
+  const router = createMemoryRouter(createRoutes(queryClient), {
+    initialEntries: [path],
+  });
   render(
-    <AppProviders>
+    <AppProviders queryClient={queryClient}>
       <RouterProvider router={router} />
     </AppProviders>,
   );

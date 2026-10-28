@@ -9,7 +9,7 @@ export type ClientOptions = {
  *
  * Stable error codes; the client shows `errors.<code>` from he.json.
  */
-export type ErrorCode = 'recipe_not_found' | 'tag_not_found' | 'email_taken' | 'user_not_found' | 'password_too_short' | 'password_too_long' | 'invalid_credentials' | 'rate_limited';
+export type ErrorCode = 'recipe_not_found' | 'tag_not_found' | 'email_taken' | 'user_not_found' | 'password_too_short' | 'password_too_long' | 'invalid_credentials' | 'rate_limited' | 'unauthorized' | 'forbidden' | 'csrf_header_missing';
 
 /**
  * ErrorResponse

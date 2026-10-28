@@ -42,6 +42,25 @@ share one bucket. In production start uvicorn with `--proxy-headers` and
 `--forwarded-allow-ips` set to the proxy's address only (not `*`, or the header can be
 spoofed to dodge the limit). That is set up with the container in Story 6.1.
 
+## Guarding routes (AD-6, AD-30)
+
+Protect a route with a dependency, like a Nest `@Roles()` guard:
+
+```python
+user: Annotated[CurrentUser, Depends(require_role(Role.EDITOR))]  # or "admin"
+```
+
+No session gives 401 `unauthorized`; a lower role gives 403 `forbidden`; an admin passes
+every editor check. The user comes from the database on each request, so a demotion or a
+block works at once (a blocked or deleted user is a 401).
+
+`app.core` may not import `auth`, so `get_session_user` in `app/core/security.py` is a stub
+that `create_app()` answers with `auth.service.get_current_user` through
+`dependency_overrides`. The CSRF check is a dependency on the whole app: any request that
+is not GET, HEAD or OPTIONS needs `X-Requested-With: bite-and-board`, or it gets 403
+`csrf_header_missing` before any role check. Tests use the `client` fixture (sends the
+header, like the SPA) and `bare_client` (does not).
+
 ## Database and migrations
 
 SQLite lives in `DATA_DIR/app.db`. Every connection turns on `foreign_keys` and WAL.

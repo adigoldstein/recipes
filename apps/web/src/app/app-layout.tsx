@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, Outlet, useLocation } from 'react-router';
 import { ThemeToggle, TopBar, Wordmark } from '@bite-and-board/ui-components';
+import { useSessionExpiry } from './use-session-expiry';
 import { useTheme } from './theme';
 
 // Its own chunk: the account menu reads the session through the API client, which
@@ -18,6 +19,8 @@ export function AppLayout() {
   const location = useLocation();
   const main = useRef<HTMLElement>(null);
   const shownPath = useRef(location.pathname);
+
+  useSessionExpiry();
 
   // After a navigation to another page (not the first load), move focus to the
   // new page's h1 so screen readers announce it and keyboard users start at the

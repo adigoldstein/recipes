@@ -1,13 +1,19 @@
-"""Roles, password hashing, session tokens, and (from Story 2.3) `require_role`."""
+"""Roles, password hashing, session tokens, and the request guards (AD-6, AD-30)."""
 
 import uuid
+from collections.abc import Callable
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from enum import StrEnum
+from typing import Annotated
 
 import jwt
+from fastapi import Depends, Request
 from pwdlib import PasswordHash
 from pwdlib.exceptions import UnknownHashError
 from pwdlib.hashers.argon2 import Argon2Hasher
+
+from app.core.errors import AppError, ErrorCode
 
 
 class Role(StrEnum):
@@ -73,3 +79,75 @@ def read_session_token(token: str, secret: str) -> uuid.UUID | None:
         return uuid.UUID(claims["sub"])
     except (jwt.InvalidTokenError, ValueError):
         return None
+
+
+# --- Request guards ----------------------------------------------------------
+
+# The CSRF guard: a cross-site form post cannot add a custom header, and a
+# cross-site fetch that does would need a CORS preflight this app never allows (AD-6).
+CSRF_HEADER = "X-Requested-With"
+CSRF_VALUE = "bite-and-board"
+_SAFE_METHODS = frozenset({"GET", "HEAD", "OPTIONS"})
+
+
+def require_csrf_header(request: Request) -> None:
+    """Reject any request that changes something without the CSRF header.
+
+    Registered once on the whole app, so no route can forget it. It runs before the
+    role check, which makes a missing header a 403 and never a 401 (AD-21).
+    """
+    if request.method not in _SAFE_METHODS and (
+        request.headers.get(CSRF_HEADER) != CSRF_VALUE
+    ):
+        raise AppError(
+            403, ErrorCode.CSRF_HEADER_MISSING, f"Missing {CSRF_HEADER} header"
+        )
+
+
+@dataclass(frozen=True)
+class CurrentUser:
+    """Who is making this request, as the database says right now."""
+
+    id: uuid.UUID
+    email: str
+    name: str
+    role: Role
+
+
+def get_session_user() -> CurrentUser | None:
+    """The seam that answers "who does this request's cookie belong to?".
+
+    `core` may not import the feature modules, so it only declares the question.
+    `main.py` answers it with `dependency_overrides`, like a Nest custom provider
+    (`useFactory`). The answer must be looked up fresh: that is what makes a demotion
+    or a block take effect on the next request (AD-30).
+    """
+    raise RuntimeError("get_session_user is not wired; see create_app()")
+
+
+# Admin satisfies every editor-level check.
+_RANK = {Role.EDITOR: 1, Role.ADMIN: 2}
+
+
+def has_role(user_role: Role, required: Role) -> bool:
+    return _RANK[user_role] >= _RANK[required]
+
+
+def require_role(role: Role | str) -> Callable[..., CurrentUser]:
+    """A route dependency, like a Nest `@Roles()` guard: 401 without a session,
+    403 when the role is too low, otherwise the current user.
+
+    Use it as `Depends(require_role(Role.EDITOR))` or `Depends(require_role("admin"))`.
+    """
+    required = Role(role)
+
+    def dependency(
+        user: Annotated[CurrentUser | None, Depends(get_session_user)],
+    ) -> CurrentUser:
+        if user is None:
+            raise AppError(401, ErrorCode.UNAUTHORIZED, "Sign in required")
+        if not has_role(user.role, required):
+            raise AppError(403, ErrorCode.FORBIDDEN, "Not allowed")
+        return user
+
+    return dependency
