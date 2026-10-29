@@ -6,6 +6,7 @@ import { toast } from '@bite-and-board/ui-components';
 import { server } from '../testing/server';
 import { ADI, renderAt, serveSession } from '../testing/render-auth';
 import { Component as AccountPage } from './account';
+import { labelled } from '../testing/labelled';
 
 function renderAccount() {
   serveSession(ADI);
@@ -15,9 +16,9 @@ function renderAccount() {
   ]);
 }
 
-const current = () => screen.getByLabelText('סיסמה נוכחית');
-const next = () => screen.getByLabelText('סיסמה חדשה');
-const confirm = () => screen.getByLabelText('אימות הסיסמה החדשה');
+const current = () => screen.getByLabelText(labelled('סיסמה נוכחית'));
+const next = () => screen.getByLabelText(labelled('סיסמה חדשה'));
+const confirm = () => screen.getByLabelText(labelled('אימות הסיסמה החדשה'));
 const submit = () => screen.getByRole('button', { name: 'עדכון סיסמה' });
 
 async function fill(
@@ -32,6 +33,23 @@ async function fill(
 
 describe('AccountPage', () => {
   afterEach(() => vi.restoreAllMocks());
+
+  it('marks the three password fields as required and explains the star', async () => {
+    renderAccount();
+    await screen.findByRole('heading', { level: 1, name: 'החשבון שלי' });
+    expect(screen.getByText(/שדות המסומנים/).closest('p')?.textContent).toBe(
+      'שדות המסומנים ב־* הם שדות חובה',
+    );
+    for (const field of [current(), next(), confirm()]) {
+      expect(field.getAttribute('aria-required')).toBe('true');
+      expect(
+        field
+          .closest('div')
+          ?.querySelector('label')
+          ?.querySelector('[aria-hidden]')?.textContent,
+      ).toBe(' *');
+    }
+  });
 
   it('shows the title, who I am and left-to-right password fields', async () => {
     renderAccount();

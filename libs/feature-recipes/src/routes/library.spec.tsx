@@ -1,7 +1,7 @@
 import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { delay, http, HttpResponse } from 'msw';
-import { server } from '../testing/server';
+import { server, serveSession } from '../testing/server';
 import { recipe, renderLibrary, serveRecipes } from '../testing/render-library';
 
 const SHAKSHUKA = recipe('r1', 'שקשוקה', {
@@ -127,6 +127,16 @@ describe('LibraryPage', () => {
       ).toBeTruthy();
       expect(screen.queryByRole('list')).toBeNull();
       expect(screen.queryByRole('button', { name: /ניקוי/ })).toBeNull();
+      expect(screen.queryByRole('link', { name: 'מתכון חדש' })).toBeNull();
+    });
+
+    it('offers an editor "מתכון חדש" in the empty state, and a visitor nothing', async () => {
+      serveRecipes([]);
+      serveSession('editor');
+      const router = renderLibrary();
+      const link = await screen.findByRole('link', { name: 'מתכון חדש' });
+      expect(link.getAttribute('href')).toBe('/recipes/new');
+      expect(router.state.location.pathname).toBe('/');
     });
 
     it('shows the API error in Hebrew and retries', async () => {

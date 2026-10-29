@@ -15,8 +15,9 @@ import {
 import {
   BackLink,
   Button,
+  FormField,
   Input,
-  Label,
+  RequiredNote,
   toast,
 } from '@bite-and-board/ui-components';
 import { useErrorMessage } from '../shared/use-error-message';
@@ -31,7 +32,7 @@ const FIELD_ERRORS = new Set([
   'password_too_long',
 ]);
 
-/** One labelled password input with its error line. */
+/** One required password input: label, control and error line. */
 function PasswordField({
   id,
   label,
@@ -46,23 +47,17 @@ function PasswordField({
   registration: UseFormRegisterReturn;
 }) {
   return (
-    <div className="flex flex-col gap-2">
-      <Label htmlFor={id}>{label}</Label>
-      <Input
-        id={id}
-        type="password"
-        dir="ltr"
-        autoComplete={autoComplete}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={error ? `${id}-error` : undefined}
-        {...registration}
-      />
-      {error ? (
-        <p id={`${id}-error`} className="text-sm text-destructive">
-          {error}
-        </p>
-      ) : null}
-    </div>
+    <FormField id={id} label={label} required error={error}>
+      {(field) => (
+        <Input
+          type="password"
+          dir="ltr"
+          autoComplete={autoComplete}
+          {...field}
+          {...registration}
+        />
+      )}
+    </FormField>
   );
 }
 
@@ -143,6 +138,7 @@ function ChangePasswordSection() {
         {t('account.password.title')}
       </h2>
       <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
+        <RequiredNote>{t('form.requiredNote')}</RequiredNote>
         <PasswordField
           id="account-current"
           label={t('account.password.current')}

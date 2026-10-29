@@ -126,12 +126,29 @@ export const zSourceValue = z.object({
 });
 
 /**
+ * StepCreate
+ */
+export const zStepCreate = z.object({
+    description: z.string().min(1)
+});
+
+/**
  * StepRead
  */
 export const zStepRead = z.object({
     description: z.string(),
     id: z.uuid(),
     source_text: z.string().nullable()
+});
+
+/**
+ * TagInput
+ *
+ * A tag in a recipe write: an existing tag by id, or a name to find or create.
+ */
+export const zTagInput = z.object({
+    id: z.uuid().nullish(),
+    name: z.string().nullish()
 });
 
 /**
@@ -185,6 +202,18 @@ export const zUnit = z.enum([
 ]);
 
 /**
+ * IngredientCreate
+ *
+ * An ingredient in a recipe write; its position is its place in the list.
+ */
+export const zIngredientCreate = z.object({
+    amount: z.number().gt(0).lt(1000000000).nullish(),
+    name: z.string().min(1),
+    note: z.string().nullish(),
+    unit: zUnit.nullish()
+});
+
+/**
  * OriginalValue
  *
  * The ingredient's amount and unit before its first edit (FR-7).
@@ -207,6 +236,24 @@ export const zIngredientRead = z.object({
     original: zOriginalValue.nullable(),
     source: zSourceValue.nullable(),
     unit: zUnit.nullable()
+});
+
+/**
+ * RecipeCreate
+ *
+ * Everything needed to create a recipe; tags are ids or names (AD-25).
+ */
+export const zRecipeCreate = z.object({
+    base_servings: z.int().gte(1).lte(100),
+    cook_time_minutes: z.int().gte(0).nullish(),
+    description: z.string().max(500).nullish(),
+    ingredients: z.array(zIngredientCreate).min(1),
+    notes: z.string().max(5000).nullish(),
+    prep_time_minutes: z.int().gte(0).nullish(),
+    source_url: z.string().max(2048).nullish(),
+    steps: z.array(zStepCreate).min(1),
+    tags: z.array(zTagInput).optional(),
+    title: z.string().min(1).max(120)
 });
 
 /**
@@ -325,6 +372,13 @@ export const zHealthGetHealthResponse = zHealthRead;
  * Successful Response
  */
 export const zRecipesListRecipesResponse = z.array(zRecipeSummary);
+
+export const zRecipesCreateRecipeBody = zRecipeCreate;
+
+/**
+ * Successful Response
+ */
+export const zRecipesCreateRecipeResponse = zRecipeRead;
 
 export const zRecipesGetRecipePath = z.object({
     recipe_id: z.uuid()

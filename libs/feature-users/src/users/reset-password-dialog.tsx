@@ -11,11 +11,12 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  FormField,
   Input,
+  RequiredNote,
   toast,
 } from '@bite-and-board/ui-components';
 import { useErrorMessage } from '../shared/use-error-message';
-import { Field } from './field';
 import { useUpdateUser } from './use-update-user';
 
 // Matches the server's policy (FR-13); the server stays the authority.
@@ -90,38 +91,39 @@ function ResetPasswordForm({
 
   return (
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
-      <Field
+      <RequiredNote>{t('form.requiredNote')}</RequiredNote>
+      <FormField
         id="reset-password"
         label={t('users.reset.password')}
+        required
         error={errors.password?.message}
       >
-        <Input
-          id="reset-password"
-          type="password"
-          dir="ltr"
-          autoComplete="new-password"
-          aria-invalid={errors.password ? true : undefined}
-          aria-describedby={
-            errors.password ? 'reset-password-error' : undefined
-          }
-          {...register('password')}
-        />
-      </Field>
-      <Field
+        {(field) => (
+          <Input
+            type="password"
+            dir="ltr"
+            autoComplete="new-password"
+            {...field}
+            {...register('password')}
+          />
+        )}
+      </FormField>
+      <FormField
         id="reset-confirm"
         label={t('users.reset.confirm')}
+        required
         error={errors.confirm?.message}
       >
-        <Input
-          id="reset-confirm"
-          type="password"
-          dir="ltr"
-          autoComplete="new-password"
-          aria-invalid={errors.confirm ? true : undefined}
-          aria-describedby={errors.confirm ? 'reset-confirm-error' : undefined}
-          {...register('confirm')}
-        />
-      </Field>
+        {(field) => (
+          <Input
+            type="password"
+            dir="ltr"
+            autoComplete="new-password"
+            {...field}
+            {...register('confirm')}
+          />
+        )}
+      </FormField>
       {/* Always rendered, so a screen reader announces the text when it appears. */}
       <p role="alert" className="text-sm text-destructive">
         {formError ? errorMessage(update.error) : null}

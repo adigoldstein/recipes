@@ -10,6 +10,7 @@ import {
   serveSession,
   serveUsers,
 } from '../testing/render-users';
+import { labelled } from '../testing/labelled';
 
 type User = ReturnType<typeof userEvent.setup>;
 
@@ -359,7 +360,7 @@ describe('resetting a password', () => {
     return screen.findByRole('dialog', { name: `איפוס הסיסמה של ${name}` });
   };
   const typeInto = (user: User, label: string, text: string) =>
-    user.type(screen.getByLabelText(label), text);
+    user.type(screen.getByLabelText(labelled(label)), text);
 
   it('opens a form naming the user, with LTR password fields', async () => {
     const user = userEvent.setup();
@@ -370,9 +371,30 @@ describe('resetting a password', () => {
 
     expect(dialog.textContent).toContain('Dana ינותק מכל המכשירים');
     for (const label of ['סיסמה חדשה', 'אימות סיסמה']) {
-      const field = within(dialog).getByLabelText(label);
+      const field = within(dialog).getByLabelText(labelled(label));
       expect(field.getAttribute('type')).toBe('password');
       expect(field.getAttribute('dir')).toBe('ltr');
+    }
+  });
+
+  it('marks both password fields as required and explains the star', async () => {
+    const user = userEvent.setup();
+    servePatch([ADI, { ...DANA }]);
+    renderUsers();
+
+    const dialog = await openReset(user);
+
+    expect(
+      within(dialog)
+        .getByText(/שדות המסומנים/)
+        .closest('p')?.textContent,
+    ).toBe('שדות המסומנים ב־* הם שדות חובה');
+    for (const label of ['סיסמה חדשה', 'אימות סיסמה']) {
+      const field = within(dialog).getByLabelText(labelled(label));
+      expect(field.getAttribute('aria-required')).toBe('true');
+      expect(field.closest('div')?.querySelector('label')?.textContent).toBe(
+        `${label} *`,
+      );
     }
   });
 
@@ -436,7 +458,9 @@ describe('resetting a password', () => {
 
     const message = await screen.findByText('הסיסמה יכולה להכיל עד 128 תווים');
     expect(
-      screen.getByLabelText('סיסמה חדשה').getAttribute('aria-describedby'),
+      screen
+        .getByLabelText(labelled('סיסמה חדשה'))
+        .getAttribute('aria-describedby'),
     ).toBe(message.id);
     expect(screen.getByRole('dialog')).toBeTruthy();
   });
@@ -476,7 +500,7 @@ describe('resetting a password', () => {
 
     await openReset(user);
     expect(
-      (screen.getByLabelText('סיסמה חדשה') as HTMLInputElement).value,
+      (screen.getByLabelText(labelled('סיסמה חדשה')) as HTMLInputElement).value,
     ).toBe('');
   });
 });

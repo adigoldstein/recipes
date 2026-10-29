@@ -73,9 +73,16 @@ class RecipeService:
             for recipe in recipes
         ]
 
-    def create_recipe(self, data: RecipeCreate) -> RecipeRead:
-        """Create a recipe, its ingredients, steps and tags in one transaction."""
+    def create_recipe(
+        self, data: RecipeCreate, user_id: uuid.UUID | None = None
+    ) -> RecipeRead:
+        """Create a recipe, its ingredients, steps and tags in one transaction.
+
+        `user_id` is the author; the seed has none.
+        """
         recipe = Recipe(
+            created_by=user_id,
+            updated_by=user_id,
             title=data.title,
             description=data.description,
             notes=data.notes,

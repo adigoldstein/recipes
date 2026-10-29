@@ -68,6 +68,27 @@ export type HealthRead = {
 };
 
 /**
+ * IngredientCreate
+ *
+ * An ingredient in a recipe write; its position is its place in the list.
+ */
+export type IngredientCreate = {
+    /**
+     * Amount
+     */
+    amount?: number | null;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Note
+     */
+    note?: string | null;
+    unit?: Unit | null;
+};
+
+/**
  * IngredientRead
  */
 export type IngredientRead = {
@@ -141,6 +162,54 @@ export type PhotoRead = {
      * Url
      */
     url: string;
+};
+
+/**
+ * RecipeCreate
+ *
+ * Everything needed to create a recipe; tags are ids or names (AD-25).
+ */
+export type RecipeCreate = {
+    /**
+     * Base Servings
+     */
+    base_servings: number;
+    /**
+     * Cook Time Minutes
+     */
+    cook_time_minutes?: number | null;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Ingredients
+     */
+    ingredients: Array<IngredientCreate>;
+    /**
+     * Notes
+     */
+    notes?: string | null;
+    /**
+     * Prep Time Minutes
+     */
+    prep_time_minutes?: number | null;
+    /**
+     * Source Url
+     */
+    source_url?: string | null;
+    /**
+     * Steps
+     */
+    steps: Array<StepCreate>;
+    /**
+     * Tags
+     */
+    tags?: Array<TagInput>;
+    /**
+     * Title
+     */
+    title: string;
 };
 
 /**
@@ -287,6 +356,16 @@ export type SourceValue = {
 };
 
 /**
+ * StepCreate
+ */
+export type StepCreate = {
+    /**
+     * Description
+     */
+    description: string;
+};
+
+/**
  * StepRead
  */
 export type StepRead = {
@@ -302,6 +381,22 @@ export type StepRead = {
      * Source Text
      */
     source_text: string | null;
+};
+
+/**
+ * TagInput
+ *
+ * A tag in a recipe write: an existing tag by id, or a name to find or create.
+ */
+export type TagInput = {
+    /**
+     * Id
+     */
+    id?: string | null;
+    /**
+     * Name
+     */
+    name?: string | null;
 };
 
 /**
@@ -568,6 +663,43 @@ export type RecipesListRecipesResponses = {
 };
 
 export type RecipesListRecipesResponse = RecipesListRecipesResponses[keyof RecipesListRecipesResponses];
+
+export type RecipesCreateRecipeData = {
+    body: RecipeCreate;
+    path?: never;
+    query?: never;
+    url: '/api/recipes';
+};
+
+export type RecipesCreateRecipeErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RecipesCreateRecipeError = RecipesCreateRecipeErrors[keyof RecipesCreateRecipeErrors];
+
+export type RecipesCreateRecipeResponses = {
+    /**
+     * Successful Response
+     */
+    201: RecipeRead;
+};
+
+export type RecipesCreateRecipeResponse = RecipesCreateRecipeResponses[keyof RecipesCreateRecipeResponses];
 
 export type RecipesGetRecipeData = {
     body?: never;

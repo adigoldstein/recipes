@@ -17,7 +17,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  FormField,
   Input,
+  RequiredNote,
   Select,
   SelectContent,
   SelectItem,
@@ -26,7 +28,6 @@ import {
   toast,
 } from '@bite-and-board/ui-components';
 import { useErrorMessage } from '../shared/use-error-message';
-import { Field } from './field';
 
 // Matches the server's policy (FR-13); the server stays the authority.
 const MIN_PASSWORD_LENGTH = 8;
@@ -117,88 +118,87 @@ function AddUserForm({ onDone }: { onDone: () => void }) {
 
   return (
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
-      <Field
+      <RequiredNote>{t('form.requiredNote')}</RequiredNote>
+      <FormField
         id="add-user-email"
         label={t('users.add.email')}
+        required
         error={errors.email?.message}
       >
-        <Input
-          id="add-user-email"
-          type="email"
-          dir="ltr"
-          autoComplete="off"
-          aria-invalid={errors.email ? true : undefined}
-          aria-describedby={errors.email ? 'add-user-email-error' : undefined}
-          {...register('email')}
-        />
-      </Field>
-      <Field
+        {(field) => (
+          <Input
+            type="email"
+            dir="ltr"
+            autoComplete="off"
+            {...field}
+            {...register('email')}
+          />
+        )}
+      </FormField>
+      <FormField
         id="add-user-name"
         label={t('users.add.name')}
+        required
         error={errors.name?.message}
       >
-        <Input
-          id="add-user-name"
-          autoComplete="off"
-          aria-invalid={errors.name ? true : undefined}
-          aria-describedby={errors.name ? 'add-user-name-error' : undefined}
-          {...register('name')}
-        />
-      </Field>
-      <Field id="add-user-role" label={t('users.add.role')}>
-        <Controller
-          control={control}
-          name="role"
-          render={({ field }) => (
-            <Select value={field.value} onValueChange={field.onChange}>
-              <SelectTrigger id="add-user-role" className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {ROLES.map((role) => (
-                  <SelectItem key={role} value={role}>
-                    {t(`users.role.${role}`)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        />
-      </Field>
-      <Field
+        {(field) => (
+          <Input autoComplete="off" {...field} {...register('name')} />
+        )}
+      </FormField>
+      <FormField id="add-user-role" label={t('users.add.role')}>
+        {() => (
+          <Controller
+            control={control}
+            name="role"
+            render={({ field }) => (
+              <Select value={field.value} onValueChange={field.onChange}>
+                <SelectTrigger id="add-user-role" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {ROLES.map((role) => (
+                    <SelectItem key={role} value={role}>
+                      {t(`users.role.${role}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
+        )}
+      </FormField>
+      <FormField
         id="add-user-password"
         label={t('users.add.password')}
+        required
         error={errors.password?.message}
       >
-        <Input
-          id="add-user-password"
-          type="password"
-          dir="ltr"
-          autoComplete="new-password"
-          aria-invalid={errors.password ? true : undefined}
-          aria-describedby={
-            errors.password ? 'add-user-password-error' : undefined
-          }
-          {...register('password')}
-        />
-      </Field>
-      <Field
+        {(field) => (
+          <Input
+            type="password"
+            dir="ltr"
+            autoComplete="new-password"
+            {...field}
+            {...register('password')}
+          />
+        )}
+      </FormField>
+      <FormField
         id="add-user-confirm"
         label={t('users.add.confirm')}
+        required
         error={errors.confirm?.message}
       >
-        <Input
-          id="add-user-confirm"
-          type="password"
-          dir="ltr"
-          autoComplete="new-password"
-          aria-invalid={errors.confirm ? true : undefined}
-          aria-describedby={
-            errors.confirm ? 'add-user-confirm-error' : undefined
-          }
-          {...register('confirm')}
-        />
-      </Field>
+        {(field) => (
+          <Input
+            type="password"
+            dir="ltr"
+            autoComplete="new-password"
+            {...field}
+            {...register('confirm')}
+          />
+        )}
+      </FormField>
       {/* Always rendered, so a screen reader announces the text when it appears. */}
       <p role="alert" className="text-sm text-destructive">
         {formError ? errorMessage(create.error) : null}

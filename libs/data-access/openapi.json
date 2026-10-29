@@ -109,6 +109,56 @@
         "title": "HealthRead",
         "type": "object"
       },
+      "IngredientCreate": {
+        "additionalProperties": false,
+        "description": "An ingredient in a recipe write; its position is its place in the list.",
+        "properties": {
+          "amount": {
+            "anyOf": [
+              {
+                "exclusiveMaximum": 1000000000.0,
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount"
+          },
+          "name": {
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Unit"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "IngredientCreate",
+        "type": "object"
+      },
       "IngredientRead": {
         "properties": {
           "amount": {
@@ -269,6 +319,115 @@
           "credit_domain"
         ],
         "title": "PhotoRead",
+        "type": "object"
+      },
+      "RecipeCreate": {
+        "additionalProperties": false,
+        "description": "Everything needed to create a recipe; tags are ids or names (AD-25).",
+        "properties": {
+          "base_servings": {
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Base Servings",
+            "type": "integer"
+          },
+          "cook_time_minutes": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cook Time Minutes"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "ingredients": {
+            "items": {
+              "$ref": "#/components/schemas/IngredientCreate"
+            },
+            "minItems": 1,
+            "title": "Ingredients",
+            "type": "array"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "maxLength": 5000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "prep_time_minutes": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prep Time Minutes"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "maxLength": 2048,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/StepCreate"
+            },
+            "minItems": 1,
+            "title": "Steps",
+            "type": "array"
+          },
+          "tags": {
+            "items": {
+              "$ref": "#/components/schemas/TagInput"
+            },
+            "title": "Tags",
+            "type": "array"
+          },
+          "title": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "base_servings",
+          "ingredients",
+          "steps"
+        ],
+        "title": "RecipeCreate",
         "type": "object"
       },
       "RecipeRead": {
@@ -546,6 +705,21 @@
         "title": "SourceValue",
         "type": "object"
       },
+      "StepCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "minLength": 1,
+            "title": "Description",
+            "type": "string"
+          }
+        },
+        "required": [
+          "description"
+        ],
+        "title": "StepCreate",
+        "type": "object"
+      },
       "StepRead": {
         "properties": {
           "description": {
@@ -575,6 +749,36 @@
           "source_text"
         ],
         "title": "StepRead",
+        "type": "object"
+      },
+      "TagInput": {
+        "description": "A tag in a recipe write: an existing tag by id, or a name to find or create.",
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          }
+        },
+        "title": "TagInput",
         "type": "object"
       },
       "TagRead": {
@@ -986,6 +1190,75 @@
           }
         },
         "summary": "List Recipes",
+        "tags": [
+          "recipes"
+        ]
+      },
+      "post": {
+        "operationId": "recipes_create_recipe",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecipeCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipeRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Recipe",
         "tags": [
           "recipes"
         ]

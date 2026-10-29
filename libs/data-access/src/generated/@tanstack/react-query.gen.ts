@@ -3,8 +3,8 @@
 import { type DefaultError, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen.js';
-import { authChangePassword, authLogin, authLogout, authSession, healthGetHealth, type Options, recipesGetRecipe, recipesListRecipes, tagsListTags, usersCreateUser, usersListUsers, usersUpdateUser } from '../sdk.gen.js';
-import type { AuthChangePasswordData, AuthChangePasswordError, AuthChangePasswordResponse, AuthLoginData, AuthLoginError, AuthLoginResponse, AuthLogoutData, AuthLogoutResponse, AuthSessionData, AuthSessionError, AuthSessionResponse, HealthGetHealthData, HealthGetHealthResponse, RecipesGetRecipeData, RecipesGetRecipeError, RecipesGetRecipeResponse, RecipesListRecipesData, RecipesListRecipesResponse, TagsListTagsData, TagsListTagsResponse, UsersCreateUserData, UsersCreateUserError, UsersCreateUserResponse, UsersListUsersData, UsersListUsersResponse, UsersUpdateUserData, UsersUpdateUserError, UsersUpdateUserResponse } from '../types.gen.js';
+import { authChangePassword, authLogin, authLogout, authSession, healthGetHealth, type Options, recipesCreateRecipe, recipesGetRecipe, recipesListRecipes, tagsListTags, usersCreateUser, usersListUsers, usersUpdateUser } from '../sdk.gen.js';
+import type { AuthChangePasswordData, AuthChangePasswordError, AuthChangePasswordResponse, AuthLoginData, AuthLoginError, AuthLoginResponse, AuthLogoutData, AuthLogoutResponse, AuthSessionData, AuthSessionError, AuthSessionResponse, HealthGetHealthData, HealthGetHealthResponse, RecipesCreateRecipeData, RecipesCreateRecipeError, RecipesCreateRecipeResponse, RecipesGetRecipeData, RecipesGetRecipeError, RecipesGetRecipeResponse, RecipesListRecipesData, RecipesListRecipesResponse, TagsListTagsData, TagsListTagsResponse, UsersCreateUserData, UsersCreateUserError, UsersCreateUserResponse, UsersListUsersData, UsersListUsersResponse, UsersUpdateUserData, UsersUpdateUserError, UsersUpdateUserResponse } from '../types.gen.js';
 
 /**
  * Login
@@ -152,6 +152,23 @@ export const recipesListRecipesOptions = (options?: Options<RecipesListRecipesDa
     },
     queryKey: recipesListRecipesQueryKey(options)
 });
+
+/**
+ * Create Recipe
+ */
+export const recipesCreateRecipeMutation = (options?: Partial<Options<RecipesCreateRecipeData>>): UseMutationOptions<RecipesCreateRecipeResponse, RecipesCreateRecipeError, Options<RecipesCreateRecipeData>> => {
+    const mutationOptions: UseMutationOptions<RecipesCreateRecipeResponse, RecipesCreateRecipeError, Options<RecipesCreateRecipeData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await recipesCreateRecipe({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
 
 export const recipesGetRecipeQueryKey = (options: Options<RecipesGetRecipeData>) => createQueryKey('recipesGetRecipe', options);
 

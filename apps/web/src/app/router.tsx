@@ -32,6 +32,10 @@ export function createRoutes(queryClient: QueryClient): RouteObject[] {
         // Any signed-in user: a visitor goes to /login.
         protectedRoute(queryClient, 'editor', [
           {
+            path: 'recipes/new',
+            lazy: () => import('@bite-and-board/feature-recipes/recipe-new'),
+          },
+          {
             path: 'account',
             lazy: () => import('@bite-and-board/feature-auth/account'),
           },

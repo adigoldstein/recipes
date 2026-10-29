@@ -5,7 +5,7 @@ import { server } from './server';
 // the page origin gives MSW something to match.
 client.setConfig({ baseUrl: window.location.origin });
 
-// jsdom gaps that Radix (the chip row) relies on.
+// jsdom gaps that Radix (the chip row and the unit select) relies on.
 class ResizeObserverStub {
   observe() {
     /* no layout in jsdom */
@@ -18,6 +18,9 @@ class ResizeObserverStub {
   }
 }
 globalThis.ResizeObserver ??= ResizeObserverStub;
+Element.prototype.hasPointerCapture ??= () => false;
+Element.prototype.releasePointerCapture ??= () => undefined;
+Element.prototype.scrollIntoView ??= () => undefined;
 
 beforeAll(() => server.listen({ onUnhandledFrame: 'error' }));
 afterEach(() => server.resetHandlers());

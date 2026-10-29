@@ -1,4 +1,10 @@
-import { invalidationMap, recipesListRecipesQueryKey, schemas } from './index';
+import { QueryClient } from '@tanstack/react-query';
+import {
+  invalidationMap,
+  recipesGetRecipeQueryKey,
+  recipesListRecipesQueryKey,
+  schemas,
+} from './index';
 
 describe('data-access entry', () => {
   it('exports the generated hooks helpers and Zod schemas', () => {
@@ -6,7 +12,23 @@ describe('data-access entry', () => {
     expect(schemas.zRecipeSummary).toBeDefined();
   });
 
-  it('starts with an empty invalidation map', () => {
-    expect(invalidationMap).toEqual({});
+  it('invalidates the list and the recipe page on a recipe write', async () => {
+    const queryClient = new QueryClient();
+    const invalidate = vi.spyOn(queryClient, 'invalidateQueries');
+    await invalidationMap.recipeWrite(queryClient, 'r1');
+    expect(invalidate).toHaveBeenCalledWith({
+      queryKey: recipesListRecipesQueryKey(),
+    });
+    expect(invalidate).toHaveBeenCalledWith({
+      queryKey: recipesGetRecipeQueryKey({ path: { recipe_id: 'r1' } }),
+    });
+    expect(invalidate).toHaveBeenCalledTimes(2);
+  });
+
+  it('refreshes only the list when there is no recipe id yet', async () => {
+    const queryClient = new QueryClient();
+    const invalidate = vi.spyOn(queryClient, 'invalidateQueries');
+    await invalidationMap.recipeWrite(queryClient);
+    expect(invalidate).toHaveBeenCalledTimes(1);
   });
 });

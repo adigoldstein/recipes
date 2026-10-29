@@ -4,6 +4,7 @@ import { delay, http, HttpResponse } from 'msw';
 import { server } from '../testing/server';
 import { ADI, renderAt, serveSession } from '../testing/render-auth';
 import { Component as LoginPage } from './login';
+import { labelled } from '../testing/labelled';
 
 function renderLogin(path = '/login') {
   serveSession(null);
@@ -14,8 +15,8 @@ function renderLogin(path = '/login') {
   ]);
 }
 
-const email = () => screen.getByLabelText('אימייל');
-const password = () => screen.getByLabelText('סיסמה');
+const email = () => screen.getByLabelText(labelled('אימייל'));
+const password = () => screen.getByLabelText(labelled('סיסמה'));
 const submit = () => screen.getByRole('button', { name: 'כניסה' });
 
 async function fill(user: ReturnType<typeof userEvent.setup>) {
@@ -35,6 +36,23 @@ describe('LoginPage', () => {
     expect(password().getAttribute('type')).toBe('password');
     expect(password().getAttribute('autocomplete')).toBe('current-password');
     expect(document.title).toBe('כניסה · ביס & סיר');
+  });
+
+  it('marks both fields as required and explains the star', async () => {
+    renderLogin();
+    await screen.findByRole('heading', { level: 1, name: 'כניסה' });
+    expect(screen.getByText(/שדות המסומנים/).closest('p')?.textContent).toBe(
+      'שדות המסומנים ב־* הם שדות חובה',
+    );
+    for (const field of [email(), password()]) {
+      expect(field.getAttribute('aria-required')).toBe('true');
+      expect(
+        field
+          .closest('div')
+          ?.querySelector('label')
+          ?.querySelector('[aria-hidden]')?.textContent,
+      ).toBe(' *');
+    }
   });
 
   it('logs in, sends the CSRF header and goes to ?next=', async () => {
