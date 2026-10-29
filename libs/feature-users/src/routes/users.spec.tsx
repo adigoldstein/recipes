@@ -9,6 +9,7 @@ import {
   serveSession,
   serveUsers,
 } from '../testing/render-users';
+import { labelled } from '../testing/labelled';
 
 type User = ReturnType<typeof userEvent.setup>;
 
@@ -18,7 +19,7 @@ const openDialog = async (user: User) => {
 };
 
 const typeInto = (user: User, label: string, text: string) =>
-  user.type(screen.getByLabelText(label), text);
+  user.type(screen.getByLabelText(labelled(label)), text);
 
 /** Fills the whole form with valid values (the role stays "עורך"). */
 async function fillValid(user: User) {
@@ -84,21 +85,46 @@ describe('UsersPage', () => {
 });
 
 describe('Add user dialog', () => {
+  it('marks email, name and both passwords as required, but not the role', async () => {
+    const user = userEvent.setup();
+    serveUsers([ADI]);
+    renderUsers();
+    const dialog = await openDialog(user);
+
+    expect(
+      within(dialog)
+        .getByText(/שדות המסומנים/)
+        .closest('p')?.textContent,
+    ).toBe('שדות המסומנים ב־* הם שדות חובה');
+    const star = (label: string) =>
+      within(dialog).getByLabelText(labelled(label));
+    for (const label of ['אימייל', 'שם', 'סיסמה התחלתית', 'אימות סיסמה']) {
+      expect(star(label).getAttribute('aria-required')).toBe('true');
+      expect(
+        star(label).closest('div')?.querySelector('label')?.textContent,
+      ).toBe(`${label} *`);
+    }
+    expect(star('תפקיד').getAttribute('aria-required')).toBeNull();
+    expect(
+      star('תפקיד').closest('div')?.querySelector('label')?.textContent,
+    ).toBe('תפקיד');
+  });
+
   it('opens a labelled form with LTR email and password fields', async () => {
     const user = userEvent.setup();
     serveUsers([ADI]);
     renderUsers();
     const dialog = await openDialog(user);
 
-    expect(within(dialog).getByLabelText('אימייל').getAttribute('dir')).toBe(
-      'ltr',
-    );
-    expect(within(dialog).getByLabelText('שם')).toBeTruthy();
-    expect(within(dialog).getByLabelText('תפקיד').textContent).toContain(
-      'עורך',
-    );
+    expect(
+      within(dialog).getByLabelText(labelled('אימייל')).getAttribute('dir'),
+    ).toBe('ltr');
+    expect(within(dialog).getByLabelText(labelled('שם'))).toBeTruthy();
+    expect(
+      within(dialog).getByLabelText(labelled('תפקיד')).textContent,
+    ).toContain('עורך');
     for (const label of ['סיסמה התחלתית', 'אימות סיסמה']) {
-      const field = within(dialog).getByLabelText(label);
+      const field = within(dialog).getByLabelText(labelled(label));
       expect(field.getAttribute('type')).toBe('password');
       expect(field.getAttribute('dir')).toBe('ltr');
     }
@@ -124,7 +150,7 @@ describe('Add user dialog', () => {
 
     await typeInto(user, 'אימייל', 'dana@example.com');
     await typeInto(user, 'שם', 'Dana');
-    await user.click(screen.getByLabelText('תפקיד'));
+    await user.click(screen.getByLabelText(labelled('תפקיד')));
     await user.click(await screen.findByRole('option', { name: 'מנהל' }));
     await typeInto(user, 'סיסמה התחלתית', 'starting pass');
     await typeInto(user, 'אימות סיסמה', 'starting pass');
@@ -168,9 +194,9 @@ describe('Add user dialog', () => {
     expect(await screen.findByText('כתובת האימייל אינה תקינה')).toBeTruthy();
     expect(screen.getByText('הסיסמה חייבת להכיל לפחות 8 תווים')).toBeTruthy();
     expect(screen.getByText('הסיסמאות אינן זהות')).toBeTruthy();
-    expect(screen.getByLabelText('אימייל').getAttribute('aria-invalid')).toBe(
-      'true',
-    );
+    expect(
+      screen.getByLabelText(labelled('אימייל')).getAttribute('aria-invalid'),
+    ).toBe('true');
     expect(posts).toBe(0);
   });
 
@@ -208,7 +234,7 @@ describe('Add user dialog', () => {
     await user.click(submit());
 
     const message = await screen.findByText('כבר קיים משתמש עם האימייל הזה');
-    const email = screen.getByLabelText('אימייל');
+    const email = screen.getByLabelText(labelled('אימייל'));
     expect(email.getAttribute('aria-invalid')).toBe('true');
     expect(email.getAttribute('aria-describedby')).toBe(message.id);
     expect(screen.getByRole('dialog')).toBeTruthy();
@@ -233,7 +259,9 @@ describe('Add user dialog', () => {
 
     const message = await screen.findByText('הסיסמה חייבת להכיל לפחות 8 תווים');
     expect(
-      screen.getByLabelText('סיסמה התחלתית').getAttribute('aria-describedby'),
+      screen
+        .getByLabelText(labelled('סיסמה התחלתית'))
+        .getAttribute('aria-describedby'),
     ).toBe(message.id);
   });
 
@@ -269,7 +297,9 @@ describe('Add user dialog', () => {
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
 
     await openDialog(user);
-    expect((screen.getByLabelText('שם') as HTMLInputElement).value).toBe('');
+    expect(
+      (screen.getByLabelText(labelled('שם')) as HTMLInputElement).value,
+    ).toBe('');
   });
 });
 

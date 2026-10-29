@@ -10,7 +10,13 @@ import {
   useBackNavigation,
   useSession,
 } from '@bite-and-board/data-access';
-import { BackLink, Button, Input, Label } from '@bite-and-board/ui-components';
+import {
+  BackLink,
+  Button,
+  FormField,
+  Input,
+  RequiredNote,
+} from '@bite-and-board/ui-components';
 import { safeNext } from '../shared/safe-next';
 import { useErrorMessage } from '../shared/use-error-message';
 
@@ -70,42 +76,39 @@ export function LoginPage() {
           {t('auth.login.title')}
         </h1>
         <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="login-email">{t('auth.login.email')}</Label>
-            <Input
-              id="login-email"
-              type="email"
-              dir="ltr"
-              autoComplete="username"
-              aria-invalid={errors.email ? true : undefined}
-              aria-describedby={errors.email ? 'login-email-error' : undefined}
-              {...register('email')}
-            />
-            {errors.email ? (
-              <p id="login-email-error" className="text-sm text-destructive">
-                {errors.email.message}
-              </p>
-            ) : null}
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="login-password">{t('auth.login.password')}</Label>
-            <Input
-              id="login-password"
-              type="password"
-              dir="ltr"
-              autoComplete="current-password"
-              aria-invalid={errors.password ? true : undefined}
-              aria-describedby={
-                errors.password ? 'login-password-error' : undefined
-              }
-              {...register('password')}
-            />
-            {errors.password ? (
-              <p id="login-password-error" className="text-sm text-destructive">
-                {errors.password.message}
-              </p>
-            ) : null}
-          </div>
+          <RequiredNote>{t('form.requiredNote')}</RequiredNote>
+          <FormField
+            id="login-email"
+            label={t('auth.login.email')}
+            required
+            error={errors.email?.message}
+          >
+            {(field) => (
+              <Input
+                type="email"
+                dir="ltr"
+                autoComplete="username"
+                {...field}
+                {...register('email')}
+              />
+            )}
+          </FormField>
+          <FormField
+            id="login-password"
+            label={t('auth.login.password')}
+            required
+            error={errors.password?.message}
+          >
+            {(field) => (
+              <Input
+                type="password"
+                dir="ltr"
+                autoComplete="current-password"
+                {...field}
+                {...register('password')}
+              />
+            )}
+          </FormField>
           {/* Always rendered, so a screen reader announces the text when it appears. */}
           <p role="alert" className="text-sm text-destructive">
             {login.isError ? errorMessage(login.error) : null}

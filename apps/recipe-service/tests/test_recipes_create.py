@@ -22,7 +22,13 @@ def make_service(session: Session) -> RecipeService:
 
 
 def new_recipe(**fields: object) -> RecipeCreate:
-    values: dict[str, object] = {"title": "פשטידה", "base_servings": 4, **fields}
+    values: dict[str, object] = {
+        "title": "פשטידה",
+        "base_servings": 4,
+        "ingredients": [{"name": "ביצה"}],
+        "steps": [{"description": "אופים"}],
+        **fields,
+    }
     return RecipeCreate.model_validate(values)
 
 

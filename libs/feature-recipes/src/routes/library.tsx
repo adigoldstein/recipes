@@ -5,6 +5,7 @@ import { Link } from 'react-router';
 import {
   recipesListRecipesOptions,
   tagsListTagsOptions,
+  useCan,
   type RecipeSummary,
 } from '@bite-and-board/data-access';
 import { filterRecipes } from '@bite-and-board/recipe-domain';
@@ -38,6 +39,7 @@ export function LibraryPage() {
   const errorMessage = useErrorMessage();
   const formatTime = useFormatTime();
   const search = useRef<HTMLInputElement>(null);
+  const canEdit = useCan('editor');
 
   const recipes = useQuery(recipesListRecipesOptions());
   const tags = useQuery(tagsListTagsOptions());
@@ -90,7 +92,18 @@ export function LibraryPage() {
       );
     }
     if (recipes.data.length === 0) {
-      return <EmptyState title={t('library.empty.title')} />;
+      return (
+        <EmptyState
+          title={t('library.empty.title')}
+          actions={
+            canEdit ? (
+              <Button asChild>
+                <Link to="/recipes/new">{t('recipeForm.newAction')}</Link>
+              </Button>
+            ) : undefined
+          }
+        />
+      );
     }
     const visible = filterRecipes(recipes.data, { ...filters, query });
     if (visible.length === 0) {

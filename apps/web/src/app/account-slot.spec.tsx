@@ -67,7 +67,7 @@ describe('the top bar account slot', () => {
     expect(
       await screen.findByRole('heading', { level: 1, name: 'כניסה' }),
     ).toBeTruthy();
-    expect(screen.getByLabelText('אימייל')).toBeTruthy();
+    expect(screen.getByLabelText(/^אימייל( \*)?$/)).toBeTruthy();
     // The page has its own sign-in form, so the bar does not offer a second way in.
     expect(
       within(await screen.findByRole('banner')).queryByRole('link', {

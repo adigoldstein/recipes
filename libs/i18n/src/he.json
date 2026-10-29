@@ -13,6 +13,9 @@
   "toast": {
     "region": "התראות"
   },
+  "form": {
+    "requiredNote": "שדות המסומנים ב־* הם שדות חובה"
+  },
   "library": {
     "title": "מתכונים",
     "search": {
@@ -241,6 +244,65 @@
       "range": "אפשר להזין מספר בין {{min}} ל־{{max}}",
       "announce_one": "מנה אחת",
       "announce_other": "{{count}} מנות"
+    }
+  },
+  "recipeForm": {
+    "newTitle": "מתכון חדש",
+    "newAction": "מתכון חדש",
+    "back": "חזרה למתכונים",
+    "saved": "המתכון נשמר",
+    "save": "שמירה",
+    "saving": "שומרים",
+    "sections": {
+      "details": "פרטים",
+      "ingredients": "מצרכים",
+      "steps": "אופן הכנה"
+    },
+    "title": "שם המתכון",
+    "description": "תיאור",
+    "notes": "הערות וטיפים",
+    "servings": "מספר מנות",
+    "prepTime": "זמן הכנה בדקות",
+    "cookTime": "זמן בישול בדקות",
+    "sourceUrl": "קישור למקור",
+    "ingredient": {
+      "amount": "כמות",
+      "amountLabel": "כמות, מצרך {{n}}",
+      "unitLabel": "יחידה, מצרך {{n}}",
+      "noUnit": "ללא יחידה",
+      "name": "שם המצרך",
+      "nameLabel": "שם המצרך {{n}}",
+      "note": "הערה",
+      "noteLabel": "הערה למצרך {{n}}",
+      "remove": "הסרת מצרך {{n}}",
+      "add": "הוספת מצרך"
+    },
+    "step": {
+      "label": "שלב {{n}}",
+      "remove": "הסרת שלב {{n}}",
+      "add": "הוספת שלב"
+    }
+  },
+  "validation": {
+    "required": "יש למלא את השדה",
+    "string_too_short": "יש להזין לפחות {{min_length}} תווים",
+    "string_too_long": "אפשר עד {{max_length}} תווים",
+    "too_short": "יש להוסיף לפחות {{min_length}}",
+    "too_long": "אפשר עד {{max_length}}",
+    "integer": "יש להזין מספר שלם",
+    "number": "יש להזין מספר",
+    "greater_than_equal": "המספר חייב להיות {{ge}} לפחות",
+    "less_than_equal": "המספר חייב להיות {{le}} לכל היותר",
+    "greater_than": "המספר חייב להיות גדול מ־{{gt}}",
+    "less_than": "המספר חייב להיות קטן מ־{{lt}}",
+    "invalid": "הערך לא תקין",
+    "fields": {
+      "ingredients": {
+        "too_short": "יש להוסיף לפחות מצרך אחד"
+      },
+      "steps": {
+        "too_short": "יש להוסיף לפחות שלב אחד"
+      }
     }
   }
 }

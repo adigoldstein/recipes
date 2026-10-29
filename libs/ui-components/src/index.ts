@@ -18,6 +18,17 @@ export * from './components/ui/select';
 export * from './components/ui/skeleton';
 export * from './components/ui/sonner';
 export * from './components/ui/table';
+export * from './components/ui/textarea';
+export {
+  FormField,
+  type FormFieldControlProps,
+  type FormFieldProps,
+} from './components/form-field';
+export { RequiredMark, RequiredNote } from './components/required-mark';
+export {
+  CharacterCounter,
+  type CharacterCounterProps,
+} from './components/character-counter';
 export * from './components/ui/toggle-group';
 export {
   CARD_TAG_LIMIT,

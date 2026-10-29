@@ -5,45 +5,79 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Annotated
 
-from pydantic import BaseModel, Field, PlainSerializer
+from pydantic import (
+    AfterValidator,
+    BaseModel,
+    ConfigDict,
+    Field,
+    PlainSerializer,
+    WithJsonSchema,
+)
 
+from app.core.db import AMOUNT_QUANTUM
 from app.photos.schemas import PhotoRead
 from app.recipes.units import SourceUnit, Unit
 from app.tags.schemas import TagInput, TagRef
 
 DESCRIPTION_MAX_LENGTH = 500
 NOTES_MAX_LENGTH = 5000
+TITLE_MAX_LENGTH = 120
+MAX_SERVINGS = 100
 
 # AD-31: an exact Decimal inside, a plain JSON number on the wire.
 Amount = Annotated[Decimal, PlainSerializer(float, return_type=float, when_used="json")]
 
 
+def _quantize(value: Decimal) -> Decimal:
+    return value.quantize(AMOUNT_QUANTUM)
+
+
+# A written amount is a positive number that fits NUMERIC(12, 3), stored exact to 3
+# decimals; null means "to taste" (AD-31). The client only ever sends a JSON number.
+MAX_AMOUNT = 10**9
+WriteAmount = Annotated[
+    Decimal,
+    Field(lt=MAX_AMOUNT, allow_inf_nan=False),
+    AfterValidator(_quantize),
+    Field(gt=0),
+    WithJsonSchema(
+        {"type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": MAX_AMOUNT}
+    ),
+]
+
+
 class IngredientCreate(BaseModel):
     """An ingredient in a recipe write; its position is its place in the list."""
 
+    model_config = ConfigDict(extra="forbid")
+
     name: str = Field(min_length=1)
-    amount: Amount | None = Field(default=None, ge=0)
+    amount: WriteAmount | None = None
     unit: Unit | None = None
     note: str | None = None
 
 
 class StepCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     description: str = Field(min_length=1)
 
 
 class RecipeCreate(BaseModel):
     """Everything needed to create a recipe; tags are ids or names (AD-25)."""
 
-    title: str = Field(min_length=1, max_length=120)
+    model_config = ConfigDict(extra="forbid")
+
+    title: str = Field(min_length=1, max_length=TITLE_MAX_LENGTH)
     description: str | None = Field(default=None, max_length=DESCRIPTION_MAX_LENGTH)
     notes: str | None = Field(default=None, max_length=NOTES_MAX_LENGTH)
-    base_servings: int = Field(ge=1)
+    base_servings: int = Field(ge=1, le=MAX_SERVINGS)
     prep_time_minutes: int | None = Field(default=None, ge=0)
     cook_time_minutes: int | None = Field(default=None, ge=0)
     source_url: str | None = Field(default=None, max_length=2048)
     tags: list[TagInput] = Field(default_factory=list)
-    ingredients: list[IngredientCreate] = Field(default_factory=list)
-    steps: list[StepCreate] = Field(default_factory=list)
+    ingredients: list[IngredientCreate] = Field(min_length=1)
+    steps: list[StepCreate] = Field(min_length=1)
 
 
 class OriginalValue(BaseModel):

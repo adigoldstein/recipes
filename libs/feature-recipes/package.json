@@ -14,6 +14,16 @@
       "import": "./src/routes/recipe-detail.tsx",
       "default": "./src/routes/recipe-detail.tsx"
     },
+    "./recipe-new": {
+      "types": "./src/routes/recipe-new.tsx",
+      "import": "./src/routes/recipe-new.tsx",
+      "default": "./src/routes/recipe-new.tsx"
+    },
+    "./new-recipe-button": {
+      "types": "./src/routes/new-recipe-button.tsx",
+      "import": "./src/routes/new-recipe-button.tsx",
+      "default": "./src/routes/new-recipe-button.tsx"
+    },
     "./package.json": "./package.json"
   },
   "nx": {

@@ -12,6 +12,13 @@ const AccountMenu = lazy(async () => ({
     .AccountMenu,
 }));
 
+// Also its own chunk, and for the same reason: it asks who is signed in. Visitors
+// get nothing; editors get the "מתכון חדש" button.
+const NewRecipeButton = lazy(async () => ({
+  default: (await import('@bite-and-board/feature-recipes/new-recipe-button'))
+    .NewRecipeButton,
+}));
+
 /** The shell around every page: top bar, then the page in `<main>`. */
 export function AppLayout() {
   const { t } = useTranslation();
@@ -42,6 +49,9 @@ export function AppLayout() {
         }
         actions={
           <>
+            <Suspense fallback={null}>
+              <NewRecipeButton />
+            </Suspense>
             <ThemeToggle
               value={mode}
               onValueChange={setMode}
