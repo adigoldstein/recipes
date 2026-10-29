@@ -190,7 +190,7 @@ FR5: Epic 1 - Recipe detail page
 FR6: Epic 3 - Edit a recipe with the same form
 FR7: Epic 3 - Remember the first original amount and unit
 FR8: Epic 3 - Show the "originally" hint (scaled)
-FR9: Epic 3 - Reset to original
+FR9: Epic 7 (optional, Story 7.5) - Reset to original
 FR10: Epic 3 - Delete with confirmation
 FR11: Epic 1 - Serving scaling with the rounding rules
 FR12: Epic 1 - Idempotent seed (the hinted ingredient is added in Epic 3)
@@ -226,8 +226,8 @@ Adi bootstraps the admin account, and users log in and out. Visitors read, edito
 
 ### Epic 3: Create, edit and delete recipes
 
-Editors create recipes in the full form: ingredient and step rows, fractions, validation, and an unsaved-changes guard. They pick tags (creating new tags inline) and add a photo. Editing keeps "originally …" hints, with reset to original, and recipes can be deleted after a confirmation.
-**FRs covered:** FR4, FR6, FR7, FR8, FR9, FR10, FR22
+Editors create recipes in the full form: ingredient and step rows, fractions, validation, and an unsaved-changes guard. They pick tags (creating new tags inline) and add a photo. Editing keeps "originally …" hints, and recipes can be deleted after a confirmation.
+**FRs covered:** FR4, FR6, FR7, FR8, FR10, FR22 (FR9 moved to the optional Story 7.5 in Epic 7)
 
 ### Epic 4: Organise with tags
 
@@ -247,7 +247,7 @@ The app runs as one production container (`docker compose up`) with backups, str
 ### Epic 7 (optional, nice to have): Kitchen mode extras
 
 Small comforts for cooking on the phone: the screen stays awake, amounts show as pretty fractions, and a recipe can be shared as text. Split out of Story 1.11 (2026-10-28); it can be cut without affecting any other story. It also holds one optional admin story: editing a user's name and email (Story 7.2), and one REQUIRED story: data caching tuning (Story 7.3), which must not be cut with the rest.
-**FRs covered:** none (UX-DR22)
+**FRs covered:** FR9 (Story 7.5 only), UX-DR22
 
 ## Epic 1: Browse and cook from the phone
 
@@ -674,20 +674,9 @@ So that I can tune recipes to my taste without losing the source (FR6, FR7, FR8)
 **And** the seed now adds one recipe with a hinted ingredient (by create, then update, through the service) (FR12)
 **And** unit tests cover every rule in the original-value truth table with 100% branch coverage (NFR-2)
 
-### Story 3.5: Reset an ingredient to its original
+### Story 3.5: Reset an ingredient to its original (moved to Story 7.5)
 
-As an editor,
-I want to put an ingredient back to its original amount with one click,
-So that I can undo my tweaks when the original was better (FR9).
-
-**Acceptance Criteria:**
-
-**Given** a hinted ingredient in the edit form
-**When** I tap "חזרה למקור"
-**Then** the amount and unit fields return to the original values. The hint stays until I save, and typing a different value undoes the reset
-**And** after saving, the server sees the amount and unit equal to the original, clears both original fields, and the ingredient looks as if it had never been edited (AD-4)
-**And** this works for thirds (⅓ saved as 0.333) and for an original that was to-taste
-**And** the e2e-ready test path is: edit cumin 1→2 tsp, save, see the hint, reset, save, and the hint is gone
+> Moved to Epic 7 as the optional Story 7.5 on 2026-10-29 (Adi: nice to have, at the end). Nothing in Epic 3 depends on it; this heading stays so the numbering does not break.
 
 ### Story 3.6: Delete a recipe
 
@@ -1010,3 +999,20 @@ So that giving a recipe its meal type takes one tap, with no typing, on my phone
 **Then** a row of toggle chips shows the pinned tags in their fixed order (from `GET /api/tags`), in the same style as the library's chip row (UX-DR11), and it scrolls sideways on phone
 **And** tapping a chip adds that tag to the recipe and tapping it again removes it, and it stays in step with the tag field's chosen tags (a tag picked in either place shows in both)
 **And** component tests cover the toggle, the sync with the tag field and keyboard use, and the row works at 375 px
+
+### Story 7.5: Reset ingredient to original (nice to have, optional)
+
+> Optional. Moved here from Story 3.5 on 2026-10-29. Until it is built, the "במקור …" hint from Story 3.4 stays after a manual edit, and retyping the original value and saving already clears it (the server rule from AD-4 is done).
+
+As an editor,
+I want to put an ingredient back to its original amount with one click,
+So that I can undo my tweaks when the original was better (FR9).
+
+**Acceptance Criteria:**
+
+**Given** a hinted ingredient in the edit form
+**When** I tap "חזרה למקור"
+**Then** the amount and unit fields return to the original values. The hint stays until I save, and typing a different value undoes the reset
+**And** after saving, the server sees the amount and unit equal to the original, clears both original fields, and the ingredient looks as if it had never been edited (AD-4)
+**And** this works for thirds (⅓ saved as 0.333) and for an original that was to-taste
+**And** the e2e-ready test path is: edit cumin 1→2 tsp, save, see the hint, reset, save, and the hint is gone

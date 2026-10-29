@@ -32,6 +32,11 @@ class RecipeRepository:
         self._session.flush()
         return recipe
 
+    def delete(self, recipe: Recipe) -> None:
+        """Stage the removal; the database cascades to its ingredients, steps, tags."""
+        self._session.delete(recipe)
+        self._session.flush()
+
     def commit(self) -> None:
         self._session.commit()
 

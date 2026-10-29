@@ -62,9 +62,9 @@ development_status:
   3-1-create-a-recipe-api-and-basic-form: done
   3-2-recipe-form-experience: done
   3-3-tags-on-a-recipe-with-inline-new-tags: done
-  3-4-edit-a-recipe-with-original-value-tracking: review
-  3-5-reset-an-ingredient-to-its-original: backlog
-  3-6-delete-a-recipe: backlog
+  3-4-edit-a-recipe-with-original-value-tracking: done
+  3-5-reset-an-ingredient-to-its-original: optional # moved to 7-5 (optional, nice to have); nothing in Epic 3 depends on it
+  3-6-delete-a-recipe: review
   3-7-recipe-photos-upload-replace-remove: backlog
   3-8-duplicate-a-recipe: backlog # stretch / optional: can be cut without affecting any other story
   epic-3-retrospective: optional
@@ -95,4 +95,5 @@ development_status:
   7-2-edit-user-details: backlog # optional: admin edits a user's name and email, and users edit their own (nice to have)
   7-3-data-caching-tuning: backlog # REQUIRED (not optional): per-query staleTime for reference data like tags, invalidate on edits
   7-4-quick-pick-chips-for-pinned-tags-in-the-recipe-form: backlog # optional: toggle chips for pinned tags above the tag field (split out of 3.3)
+  7-5-reset-ingredient-to-original: backlog # optional: "חזרה למקור" button in the edit form (moved from 3.5; the 3.4 hint stays meanwhile)
   epic-7-retrospective: optional

@@ -411,6 +411,15 @@ export const zRecipesCreateRecipeBody = zRecipeCreate;
  */
 export const zRecipesCreateRecipeResponse = zRecipeRead;
 
+export const zRecipesDeleteRecipePath = z.object({
+    recipe_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zRecipesDeleteRecipeResponse = z.void();
+
 export const zRecipesGetRecipePath = z.object({
     recipe_id: z.uuid()
 });

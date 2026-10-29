@@ -54,3 +54,16 @@ def update_recipe(
     current: EditorDep,
 ) -> RecipeRead:
     return service.update_recipe(recipe_id, data, current.id)
+
+
+@router.delete(
+    "/{recipe_id}",
+    status_code=204,
+    responses={
+        401: {"model": ErrorResponse},
+        403: {"model": ErrorResponse},
+        404: {"model": ErrorResponse},
+    },
+)
+def delete_recipe(recipe_id: uuid.UUID, service: ServiceDep, _: EditorDep) -> None:
+    service.delete_recipe(recipe_id)
