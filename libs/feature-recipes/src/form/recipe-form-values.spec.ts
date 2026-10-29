@@ -1,6 +1,7 @@
 import type { RecipeRead } from '@bite-and-board/data-access';
 import {
   emptyFormValues,
+  emptyIngredientRow,
   toFormValues,
   toWritePayload,
   type RecipeFormValues,
@@ -107,8 +108,22 @@ describe('toFormValues', () => {
         { id: 't2', name: 'מסיבות' },
       ],
       ingredients: [
-        { amount: '0.333', unit: 'kg', name: 'עגבניות', note: '' },
-        { amount: '', unit: '', name: 'מלח', note: 'לפי הטעם' },
+        {
+          amount: '0.333',
+          unit: 'kg',
+          name: 'עגבניות',
+          note: '',
+          ingredientId: 'i1',
+          original: null,
+        },
+        {
+          amount: '',
+          unit: '',
+          name: 'מלח',
+          note: 'לפי הטעם',
+          ingredientId: 'i2',
+          original: null,
+        },
       ],
       steps: [{ description: 'מבשלים' }],
     });
@@ -120,6 +135,19 @@ describe('toFormValues', () => {
     expect(payload.base_servings).toBe(4);
     expect(payload.description).toBeNull();
     expect(payload.tags).toEqual([{ id: 't1' }, { id: 't2' }]);
+  });
+
+  it('sends a saved ingredient with its id and never an original', () => {
+    const payload = toWritePayload(toFormValues(recipe));
+    expect(payload.ingredients.map((item) => item.id)).toEqual(['i1', 'i2']);
+    expect(payload.ingredients[0]).not.toHaveProperty('original');
+  });
+
+  it('sends a new ingredient row without an id', () => {
+    const values = toFormValues(recipe);
+    values.ingredients.push({ ...emptyIngredientRow(), name: 'פלפל' });
+    const [, , added] = toWritePayload(values).ingredients;
+    expect(added).not.toHaveProperty('id');
   });
 });
 

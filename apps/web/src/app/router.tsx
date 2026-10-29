@@ -36,6 +36,10 @@ export function createRoutes(queryClient: QueryClient): RouteObject[] {
             lazy: () => import('@bite-and-board/feature-recipes/recipe-new'),
           },
           {
+            path: 'recipes/:id/edit',
+            lazy: () => import('@bite-and-board/feature-recipes/recipe-edit'),
+          },
+          {
             path: 'account',
             lazy: () => import('@bite-and-board/feature-auth/account'),
           },

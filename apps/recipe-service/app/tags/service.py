@@ -48,6 +48,13 @@ class TagService:
                 linked.add(tag.id)
                 self._repository.link(recipe_id, tag.id)
 
+    def replace_for_recipe(
+        self, recipe_id: uuid.UUID, refs: Sequence[TagInput]
+    ) -> None:
+        """Make `refs` the recipe's whole tag list; the caller's transaction commits."""
+        self._repository.unlink_all(recipe_id)
+        self.assign_to_recipe(recipe_id, refs)
+
     def _resolve(self, ref: TagInput) -> Tag:
         if ref.id is not None:
             tag = self._repository.get(ref.id)

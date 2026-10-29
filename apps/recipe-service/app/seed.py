@@ -5,10 +5,17 @@ never creates them. Free tags are created on first use by the tag resolver (AD-2
 Amounts are exact decimals: ½ is 0.5 and ⅓ is 0.333 (AD-31).
 """
 
+import uuid
 from dataclasses import dataclass
 from decimal import Decimal
 
-from app.recipes.schemas import IngredientCreate, RecipeCreate, StepCreate
+from app.recipes.schemas import (
+    IngredientCreate,
+    IngredientUpdate,
+    RecipeCreate,
+    RecipeUpdate,
+    StepCreate,
+)
 from app.recipes.service import RecipeService
 from app.recipes.units import Unit
 from app.tags.schemas import TagInput
@@ -245,6 +252,48 @@ SEED_RECIPES: tuple[RecipeCreate, ...] = (
 )
 
 
+# A recipe that was tuned after it was created, so one ingredient shows its original
+# (FR-7): the sugar went from 1 cup to ½ cup. Made by create, then update.
+TUNED_RECIPE = _recipe(
+    "עוגיות חמאה",
+    tags=("קינוח", "מאפה"),
+    servings=24,
+    prep=20,
+    cook=12,
+    description="עוגיות פריכות וקלות להכנה.",
+    ingredients=(
+        ("קמח", 300, Unit.G),
+        ("חמאה רכה", 200, Unit.G),
+        ("סוכר", 1, Unit.CUP),
+        ("ביצה", 1, Unit.UNIT),
+    ),
+    steps=("מקציפים חמאה וסוכר.", "מוסיפים ביצה וקמח, יוצרים כדורים ואופים."),
+)
+SEED_TOTAL = len(SEED_RECIPES) + 1
+
+
+def _tuned(service: RecipeService, recipe_id: uuid.UUID) -> None:
+    """Halve the sugar in the tuned recipe, as an editor would."""
+    saved = service.get_recipe(recipe_id)
+    changes = RecipeUpdate.model_validate(
+        {
+            **TUNED_RECIPE.model_dump(),
+            "tags": [{"id": tag.id} for tag in saved.tags],
+            "ingredients": [
+                IngredientUpdate(
+                    id=item.id,
+                    name=item.name,
+                    amount=HALF if item.name == "סוכר" else item.amount,
+                    unit=item.unit,
+                    note=item.note,
+                )
+                for item in saved.ingredients
+            ],
+        }
+    )
+    service.update_recipe(recipe_id, changes)
+
+
 @dataclass(frozen=True)
 class SeedResult:
     created: int
@@ -260,4 +309,7 @@ def run_seed(service: RecipeService) -> SeedResult:
             continue
         service.create_recipe(recipe)
         created += 1
-    return SeedResult(created=created, skipped=len(SEED_RECIPES) - created)
+    if TUNED_RECIPE.title not in existing:
+        _tuned(service, service.create_recipe(TUNED_RECIPE).id)
+        created += 1
+    return SeedResult(created=created, skipped=SEED_TOTAL - created)

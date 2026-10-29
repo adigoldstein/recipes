@@ -233,6 +233,7 @@
     "showOriginal": "הצג מתכון מקורי",
     "clearChecks": "ניקוי סימונים",
     "toTaste": "לפי הטעם",
+    "edit": "עריכה",
     "originalHint": "במקור {{value}}",
     "originalToTaste": "במקור: לפי הטעם",
     "stepOriginal": "במקור: {{text}}",
@@ -250,6 +251,9 @@
   "recipeForm": {
     "newTitle": "מתכון חדש",
     "newAction": "מתכון חדש",
+    "editTitle": "עריכת מתכון",
+    "editBack": "חזרה למתכון",
+    "editSaved": "השינויים נשמרו",
     "back": "חזרה למתכונים",
     "saved": "המתכון נשמר",
     "save": "שמירה",

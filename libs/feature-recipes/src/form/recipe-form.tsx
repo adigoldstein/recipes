@@ -21,7 +21,7 @@ import {
   getValidationIssues,
   schemas,
   tagsListTagsOptions,
-  type RecipeCreate,
+  type RecipeUpdate,
 } from '@bite-and-board/data-access';
 import {
   TAG_NAME_MAX_LENGTH,
@@ -45,6 +45,7 @@ import {
   toast,
 } from '@bite-and-board/ui-components';
 import { useErrorMessage } from '../shared/use-error-message';
+import { useOriginalHint } from '../shared/use-original-hint';
 import {
   DESCRIPTION_MAX_LENGTH,
   NOTES_MAX_LENGTH,
@@ -69,7 +70,7 @@ const UNITS = schemas.zUnit.options;
 export interface RecipeFormProps {
   defaultValues: RecipeFormValues;
   /** Saves the recipe. A rejected promise shows its error on the form. */
-  onSave: (payload: RecipeCreate) => Promise<unknown>;
+  onSave: (payload: RecipeUpdate) => Promise<unknown>;
   submitLabel: string;
 }
 
@@ -114,11 +115,20 @@ function IngredientRow({
   const { t } = useTranslation();
   const n = index + 1;
   const amount = useWatch({ control, name: `ingredients.${index}.amount` });
+  const original = useWatch({
+    control,
+    name: `ingredients.${index}.original`,
+  });
+  const originalHint = useOriginalHint()(original);
   const messages = (['amount', 'name', 'note'] as const)
     .map((field) => rowError(errors, field))
     .filter((message): message is string => Boolean(message));
   const errorId = `ingredient-${index}-error`;
-  const describedBy = messages.length > 0 ? errorId : undefined;
+  const hintId = `ingredient-${index}-hint`;
+  const describedBy =
+    [messages.length > 0 ? errorId : null, originalHint ? hintId : null]
+      .filter(Boolean)
+      .join(' ') || undefined;
   // Enter in a text box never submits the form; in the last row it adds the next one.
   const enter = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key !== 'Enter' || event.nativeEvent.isComposing) {
@@ -206,6 +216,11 @@ function IngredientRow({
           className="col-span-2 flex justify-end gap-1 sm:col-span-3"
         />
       </div>
+      {originalHint ? (
+        <p id={hintId} className="text-label text-hint">
+          {originalHint}
+        </p>
+      ) : null}
       {messages.length > 0 ? (
         <div id={errorId} className="flex flex-col text-sm text-destructive">
           {messages.map((message) => (
@@ -362,7 +377,7 @@ function Steps({
 }
 
 /**
- * The recipe form (FR-4), for create now and edit later (Story 3.4). Values are
+ * The recipe form (FR-4, FR-6), for create and edit. Values are
  * checked against the generated write schema before sending; a 422 from the server
  * lands on the same fields with the same Hebrew messages (AD-9, AD-28).
  */

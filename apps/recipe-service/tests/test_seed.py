@@ -7,7 +7,7 @@ from sqlmodel import Session, col, func, select
 from app.cli import main
 from app.recipes.models import Recipe
 from app.recipes.service import get_recipe_service
-from app.seed import SEED_RECIPES, run_seed
+from app.seed import SEED_RECIPES, SEED_TOTAL, TUNED_RECIPE, run_seed
 from app.tags.models import RecipeTag, Tag
 from app.tags.service import get_tag_service
 from tests.test_migrations import DEFAULT_PINNED_TAGS
@@ -28,10 +28,12 @@ def test_seed_creates_recipes_through_the_service(
 
     result = run_seed(service)
 
-    assert (result.created, result.skipped) == (len(SEED_RECIPES), 0)
+    assert (result.created, result.skipped) == (SEED_TOTAL, 0)
     assert len(SEED_RECIPES) == 10
     titles = [item["title"] for item in client.get("/api/recipes").json()]
-    assert sorted(titles) == sorted(recipe.title for recipe in SEED_RECIPES)
+    assert sorted(titles) == sorted(
+        [recipe.title for recipe in SEED_RECIPES] + [TUNED_RECIPE.title]
+    )
 
     # Default tags are untouched; every one is used; free tags were created unpinned.
     assert [row for row in _tags(session) if row[2]] == defaults_before
@@ -52,8 +54,8 @@ def test_seed_is_idempotent(client: TestClient, session: Session) -> None:
 
     again = run_seed(service)
 
-    assert (again.created, again.skipped) == (0, len(SEED_RECIPES))
-    assert session.exec(select(func.count()).select_from(Recipe)).one() == 10
+    assert (again.created, again.skipped) == (0, SEED_TOTAL)
+    assert session.exec(select(func.count()).select_from(Recipe)).one() == SEED_TOTAL
     assert _tags(session) == tags_before
 
 
@@ -69,19 +71,39 @@ def test_seed_has_to_taste_and_fractions(client: TestClient, session: Session) -
                 assert item["unit"] is None
             else:
                 amounts.append(Decimal(str(item["amount"])))
-            assert item["original"] is None
+            if detail["title"] != TUNED_RECIPE.title:
+                assert item["original"] is None
     assert to_taste >= 1
     assert Decimal("0.5") in amounts
     assert Decimal("0.333") in amounts
+
+
+def test_seed_has_one_recipe_with_a_hinted_ingredient(
+    client: TestClient, session: Session
+) -> None:
+    run_seed(get_recipe_service(session, get_tag_service(session)))
+    hinted = []
+    for summary in client.get("/api/recipes").json():
+        detail = client.get(f"/api/recipes/{summary['id']}").json()
+        hinted += [
+            (detail["title"], item)
+            for item in detail["ingredients"]
+            if item["original"] is not None
+        ]
+    [(title, sugar)] = hinted
+    assert title == TUNED_RECIPE.title
+    assert sugar["name"] == "סוכר"
+    assert (sugar["amount"], sugar["unit"]) == (0.5, "cup")
+    assert sugar["original"] == {"amount": 1, "unit": "cup"}
 
 
 def test_cli_seed_runs_and_reruns(
     client: TestClient, capsys: pytest.CaptureFixture[str]
 ) -> None:
     assert main(["seed"]) == 0
-    assert "10 created, 0 already there" in capsys.readouterr().out
+    assert f"{SEED_TOTAL} created, 0 already there" in capsys.readouterr().out
     assert main(["seed"]) == 0
-    assert "0 created, 10 already there" in capsys.readouterr().out
+    assert f"0 created, {SEED_TOTAL} already there" in capsys.readouterr().out
 
 
 def test_cli_rejects_unknown_command() -> None:
