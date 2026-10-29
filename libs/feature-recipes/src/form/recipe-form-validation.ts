@@ -18,7 +18,9 @@ export function issueFieldPath(path: string) {
 
 /** The part of the form a path belongs to, for telling form fields from other errors. */
 export function isFormField(path: string) {
-  const [field] = path.split('.');
+  const [field, , leaf] = path.split('.');
+  // A refused ingredient `id` has no field to sit on; the form shows it under the button.
+  if (field === 'ingredients' && leaf === 'id') return false;
   return [
     'title',
     'description',
@@ -72,7 +74,7 @@ function numberIssues(values: RecipeFormValues): FieldIssue[] {
  */
 export function validateRecipeForm(values: RecipeFormValues): FieldIssue[] {
   const unparsable = numberIssues(values);
-  const result = schemas.zRecipesCreateRecipeBody.safeParse(
+  const result = schemas.zRecipesUpdateRecipeBody.safeParse(
     toWritePayload(values),
   );
   const rejected = result.success ? [] : fromZodIssues(result.error.issues);

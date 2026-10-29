@@ -1,7 +1,8 @@
 import { parseAmount } from '@bite-and-board/recipe-domain';
 import type {
-  RecipeCreate,
+  OriginalValue,
   RecipeRead,
+  RecipeUpdate,
   Unit,
 } from '@bite-and-board/data-access';
 
@@ -16,6 +17,10 @@ export interface IngredientFormValues {
   unit: Unit | '';
   name: string;
   note: string;
+  /** Set when editing a saved ingredient: it is sent back so the server keeps it. */
+  ingredientId?: string;
+  /** The saved FR-7 original, for the hint only; never sent (AD-20). */
+  original?: OriginalValue | null;
 }
 
 /** A tag on the recipe: an existing one by `id`, or a new one that only has a name. */
@@ -90,6 +95,8 @@ export function toFormValues(recipe: RecipeRead): RecipeFormValues {
       unit: ingredient.unit ?? '',
       name: ingredient.name,
       note: ingredient.note ?? '',
+      ingredientId: ingredient.id,
+      original: ingredient.original,
     })),
     steps: recipe.steps.map((step) => ({ description: step.description })),
   };
@@ -102,7 +109,7 @@ const numberOrNull = (value: string) =>
   value.trim() === '' ? null : Number(value.trim());
 
 /**
- * The create request for these values. Blank optional fields become null, and an
+ * The write request for these values; a saved ingredient keeps its `id` (AD-20). Blank optional fields become null, and an
  * ingredient with no amount is "to taste", so it carries no unit either. A blank
  * required number becomes NaN, which the write schema reports as missing.
  *
@@ -110,7 +117,7 @@ const numberOrNull = (value: string) =>
  * A tag that exists goes as its `id`, a new one as its `name` for the server to
  * create inside the recipe's transaction (AD-25).
  */
-export function toWritePayload(values: RecipeFormValues): RecipeCreate {
+export function toWritePayload(values: RecipeFormValues): RecipeUpdate {
   return {
     title: values.title.trim(),
     description: trimmedOrNull(values.description),
@@ -129,6 +136,7 @@ export function toWritePayload(values: RecipeFormValues): RecipeCreate {
           ? null
           : (parseAmount(ingredient.amount) ?? Number.NaN);
       return {
+        ...(ingredient.ingredientId ? { id: ingredient.ingredientId } : {}),
         name: ingredient.name.trim(),
         amount,
         unit:

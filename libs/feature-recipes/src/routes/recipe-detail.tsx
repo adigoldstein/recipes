@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ParseKeys } from 'i18next';
 import { useQuery } from '@tanstack/react-query';
+import { Pencil } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router';
 import {
   getErrorCode,
   useBackNavigation,
+  useCan,
   recipesGetRecipeOptions,
   type IngredientRead,
   type RecipeRead,
@@ -29,6 +31,7 @@ import { useCookingChecks } from '../detail/use-cooking-checks';
 import { useServings } from '../detail/use-servings';
 import { useErrorMessage } from '../shared/use-error-message';
 import { useFormatTime } from '../shared/use-format-time';
+import { useOriginalHint } from '../shared/use-original-hint';
 
 const MIN_SERVINGS = 1;
 const MAX_SERVINGS = 100;
@@ -96,6 +99,7 @@ function RecipeDetail({ recipe }: { recipe: RecipeRead }) {
   // with its filters.
   const { cameFromApp, onBack } = useBackNavigation();
   const title = useRef<HTMLHeadingElement>(null);
+  const canEdit = useCan('editor');
   const checks = useCookingChecks(recipe.id);
   const [showOriginal, setShowOriginal] = useState(false);
   // View-only: kept for this tab's session, never saved to the recipe.
@@ -132,14 +136,9 @@ function RecipeDetail({ recipe }: { recipe: RecipeRead }) {
     return { amount: formatAmount(scaled), unit: unitLabel(unit, scaled) };
   };
 
-  const originalHint = ({ original }: IngredientRead) => {
-    if (!original) return undefined;
-    if (original.amount === null) return t('detail.originalToTaste');
-    const { amount, unit } = quantityOf(original.amount, original.unit);
-    return t('detail.originalHint', {
-      value: unit ? `${amount} ${unit}` : amount,
-    });
-  };
+  const hintFor = useOriginalHint();
+  const originalHint = ({ original }: IngredientRead) =>
+    hintFor(original, scale);
 
   const hasConverted =
     recipe.ingredients.some((ingredient) => ingredient.source) ||
@@ -152,14 +151,24 @@ function RecipeDetail({ recipe }: { recipe: RecipeRead }) {
     <article className="mx-auto max-w-detail pb-8">
       <title>{t('app.pageTitle', { page: recipe.title })}</title>
       <div className="flex flex-col gap-3 pt-4 pb-6">
-        <BackLink
-          label={t('detail.back')}
-          link={(children) => (
-            <Link to="/" onClick={onBack}>
-              {children}
-            </Link>
-          )}
-        />
+        <div className="flex items-center justify-between gap-3">
+          <BackLink
+            label={t('detail.back')}
+            link={(children) => (
+              <Link to="/" onClick={onBack}>
+                {children}
+              </Link>
+            )}
+          />
+          {canEdit ? (
+            <Button asChild variant="secondary">
+              <Link to={`/recipes/${recipe.id}/edit`}>
+                <Pencil aria-hidden="true" />
+                {t('detail.edit')}
+              </Link>
+            </Button>
+          ) : null}
+        </div>
         {recipe.tags.length > 0 || prep || cook ? (
           <div className="flex flex-wrap items-center gap-2">
             {recipe.tags.map((tag) => (

@@ -3,7 +3,7 @@
 import uuid
 from collections.abc import Sequence
 
-from sqlalchemy import func
+from sqlalchemy import delete, func
 from sqlmodel import Session, col, select
 
 from app.tags.models import RecipeTag, Tag
@@ -29,6 +29,11 @@ class TagRepository:
     def link(self, recipe_id: uuid.UUID, tag_id: uuid.UUID) -> None:
         self._session.add(RecipeTag(recipe_id=recipe_id, tag_id=tag_id))
         self._session.flush()
+
+    def unlink_all(self, recipe_id: uuid.UUID) -> None:
+        self._session.exec(
+            delete(RecipeTag).where(col(RecipeTag.recipe_id) == recipe_id)
+        )
 
     def list_for_recipes(
         self, recipe_ids: Sequence[uuid.UUID]

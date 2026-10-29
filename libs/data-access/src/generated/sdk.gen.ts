@@ -2,7 +2,7 @@
 
 import { client } from './client.gen.js';
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client/index.js';
-import type { AuthChangePasswordData, AuthChangePasswordErrors, AuthChangePasswordResponses, AuthLoginData, AuthLoginErrors, AuthLoginResponses, AuthLogoutData, AuthLogoutResponses, AuthSessionData, AuthSessionErrors, AuthSessionResponses, HealthGetHealthData, HealthGetHealthResponses, RecipesCreateRecipeData, RecipesCreateRecipeErrors, RecipesCreateRecipeResponses, RecipesGetRecipeData, RecipesGetRecipeErrors, RecipesGetRecipeResponses, RecipesListRecipesData, RecipesListRecipesResponses, TagsListTagsData, TagsListTagsResponses, UsersCreateUserData, UsersCreateUserErrors, UsersCreateUserResponses, UsersListUsersData, UsersListUsersResponses, UsersUpdateUserData, UsersUpdateUserErrors, UsersUpdateUserResponses } from './types.gen.js';
+import type { AuthChangePasswordData, AuthChangePasswordErrors, AuthChangePasswordResponses, AuthLoginData, AuthLoginErrors, AuthLoginResponses, AuthLogoutData, AuthLogoutResponses, AuthSessionData, AuthSessionErrors, AuthSessionResponses, HealthGetHealthData, HealthGetHealthResponses, RecipesCreateRecipeData, RecipesCreateRecipeErrors, RecipesCreateRecipeResponses, RecipesGetRecipeData, RecipesGetRecipeErrors, RecipesGetRecipeResponses, RecipesListRecipesData, RecipesListRecipesResponses, RecipesUpdateRecipeData, RecipesUpdateRecipeErrors, RecipesUpdateRecipeResponses, TagsListTagsData, TagsListTagsResponses, UsersCreateUserData, UsersCreateUserErrors, UsersCreateUserResponses, UsersListUsersData, UsersListUsersResponses, UsersUpdateUserData, UsersUpdateUserErrors, UsersUpdateUserResponses } from './types.gen.js';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -87,6 +87,18 @@ export const recipesCreateRecipe = <ThrowOnError extends boolean = false>(option
  * Get Recipe
  */
 export const recipesGetRecipe = <ThrowOnError extends boolean = false>(options: Options<RecipesGetRecipeData, ThrowOnError>): RequestResult<RecipesGetRecipeResponses, RecipesGetRecipeErrors, ThrowOnError> => (options.client ?? client).get<RecipesGetRecipeResponses, RecipesGetRecipeErrors, ThrowOnError>({ url: '/api/recipes/{recipe_id}', ...options });
+
+/**
+ * Update Recipe
+ */
+export const recipesUpdateRecipe = <ThrowOnError extends boolean = false>(options: Options<RecipesUpdateRecipeData, ThrowOnError>): RequestResult<RecipesUpdateRecipeResponses, RecipesUpdateRecipeErrors, ThrowOnError> => (options.client ?? client).put<RecipesUpdateRecipeResponses, RecipesUpdateRecipeErrors, ThrowOnError>({
+    url: '/api/recipes/{recipe_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
  * List Tags

@@ -114,6 +114,31 @@ export type IngredientRead = {
 };
 
 /**
+ * IngredientUpdate
+ *
+ * An ingredient in a recipe replace: with an `id` it is an existing one (AD-20).
+ */
+export type IngredientUpdate = {
+    /**
+     * Amount
+     */
+    amount?: number | null;
+    /**
+     * Id
+     */
+    id?: string | null;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Note
+     */
+    note?: string | null;
+    unit?: Unit | null;
+};
+
+/**
  * LoginRequest
  *
  * Plain strings on purpose: a malformed email is just wrong credentials.
@@ -167,7 +192,7 @@ export type PhotoRead = {
 /**
  * RecipeCreate
  *
- * Everything needed to create a recipe; tags are ids or names (AD-25).
+ * Everything needed to create a recipe.
  */
 export type RecipeCreate = {
     /**
@@ -296,6 +321,54 @@ export type RecipeSummary = {
      * Total Minutes
      */
     total_minutes: number | null;
+};
+
+/**
+ * RecipeUpdate
+ *
+ * The whole recipe, replacing the saved one (AD-4); never carries originals.
+ */
+export type RecipeUpdate = {
+    /**
+     * Base Servings
+     */
+    base_servings: number;
+    /**
+     * Cook Time Minutes
+     */
+    cook_time_minutes?: number | null;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Ingredients
+     */
+    ingredients: Array<IngredientUpdate>;
+    /**
+     * Notes
+     */
+    notes?: string | null;
+    /**
+     * Prep Time Minutes
+     */
+    prep_time_minutes?: number | null;
+    /**
+     * Source Url
+     */
+    source_url?: string | null;
+    /**
+     * Steps
+     */
+    steps: Array<StepCreate>;
+    /**
+     * Tags
+     */
+    tags?: Array<TagInput>;
+    /**
+     * Title
+     */
+    title: string;
 };
 
 /**
@@ -734,6 +807,48 @@ export type RecipesGetRecipeResponses = {
 };
 
 export type RecipesGetRecipeResponse = RecipesGetRecipeResponses[keyof RecipesGetRecipeResponses];
+
+export type RecipesUpdateRecipeData = {
+    body: RecipeUpdate;
+    path: {
+        /**
+         * Recipe Id
+         */
+        recipe_id: string;
+    };
+    query?: never;
+    url: '/api/recipes/{recipe_id}';
+};
+
+export type RecipesUpdateRecipeErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RecipesUpdateRecipeError = RecipesUpdateRecipeErrors[keyof RecipesUpdateRecipeErrors];
+
+export type RecipesUpdateRecipeResponses = {
+    /**
+     * Successful Response
+     */
+    200: RecipeRead;
+};
+
+export type RecipesUpdateRecipeResponse = RecipesUpdateRecipeResponses[keyof RecipesUpdateRecipeResponses];
 
 export type TagsListTagsData = {
     body?: never;

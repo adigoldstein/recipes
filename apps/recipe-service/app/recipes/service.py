@@ -4,11 +4,13 @@ import uuid
 from typing import Annotated
 
 from fastapi import Depends
+from fastapi.exceptions import RequestValidationError
 from sqlmodel import Session
 
-from app.core.db import get_session
+from app.core.db import get_session, utcnow
 from app.core.errors import AppError, ErrorCode
 from app.recipes.models import Ingredient, Recipe, Step
+from app.recipes.originals import apply_edit
 from app.recipes.repository import RecipeRepository
 from app.recipes.schemas import (
     IngredientRead,
@@ -16,6 +18,7 @@ from app.recipes.schemas import (
     RecipeCreate,
     RecipeRead,
     RecipeSummary,
+    RecipeUpdate,
     SourceValue,
     StepRead,
 )
@@ -109,6 +112,82 @@ class RecipeService:
         try:
             self._repository.add(recipe)
             self._tags.assign_to_recipe(recipe.id, data.tags)
+            self._repository.commit()
+        except Exception:
+            self._repository.rollback()
+            raise
+        return self.get_recipe(recipe.id)
+
+    def update_recipe(
+        self,
+        recipe_id: uuid.UUID,
+        data: RecipeUpdate,
+        user_id: uuid.UUID | None = None,
+    ) -> RecipeRead:
+        """Replace the whole recipe in one transaction (AD-4, AD-20).
+
+        Ingredients are matched by `id` and updated in place, so their originals
+        survive; omitted ones are deleted and ones without an `id` are inserted.
+        `user_id` is the editor; the seed has none.
+        """
+        recipe = self._repository.get(recipe_id)
+        if recipe is None:
+            raise AppError(404, ErrorCode.RECIPE_NOT_FOUND, "Recipe not found")
+        existing = {item.id: item for item in recipe.ingredients}
+        unknown = [
+            index
+            for index, item in enumerate(data.ingredients)
+            if item.id is not None and item.id not in existing
+        ]
+        if unknown:
+            raise RequestValidationError(
+                [
+                    {
+                        "type": "invalid",
+                        "loc": ("body", "ingredients", index, "id"),
+                        "msg": "Ingredient does not belong to this recipe",
+                        "input": str(data.ingredients[index].id),
+                    }
+                    for index in unknown
+                ]
+            )
+
+        recipe.title = data.title
+        recipe.description = data.description
+        recipe.notes = data.notes
+        recipe.base_servings = data.base_servings
+        recipe.prep_time_minutes = data.prep_time_minutes
+        recipe.cook_time_minutes = data.cook_time_minutes
+        recipe.source_url = data.source_url
+        recipe.updated_by = user_id
+        recipe.updated_at = utcnow()
+
+        ingredients: list[Ingredient] = []
+        for position, item in enumerate(data.ingredients):
+            if item.id is None:
+                ingredient = Ingredient(
+                    recipe_id=recipe.id,
+                    position=position,
+                    name=item.name,
+                    amount=item.amount,
+                    unit=item.unit if item.amount is not None else None,
+                    note=item.note,
+                )
+            else:
+                ingredient = existing[item.id]
+                ingredient.position = position
+                ingredient.name = item.name
+                ingredient.note = item.note
+                apply_edit(ingredient, item.amount, item.unit)
+            ingredients.append(ingredient)
+        recipe.ingredients = ingredients
+        recipe.steps = [
+            Step(recipe_id=recipe.id, position=position, description=item.description)
+            for position, item in enumerate(data.steps)
+        ]
+        try:
+            self._repository.add(recipe)
+            self._tags.replace_for_recipe(recipe.id, data.tags)
             self._repository.commit()
         except Exception:
             self._repository.rollback()

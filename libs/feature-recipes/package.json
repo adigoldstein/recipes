@@ -19,6 +19,11 @@
       "import": "./src/routes/recipe-new.tsx",
       "default": "./src/routes/recipe-new.tsx"
     },
+    "./recipe-edit": {
+      "types": "./src/routes/recipe-edit.tsx",
+      "import": "./src/routes/recipe-edit.tsx",
+      "default": "./src/routes/recipe-edit.tsx"
+    },
     "./new-recipe-button": {
       "types": "./src/routes/new-recipe-button.tsx",
       "import": "./src/routes/new-recipe-button.tsx",

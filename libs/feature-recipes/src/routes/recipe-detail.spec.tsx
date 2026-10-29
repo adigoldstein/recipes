@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { delay, http, HttpResponse } from 'msw';
 import { schemas, type RecipeRead } from '@bite-and-board/data-access';
 import { initI18n } from '@bite-and-board/i18n';
-import { server } from '../testing/server';
+import { server, serveSession } from '../testing/server';
 import { renderDetail } from '../testing/render-detail';
 
 function recipe(overrides: Partial<RecipeRead> = {}): RecipeRead {
@@ -57,6 +57,21 @@ afterEach(() => {
 });
 
 describe('RecipeDetailPage', () => {
+  it('offers editing to an editor only', async () => {
+    serve(recipe());
+    renderDetail('r1');
+    await screen.findByRole('heading', { level: 1, name: 'פנקייק' });
+    expect(screen.queryByRole('link', { name: 'עריכה' })).toBeNull();
+  });
+
+  it('links an editor to the edit form', async () => {
+    serveSession('editor');
+    serve(recipe());
+    renderDetail('r1');
+    const edit = await screen.findByRole('link', { name: 'עריכה' });
+    expect(edit.getAttribute('href')).toBe('/recipes/r1/edit');
+  });
+
   it('shows tags, times, title, ingredients, numbered steps', async () => {
     serve(recipe({ description: 'ארוחת בוקר קלאסית' }));
     renderDetail('r1');

@@ -57,14 +57,20 @@ class IngredientCreate(BaseModel):
     note: str | None = None
 
 
+class IngredientUpdate(IngredientCreate):
+    """An ingredient in a recipe replace: with an `id` it is an existing one (AD-20)."""
+
+    id: uuid.UUID | None = None
+
+
 class StepCreate(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     description: str = Field(min_length=1)
 
 
-class RecipeCreate(BaseModel):
-    """Everything needed to create a recipe; tags are ids or names (AD-25)."""
+class _RecipeFields(BaseModel):
+    """What a recipe write shares; tags are ids or names (AD-25)."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -76,7 +82,19 @@ class RecipeCreate(BaseModel):
     cook_time_minutes: int | None = Field(default=None, ge=0)
     source_url: str | None = Field(default=None, max_length=2048)
     tags: list[TagInput] = Field(default_factory=list)
+
+
+class RecipeCreate(_RecipeFields):
+    """Everything needed to create a recipe."""
+
     ingredients: list[IngredientCreate] = Field(min_length=1)
+    steps: list[StepCreate] = Field(min_length=1)
+
+
+class RecipeUpdate(_RecipeFields):
+    """The whole recipe, replacing the saved one (AD-4); never carries originals."""
+
+    ingredients: list[IngredientUpdate] = Field(min_length=1)
     steps: list[StepCreate] = Field(min_length=1)
 
 

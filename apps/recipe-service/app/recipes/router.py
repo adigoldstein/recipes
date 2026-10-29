@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends
 
 from app.core.errors import ErrorResponse
 from app.core.security import CurrentUser, require_role
-from app.recipes.schemas import RecipeCreate, RecipeRead, RecipeSummary
+from app.recipes.schemas import RecipeCreate, RecipeRead, RecipeSummary, RecipeUpdate
 from app.recipes.service import RecipeService, get_recipe_service
 
 router = APIRouter(prefix="/recipes", tags=["recipes"])
@@ -37,3 +37,20 @@ def create_recipe(
     data: RecipeCreate, service: ServiceDep, current: EditorDep
 ) -> RecipeRead:
     return service.create_recipe(data, current.id)
+
+
+@router.put(
+    "/{recipe_id}",
+    responses={
+        401: {"model": ErrorResponse},
+        403: {"model": ErrorResponse},
+        404: {"model": ErrorResponse},
+    },
+)
+def update_recipe(
+    recipe_id: uuid.UUID,
+    data: RecipeUpdate,
+    service: ServiceDep,
+    current: EditorDep,
+) -> RecipeRead:
+    return service.update_recipe(recipe_id, data, current.id)
