@@ -95,6 +95,29 @@ describe('RouteError', () => {
     expect(document.title).toBe('משהו השתבש · ביס & סיר');
   });
 
+  it('has a back link to the home page and a refresh button', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const reload = vi.fn();
+    vi.stubGlobal('location', { ...window.location, reload });
+    renderApp('/', throwingRoutes(new Error('boom')));
+    const back = await screen.findByRole('link', { name: 'חזרה לרשימה' });
+    expect(back.getAttribute('href')).toBe('/');
+    fireEvent.click(screen.getByRole('button', { name: 'רענון הדף' }));
+    expect(reload).toHaveBeenCalledTimes(1);
+    vi.unstubAllGlobals();
+  });
+
+  it('has the back link, and no refresh button, on a thrown 404', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    renderApp('/', throwingRoutes(data(null, { status: 404 })));
+    expect(
+      (await screen.findByRole('link', { name: 'חזרה לרשימה' })).getAttribute(
+        'href',
+      ),
+    ).toBe('/');
+    expect(screen.queryByRole('button', { name: 'רענון הדף' })).toBeNull();
+  });
+
   it('renders the not-found copy for a thrown 404', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
     renderApp('/', throwingRoutes(data(null, { status: 404 })));

@@ -5,6 +5,7 @@ import {
   recipesListRecipesQueryKey,
   type RecipeRead,
 } from '@bite-and-board/data-access';
+import { toast } from '@bite-and-board/ui-components';
 import { renderNew } from '../testing/render-new';
 import { server } from '../testing/server';
 
@@ -59,6 +60,11 @@ async function fillRequired(user: User) {
 }
 
 describe('RecipeNewPage', () => {
+  // Toasts live in a module-level store, so one test's would show in the next.
+  afterEach(() => {
+    toast.dismiss();
+  });
+
   describe('the form', () => {
     it('has a heading, a back link and every field of the story', () => {
       renderNew();
@@ -252,7 +258,7 @@ describe('RecipeNewPage', () => {
       await user.click(save());
 
       expect(await screen.findAllByText('יש למלא את השדה')).toHaveLength(4);
-      expect(screen.getByText('יש להזין מספר')).toBeTruthy();
+      expect(screen.getByText(/^יש להזין מספר, למשל/)).toBeTruthy();
       const title = field('שם המתכון');
       expect(title.getAttribute('aria-invalid')).toBe('true');
       expect(title.getAttribute('aria-describedby')).toBe('recipe-title-error');
@@ -277,6 +283,187 @@ describe('RecipeNewPage', () => {
         'text-destructive',
       );
       expect(sent).toEqual([]);
+    });
+  });
+
+  describe('the form experience', () => {
+    it('accepts fractions as amounts and sends them as numbers', async () => {
+      const user = userEvent.setup();
+      const sent = serveCreate();
+      renderNew();
+      await fillRequired(user);
+      await user.type(field('כמות, מצרך 1'), '1 ½');
+      for (const [n, amount, name] of [
+        [2, '⅓', 'ב'],
+        [3, '1/3', 'ג'],
+        [4, '1,5', 'ד'],
+      ] as const) {
+        await user.click(screen.getByRole('button', { name: 'הוספת מצרך' }));
+        await user.type(field(`כמות, מצרך ${n}`), amount);
+        await user.type(field(`שם המצרך ${n}`), name);
+      }
+      await user.click(save());
+      await screen.findByText('recipe page stub');
+      const [payload] = sent as { ingredients: { amount: number }[] }[];
+      expect(payload.ingredients.map((i) => i.amount)).toEqual([
+        1.5, 0.333, 0.333, 1.5,
+      ]);
+    });
+
+    it('flags an amount that is not a number as soon as it is left', async () => {
+      const user = userEvent.setup();
+      renderNew();
+      await user.type(field('כמות, מצרך 1'), '1/0');
+      expect(screen.queryByText(/^יש להזין מספר, למשל/)).toBeNull();
+      await user.tab();
+      expect(await screen.findByText(/^יש להזין מספר, למשל/)).toBeTruthy();
+      expect(field('כמות, מצרך 1').getAttribute('aria-invalid')).toBe('true');
+      await user.clear(field('כמות, מצרך 1'));
+      await user.type(field('כמות, מצרך 1'), '½');
+      await waitFor(() =>
+        expect(screen.queryByText(/^יש להזין מספר, למשל/)).toBeNull(),
+      );
+    });
+
+    it('shows a required error when a field is left, not before', async () => {
+      const user = userEvent.setup();
+      renderNew();
+      expect(screen.queryByText('יש למלא את השדה')).toBeNull();
+      await user.click(field('שם המתכון'));
+      await user.tab();
+      expect(await screen.findByText('יש למלא את השדה')).toBeTruthy();
+      await user.type(field('שם המתכון'), 'א');
+      await waitFor(() =>
+        expect(screen.queryByText('יש למלא את השדה')).toBeNull(),
+      );
+    });
+
+    it('focuses the first error in a list row on submit', async () => {
+      const user = userEvent.setup();
+      renderNew();
+      await user.type(field('שם המתכון'), 'פשטידה');
+      await user.type(field('שלב 1'), 'אופים');
+      await user.click(save());
+      await waitFor(() =>
+        expect(document.activeElement).toBe(field('שם המצרך 1')),
+      );
+    });
+
+    it('moves ingredient rows up and down with buttons, keeping the keyboard on them', async () => {
+      const user = userEvent.setup();
+      const sent = serveCreate();
+      renderNew();
+      await fillRequired(user);
+      await user.click(screen.getByRole('button', { name: 'הוספת מצרך' }));
+      await user.type(field('שם המצרך 2'), 'מלח');
+      const button = (name: string) =>
+        screen.getByRole('button', { name }) as HTMLButtonElement;
+      expect(button('העברת מצרך 1 למעלה').disabled).toBe(true);
+      expect(button('העברת מצרך 2 למטה').disabled).toBe(true);
+
+      button('העברת מצרך 1 למטה').focus();
+      await user.keyboard('{Enter}');
+      expect(field('שם המצרך 1')).toHaveProperty('value', 'מלח');
+      expect(field('שם המצרך 2')).toHaveProperty('value', 'תרד');
+      // The pressed button is now disabled, so focus moves to its partner.
+      expect(document.activeElement).toBe(button('העברת מצרך 2 למעלה'));
+
+      await user.click(save());
+      await screen.findByText('recipe page stub');
+      const [payload] = sent as { ingredients: { name: string }[] }[];
+      expect(payload.ingredients.map((i) => i.name)).toEqual(['מלח', 'תרד']);
+    });
+
+    it('moves steps too', async () => {
+      const user = userEvent.setup();
+      renderNew();
+      await user.type(field('שלב 1'), 'ראשון');
+      await user.click(screen.getByRole('button', { name: 'הוספת שלב' }));
+      await user.type(field('שלב 2'), 'שני');
+      await user.click(
+        screen.getByRole('button', { name: 'העברת שלב 2 למעלה' }),
+      );
+      expect(field('שלב 1')).toHaveProperty('value', 'שני');
+      expect(field('שלב 2')).toHaveProperty('value', 'ראשון');
+    });
+
+    it('adds an ingredient row on Enter in the last row, once it has a name', async () => {
+      const user = userEvent.setup();
+      const sent = serveCreate();
+      renderNew();
+      await user.type(field('שם המצרך 1'), '{Enter}');
+      expect(screen.queryByLabelText('שם המצרך 2')).toBeNull();
+      await user.type(field('שם המצרך 1'), 'תרד{Enter}');
+      expect(field('כמות, מצרך 2')).toBeTruthy();
+      expect(document.activeElement).toBe(field('כמות, מצרך 2'));
+      // Enter in a row that is not the last one adds nothing, and never submits.
+      await user.type(field('שם המצרך 1'), '{Enter}');
+      expect(screen.queryByLabelText('שם המצרך 3')).toBeNull();
+      expect(sent).toEqual([]);
+    });
+  });
+
+  describe('leaving with unsaved changes', () => {
+    const back = () => screen.getByRole('link', { name: 'חזרה למתכונים' });
+
+    it('leaves at once when nothing was typed', async () => {
+      const user = userEvent.setup();
+      renderNew('/');
+      await user.click(back());
+      await screen.findByText('library stub');
+    });
+
+    it('asks first, and staying keeps the form as it was', async () => {
+      const user = userEvent.setup();
+      const { router } = renderNew('/');
+      await user.type(field('שם המתכון'), 'פשטידה');
+      await user.click(back());
+      const dialog = await screen.findByRole('alertdialog');
+      expect(dialog.textContent).toContain('לצאת בלי לשמור?');
+      await user.click(screen.getByRole('button', { name: 'להישאר' }));
+      await waitFor(() => expect(screen.queryByRole('alertdialog')).toBeNull());
+      expect(router.state.location.pathname).toBe('/recipes/new');
+      expect(field('שם המתכון')).toHaveProperty('value', 'פשטידה');
+    });
+
+    it('leaves after confirming', async () => {
+      const user = userEvent.setup();
+      renderNew('/');
+      await user.type(field('שם המתכון'), 'פשטידה');
+      await user.click(back());
+      await user.click(await screen.findByRole('button', { name: 'לצאת' }));
+      await screen.findByText('library stub');
+    });
+
+    it('also guards the browser back button', async () => {
+      const user = userEvent.setup();
+      const { router } = renderNew('/');
+      await user.type(field('שם המתכון'), 'פשטידה');
+      await router.navigate(-1);
+      expect(await screen.findByRole('alertdialog')).toBeTruthy();
+    });
+
+    it('asks the browser to warn on reload or close only while there are changes', async () => {
+      const user = userEvent.setup();
+      renderNew();
+      const unload = () => {
+        const event = new Event('beforeunload', { cancelable: true });
+        globalThis.dispatchEvent(event);
+        return event.defaultPrevented;
+      };
+      expect(unload()).toBe(false);
+      await user.type(field('שם המתכון'), 'פשטידה');
+      expect(unload()).toBe(true);
+    });
+
+    it('does not ask after a successful save', async () => {
+      const user = userEvent.setup();
+      serveCreate();
+      renderNew();
+      await fillRequired(user);
+      await user.click(save());
+      await screen.findByText('recipe page stub');
+      expect(screen.queryByRole('alertdialog')).toBeNull();
     });
   });
 
@@ -378,6 +565,50 @@ describe('RecipeNewPage', () => {
       await user.click(save());
       await screen.findByText('recipe page stub');
       expect(calls).toBe(2);
+    });
+
+    it('offers a retry toast when the server fails, and the retry saves', async () => {
+      const user = userEvent.setup();
+      let calls = 0;
+      server.use(
+        http.post('*/api/recipes', () => {
+          calls += 1;
+          return calls === 1
+            ? new HttpResponse('boom', { status: 500 })
+            : HttpResponse.json(SAVED, { status: 201 });
+        }),
+      );
+      renderNew();
+      await fillRequired(user);
+      await user.click(save());
+
+      expect(await screen.findAllByText(/^השמירה לא הצליחה/)).not.toHaveLength(
+        0,
+      );
+      expect((await screen.findByRole('alert')).textContent).toBe(
+        'משהו השתבש, אפשר לנסות שוב',
+      );
+      expect(field('שם המתכון')).toHaveProperty('value', 'פשטידת תרד');
+      await user.click(screen.getByRole('button', { name: 'לנסות שוב' }));
+      await screen.findByText('recipe page stub');
+      expect(calls).toBe(2);
+    });
+
+    it('shows no retry toast for an error that retrying cannot fix', async () => {
+      const user = userEvent.setup();
+      server.use(
+        http.post('*/api/recipes', () =>
+          HttpResponse.json(
+            { detail: 'Tag not found', code: 'tag_not_found' },
+            { status: 404 },
+          ),
+        ),
+      );
+      renderNew();
+      await fillRequired(user);
+      await user.click(save());
+      await screen.findByRole('alert');
+      expect(screen.queryAllByText(/^השמירה לא הצליחה/)).toHaveLength(0);
     });
   });
 });

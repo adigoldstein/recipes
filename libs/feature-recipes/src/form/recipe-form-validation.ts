@@ -3,10 +3,10 @@ import {
   schemas,
   type FieldIssue,
 } from '@bite-and-board/data-access';
+import { parseAmount } from '@bite-and-board/recipe-domain';
 import { toWritePayload, type RecipeFormValues } from './recipe-form-values';
 
 const INTEGER = /^\d+$/;
-const DECIMAL = /^\d+(\.\d+)?$/;
 
 /** Array fields keep their own message apart from their rows' (`errors.steps.root`). */
 const ARRAY_FIELDS = new Set(['ingredients', 'steps']);
@@ -49,9 +49,18 @@ function numberIssues(values: RecipeFormValues): FieldIssue[] {
   check('base_servings', values.base_servings, INTEGER, 'integer');
   check('prep_time_minutes', values.prep_time_minutes, INTEGER, 'integer');
   check('cook_time_minutes', values.cook_time_minutes, INTEGER, 'integer');
-  values.ingredients.forEach((ingredient, index) =>
-    check(`ingredients.${index}.amount`, ingredient.amount, DECIMAL, 'number'),
-  );
+  values.ingredients.forEach((ingredient, index) => {
+    if (
+      ingredient.amount.trim() !== '' &&
+      parseAmount(ingredient.amount) === null
+    ) {
+      issues.push({
+        path: `ingredients.${index}.amount`,
+        type: 'number',
+        params: {},
+      });
+    }
+  });
   return issues;
 }
 

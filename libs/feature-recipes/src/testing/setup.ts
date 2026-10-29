@@ -20,6 +20,7 @@ class ResizeObserverStub {
 globalThis.ResizeObserver ??= ResizeObserverStub;
 Element.prototype.hasPointerCapture ??= () => false;
 Element.prototype.releasePointerCapture ??= () => undefined;
+Element.prototype.setPointerCapture ??= () => undefined; // sonner, when a toast is pressed
 Element.prototype.scrollIntoView ??= () => undefined;
 
 beforeAll(() => server.listen({ onUnhandledFrame: 'error' }));

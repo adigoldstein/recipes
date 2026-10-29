@@ -1,3 +1,4 @@
+import { parseAmount } from '@bite-and-board/recipe-domain';
 import type {
   RecipeCreate,
   RecipeRead,
@@ -110,7 +111,11 @@ export function toWritePayload(values: RecipeFormValues): RecipeCreate {
     source_url: trimmedOrNull(values.source_url),
     tags: [],
     ingredients: values.ingredients.map((ingredient) => {
-      const amount = numberOrNull(ingredient.amount);
+      // Blank is "to taste"; text that is no amount stays NaN for the checks.
+      const amount =
+        ingredient.amount.trim() === ''
+          ? null
+          : (parseAmount(ingredient.amount) ?? Number.NaN);
       return {
         name: ingredient.name.trim(),
         amount,
