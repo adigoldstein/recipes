@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider, useLocation } from 'react-router';
 import { initI18n } from '@bite-and-board/i18n';
-import { DirectionProvider } from '@bite-and-board/ui-components';
+import { DirectionProvider, Toaster } from '@bite-and-board/ui-components';
 import { Component as RecipeDetailPage } from '../routes/recipe-detail';
 
 initI18n();
@@ -28,11 +28,13 @@ export function renderDetail(id: string, from?: string) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
-  return render(
+  const rendered = render(
     <QueryClientProvider client={queryClient}>
       <DirectionProvider dir="rtl">
         <RouterProvider router={router} />
+        <Toaster />
       </DirectionProvider>
     </QueryClientProvider>,
   );
+  return { ...rendered, router, queryClient };
 }

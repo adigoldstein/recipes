@@ -194,6 +194,18 @@ class RecipeService:
             raise
         return self.get_recipe(recipe.id)
 
+    def delete_recipe(self, recipe_id: uuid.UUID) -> None:
+        """Delete the recipe with its ingredients, steps and tag links (FR-10)."""
+        recipe = self._repository.get(recipe_id)
+        if recipe is None:
+            raise AppError(404, ErrorCode.RECIPE_NOT_FOUND, "Recipe not found")
+        try:
+            self._repository.delete(recipe)
+            self._repository.commit()
+        except Exception:
+            self._repository.rollback()
+            raise
+
     def get_recipe(self, recipe_id: uuid.UUID) -> RecipeRead:
         recipe = self._repository.get(recipe_id)
         if recipe is None:

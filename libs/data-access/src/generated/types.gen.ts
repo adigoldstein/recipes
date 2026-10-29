@@ -774,6 +774,48 @@ export type RecipesCreateRecipeResponses = {
 
 export type RecipesCreateRecipeResponse = RecipesCreateRecipeResponses[keyof RecipesCreateRecipeResponses];
 
+export type RecipesDeleteRecipeData = {
+    body?: never;
+    path: {
+        /**
+         * Recipe Id
+         */
+        recipe_id: string;
+    };
+    query?: never;
+    url: '/api/recipes/{recipe_id}';
+};
+
+export type RecipesDeleteRecipeErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RecipesDeleteRecipeError = RecipesDeleteRecipeErrors[keyof RecipesDeleteRecipeErrors];
+
+export type RecipesDeleteRecipeResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type RecipesDeleteRecipeResponse = RecipesDeleteRecipeResponses[keyof RecipesDeleteRecipeResponses];
+
 export type RecipesGetRecipeData = {
     body?: never;
     path: {

@@ -27,6 +27,7 @@ import {
   Toggle,
   type IngredientQuantity,
 } from '@bite-and-board/ui-components';
+import { DeleteRecipe } from '../detail/delete-recipe';
 import { useCookingChecks } from '../detail/use-cooking-checks';
 import { useServings } from '../detail/use-servings';
 import { useErrorMessage } from '../shared/use-error-message';
@@ -161,12 +162,15 @@ function RecipeDetail({ recipe }: { recipe: RecipeRead }) {
             )}
           />
           {canEdit ? (
-            <Button asChild variant="secondary">
-              <Link to={`/recipes/${recipe.id}/edit`}>
-                <Pencil aria-hidden="true" />
-                {t('detail.edit')}
-              </Link>
-            </Button>
+            <div className="flex items-center gap-1">
+              <Button asChild variant="secondary">
+                <Link to={`/recipes/${recipe.id}/edit`}>
+                  <Pencil aria-hidden="true" />
+                  {t('detail.edit')}
+                </Link>
+              </Button>
+              <DeleteRecipe recipe={recipe} />
+            </div>
           ) : null}
         </div>
         {recipe.tags.length > 0 || prep || cook ? (

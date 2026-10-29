@@ -234,6 +234,15 @@
     "clearChecks": "ניקוי סימונים",
     "toTaste": "לפי הטעם",
     "edit": "עריכה",
+    "delete": {
+      "action": "מחיקה",
+      "title": "למחוק את המתכון?",
+      "description": "המתכון '{{title}}' יימחק לצמיתות.",
+      "confirm": "מחיקה",
+      "cancel": "ביטול",
+      "done": "המתכון נמחק",
+      "gone": "המתכון כבר נמחק"
+    },
     "originalHint": "במקור {{value}}",
     "originalToTaste": "במקור: לפי הטעם",
     "stepOriginal": "במקור: {{text}}",
