@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { HttpResponse, http } from 'msw';
 import {
   recipesListRecipesQueryKey,
+  tagsListTagsQueryKey,
   type RecipeRead,
 } from '@bite-and-board/data-access';
 import { toast } from '@bite-and-board/ui-components';
@@ -283,6 +284,125 @@ describe('RecipeNewPage', () => {
         'text-destructive',
       );
       expect(sent).toEqual([]);
+    });
+  });
+
+  describe('tags', () => {
+    const TAGS = [
+      { id: '11111111-1111-4111-8111-111111111111', name: 'ערב', pinned: true },
+      { id: '22222222-2222-4222-8222-222222222222', name: 'מרק', pinned: true },
+      {
+        id: '33333333-3333-4333-8333-333333333333',
+        name: 'על האש',
+        pinned: false,
+      },
+    ];
+    const serveTags = () =>
+      server.use(http.get('*/api/tags', () => HttpResponse.json(TAGS)));
+    // The field's label is the button's accessible name.
+    const picker = () => screen.getByLabelText('תגיות');
+
+    it('lists every tag when opened, and sends existing ones by id and new ones by name', async () => {
+      const user = userEvent.setup();
+      serveTags();
+      const sent = serveCreate();
+      renderNew();
+      await fillRequired(user);
+      await user.click(picker());
+      expect(
+        (await screen.findAllByRole('option')).map((o) => o.textContent),
+      ).toEqual(['ערב', 'מרק', 'על האש']);
+      await user.click(screen.getByRole('option', { name: 'מרק' }));
+      await user.type(
+        screen.getByPlaceholderText('חיפוש תגית או שם חדש'),
+        '  ארוחת   שבת ',
+      );
+      await user.click(
+        screen.getByRole('option', { name: "יצירת תגית 'ארוחת שבת'" }),
+      );
+      await user.keyboard('{Escape}');
+      const chips = screen.getByRole('list', { name: 'התגיות של המתכון' });
+      expect(chips.textContent).toContain('מרק');
+      expect(chips.textContent).toContain('ארוחת שבת');
+
+      await user.click(save());
+      await screen.findByText('recipe page stub');
+      const [payload] = sent as { tags: unknown[] }[];
+      expect(payload.tags).toEqual([
+        { id: '22222222-2222-4222-8222-222222222222' },
+        { name: 'ארוחת שבת' },
+      ]);
+    });
+
+    it('does not offer to create a tag that exists, whatever its case', async () => {
+      const user = userEvent.setup();
+      server.use(
+        http.get('*/api/tags', () =>
+          HttpResponse.json([
+            {
+              id: '44444444-4444-4444-8444-444444444444',
+              name: 'BBQ',
+              pinned: false,
+            },
+          ]),
+        ),
+      );
+      renderNew();
+      await user.click(picker());
+      await screen.findByRole('option', { name: 'BBQ' });
+      await user.type(
+        screen.getByPlaceholderText('חיפוש תגית או שם חדש'),
+        'bbq ',
+      );
+      expect(screen.getAllByRole('option').map((o) => o.textContent)).toEqual([
+        'BBQ',
+      ]);
+    });
+
+    it('works when the tag list cannot be loaded: a typed name can still be created', async () => {
+      const user = userEvent.setup();
+      server.use(
+        http.get('*/api/tags', () => HttpResponse.json({}, { status: 500 })),
+      );
+      const sent = serveCreate();
+      renderNew();
+      await fillRequired(user);
+      await user.click(picker());
+      await user.type(
+        screen.getByPlaceholderText('חיפוש תגית או שם חדש'),
+        'חג',
+      );
+      await user.click(screen.getByRole('option', { name: "יצירת תגית 'חג'" }));
+      await user.keyboard('{Escape}');
+      await user.click(save());
+      await screen.findByText('recipe page stub');
+      expect((sent as { tags: unknown[] }[])[0].tags).toEqual([{ name: 'חג' }]);
+    });
+
+    it('counts a chosen tag as an unsaved change', async () => {
+      const user = userEvent.setup();
+      serveTags();
+      renderNew('/');
+      await user.click(picker());
+      await user.click(await screen.findByRole('option', { name: 'ערב' }));
+      await user.keyboard('{Escape}');
+      await user.click(screen.getByRole('link', { name: 'חזרה למתכונים' }));
+      expect(await screen.findByRole('alertdialog')).toBeTruthy();
+    });
+
+    it('refreshes the tag list after saving, so a new tag shows up everywhere', async () => {
+      const user = userEvent.setup();
+      serveCreate();
+      const { queryClient } = renderNew();
+      // The form reads the tags, so the list refetches at once and cannot be
+      // inspected as "stale": watch for the call instead.
+      const invalidate = vi.spyOn(queryClient, 'invalidateQueries');
+      await fillRequired(user);
+      await user.click(save());
+      await screen.findByText('recipe page stub');
+      expect(invalidate).toHaveBeenCalledWith({
+        queryKey: tagsListTagsQueryKey(),
+      });
     });
   });
 

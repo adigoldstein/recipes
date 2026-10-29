@@ -1,4 +1,5 @@
 import type { ParseKeys } from 'i18next';
+import { useQuery } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import type { KeyboardEvent } from 'react';
 import {
@@ -19,8 +20,13 @@ import {
   getErrorCode,
   getValidationIssues,
   schemas,
+  tagsListTagsOptions,
   type RecipeCreate,
 } from '@bite-and-board/data-access';
+import {
+  TAG_NAME_MAX_LENGTH,
+  normalizeTagName,
+} from '@bite-and-board/recipe-domain';
 import {
   Button,
   CharacterCounter,
@@ -34,6 +40,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  TagPicker,
   Textarea,
   toast,
 } from '@bite-and-board/ui-components';
@@ -71,6 +78,18 @@ function rowError(errors: FieldErrors | undefined, field: string) {
     field
   ];
   return error?.message;
+}
+
+/** The message of a tags error: the list's own, or the first tag's. */
+function firstTagMessage(errors: FieldErrors<RecipeFormValues>['tags']) {
+  if (!errors) return undefined;
+  if (errors.root?.message) return errors.root.message;
+  const rows = Array.isArray(errors) ? errors : [];
+  for (const row of rows) {
+    const message = row?.name?.message ?? row?.id?.message;
+    if (message) return message;
+  }
+  return undefined;
 }
 
 function IngredientRow({
@@ -386,9 +405,11 @@ export function RecipeForm({
   });
   const { blocker, allowLeaving } = useUnsavedChangesGuard(isDirty);
 
+  const tagList = useQuery(tagsListTagsOptions());
   const description = useWatch({ control, name: 'description' });
   const notes = useWatch({ control, name: 'notes' });
   const formError = errors.root?.server?.message;
+  const tagsError = firstTagMessage(errors.tags);
 
   const onSubmit: () => Promise<void> = handleSubmit(async (values) => {
     clearErrors('root.server');
@@ -533,6 +554,38 @@ export function RecipeForm({
               autoComplete="off"
               {...field}
               {...register('source_url')}
+            />
+          )}
+        </FormField>
+        <FormField
+          id="recipe-tags"
+          label={t('recipeForm.tags.label')}
+          error={tagsError}
+        >
+          {(tagsField) => (
+            <Controller
+              control={control}
+              name="tags"
+              render={({ field }) => (
+                <TagPicker
+                  {...tagsField}
+                  // Without the list (loading, or failed) a typed name still works:
+                  // the server reuses an existing tag of that name.
+                  options={tagList.data ?? []}
+                  value={field.value}
+                  onChange={field.onChange}
+                  normalize={normalizeTagName}
+                  maxLength={TAG_NAME_MAX_LENGTH}
+                  labels={{
+                    trigger: t('recipeForm.tags.trigger'),
+                    search: t('recipeForm.tags.search'),
+                    empty: t('recipeForm.tags.empty'),
+                    create: (name) => t('recipeForm.tags.create', { name }),
+                    remove: (name) => t('recipeForm.tags.remove', { name }),
+                    chosen: t('recipeForm.tags.chosen'),
+                  }}
+                />
+              )}
             />
           )}
         </FormField>

@@ -274,6 +274,15 @@
     "prepTime": "זמן הכנה בדקות",
     "cookTime": "זמן בישול בדקות",
     "sourceUrl": "קישור למקור",
+    "tags": {
+      "label": "תגיות",
+      "trigger": "הוספת תגית",
+      "search": "חיפוש תגית או שם חדש",
+      "empty": "אין תגיות",
+      "create": "יצירת תגית '{{name}}'",
+      "remove": "הסרת התגית {{name}}",
+      "chosen": "התגיות של המתכון"
+    },
     "ingredient": {
       "amount": "כמות",
       "amountLabel": "כמות, מצרך {{n}}",
