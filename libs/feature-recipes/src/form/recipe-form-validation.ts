@@ -9,7 +9,7 @@ import { toWritePayload, type RecipeFormValues } from './recipe-form-values';
 const INTEGER = /^\d+$/;
 
 /** Array fields keep their own message apart from their rows' (`errors.steps.root`). */
-const ARRAY_FIELDS = new Set(['ingredients', 'steps']);
+const ARRAY_FIELDS = new Set(['ingredients', 'steps', 'tags']);
 
 /** The path React Hook Form stores an issue under. */
 export function issueFieldPath(path: string) {
@@ -27,6 +27,7 @@ export function isFormField(path: string) {
     'prep_time_minutes',
     'cook_time_minutes',
     'source_url',
+    'tags',
     'ingredients',
     'steps',
   ].includes(field);

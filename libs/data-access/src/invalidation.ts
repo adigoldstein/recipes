@@ -2,6 +2,7 @@ import type { QueryClient } from '@tanstack/react-query';
 import {
   recipesGetRecipeQueryKey,
   recipesListRecipesQueryKey,
+  tagsListTagsQueryKey,
 } from './generated/@tanstack/react-query.gen';
 
 /**
@@ -14,10 +15,14 @@ export type Invalidator = (
 ) => Promise<unknown>;
 
 export const invalidationMap = {
-  /** A recipe write refreshes the library list and, given its id, that recipe's page. */
+  /**
+   * A recipe write refreshes the library list, the tag list (a save can create tags),
+   * and, given its id, that recipe's page.
+   */
   recipeWrite: (queryClient: QueryClient, recipeId?: string) =>
     Promise.all([
       queryClient.invalidateQueries({ queryKey: recipesListRecipesQueryKey() }),
+      queryClient.invalidateQueries({ queryKey: tagsListTagsQueryKey() }),
       recipeId
         ? queryClient.invalidateQueries({
             queryKey: recipesGetRecipeQueryKey({

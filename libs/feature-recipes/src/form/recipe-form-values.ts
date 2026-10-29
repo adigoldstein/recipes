@@ -18,6 +18,12 @@ export interface IngredientFormValues {
   note: string;
 }
 
+/** A tag on the recipe: an existing one by `id`, or a new one that only has a name. */
+export interface TagFormValues {
+  id?: string;
+  name: string;
+}
+
 export interface StepFormValues {
   description: string;
 }
@@ -30,6 +36,7 @@ export interface RecipeFormValues {
   prep_time_minutes: string;
   cook_time_minutes: string;
   source_url: string;
+  tags: TagFormValues[];
   ingredients: IngredientFormValues[];
   steps: StepFormValues[];
 }
@@ -58,6 +65,7 @@ export function emptyFormValues(): RecipeFormValues {
     prep_time_minutes: '',
     cook_time_minutes: '',
     source_url: '',
+    tags: [],
     ingredients: [emptyIngredientRow()],
     steps: [emptyStepRow()],
   };
@@ -66,7 +74,7 @@ export function emptyFormValues(): RecipeFormValues {
 const text = (value: number | null | undefined) =>
   value == null ? '' : String(value);
 
-/** A saved recipe as form values, for the edit form. Tags are handled by Story 3.3. */
+/** A saved recipe as form values, for the edit form. */
 export function toFormValues(recipe: RecipeRead): RecipeFormValues {
   return {
     title: recipe.title,
@@ -76,6 +84,7 @@ export function toFormValues(recipe: RecipeRead): RecipeFormValues {
     prep_time_minutes: text(recipe.prep_time_minutes),
     cook_time_minutes: text(recipe.cook_time_minutes),
     source_url: recipe.source_url ?? '',
+    tags: recipe.tags.map((tag) => ({ id: tag.id, name: tag.name })),
     ingredients: recipe.ingredients.map((ingredient) => ({
       amount: text(ingredient.amount),
       unit: ingredient.unit ?? '',
@@ -98,7 +107,8 @@ const numberOrNull = (value: string) =>
  * required number becomes NaN, which the write schema reports as missing.
  *
  * It does not validate; the generated write schema does (see `recipe-form-resolver`).
- * Tags are not in the form yet (Story 3.3), so none are sent.
+ * A tag that exists goes as its `id`, a new one as its `name` for the server to
+ * create inside the recipe's transaction (AD-25).
  */
 export function toWritePayload(values: RecipeFormValues): RecipeCreate {
   return {
@@ -109,7 +119,9 @@ export function toWritePayload(values: RecipeFormValues): RecipeCreate {
     prep_time_minutes: numberOrNull(values.prep_time_minutes),
     cook_time_minutes: numberOrNull(values.cook_time_minutes),
     source_url: trimmedOrNull(values.source_url),
-    tags: [],
+    tags: values.tags.map((tag) =>
+      tag.id ? { id: tag.id } : { name: tag.name },
+    ),
     ingredients: values.ingredients.map((ingredient) => {
       // Blank is "to taste"; text that is no amount stays NaN for the checks.
       const amount =

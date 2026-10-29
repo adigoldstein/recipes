@@ -85,7 +85,8 @@ describe('isFormField', () => {
   it('knows the form fields and nothing else', () => {
     expect(isFormField('steps.1.description')).toBe(true);
     expect(isFormField('source_url')).toBe(true);
-    expect(isFormField('tags.0')).toBe(false);
+    expect(isFormField('tags.0.name')).toBe(true);
+    expect(isFormField('photo')).toBe(false);
     expect(isFormField('')).toBe(false);
   });
 });

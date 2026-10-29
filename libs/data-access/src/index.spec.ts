@@ -4,6 +4,7 @@ import {
   recipesGetRecipeQueryKey,
   recipesListRecipesQueryKey,
   schemas,
+  tagsListTagsQueryKey,
 } from './index';
 
 describe('data-access entry', () => {
@@ -12,7 +13,7 @@ describe('data-access entry', () => {
     expect(schemas.zRecipeSummary).toBeDefined();
   });
 
-  it('invalidates the list and the recipe page on a recipe write', async () => {
+  it('invalidates the list, the tags and the recipe page on a recipe write', async () => {
     const queryClient = new QueryClient();
     const invalidate = vi.spyOn(queryClient, 'invalidateQueries');
     await invalidationMap.recipeWrite(queryClient, 'r1');
@@ -22,13 +23,16 @@ describe('data-access entry', () => {
     expect(invalidate).toHaveBeenCalledWith({
       queryKey: recipesGetRecipeQueryKey({ path: { recipe_id: 'r1' } }),
     });
-    expect(invalidate).toHaveBeenCalledTimes(2);
+    expect(invalidate).toHaveBeenCalledWith({
+      queryKey: tagsListTagsQueryKey(),
+    });
+    expect(invalidate).toHaveBeenCalledTimes(3);
   });
 
-  it('refreshes only the list when there is no recipe id yet', async () => {
+  it('refreshes only the list and the tags when there is no recipe id yet', async () => {
     const queryClient = new QueryClient();
     const invalidate = vi.spyOn(queryClient, 'invalidateQueries');
     await invalidationMap.recipeWrite(queryClient);
-    expect(invalidate).toHaveBeenCalledTimes(1);
+    expect(invalidate).toHaveBeenCalledTimes(2);
   });
 });

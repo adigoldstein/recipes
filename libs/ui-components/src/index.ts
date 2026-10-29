@@ -11,7 +11,9 @@ export {
 export { TopBar, Wordmark, type TopBarProps } from './components/top-bar';
 export * from './components/ui/alert-dialog';
 export * from './components/ui/dialog';
+export * from './components/ui/command';
 export * from './components/ui/dropdown-menu';
+export * from './components/ui/popover';
 export * from './components/ui/input';
 export * from './components/ui/label';
 export * from './components/ui/select';
@@ -42,6 +44,13 @@ export {
   type TagFilterOption,
   type TagFilterProps,
 } from './components/tag-filter';
+export {
+  TagPicker,
+  type TagPickerLabels,
+  type TagPickerOption,
+  type TagPickerProps,
+  type TagPickerValue,
+} from './components/tag-picker';
 export { EmptyState, type EmptyStateProps } from './components/empty-state';
 export { BackLink, type BackLinkProps } from './components/back-link';
 export {

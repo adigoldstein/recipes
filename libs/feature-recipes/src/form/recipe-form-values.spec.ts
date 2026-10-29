@@ -14,6 +14,7 @@ const filled: RecipeFormValues = {
   prep_time_minutes: '15',
   cook_time_minutes: '',
   source_url: ' https://example.com/pie ',
+  tags: [{ id: 't-evening', name: 'ערב' }, { name: 'על האש' }],
   ingredients: [
     { amount: '1.5', unit: 'cup', name: ' קמח ', note: ' מנופה ' },
     { amount: '', unit: 'g', name: 'מלח', note: '' },
@@ -31,7 +32,7 @@ describe('toWritePayload', () => {
       prep_time_minutes: 15,
       cook_time_minutes: null,
       source_url: 'https://example.com/pie',
-      tags: [],
+      tags: [{ id: 't-evening' }, { name: 'על האש' }],
       ingredients: [
         { name: 'קמח', amount: 1.5, unit: 'cup', note: 'מנופה' },
         { name: 'מלח', amount: null, unit: null, note: null },
@@ -58,7 +59,10 @@ describe('toFormValues', () => {
     title: 'שקשוקה',
     description: null,
     notes: 'אפשר להקפיא',
-    tags: [],
+    tags: [
+      { id: 't1', name: 'ערב' },
+      { id: 't2', name: 'מסיבות' },
+    ],
     base_servings: 4,
     prep_time_minutes: 10,
     cook_time_minutes: null,
@@ -98,6 +102,10 @@ describe('toFormValues', () => {
       prep_time_minutes: '10',
       cook_time_minutes: '',
       source_url: '',
+      tags: [
+        { id: 't1', name: 'ערב' },
+        { id: 't2', name: 'מסיבות' },
+      ],
       ingredients: [
         { amount: '0.333', unit: 'kg', name: 'עגבניות', note: '' },
         { amount: '', unit: '', name: 'מלח', note: 'לפי הטעם' },
@@ -111,6 +119,7 @@ describe('toFormValues', () => {
     expect(payload.ingredients[0]).toMatchObject({ amount: 0.333, unit: 'kg' });
     expect(payload.base_servings).toBe(4);
     expect(payload.description).toBeNull();
+    expect(payload.tags).toEqual([{ id: 't1' }, { id: 't2' }]);
   });
 });
 
@@ -120,5 +129,6 @@ describe('emptyFormValues', () => {
     expect(values.base_servings).toBe('4');
     expect(values.ingredients).toHaveLength(1);
     expect(values.steps).toHaveLength(1);
+    expect(values.tags).toEqual([]);
   });
 });

@@ -994,3 +994,19 @@ So that screens don't refetch the same data on every mount and focus.
 **Then** each reference query has its own `staleTime` (tags long, or `Infinity`), and the defaults are reviewed per query
 **And** editing the data invalidates the query (e.g. the Epic 4 tag editor invalidates the tags query), so edits show immediately
 **And** a test or network check shows that opening several screens in a row fetches tags once
+
+### Story 7.4: Quick-pick chips for pinned tags in the recipe form (optional)
+
+> Optional. Split out of Story 3.3 on 2026-10-29 to keep 3.3 to the tag combobox alone.
+
+As an editor,
+I want to tap a pinned tag like "ערב" or "מרק" straight from the recipe form,
+So that giving a recipe its meal type takes one tap, with no typing, on my phone.
+
+**Acceptance Criteria:**
+
+**Given** the recipe form from Stories 3.1 to 3.3
+**When** I look above the tag field
+**Then** a row of toggle chips shows the pinned tags in their fixed order (from `GET /api/tags`), in the same style as the library's chip row (UX-DR11), and it scrolls sideways on phone
+**And** tapping a chip adds that tag to the recipe and tapping it again removes it, and it stays in step with the tag field's chosen tags (a tag picked in either place shows in both)
+**And** component tests cover the toggle, the sync with the tag field and keyboard use, and the row works at 375 px

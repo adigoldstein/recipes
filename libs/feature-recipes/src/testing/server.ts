@@ -7,6 +7,8 @@ import { setupServer } from 'msw/node';
  */
 export const server = setupServer(
   http.get('*/api/auth/session', () => HttpResponse.json({ user: null })),
+  // The recipe form reads the tag list; a spec that needs tags serves its own.
+  http.get('*/api/tags', () => HttpResponse.json([])),
 );
 
 /** Serves GET /api/auth/session as a signed-in user of this role. */
