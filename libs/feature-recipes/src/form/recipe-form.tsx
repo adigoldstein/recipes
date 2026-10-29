@@ -1,5 +1,6 @@
 import type { ParseKeys } from 'i18next';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus } from 'lucide-react';
+import type { KeyboardEvent } from 'react';
 import {
   Controller,
   set,
@@ -10,6 +11,7 @@ import {
   type FieldErrors,
   type FieldPath,
   type Resolver,
+  type UseFormGetValues,
   type UseFormRegister,
 } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -22,6 +24,7 @@ import {
 import {
   Button,
   CharacterCounter,
+  ConfirmDialog,
   FormField,
   RequiredMark,
   RequiredNote,
@@ -32,6 +35,7 @@ import {
   SelectTrigger,
   SelectValue,
   Textarea,
+  toast,
 } from '@bite-and-board/ui-components';
 import { useErrorMessage } from '../shared/use-error-message';
 import {
@@ -47,7 +51,9 @@ import {
   issueFieldPath,
   validateRecipeForm,
 } from './recipe-form-validation';
+import { RowActions } from './row-actions';
 import { useIssueMessage } from './use-issue-message';
+import { useUnsavedChangesGuard } from './use-unsaved-changes-guard';
 
 const NO_UNIT = 'none';
 // The options list names the unit in general, which is the plural form (`_other`).
@@ -72,15 +78,19 @@ function IngredientRow({
   control,
   register,
   errors,
+  count,
+  onMove,
   onRemove,
-  canRemove,
+  onEnter,
 }: {
   index: number;
   control: Control<RecipeFormValues>;
   register: UseFormRegister<RecipeFormValues>;
   errors: FieldErrors<RecipeFormValues['ingredients'][number]> | undefined;
+  count: number;
+  onMove: (to: number) => void;
   onRemove: () => void;
-  canRemove: boolean;
+  onEnter: () => void;
 }) {
   const { t } = useTranslation();
   const n = index + 1;
@@ -90,6 +100,14 @@ function IngredientRow({
     .filter((message): message is string => Boolean(message));
   const errorId = `ingredient-${index}-error`;
   const describedBy = messages.length > 0 ? errorId : undefined;
+  // Enter in a text box never submits the form; in the last row it adds the next one.
+  const enter = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== 'Enter' || event.nativeEvent.isComposing) {
+      return;
+    }
+    event.preventDefault();
+    onEnter();
+  };
   return (
     <li className="flex flex-col gap-2">
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-12">
@@ -102,6 +120,7 @@ function IngredientRow({
           aria-invalid={errors?.amount ? true : undefined}
           aria-describedby={describedBy}
           className="sm:col-span-2"
+          onKeyDown={enter}
           {...register(`ingredients.${index}.amount`)}
         />
         <Controller
@@ -117,7 +136,7 @@ function IngredientRow({
             >
               <SelectTrigger
                 aria-label={t('recipeForm.ingredient.unitLabel', { n })}
-                className="w-full sm:col-span-3"
+                className="w-full sm:col-span-2"
               >
                 <SelectValue />
               </SelectTrigger>
@@ -142,7 +161,8 @@ function IngredientRow({
           placeholder={t('recipeForm.ingredient.name')}
           aria-invalid={errors?.name ? true : undefined}
           aria-describedby={describedBy}
-          className="col-span-2 sm:col-span-4"
+          className="col-span-2 sm:col-span-3"
+          onKeyDown={enter}
           {...register(`ingredients.${index}.name`)}
         />
         <Input
@@ -153,19 +173,19 @@ function IngredientRow({
           aria-invalid={errors?.note ? true : undefined}
           aria-describedby={describedBy}
           className="col-span-2 sm:col-span-2"
+          onKeyDown={enter}
           {...register(`ingredients.${index}.note`)}
         />
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          className="col-span-2 w-full sm:col-span-1 sm:w-11"
-          aria-label={t('recipeForm.ingredient.remove', { n })}
-          disabled={!canRemove}
-          onClick={onRemove}
-        >
-          <Trash2 aria-hidden="true" />
-        </Button>
+        <RowActions
+          index={index}
+          count={count}
+          moveUpLabel={t('recipeForm.ingredient.moveUp', { n })}
+          moveDownLabel={t('recipeForm.ingredient.moveDown', { n })}
+          removeLabel={t('recipeForm.ingredient.remove', { n })}
+          onMove={onMove}
+          onRemove={onRemove}
+          className="col-span-2 flex justify-end gap-1 sm:col-span-3"
+        />
       </div>
       {messages.length > 0 ? (
         <div id={errorId} className="flex flex-col text-sm text-destructive">
@@ -181,14 +201,16 @@ function IngredientRow({
 function Ingredients({
   control,
   register,
+  getValues,
   errors,
 }: {
   control: Control<RecipeFormValues>;
   register: UseFormRegister<RecipeFormValues>;
+  getValues: UseFormGetValues<RecipeFormValues>;
   errors: FieldErrors<RecipeFormValues>;
 }) {
   const { t } = useTranslation();
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, move, remove } = useFieldArray({
     control,
     name: 'ingredients',
   });
@@ -210,8 +232,22 @@ function Ingredients({
             control={control}
             register={register}
             errors={errors.ingredients?.[index]}
-            canRemove={fields.length > 1}
+            count={fields.length}
+            onMove={(to) => move(index, to)}
             onRemove={() => remove(index)}
+            onEnter={() => {
+              // Only the last row grows the list, and only once it has a name.
+              const last = index === fields.length - 1;
+              if (
+                !last ||
+                getValues(`ingredients.${index}.name`).trim() === ''
+              ) {
+                return;
+              }
+              append(emptyIngredientRow(), {
+                focusName: `ingredients.${index + 1}.amount`,
+              });
+            }}
           />
         ))}
       </ul>
@@ -243,7 +279,10 @@ function Steps({
   errors: FieldErrors<RecipeFormValues>;
 }) {
   const { t } = useTranslation();
-  const { fields, append, remove } = useFieldArray({ control, name: 'steps' });
+  const { fields, append, move, remove } = useFieldArray({
+    control,
+    name: 'steps',
+  });
   const rootError = errors.steps?.root?.message;
   return (
     <section aria-labelledby="steps-heading" className="flex flex-col gap-3">
@@ -267,16 +306,18 @@ function Steps({
                     {...register(`steps.${index}.description`)}
                     aria-required="true"
                   />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    aria-label={t('recipeForm.step.remove', { n: index + 1 })}
-                    disabled={fields.length <= 1}
-                    onClick={() => remove(index)}
-                  >
-                    <Trash2 aria-hidden="true" />
-                  </Button>
+                  <RowActions
+                    index={index}
+                    count={fields.length}
+                    moveUpLabel={t('recipeForm.step.moveUp', { n: index + 1 })}
+                    moveDownLabel={t('recipeForm.step.moveDown', {
+                      n: index + 1,
+                    })}
+                    removeLabel={t('recipeForm.step.remove', { n: index + 1 })}
+                    onMove={(to) => move(index, to)}
+                    onRemove={() => remove(index)}
+                    className="flex flex-col gap-1"
+                  />
                 </div>
               )}
             </FormField>
@@ -335,18 +376,28 @@ export function RecipeForm({
     handleSubmit,
     setError,
     clearErrors,
-    formState: { errors, isSubmitting },
-  } = useForm<RecipeFormValues>({ defaultValues, resolver });
+    getValues,
+    formState: { errors, isSubmitting, isDirty },
+  } = useForm<RecipeFormValues>({
+    defaultValues,
+    resolver,
+    // An error shows when a field is first left, then follows the typing until it clears.
+    mode: 'onTouched',
+  });
+  const { blocker, allowLeaving } = useUnsavedChangesGuard(isDirty);
 
   const description = useWatch({ control, name: 'description' });
   const notes = useWatch({ control, name: 'notes' });
   const formError = errors.root?.server?.message;
 
-  const onSubmit = handleSubmit(async (values) => {
+  const onSubmit: () => Promise<void> = handleSubmit(async (values) => {
     clearErrors('root.server');
+    // A saved form navigates away from inside `onSave`; that must not ask.
+    allowLeaving(true);
     try {
       await onSave(toWritePayload(values));
     } catch (error) {
+      allowLeaving(false);
       const issues = getValidationIssues(error);
       const known = issues.filter((issue) => isFormField(issue.path));
       for (const issue of known) {
@@ -360,6 +411,15 @@ export function RecipeForm({
         setError('root.server', {
           type: getErrorCode(error) ?? 'unknown',
           message: errorMessage(error),
+        });
+      }
+      // No code and no field means the network or the server failed, not the input.
+      if (getErrorCode(error) === undefined && issues.length === 0) {
+        toast.error(t('recipeForm.saveFailed'), {
+          action: {
+            label: t('recipeForm.retry'),
+            onClick: () => void onSubmit(),
+          },
         });
       }
     }
@@ -478,7 +538,12 @@ export function RecipeForm({
         </FormField>
       </section>
 
-      <Ingredients control={control} register={register} errors={errors} />
+      <Ingredients
+        control={control}
+        register={register}
+        getValues={getValues}
+        errors={errors}
+      />
       <Steps control={control} register={register} errors={errors} />
 
       <div className="flex flex-col items-start gap-3">
@@ -491,6 +556,20 @@ export function RecipeForm({
           {isSubmitting ? t('recipeForm.saving') : submitLabel}
         </Button>
       </div>
+      <ConfirmDialog
+        open={blocker.state === 'blocked'}
+        onOpenChange={(open) => {
+          if (!open && blocker.state === 'blocked') blocker.reset();
+        }}
+        title={t('recipeForm.leave.title')}
+        description={t('recipeForm.leave.description')}
+        confirmLabel={t('recipeForm.leave.confirm')}
+        cancelLabel={t('recipeForm.leave.cancel')}
+        destructive
+        onConfirm={() => {
+          if (blocker.state === 'blocked') blocker.proceed();
+        }}
+      />
     </form>
   );
 }
