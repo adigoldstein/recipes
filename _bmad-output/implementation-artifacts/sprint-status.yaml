@@ -62,7 +62,7 @@ development_status:
   3-1-create-a-recipe-api-and-basic-form: done
   3-2-recipe-form-experience: done
   3-3-tags-on-a-recipe-with-inline-new-tags: done
-  3-4-edit-a-recipe-with-original-value-tracking: in-progress
+  3-4-edit-a-recipe-with-original-value-tracking: review
   3-5-reset-an-ingredient-to-its-original: backlog
   3-6-delete-a-recipe: backlog
   3-7-recipe-photos-upload-replace-remove: backlog
