@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import { HttpResponse, http } from 'msw';
 import { setupServer } from 'msw/node';
 import { createMemoryRouter, RouterProvider } from 'react-router';
@@ -80,8 +80,20 @@ describe('the "מתכון חדש" button', () => {
     async () => {
       sessionUser = EDITOR;
       const router = renderAt('/');
-      // The button is a lazy chunk, which a busy machine can take a while to load.
-      const button = await screen.findByRole(
+      // The library's empty state has its own link with this name, so look only in
+      // the top bar. The button is a lazy chunk, which a busy machine can take a
+      // while to load.
+      // Wait until both links are there, so the check always runs in the state where
+      // an unscoped query would be ambiguous.
+      await waitFor(
+        () =>
+          expect(
+            screen.getAllByRole('link', { name: 'מתכון חדש' }),
+          ).toHaveLength(2),
+        { timeout: LAZY_TIMEOUT },
+      );
+      const topBar = screen.getByRole('banner');
+      const button = await within(topBar).findByRole(
         'link',
         { name: 'מתכון חדש' },
         { timeout: LAZY_TIMEOUT },
@@ -98,6 +110,10 @@ describe('the "מתכון חדש" button', () => {
   it('is not offered to a visitor', async () => {
     renderAt('/');
     await screen.findByRole('link', { name: 'כניסה' });
-    expect(screen.queryByRole('link', { name: 'מתכון חדש' })).toBeNull();
+    expect(
+      within(screen.getByRole('banner')).queryByRole('link', {
+        name: 'מתכון חדש',
+      }),
+    ).toBeNull();
   });
 });
