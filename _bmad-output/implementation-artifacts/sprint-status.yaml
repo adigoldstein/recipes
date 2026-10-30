@@ -65,8 +65,8 @@ development_status:
   3-4-edit-a-recipe-with-original-value-tracking: done
   3-5-reset-an-ingredient-to-its-original: optional # moved to 7-5 (optional, nice to have); nothing in Epic 3 depends on it
   3-6-delete-a-recipe: done
-  3-7a-recipe-photos-storage-upload-api-and-display: review
-  3-7b-recipe-photos-the-forms-upload-replace-remove: backlog # needs 3-7a
+  3-7a-recipe-photos-storage-upload-api-and-display: done
+  3-7b-recipe-photos-the-forms-upload-replace-remove: review
   3-8-duplicate-a-recipe: backlog # stretch / optional: can be cut without affecting any other story
   epic-3-retrospective: optional
 

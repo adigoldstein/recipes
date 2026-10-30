@@ -44,6 +44,13 @@ export interface RecipeFormValues {
   tags: TagFormValues[];
   ingredients: IngredientFormValues[];
   steps: StepFormValues[];
+  /**
+   * What the save does with the photo (AD-27): left out (`undefined`) keeps the saved
+   * one, `null` removes it, a key attaches a photo uploaded with `uploadPhoto`.
+   */
+  photoKey?: string | null;
+  /** The picture the form shows: the saved thumbnail or a preview of a chosen file. */
+  photoPreview: string | null;
 }
 
 /** Matches the Pydantic limits, which the generated Zod repeats (AD-19). */
@@ -73,6 +80,7 @@ export function emptyFormValues(): RecipeFormValues {
     tags: [],
     ingredients: [emptyIngredientRow()],
     steps: [emptyStepRow()],
+    photoPreview: null,
   };
 }
 
@@ -99,6 +107,7 @@ export function toFormValues(recipe: RecipeRead): RecipeFormValues {
       original: ingredient.original,
     })),
     steps: recipe.steps.map((step) => ({ description: step.description })),
+    photoPreview: recipe.photo?.thumb_url ?? null,
   };
 }
 
@@ -147,5 +156,7 @@ export function toWritePayload(values: RecipeFormValues): RecipeUpdate {
     steps: values.steps.map((step) => ({
       description: step.description.trim(),
     })),
+    // Only a changed photo is sent: left out, the server keeps the saved one.
+    ...(values.photoKey === undefined ? {} : { photo_key: values.photoKey }),
   };
 }

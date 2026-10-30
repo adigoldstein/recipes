@@ -14,6 +14,7 @@ export {
   configureClient,
 } from './client';
 export { getErrorCode, getErrorParams } from './errors';
+export { uploadPhoto, type UploadPhotoOptions } from './upload-photo';
 export { requireRole } from './guards';
 export { useBackNavigation } from './navigation';
 export { roleAtLeast, useCan, useSession } from './session';

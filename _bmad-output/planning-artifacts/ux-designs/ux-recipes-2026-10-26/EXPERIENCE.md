@@ -108,7 +108,7 @@ Behavioural only. The visual specs are in `DESIGN.md.Components`.
 | No search results | Library | "לא נמצאו מתכונים ל־'{q}'" with a "ניקוי החיפוש" action (it also clears the filter when one is set). |
 | Not found | Detail and unknown routes | "המתכון לא נמצא" with "חזרה לרשימה". |
 | Photo upload | Form | An inline thumbnail with upload progress. A wrong type or too large a file is rejected with the allowed limits shown beside the field (limits set in architecture). |
-| No photo | Detail | The photo slot is omitted. The title opens the page. |
+| No photo | Detail | The photo slot is omitted. The title opens the page. With a photo, the title and description come first and the photo follows them (as on the cards). |
 | Import running | Import | Phase text, an indeterminate progress bar, and Cancel. The rest of the app is still usable on desktop [ASSUMPTION]. |
 | Import fetch failed | Import / URL tab | A message suggesting the paste tab, with a one-click switch that keeps the dialog open (FR-17). |
 | Import no recipe | Import / text tab | "לא נמצא מתכון בטקסט הזה". The text is kept so it can be fixed. |

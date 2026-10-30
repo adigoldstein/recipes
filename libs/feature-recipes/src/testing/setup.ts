@@ -22,6 +22,9 @@ Element.prototype.hasPointerCapture ??= () => false;
 Element.prototype.releasePointerCapture ??= () => undefined;
 Element.prototype.setPointerCapture ??= () => undefined; // sonner, when a toast is pressed
 Element.prototype.scrollIntoView ??= () => undefined;
+// jsdom has no object URLs; the photo field previews a chosen file with one.
+URL.createObjectURL ??= () => 'blob:preview';
+URL.revokeObjectURL ??= () => undefined;
 
 beforeAll(() => server.listen({ onUnhandledFrame: 'error' }));
 afterEach(() => server.resetHandlers());
