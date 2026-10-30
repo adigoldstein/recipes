@@ -3,6 +3,13 @@
 import * as z from 'zod';
 
 /**
+ * Body_photos_upload_photo
+ */
+export const zBodyPhotosUploadPhoto = z.object({
+    file: z.string()
+});
+
+/**
  * ChangePasswordRequest
  *
  * The signed-in user's own password change (Story 2.6).
@@ -23,6 +30,10 @@ export const zChangePasswordRequest = z.object({
 export const zErrorCode = z.enum([
     'recipe_not_found',
     'tag_not_found',
+    'photo_not_found',
+    'photo_too_large',
+    'photo_dimensions_too_large',
+    'photo_unsupported_type',
     'email_taken',
     'user_not_found',
     'password_too_short',
@@ -66,6 +77,16 @@ export const zLoginRequest = z.object({
 });
 
 /**
+ * PhotoLimits
+ *
+ * What an upload may be, for the form to show beside the field.
+ */
+export const zPhotoLimits = z.object({
+    content_types: z.array(z.string()),
+    max_bytes: z.int()
+});
+
+/**
  * PhotoRead
  *
  * The photo shape that read schemas embed (AD-27); URLs are built server-side.
@@ -74,6 +95,15 @@ export const zPhotoRead = z.object({
     credit_domain: z.string().nullable(),
     thumb_url: z.string(),
     url: z.string()
+});
+
+/**
+ * PhotoUploaded
+ *
+ * An uploaded photo that no recipe holds yet; a recipe save attaches it.
+ */
+export const zPhotoUploaded = z.object({
+    photo_key: z.string()
 });
 
 /**
@@ -262,6 +292,7 @@ export const zRecipeCreate = z.object({
     description: z.string().max(500).nullish(),
     ingredients: z.array(zIngredientCreate).min(1),
     notes: z.string().max(5000).nullish(),
+    photo_key: z.string().regex(/^[0-9a-f]{32}$/).nullish(),
     prep_time_minutes: z.int().gte(0).nullish(),
     source_url: z.string().max(2048).nullish(),
     steps: z.array(zStepCreate).min(1),
@@ -300,6 +331,7 @@ export const zRecipeUpdate = z.object({
     description: z.string().max(500).nullish(),
     ingredients: z.array(zIngredientUpdate).min(1),
     notes: z.string().max(5000).nullish(),
+    photo_key: z.string().regex(/^[0-9a-f]{32}$/).nullish(),
     prep_time_minutes: z.int().gte(0).nullish(),
     source_url: z.string().max(2048).nullish(),
     steps: z.array(zStepCreate).min(1),
@@ -396,6 +428,18 @@ export const zAuthSessionResponse = zSessionResponse;
  * Successful Response
  */
 export const zHealthGetHealthResponse = zHealthRead;
+
+export const zPhotosUploadPhotoBody = zBodyPhotosUploadPhoto;
+
+/**
+ * Successful Response
+ */
+export const zPhotosUploadPhotoResponse = zPhotoUploaded;
+
+/**
+ * Successful Response
+ */
+export const zPhotosGetLimitsResponse = zPhotoLimits;
 
 /**
  * Response Recipes List Recipes

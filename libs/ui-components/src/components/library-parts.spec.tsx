@@ -58,7 +58,7 @@ describe('RecipeCard', () => {
     );
   });
 
-  it('shows a lazy photo and the regular title size when it has one', () => {
+  it('shows a lazy photo below the title, and the regular title size, when it has one', () => {
     const { container } = render(
       <RecipeCard
         title="לזניה"
@@ -71,7 +71,15 @@ describe('RecipeCard', () => {
     expect(photo?.getAttribute('src')).toBe('/media/lasagna.webp');
     expect(photo?.getAttribute('loading')).toBe('lazy');
     expect(photo?.getAttribute('alt')).toBe('');
+    expect(photo?.getAttribute('width')).toBe('600');
+    expect(photo?.getAttribute('height')).toBe('450');
     expect(screen.getByRole('heading').className).toContain('text-title');
+    // The title comes first and the photo follows it.
+    const title = screen.getByRole('heading');
+    expect(
+      title.compareDocumentPosition(photo as Node) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
   });
 
   it('has no placeholder art and a larger title without a photo', () => {

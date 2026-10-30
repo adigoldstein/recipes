@@ -1,6 +1,20 @@
 {
   "components": {
     "schemas": {
+      "Body_photos_upload_photo": {
+        "properties": {
+          "file": {
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file"
+        ],
+        "title": "Body_photos_upload_photo",
+        "type": "object"
+      },
       "ChangePasswordRequest": {
         "description": "The signed-in user's own password change (Story 2.6).\n\nThe new password's length is checked by the password policy in the service, so\nthe client gets the same `password_too_short` error as an admin reset.",
         "properties": {
@@ -29,6 +43,10 @@
         "enum": [
           "recipe_not_found",
           "tag_not_found",
+          "photo_not_found",
+          "photo_too_large",
+          "photo_dimensions_too_large",
+          "photo_unsupported_type",
           "email_taken",
           "user_not_found",
           "password_too_short",
@@ -352,6 +370,28 @@
         "title": "OriginalValue",
         "type": "object"
       },
+      "PhotoLimits": {
+        "description": "What an upload may be, for the form to show beside the field.",
+        "properties": {
+          "content_types": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Content Types",
+            "type": "array"
+          },
+          "max_bytes": {
+            "title": "Max Bytes",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "max_bytes",
+          "content_types"
+        ],
+        "title": "PhotoLimits",
+        "type": "object"
+      },
       "PhotoRead": {
         "description": "The photo shape that read schemas embed (AD-27); URLs are built server-side.",
         "properties": {
@@ -381,6 +421,20 @@
           "credit_domain"
         ],
         "title": "PhotoRead",
+        "type": "object"
+      },
+      "PhotoUploaded": {
+        "description": "An uploaded photo that no recipe holds yet; a recipe save attaches it.",
+        "properties": {
+          "photo_key": {
+            "title": "Photo Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "photo_key"
+        ],
+        "title": "PhotoUploaded",
         "type": "object"
       },
       "RecipeCreate": {
@@ -436,6 +490,18 @@
               }
             ],
             "title": "Notes"
+          },
+          "photo_key": {
+            "anyOf": [
+              {
+                "pattern": "^[0-9a-f]{32}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Photo Key"
           },
           "prep_time_minutes": {
             "anyOf": [
@@ -734,6 +800,18 @@
               }
             ],
             "title": "Notes"
+          },
+          "photo_key": {
+            "anyOf": [
+              {
+                "pattern": "^[0-9a-f]{32}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Photo Key"
           },
           "prep_time_minutes": {
             "anyOf": [
@@ -1338,6 +1416,118 @@
         "summary": "Get Health",
         "tags": [
           "health"
+        ]
+      }
+    },
+    "/api/photos": {
+      "post": {
+        "operationId": "photos_upload_photo",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_photos_upload_photo"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhotoUploaded"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Content Too Large"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unsupported Media Type"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Upload Photo",
+        "tags": [
+          "photos"
+        ]
+      }
+    },
+    "/api/photos/limits": {
+      "get": {
+        "operationId": "photos_get_limits",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhotoLimits"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get Limits",
+        "tags": [
+          "photos"
         ]
       }
     },

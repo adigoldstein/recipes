@@ -3,8 +3,8 @@
 import { type DefaultError, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen.js';
-import { authChangePassword, authLogin, authLogout, authSession, healthGetHealth, type Options, recipesCreateRecipe, recipesDeleteRecipe, recipesGetRecipe, recipesListRecipes, recipesUpdateRecipe, tagsListTags, usersCreateUser, usersListUsers, usersUpdateUser } from '../sdk.gen.js';
-import type { AuthChangePasswordData, AuthChangePasswordError, AuthChangePasswordResponse, AuthLoginData, AuthLoginError, AuthLoginResponse, AuthLogoutData, AuthLogoutResponse, AuthSessionData, AuthSessionError, AuthSessionResponse, HealthGetHealthData, HealthGetHealthResponse, RecipesCreateRecipeData, RecipesCreateRecipeError, RecipesCreateRecipeResponse, RecipesDeleteRecipeData, RecipesDeleteRecipeError, RecipesDeleteRecipeResponse, RecipesGetRecipeData, RecipesGetRecipeError, RecipesGetRecipeResponse, RecipesListRecipesData, RecipesListRecipesResponse, RecipesUpdateRecipeData, RecipesUpdateRecipeError, RecipesUpdateRecipeResponse, TagsListTagsData, TagsListTagsResponse, UsersCreateUserData, UsersCreateUserError, UsersCreateUserResponse, UsersListUsersData, UsersListUsersResponse, UsersUpdateUserData, UsersUpdateUserError, UsersUpdateUserResponse } from '../types.gen.js';
+import { authChangePassword, authLogin, authLogout, authSession, healthGetHealth, type Options, photosGetLimits, photosUploadPhoto, recipesCreateRecipe, recipesDeleteRecipe, recipesGetRecipe, recipesListRecipes, recipesUpdateRecipe, tagsListTags, usersCreateUser, usersListUsers, usersUpdateUser } from '../sdk.gen.js';
+import type { AuthChangePasswordData, AuthChangePasswordError, AuthChangePasswordResponse, AuthLoginData, AuthLoginError, AuthLoginResponse, AuthLogoutData, AuthLogoutResponse, AuthSessionData, AuthSessionError, AuthSessionResponse, HealthGetHealthData, HealthGetHealthResponse, PhotosGetLimitsData, PhotosGetLimitsError, PhotosGetLimitsResponse, PhotosUploadPhotoData, PhotosUploadPhotoError, PhotosUploadPhotoResponse, RecipesCreateRecipeData, RecipesCreateRecipeError, RecipesCreateRecipeResponse, RecipesDeleteRecipeData, RecipesDeleteRecipeError, RecipesDeleteRecipeResponse, RecipesGetRecipeData, RecipesGetRecipeError, RecipesGetRecipeResponse, RecipesListRecipesData, RecipesListRecipesResponse, RecipesUpdateRecipeData, RecipesUpdateRecipeError, RecipesUpdateRecipeResponse, TagsListTagsData, TagsListTagsResponse, UsersCreateUserData, UsersCreateUserError, UsersCreateUserResponse, UsersListUsersData, UsersListUsersResponse, UsersUpdateUserData, UsersUpdateUserError, UsersUpdateUserResponse } from '../types.gen.js';
 
 /**
  * Login
@@ -133,6 +133,41 @@ export const healthGetHealthOptions = (options?: Options<HealthGetHealthData>) =
         return data;
     },
     queryKey: healthGetHealthQueryKey(options)
+});
+
+/**
+ * Upload Photo
+ */
+export const photosUploadPhotoMutation = (options?: Partial<Options<PhotosUploadPhotoData>>): UseMutationOptions<PhotosUploadPhotoResponse, PhotosUploadPhotoError, Options<PhotosUploadPhotoData>> => {
+    const mutationOptions: UseMutationOptions<PhotosUploadPhotoResponse, PhotosUploadPhotoError, Options<PhotosUploadPhotoData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await photosUploadPhoto({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const photosGetLimitsQueryKey = (options?: Options<PhotosGetLimitsData>) => createQueryKey('photosGetLimits', options);
+
+/**
+ * Get Limits
+ */
+export const photosGetLimitsOptions = (options?: Options<PhotosGetLimitsData>) => queryOptions<PhotosGetLimitsResponse, PhotosGetLimitsError, PhotosGetLimitsResponse, ReturnType<typeof photosGetLimitsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await photosGetLimits({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: photosGetLimitsQueryKey(options)
 });
 
 export const recipesListRecipesQueryKey = (options?: Options<RecipesListRecipesData>) => createQueryKey('recipesListRecipes', options);

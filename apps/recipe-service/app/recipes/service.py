@@ -9,6 +9,7 @@ from sqlmodel import Session
 
 from app.core.db import get_session, utcnow
 from app.core.errors import AppError, ErrorCode
+from app.photos.service import PhotoService, get_photo_service
 from app.recipes.models import Ingredient, Recipe, Step
 from app.recipes.originals import apply_edit
 from app.recipes.repository import RecipeRepository
@@ -55,9 +56,15 @@ def _ingredient_read(ingredient: Ingredient) -> IngredientRead:
 
 
 class RecipeService:
-    def __init__(self, repository: RecipeRepository, tags: TagService) -> None:
+    def __init__(
+        self,
+        repository: RecipeRepository,
+        tags: TagService,
+        photos: PhotoService,
+    ) -> None:
         self._repository = repository
         self._tags = tags
+        self._photos = photos
 
     def list_recipes(self) -> list[RecipeSummary]:
         recipes = self._repository.list_all()
@@ -70,20 +77,29 @@ class RecipeService:
                 total_minutes=total_minutes(
                     recipe.prep_time_minutes, recipe.cook_time_minutes
                 ),
-                photo=None,  # Photos arrive with Story 3.7.
+                photo=self._photos.read(recipe.photo_key, recipe.photo_credit_domain),
                 created_at=recipe.created_at,
             )
             for recipe in recipes
         ]
 
     def create_recipe(
-        self, data: RecipeCreate, user_id: uuid.UUID | None = None
+        self,
+        data: RecipeCreate,
+        user_id: uuid.UUID | None = None,
+        *,
+        photo_credit_domain: str | None = None,
     ) -> RecipeRead:
         """Create a recipe, its ingredients, steps and tags in one transaction.
 
-        `user_id` is the author; the seed has none.
+        `user_id` is the author; the seed has none. `photo_credit_domain` names the
+        site an imported or sample photo came from.
         """
+        if data.photo_key is not None:
+            self._photos.require(data.photo_key)
         recipe = Recipe(
+            photo_key=data.photo_key,
+            photo_credit_domain=photo_credit_domain if data.photo_key else None,
             created_by=user_id,
             updated_by=user_id,
             title=data.title,
@@ -161,6 +177,7 @@ class RecipeService:
         recipe.source_url = data.source_url
         recipe.updated_by = user_id
         recipe.updated_at = utcnow()
+        replaced_photo = self._change_photo(recipe, data)
 
         ingredients: list[Ingredient] = []
         for position, item in enumerate(data.ingredients):
@@ -192,19 +209,38 @@ class RecipeService:
         except Exception:
             self._repository.rollback()
             raise
+        if replaced_photo is not None:
+            self._photos.release(replaced_photo)
         return self.get_recipe(recipe.id)
+
+    def _change_photo(self, recipe: Recipe, data: RecipeUpdate) -> str | None:
+        """Apply the update's photo key; return the key whose files are now unused."""
+        if (
+            "photo_key" not in data.model_fields_set
+            or data.photo_key == recipe.photo_key
+        ):
+            return None
+        if data.photo_key is not None:
+            self._photos.require(data.photo_key)
+        previous = recipe.photo_key
+        recipe.photo_key = data.photo_key
+        recipe.photo_credit_domain = None
+        return previous
 
     def delete_recipe(self, recipe_id: uuid.UUID) -> None:
         """Delete the recipe with its ingredients, steps and tag links (FR-10)."""
         recipe = self._repository.get(recipe_id)
         if recipe is None:
             raise AppError(404, ErrorCode.RECIPE_NOT_FOUND, "Recipe not found")
+        photo_key = recipe.photo_key
         try:
             self._repository.delete(recipe)
             self._repository.commit()
         except Exception:
             self._repository.rollback()
             raise
+        if photo_key is not None:
+            self._photos.release(photo_key)
 
     def get_recipe(self, recipe_id: uuid.UUID) -> RecipeRead:
         recipe = self._repository.get(recipe_id)
@@ -221,7 +257,7 @@ class RecipeService:
             prep_time_minutes=recipe.prep_time_minutes,
             cook_time_minutes=recipe.cook_time_minutes,
             source_url=recipe.source_url,
-            photo=None,  # Photos arrive with Story 3.7.
+            photo=self._photos.read(recipe.photo_key, recipe.photo_credit_domain),
             ingredients=[_ingredient_read(item) for item in recipe.ingredients],
             steps=[
                 StepRead(
@@ -236,9 +272,15 @@ class RecipeService:
         )
 
 
+def sweep_unattached_photos(session: Session) -> int:
+    """Delete uploaded photos no recipe holds that are over a day old (AD-27)."""
+    return get_photo_service().sweep(RecipeRepository(session).photo_keys())
+
+
 def get_recipe_service(
     session: Annotated[Session, Depends(get_session)],
     tags: Annotated[TagService, Depends(get_tag_service)],
+    photos: Annotated[PhotoService, Depends(get_photo_service)],
 ) -> RecipeService:
     """Provider, like a Nest injectable: `Depends(get_recipe_service)`."""
-    return RecipeService(RecipeRepository(session), tags)
+    return RecipeService(RecipeRepository(session), tags, photos)

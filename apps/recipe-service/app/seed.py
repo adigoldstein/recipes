@@ -8,7 +8,9 @@ Amounts are exact decimals: ½ is 0.5 and ⅓ is 0.333 (AD-31).
 import uuid
 from dataclasses import dataclass
 from decimal import Decimal
+from pathlib import Path
 
+from app.photos.service import PhotoService
 from app.recipes.schemas import (
     IngredientCreate,
     IngredientUpdate,
@@ -252,6 +254,15 @@ SEED_RECIPES: tuple[RecipeCreate, ...] = (
 )
 
 
+# Openly licensed sample photos for the recipes they match (`seed_photos/CREDITS.md`).
+SEED_PHOTO_DIR = Path(__file__).parent / "seed_photos"
+SEED_PHOTOS = {
+    "שקשוקה": "shakshuka.jpg",
+    "עוגת שוקולד": "cake.jpg",
+    "חזה עוף על האש": "chicken.jpg",
+}
+PHOTO_CREDIT_DOMAIN = "commons.wikimedia.org"
+
 # A recipe that was tuned after it was created, so one ingredient shows its original
 # (FR-7): the sugar went from 1 cup to ½ cup. Made by create, then update.
 TUNED_RECIPE = _recipe(
@@ -300,14 +311,29 @@ class SeedResult:
     skipped: int
 
 
-def run_seed(service: RecipeService) -> SeedResult:
-    """Create each demo recipe whose title does not exist yet."""
+def _with_photo(recipe: RecipeCreate, photos: PhotoService | None) -> RecipeCreate:
+    """The recipe with its sample photo stored and attached, when it has one."""
+    name = SEED_PHOTOS.get(recipe.title)
+    if photos is None or name is None:
+        return recipe
+    key = photos.store((SEED_PHOTO_DIR / name).read_bytes())
+    return recipe.model_copy(update={"photo_key": key})
+
+
+def run_seed(service: RecipeService, photos: PhotoService | None = None) -> SeedResult:
+    """Create each demo recipe whose title does not exist yet.
+
+    With `photos`, the recipes that have a sample photo get it, with its credit.
+    """
     existing = {summary.title for summary in service.list_recipes()}
     created = 0
     for recipe in SEED_RECIPES:
         if recipe.title in existing:
             continue
-        service.create_recipe(recipe)
+        service.create_recipe(
+            _with_photo(recipe, photos),
+            photo_credit_domain=PHOTO_CREDIT_DOMAIN,
+        )
         created += 1
     if TUNED_RECIPE.title not in existing:
         _tuned(service, service.create_recipe(TUNED_RECIPE).id)

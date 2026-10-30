@@ -22,6 +22,7 @@ import {
   IngredientBoard,
   IngredientLine,
   RecipeDetailSkeleton,
+  RecipePhoto,
   ServingsStepper,
   StepItem,
   Toggle,
@@ -173,6 +174,19 @@ function RecipeDetail({ recipe }: { recipe: RecipeRead }) {
             </div>
           ) : null}
         </div>
+        {recipe.photo ? (
+          <RecipePhoto
+            src={recipe.photo.url}
+            alt={t('detail.photo.alt', { title: recipe.title })}
+            credit={
+              recipe.photo.credit_domain
+                ? t('detail.photo.credit', {
+                    domain: recipe.photo.credit_domain,
+                  })
+                : undefined
+            }
+          />
+        ) : null}
         {recipe.tags.length > 0 || prep || cook ? (
           <div className="flex flex-wrap items-center gap-2">
             {recipe.tags.map((tag) => (

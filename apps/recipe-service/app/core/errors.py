@@ -11,6 +11,10 @@ class ErrorCode(StrEnum):
 
     RECIPE_NOT_FOUND = "recipe_not_found"
     TAG_NOT_FOUND = "tag_not_found"
+    PHOTO_NOT_FOUND = "photo_not_found"
+    PHOTO_TOO_LARGE = "photo_too_large"
+    PHOTO_DIMENSIONS_TOO_LARGE = "photo_dimensions_too_large"
+    PHOTO_UNSUPPORTED_TYPE = "photo_unsupported_type"
     EMAIL_TAKEN = "email_taken"
     USER_NOT_FOUND = "user_not_found"
     PASSWORD_TOO_SHORT = "password_too_short"
