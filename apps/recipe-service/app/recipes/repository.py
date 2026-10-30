@@ -26,6 +26,11 @@ class RecipeRepository:
         )
         return self._session.exec(statement).all()
 
+    def photo_keys(self) -> set[str]:
+        """The keys of every photo a recipe holds."""
+        statement = select(Recipe.photo_key).where(col(Recipe.photo_key).is_not(None))
+        return {key for key in self._session.exec(statement) if key is not None}
+
     def add(self, recipe: Recipe) -> Recipe:
         """Stage the recipe with its ingredients and steps; the caller commits."""
         self._session.add(recipe)

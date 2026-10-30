@@ -57,6 +57,48 @@ afterEach(() => {
 });
 
 describe('RecipeDetailPage', () => {
+  it('shows the photo with alt text and its credit, above the title', async () => {
+    serve(
+      recipe({
+        photo: {
+          url: '/media/photos/a.webp',
+          thumb_url: '/media/photos/a-thumb.webp',
+          credit_domain: 'commons.wikimedia.org',
+        },
+      }),
+    );
+    renderDetail('r1');
+    const photo = await screen.findByRole('img', { name: 'תמונה של פנקייק' });
+    expect(photo.getAttribute('src')).toBe('/media/photos/a.webp');
+    expect(screen.getByText('מקור: commons.wikimedia.org')).toBeTruthy();
+    const title = screen.getByRole('heading', { level: 1, name: 'פנקייק' });
+    expect(
+      photo.compareDocumentPosition(title) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
+  it('shows a photo without a credit line when it has no source', async () => {
+    serve(
+      recipe({
+        photo: {
+          url: '/media/photos/a.webp',
+          thumb_url: '/media/photos/a-thumb.webp',
+          credit_domain: null,
+        },
+      }),
+    );
+    renderDetail('r1');
+    await screen.findByRole('img', { name: 'תמונה של פנקייק' });
+    expect(screen.queryByText(/מקור:/)).toBeNull();
+  });
+
+  it('has no photo and no placeholder when the recipe has none', async () => {
+    serve(recipe());
+    renderDetail('r1');
+    await screen.findByRole('heading', { level: 1, name: 'פנקייק' });
+    expect(screen.queryByRole('img')).toBeNull();
+  });
+
   it('offers editing to an editor only', async () => {
     serve(recipe());
     renderDetail('r1');

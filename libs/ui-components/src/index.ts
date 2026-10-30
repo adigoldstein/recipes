@@ -64,6 +64,7 @@ export {
   type IngredientQuantity,
 } from './components/ingredient-line';
 export { StepItem, type StepItemProps } from './components/step-item';
+export { RecipePhoto, type RecipePhotoProps } from './components/recipe-photo';
 export {
   IngredientBoard,
   RecipeDetailSkeleton,

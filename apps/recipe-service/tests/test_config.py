@@ -25,8 +25,34 @@ def test_defaults(monkeypatch: pytest.MonkeyPatch) -> None:
     assert settings.gemini_model == "gemini-3.8-flash"
     assert settings.import_daily_cap == 50
     assert settings.llm_max_tokens == 4096
+    assert settings.photo_max_bytes == 10 * 1024 * 1024
+    assert settings.photo_max_pixels == 40_000_000
     assert settings.app_timezone == "Asia/Jerusalem"
     assert settings.log_level == "INFO"
+
+
+def test_photo_limits_can_be_set_from_the_environment(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("PHOTO_MAX_BYTES", "2097152")
+    monkeypatch.setenv("PHOTO_MAX_PIXELS", "12000000")
+    settings = load_settings()
+    assert settings.photo_max_bytes == 2 * 1024 * 1024
+    assert settings.photo_max_pixels == 12_000_000
+
+
+def test_a_photo_limit_of_zero_is_refused(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("PHOTO_MAX_BYTES", "0")
+    with pytest.raises(SystemExit) as exc_info:
+        load_settings()
+    assert "PHOTO_MAX_BYTES" in str(exc_info.value)
+
+
+def test_env_example_lists_every_setting() -> None:
+    """`.env.example` documents every setting (README), so a new one must be added."""
+    lines = (SERVICE_ROOT / ".env.example").read_text(encoding="utf-8").splitlines()
+    listed = {line.split("=")[0] for line in lines if "=" in line and line[0] != "#"}
+    assert listed == {name.upper() for name in Settings.model_fields}
 
 
 def test_reads_env_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

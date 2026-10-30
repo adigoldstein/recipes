@@ -7,6 +7,7 @@ from pydantic import ValidationError
 from sqlmodel import Session, col, func, select
 
 from app.core.errors import AppError, ErrorCode
+from app.photos.service import get_photo_service
 from app.recipes.models import Recipe
 from app.recipes.schemas import IngredientCreate, RecipeCreate, StepCreate
 from app.recipes.service import RecipeService, get_recipe_service
@@ -18,7 +19,7 @@ from tests.factories import add_tag, seeded_tag
 
 
 def make_service(session: Session) -> RecipeService:
-    return get_recipe_service(session, get_tag_service(session))
+    return get_recipe_service(session, get_tag_service(session), get_photo_service())
 
 
 def new_recipe(**fields: object) -> RecipeCreate:

@@ -15,7 +15,7 @@ from pydantic import (
 )
 
 from app.core.db import AMOUNT_QUANTUM
-from app.photos.schemas import PhotoRead
+from app.photos.schemas import PHOTO_KEY_PATTERN, PhotoRead
 from app.recipes.units import SourceUnit, Unit
 from app.tags.schemas import TagInput, TagRef
 
@@ -82,6 +82,11 @@ class _RecipeFields(BaseModel):
     cook_time_minutes: int | None = Field(default=None, ge=0)
     source_url: str | None = Field(default=None, max_length=2048)
     tags: list[TagInput] = Field(default_factory=list)
+    # The key of a photo uploaded with `POST /api/photos` (AD-27). On a create, none
+    # means no photo. On an update it has three states: left out keeps the photo,
+    # `null` removes it and a key sets it, so a client that knows nothing of photos
+    # cannot erase one.
+    photo_key: str | None = Field(default=None, pattern=PHOTO_KEY_PATTERN)
 
 
 class RecipeCreate(_RecipeFields):

@@ -39,6 +39,10 @@ class Settings(BaseSettings):
     gemini_model: str = "gemini-3.8-flash"
     import_daily_cap: PositiveInt = 50
     llm_max_tokens: PositiveInt = 4096
+    # Photo uploads (AD-27): the largest file, and the largest picture (width x height)
+    # a decoder is allowed to open, so a small file cannot expand into gigabytes.
+    photo_max_bytes: PositiveInt = 10 * 1024 * 1024
+    photo_max_pixels: PositiveInt = 40_000_000
     app_timezone: str = "Asia/Jerusalem"
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
 

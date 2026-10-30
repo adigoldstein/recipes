@@ -47,14 +47,7 @@ export function RecipeCard({
     ),
     children: (
       <Board data-slot="recipe-card" className="flex h-full flex-col gap-3">
-        {photoUrl ? (
-          <img
-            src={photoUrl}
-            alt=""
-            loading="lazy"
-            className="aspect-4/3 w-full rounded-md object-cover"
-          />
-        ) : null}
+        {/* The title comes first, with the photo below it (Adi's call, 2026-10-30). */}
         <h2
           dir="auto"
           className={cn(
@@ -64,6 +57,16 @@ export function RecipeCard({
         >
           {title}
         </h2>
+        {photoUrl ? (
+          <img
+            src={photoUrl}
+            alt=""
+            width={600}
+            height={450}
+            loading="lazy"
+            className="aspect-4/3 w-full rounded-md object-cover"
+          />
+        ) : null}
         {shown.length > 0 || time ? (
           <div className="mt-auto flex flex-wrap items-center gap-2 text-label">
             {shown.map((name) => (

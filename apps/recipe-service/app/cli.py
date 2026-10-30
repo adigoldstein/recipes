@@ -13,6 +13,7 @@ from app.core.db import get_engine
 from app.core.errors import AppError
 from app.core.migrate import run_migrations
 from app.core.security import Role
+from app.photos.service import get_photo_service
 from app.recipes.service import get_recipe_service
 from app.seed import run_seed
 from app.tags.service import get_tag_service
@@ -24,8 +25,9 @@ def _seed() -> int:
     data_dir = get_settings().data_dir
     run_migrations(data_dir)
     with Session(get_engine(data_dir)) as session:
-        service = get_recipe_service(session, get_tag_service(session))
-        result = run_seed(service)
+        photos = get_photo_service()
+        service = get_recipe_service(session, get_tag_service(session), photos)
+        result = run_seed(service, photos)
     print(f"Seed done: {result.created} created, {result.skipped} already there.")
     return 0
 

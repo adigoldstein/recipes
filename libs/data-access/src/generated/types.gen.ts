@@ -5,6 +5,16 @@ export type ClientOptions = {
 };
 
 /**
+ * Body_photos_upload_photo
+ */
+export type BodyPhotosUploadPhoto = {
+    /**
+     * File
+     */
+    file: Blob | File;
+};
+
+/**
  * ChangePasswordRequest
  *
  * The signed-in user's own password change (Story 2.6).
@@ -28,7 +38,7 @@ export type ChangePasswordRequest = {
  *
  * Stable error codes; the client shows `errors.<code>` from he.json.
  */
-export type ErrorCode = 'recipe_not_found' | 'tag_not_found' | 'email_taken' | 'user_not_found' | 'password_too_short' | 'password_too_long' | 'invalid_credentials' | 'account_blocked' | 'last_admin' | 'rate_limited' | 'unauthorized' | 'forbidden' | 'csrf_header_missing';
+export type ErrorCode = 'recipe_not_found' | 'tag_not_found' | 'photo_not_found' | 'photo_too_large' | 'photo_dimensions_too_large' | 'photo_unsupported_type' | 'email_taken' | 'user_not_found' | 'password_too_short' | 'password_too_long' | 'invalid_credentials' | 'account_blocked' | 'last_admin' | 'rate_limited' | 'unauthorized' | 'forbidden' | 'csrf_header_missing';
 
 /**
  * ErrorResponse
@@ -170,6 +180,22 @@ export type OriginalValue = {
 };
 
 /**
+ * PhotoLimits
+ *
+ * What an upload may be, for the form to show beside the field.
+ */
+export type PhotoLimits = {
+    /**
+     * Content Types
+     */
+    content_types: Array<string>;
+    /**
+     * Max Bytes
+     */
+    max_bytes: number;
+};
+
+/**
  * PhotoRead
  *
  * The photo shape that read schemas embed (AD-27); URLs are built server-side.
@@ -187,6 +213,18 @@ export type PhotoRead = {
      * Url
      */
     url: string;
+};
+
+/**
+ * PhotoUploaded
+ *
+ * An uploaded photo that no recipe holds yet; a recipe save attaches it.
+ */
+export type PhotoUploaded = {
+    /**
+     * Photo Key
+     */
+    photo_key: string;
 };
 
 /**
@@ -215,6 +253,10 @@ export type RecipeCreate = {
      * Notes
      */
     notes?: string | null;
+    /**
+     * Photo Key
+     */
+    photo_key?: string | null;
     /**
      * Prep Time Minutes
      */
@@ -349,6 +391,10 @@ export type RecipeUpdate = {
      * Notes
      */
     notes?: string | null;
+    /**
+     * Photo Key
+     */
+    photo_key?: string | null;
     /**
      * Prep Time Minutes
      */
@@ -718,6 +764,72 @@ export type HealthGetHealthResponses = {
 };
 
 export type HealthGetHealthResponse = HealthGetHealthResponses[keyof HealthGetHealthResponses];
+
+export type PhotosUploadPhotoData = {
+    body: BodyPhotosUploadPhoto;
+    path?: never;
+    query?: never;
+    url: '/api/photos';
+};
+
+export type PhotosUploadPhotoErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unsupported Media Type
+     */
+    415: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PhotosUploadPhotoError = PhotosUploadPhotoErrors[keyof PhotosUploadPhotoErrors];
+
+export type PhotosUploadPhotoResponses = {
+    /**
+     * Successful Response
+     */
+    201: PhotoUploaded;
+};
+
+export type PhotosUploadPhotoResponse = PhotosUploadPhotoResponses[keyof PhotosUploadPhotoResponses];
+
+export type PhotosGetLimitsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/photos/limits';
+};
+
+export type PhotosGetLimitsErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+};
+
+export type PhotosGetLimitsError = PhotosGetLimitsErrors[keyof PhotosGetLimitsErrors];
+
+export type PhotosGetLimitsResponses = {
+    /**
+     * Successful Response
+     */
+    200: PhotoLimits;
+};
+
+export type PhotosGetLimitsResponse = PhotosGetLimitsResponses[keyof PhotosGetLimitsResponses];
 
 export type RecipesListRecipesData = {
     body?: never;

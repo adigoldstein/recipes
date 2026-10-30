@@ -135,7 +135,7 @@ UX-DR4: App shell. One top bar with no sidebar:
 - `dir="auto"` on user content.
 - The URL, email and password fields are `dir="ltr"`.
   UX-DR6: Board component. An oak slab with radius 24, padding 18 and 36 at the top for the handle slot (a 44×12 pill in the ground colour, centred 12 px from the top). It is used only for food surfaces.
-  UX-DR7: RecipeCard. A board with the slot, a 4:3 photo (14 px corners, cover), then the title, up to 2 tags plus "+N" for the rest, and total time. The whole card is the link. Without a photo, the title is larger and there is no placeholder. Hover scales up 2% and press scales down 2%, with no shadow.
+  UX-DR7: RecipeCard. A board with the slot, then the title, then the 4:3 photo (14 px corners, cover) if there is one (title above the photo; Adi, 2026-10-30), up to 2 tags plus "+N" for the rest, and total time. The whole card is the link. Without a photo, the title is larger and there is no placeholder. Hover scales up 2% and press scales down 2%, with no shadow.
   UX-DR8: Board-shaped photo on the detail page and in import review. Board radius with the handle slot cut through the image, 4:3 on phone and 16:9 on desktop. Imported photos show the credit "מקור: {domain}".
   UX-DR9: ServingsStepper. Round 44 px − and + buttons, typing allowed, clamped to 1–100 with a range message. "חזרה ל־{base}" appears only when the value differs from the base. A polite live region announces the servings.
   UX-DR10: IngredientLine. Shows the amount in the quantity role, the unit label (singular or plural), the name and the note. To-taste lines read "לפי הטעם". The hint "במקור …" sits under the line in `hint` colour, scaled, and linked with `aria-describedby`.
@@ -693,23 +693,41 @@ So that my library stays clean (FR10).
 **And** confirming calls `DELETE /api/recipes/{id}` (editor), which removes the recipe with its ingredients, steps and tag links. I return to the library with my filters intact and a toast "המתכון נמחק"
 **And** deleting a recipe that no longer exists returns 404, and the UI shows the non-blocking toast "המתכון כבר נמחק"
 
-### Story 3.7: Recipe photos: upload, replace, remove
+### Story 3.7a: Recipe photos: storage, upload API and display
+
+> Split from Story 3.7 on 2026-10-29 (Adi) so each half can be reviewed on its own. 3.7b is the form's upload UI.
 
 As an editor,
-I want to add a photo to a recipe, or replace or remove it,
-So that recipes look appetising in the library and on the detail page (FR4 photo, FR1, FR5).
+I want a recipe to be able to carry a photo that shows on its card and its page,
+So that recipes look appetising in the library and on the detail page (FR1, FR5).
+
+**Acceptance Criteria:**
+
+**Given** `POST /api/photos` (editor)
+**When** I send an image
+**Then** it returns an unattached `photo_key` (AD-27). The limits (JPEG/PNG/WebP, max 10 MB) come from config and are published through OpenAPI. Larger or other files are rejected with 413/415 and a clear message
+**And** the server applies EXIF orientation, strips metadata, guards against huge pixel counts, and stores WebP at max 1600 px plus a 600 px thumbnail through the `PhotoStorage` port on the local `/data` volume (AD-14)
+**And** the recipe has a nullable `photo_key` and `photo_credit_domain` (one migration). Saving the recipe (`POST`/`PUT /api/recipes`) attaches the key; replacing or removing it, or deleting the recipe (Story 3.6), detaches it and deletes the old files after commit. Unattached keys older than 24 h are swept at startup
+**And** read schemas return `photo: {url, thumb_url, credit_domain} | null` built by the server. Cards use the thumbnail and the detail page uses the board-shaped photo (4:3 on phone, 16:9 from `lg`), with alt text, and a recipe with no photo looks as it does today (UX-DR7, UX-DR8)
+**And** `/media/*` is served by FastAPI and is never answered by the SPA fallback. Images are lazy-loaded with width and height set (NFR-11)
+**And** the seed adds openly licensed sample photos with their credits
+
+### Story 3.7b: Recipe photos: the form's upload, replace and remove
+
+> Split from Story 3.7 on 2026-10-29. Needs 3.7a.
+
+As an editor,
+I want to add a photo to a recipe in the form, or replace or remove it,
+So that I can manage the picture without leaving the form (FR4 photo).
 
 **Acceptance Criteria:**
 
 **Given** the recipe form
 **When** I pick an image
-**Then** `uploadPhoto()` in `libs/data-access` sends it to `POST /api/photos` (editor) with progress shown as a thumbnail and bar, and receives an unattached `photo_key` (AD-27, UX-DR12)
-**And** the limits (JPEG/PNG/WebP, max 10 MB) come from config through OpenAPI and are shown beside the field. Larger or other files are rejected with 413/415 and a clear message
-**And** the server applies EXIF orientation, strips metadata, guards against huge pixel counts, and stores WebP at max 1600 px plus a 600 px thumbnail through the `PhotoStorage` port on the local `/data` volume (AD-14)
-**And** saving the recipe attaches the key. Replacing or removing the photo, or deleting the recipe (Story 3.6), detaches it and deletes the old files after commit. Unattached keys older than 24 h are swept at startup
-**And** read schemas return `photo: {url, thumb_url, credit_domain} | null` built by the server. Cards use the thumbnail and the detail page uses the board-shaped photo (4:3 on phone, 16:9 from `lg`) (UX-DR7, UX-DR8)
-**And** `/media/*` is served by FastAPI and is never answered by the SPA fallback. Images are lazy-loaded with width and height set (NFR-11)
-**And** the seed adds openly licensed sample photos with their credits
+**Then** `uploadPhoto()` in `libs/data-access` sends it to `POST /api/photos` with progress shown as a thumbnail and bar, and receives an unattached `photo_key` (AD-27, UX-DR12)
+**And** the limits from OpenAPI are shown beside the field, and a 413/415 rejection shows a clear message
+**And** saving the form sends the key, and "replace" and "remove" work in the edit form (the old files are deleted by the server after commit)
+**And** the field is keyboard- and screen-reader friendly, and works at 375 px
 
 ### Story 3.8: Duplicate a recipe (stretch, can be cut)
 

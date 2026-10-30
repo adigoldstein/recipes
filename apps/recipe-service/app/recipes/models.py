@@ -22,6 +22,10 @@ class Recipe(SQLModel, table=True):
     prep_time_minutes: int | None = None
     cook_time_minutes: int | None = None
     source_url: str | None = Field(default=None, max_length=2048)
+    # The stored photo's key (AD-27), set only by a recipe save; the files live behind
+    # `photos.service`. The credit domain is the source site of an imported photo.
+    photo_key: str | None = Field(default=None, max_length=32)
+    photo_credit_domain: str | None = Field(default=None, max_length=255)
     # String reference: recipes must not import the users module. A removed user
     # leaves their recipes behind with no author.
     created_by: uuid.UUID | None = Field(

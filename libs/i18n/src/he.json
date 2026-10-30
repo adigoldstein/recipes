@@ -176,6 +176,10 @@
   "errors": {
     "recipe_not_found": "המתכון לא נמצא",
     "tag_not_found": "התגית לא נמצאה",
+    "photo_not_found": "התמונה לא נמצאה. אפשר להעלות אותה שוב",
+    "photo_too_large": "התמונה גדולה מדי. אפשר להעלות תמונה קטנה יותר",
+    "photo_dimensions_too_large": "מידות התמונה גדולות מדי. אפשר להעלות תמונה קטנה יותר",
+    "photo_unsupported_type": "אפשר להעלות תמונה בפורמט JPEG, PNG או WebP",
     "email_taken": "כבר קיים משתמש עם האימייל הזה",
     "user_not_found": "המשתמש לא נמצא",
     "password_too_short": "הסיסמה חייבת להכיל לפחות {{min}} תווים",
@@ -234,6 +238,10 @@
     "clearChecks": "ניקוי סימונים",
     "toTaste": "לפי הטעם",
     "edit": "עריכה",
+    "photo": {
+      "alt": "תמונה של {{title}}",
+      "credit": "מקור: {{domain}}"
+    },
     "delete": {
       "action": "מחיקה",
       "title": "למחוק את המתכון?",
