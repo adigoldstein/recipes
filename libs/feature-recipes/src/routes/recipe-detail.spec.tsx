@@ -57,7 +57,7 @@ afterEach(() => {
 });
 
 describe('RecipeDetailPage', () => {
-  it('shows the photo with alt text and its credit, above the title', async () => {
+  it('shows the photo with alt text and its credit, after the title and description', async () => {
     serve(
       recipe({
         photo: {
@@ -72,8 +72,9 @@ describe('RecipeDetailPage', () => {
     expect(photo.getAttribute('src')).toBe('/media/photos/a.webp');
     expect(screen.getByText('מקור: commons.wikimedia.org')).toBeTruthy();
     const title = screen.getByRole('heading', { level: 1, name: 'פנקייק' });
+    // The title comes first, like on the library cards, then the photo.
     expect(
-      photo.compareDocumentPosition(title) & Node.DOCUMENT_POSITION_FOLLOWING,
+      title.compareDocumentPosition(photo) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
   });
 

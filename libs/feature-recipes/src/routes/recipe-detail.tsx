@@ -174,19 +174,6 @@ function RecipeDetail({ recipe }: { recipe: RecipeRead }) {
             </div>
           ) : null}
         </div>
-        {recipe.photo ? (
-          <RecipePhoto
-            src={recipe.photo.url}
-            alt={t('detail.photo.alt', { title: recipe.title })}
-            credit={
-              recipe.photo.credit_domain
-                ? t('detail.photo.credit', {
-                    domain: recipe.photo.credit_domain,
-                  })
-                : undefined
-            }
-          />
-        ) : null}
         {recipe.tags.length > 0 || prep || cook ? (
           <div className="flex flex-wrap items-center gap-2">
             {recipe.tags.map((tag) => (
@@ -218,6 +205,19 @@ function RecipeDetail({ recipe }: { recipe: RecipeRead }) {
           <p dir="auto" className="max-w-prose text-muted-foreground">
             {recipe.description}
           </p>
+        ) : null}
+        {recipe.photo ? (
+          <RecipePhoto
+            src={recipe.photo.url}
+            alt={t('detail.photo.alt', { title: recipe.title })}
+            credit={
+              recipe.photo.credit_domain
+                ? t('detail.photo.credit', {
+                    domain: recipe.photo.credit_domain,
+                  })
+                : undefined
+            }
+          />
         ) : null}
         {hasConverted || checks.any ? (
           <div className="flex flex-wrap gap-2 pt-2">

@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import {
   getErrorCode,
   getValidationIssues,
+  photosGetLimitsOptions,
   schemas,
   tagsListTagsOptions,
   type RecipeUpdate,
@@ -35,6 +36,7 @@ import {
   RequiredMark,
   RequiredNote,
   Input,
+  PhotoField,
   Select,
   SelectContent,
   SelectItem,
@@ -60,6 +62,7 @@ import {
   validateRecipeForm,
 } from './recipe-form-validation';
 import { RowActions } from './row-actions';
+import { usePhotoUpload } from './use-photo-upload';
 import { useIssueMessage } from './use-issue-message';
 import { useUnsavedChangesGuard } from './use-unsaved-changes-guard';
 
@@ -411,6 +414,7 @@ export function RecipeForm({
     setError,
     clearErrors,
     getValues,
+    setValue,
     formState: { errors, isSubmitting, isDirty },
   } = useForm<RecipeFormValues>({
     defaultValues,
@@ -421,6 +425,14 @@ export function RecipeForm({
   const { blocker, allowLeaving } = useUnsavedChangesGuard(isDirty);
 
   const tagList = useQuery(tagsListTagsOptions());
+  const limits = useQuery(photosGetLimitsOptions());
+  const photo = usePhotoUpload({
+    getValues,
+    setValue,
+    limits: limits.data,
+    savedPreview: defaultValues.photoPreview,
+  });
+  const photoPreview = useWatch({ control, name: 'photoPreview' });
   const description = useWatch({ control, name: 'description' });
   const notes = useWatch({ control, name: 'notes' });
   const formError = errors.root?.server?.message;
@@ -572,6 +584,35 @@ export function RecipeForm({
             />
           )}
         </FormField>
+        <PhotoField
+          id="recipe-photo"
+          label={t('recipeForm.photo.label')}
+          hint={
+            limits.data
+              ? t('recipeForm.photo.limits', {
+                  mb: Math.floor(limits.data.max_bytes / (1024 * 1024)),
+                })
+              : t('recipeForm.photo.types')
+          }
+          previewUrl={photoPreview ?? undefined}
+          previewAlt={t('recipeForm.photo.preview')}
+          progress={photo.progress}
+          error={photo.error}
+          accept={
+            limits.data?.content_types.join(',') ??
+            'image/jpeg,image/png,image/webp'
+          }
+          labels={{
+            add: t('recipeForm.photo.add'),
+            replace: t('recipeForm.photo.replace'),
+            remove: t('recipeForm.photo.remove'),
+            uploading: t('recipeForm.photo.uploading'),
+            restore: t('recipeForm.photo.restore'),
+          }}
+          onSelect={(file) => void photo.select(file)}
+          onRemove={photo.remove}
+          onRestore={photo.canRestore ? photo.restore : undefined}
+        />
         <FormField
           id="recipe-tags"
           label={t('recipeForm.tags.label')}
@@ -620,7 +661,16 @@ export function RecipeForm({
             {formError}
           </p>
         ) : null}
-        <Button type="submit" size="lg" disabled={isSubmitting}>
+        {photo.uploading ? (
+          <p role="status" className="text-muted-foreground">
+            {t('recipeForm.photo.waiting')}
+          </p>
+        ) : null}
+        <Button
+          type="submit"
+          size="lg"
+          disabled={isSubmitting || photo.uploading}
+        >
           {isSubmitting ? t('recipeForm.saving') : submitLabel}
         </Button>
       </div>

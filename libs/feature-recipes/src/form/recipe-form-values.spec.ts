@@ -21,6 +21,7 @@ const filled: RecipeFormValues = {
     { amount: '', unit: 'g', name: 'מלח', note: '' },
   ],
   steps: [{ description: ' מערבבים ' }],
+  photoPreview: null,
 };
 
 describe('toWritePayload', () => {
@@ -126,6 +127,7 @@ describe('toFormValues', () => {
         },
       ],
       steps: [{ description: 'מבשלים' }],
+      photoPreview: null,
     });
   });
 
@@ -141,6 +143,35 @@ describe('toFormValues', () => {
     const payload = toWritePayload(toFormValues(recipe));
     expect(payload.ingredients.map((item) => item.id)).toEqual(['i1', 'i2']);
     expect(payload.ingredients[0]).not.toHaveProperty('original');
+  });
+
+  it('leaves the photo out unless it changed, so the saved photo is kept', () => {
+    expect(toWritePayload(filled)).not.toHaveProperty('photo_key');
+    expect(
+      toWritePayload({ ...filled, photoPreview: '/media/photos/a-thumb.webp' }),
+    ).not.toHaveProperty('photo_key');
+  });
+
+  it('sends a new photo by its key and a removed one as null', () => {
+    const key = 'a'.repeat(32);
+    expect(toWritePayload({ ...filled, photoKey: key }).photo_key).toBe(key);
+    expect(toWritePayload({ ...filled, photoKey: null }).photo_key).toBeNull();
+  });
+
+  it('shows the saved photo as the form picture, and none when there is none', () => {
+    const withPhoto = {
+      ...recipe,
+      photo: {
+        url: '/media/photos/a.webp',
+        thumb_url: '/media/photos/a-thumb.webp',
+        credit_domain: null,
+      },
+    };
+    expect(toFormValues(withPhoto).photoPreview).toBe(
+      '/media/photos/a-thumb.webp',
+    );
+    expect(toFormValues(withPhoto).photoKey).toBeUndefined();
+    expect(emptyFormValues().photoPreview).toBeNull();
   });
 
   it('sends a new ingredient row without an id', () => {

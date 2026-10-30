@@ -295,6 +295,19 @@
     "prepTime": "זמן הכנה בדקות",
     "cookTime": "זמן בישול בדקות",
     "sourceUrl": "קישור למקור",
+    "photo": {
+      "label": "תמונה",
+      "add": "הוספת תמונה",
+      "replace": "החלפה",
+      "remove": "הסרה",
+      "restore": "החזרת התמונה",
+      "uploading": "מעלה תמונה",
+      "waiting": "מחכים לסיום העלאת התמונה",
+      "preview": "התמונה שנבחרה למתכון",
+      "limits": "JPEG, PNG או WebP, עד {{mb}} מ״ב",
+      "types": "JPEG, PNG או WebP",
+      "failed": "העלאת התמונה לא הצליחה. אפשר לנסות שוב"
+    },
     "tags": {
       "label": "תגיות",
       "trigger": "הוספת תגית",
