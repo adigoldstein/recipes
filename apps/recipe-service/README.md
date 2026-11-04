@@ -78,8 +78,14 @@ Revisions must not import app code: they have to run the same way forever. Alemb
 cannot see SQLite expression indexes, so write those by hand (see revision `0001`).
 Do not edit a revision that has shipped; add a new one.
 
+A recipe's ingredients and steps are two JSON columns on `recipe` (AD-41, revision
+`0005`). Migration `0005` copies `app.db` to `app.db.bak-before-json` before it changes
+anything (never overwriting an earlier backup), checks that no item was lost before it
+drops the old tables, and has a full downgrade.
+
 SQLite changes a table by copying it and dropping the old one. With foreign keys on,
-dropping a parent such as `recipe` would delete its ingredients, steps and tag links, so
+dropping a parent such as `recipe` would delete its tag links (and, before migration
+`0005`, its ingredients and steps), so
 migrations run through `migration_transaction` (`app/core/migrate.py`): enforcement is
 off while they run, `PRAGMA foreign_key_check` must come back empty before the commit, and
 enforcement is always switched back on. Both the app and `alembic upgrade` use it.

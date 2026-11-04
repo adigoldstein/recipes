@@ -1,6 +1,5 @@
 """Helpers that insert recipes and users straight into the migrated test database."""
 
-import uuid
 from collections.abc import Sequence
 from datetime import datetime
 from typing import Any
@@ -8,7 +7,7 @@ from typing import Any
 from sqlmodel import Session, select
 
 from app.core.security import Role, hash_password
-from app.recipes.models import Ingredient, Recipe, Step
+from app.recipes.models import IngredientItem, Recipe, StepItem
 from app.tags.models import RecipeTag, Tag
 from app.users.models import User
 
@@ -29,17 +28,21 @@ def add_recipe(
     *,
     title: str = "שקשוקה",
     tags: Sequence[Tag] = (),
-    ingredients: Sequence[Ingredient] = (),
-    steps: Sequence[Step] = (),
+    ingredients: Sequence[IngredientItem] = (),
+    steps: Sequence[StepItem] = (),
     created_at: datetime | None = None,
     **fields: Any,
 ) -> Recipe:
-    values: dict[str, Any] = {"title": title, "base_servings": 4, **fields}
+    values: dict[str, Any] = {
+        "title": title,
+        "base_servings": 4,
+        "ingredients": list(ingredients),
+        "steps": list(steps),
+        **fields,
+    }
     if created_at is not None:
         values["created_at"] = created_at
     recipe = Recipe(**values)
-    recipe.ingredients = list(ingredients)
-    recipe.steps = list(steps)
     session.add(recipe)
     session.flush()
     for tag in tags:
@@ -49,16 +52,13 @@ def add_recipe(
     return recipe
 
 
-# Replaced by the relationship when the recipe is flushed.
-_UNSET = uuid.UUID(int=0)
+def ingredient(name: str, **fields: Any) -> IngredientItem:
+    """An ingredient item; its place in the list is its order (AD-41)."""
+    return IngredientItem(name=name, **fields)
 
 
-def ingredient(position: int, name: str, **fields: Any) -> Ingredient:
-    return Ingredient(recipe_id=_UNSET, position=position, name=name, **fields)
-
-
-def step(position: int, description: str, **fields: Any) -> Step:
-    return Step(recipe_id=_UNSET, position=position, description=description, **fields)
+def step(description: str, **fields: Any) -> StepItem:
+    return StepItem(description=description, **fields)
 
 
 def add_user(

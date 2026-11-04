@@ -73,12 +73,12 @@ flowchart LR
 
 - **Binds:** F2–F6, F10, FR-7–9
 - **Prevents:** two writers of ingredients, and the original-value rule implemented in two places.
-- **Rule:** `GET/POST/PUT /api/recipes[/{id}]` read and write the **whole** recipe in one transaction: fields, ordered ingredients, ordered steps, tag ids and photo key. PUT replaces the full aggregate. Existing ingredients keep their `id`; new ones have none. Only `recipes.service` applies FR-7–9:
-  - On the first change to an existing ingredient's amount or unit, it stores `original_amount/original_unit`.
-  - If the amount and unit are set back to equal the original, it clears both original fields (this is "reset to original").
+- **Rule:** `GET/POST/PUT /api/recipes[/{id}]` read and write the **whole** recipe in one transaction: fields, ordered ingredients, ordered steps, tag ids and photo key. PUT replaces the full aggregate. Existing ingredients keep their `id`; new ones have none. Ingredients and steps are stored **inside the recipe row** as two JSON arrays, not as child tables (AD-41). Only `recipes.service` applies FR-7–9:
+  - On the first change to an existing ingredient's amount or unit, it stores the previous value as the ingredient's `original`.
+  - If the amount and unit are set back to equal the original, it clears the `original` (this is "reset to original").
   - New ingredients never get originals.
 
-  The client never sends original fields.
+  The client never sends original fields. _(Changed 2026-11-04: ingredients and steps were rows in their own tables, and the original was three columns.)_
 
 ### AD-5 — Identifiers are UUIDs [ADOPTED]
 
@@ -226,7 +226,7 @@ flowchart LR
     - An `id` from another recipe returns 422.
     - An omitted ingredient is deleted, and a row without an `id` is inserted.
     - Array order is the only order.
-  - **Originals:** `IngredientRead.original` is `{amount, unit} | null`, and `{null, null}` means "originally to taste". Going from null to a value, or back, counts as a change. Name-only or note-only edits never create an original. Storage: `original_amount`, `original_unit` and a `has_original` flag, because two NULLs alone could not tell "originally to taste" from "no original".
+  - **Originals:** `IngredientRead.original` is `{amount, unit} | null`, and `{null, null}` means "originally to taste". Going from null to a value, or back, counts as a change. Name-only or note-only edits never create an original. Storage (AD-41): each ingredient item in the recipe's JSON carries `original: {amount, unit} | null`, so `null` means no original and `{amount: null, unit: null}` means "originally to taste", with no separate flag. _(Changed 2026-11-04: it was `original_amount`, `original_unit` and a `has_original` column flag.)_ The wire shapes above do not change.
   - **Units:** `Unit` is one Python `StrEnum` of the PRD's English codes, used by every schema including `DraftRecipe` and published as an OpenAPI enum.
     - Hebrew labels live only in `he.json` (`units.<code>_one/_other`), and a test checks that every code has its labels.
     - The countable set (`unit, clove, slice, can, package`, rounded to the nearest of ¼ ⅓ ½ ⅔ ¾, minimum ¼) is defined once beside the enum.
@@ -445,6 +445,20 @@ flowchart LR
   - Ingredients stream live with Ollama (streaming JSON, parsed incrementally). A provider that can't stream sends stage events only.
   - Errors found before the stream starts (auth, CSRF, cap, duplicate, unknown provider) use normal HTTP status codes. After the stream starts, errors are `error` events.
   - Cancel = the client aborts the request; the server notices the disconnect and cancels the provider call. Per-provider timeouts (AD-22) still apply.
+
+### AD-41 — Ingredients and steps live inside the recipe as JSON [ADOPTED]
+
+- **Binds:** AD-4, AD-20, AD-29, AD-31, AD-34
+- **Prevents:** child tables and cascades for data that is never read or written on its own, a `has_original` flag hack, and a stored shape that drifts from the aggregate the API already exposes.
+- **Rule:** _(Approved by Adi 2026-11-04, Story 4.R.)_
+  - `recipe` has two columns, `ingredients` and `steps`, both `JSON NOT NULL DEFAULT '[]'`. The `ingredient` and `step` tables are dropped. Array order is display order, so there is no `position`. Item `id`s are kept, because the edit form matches ingredients by id.
+  - **Ingredient item:** `{id, name, note, amount, unit, original, source}`. `original` is `{amount, unit} | null` and `source` is `{amount, unit} | null` (FR-21). **Step item:** `{id, description, source_text}`.
+  - **Amounts (AD-31):** inside the JSON an amount is a **string** with 3 decimals (`"250.000"`), never a JSON number, so it stays exact. In Python it is a `Decimal`.
+  - **Typing:** a `PydanticJson` SQLAlchemy type in `core/db.py` turns the JSON into typed `IngredientItem` / `StepItem` objects on read and validates them on write. Unit codes and amount ranges are enforced by Pydantic, no longer by a `CHECK` or `NUMERIC(12,3)`.
+  - **Writes:** items are immutable (frozen Pydantic models), and the service always assigns a new list, because SQLAlchemy does not see in-place JSON edits. The JSON is stored as UTF-8, so Hebrew stays readable. The library list defers both columns.
+  - **API contract unchanged (AD-20):** the regenerated `openapi.json` is byte-identical, and the frontend does not change.
+  - **Migration 0005 (AD-29):** backs up `app.db` first (never overwriting an earlier backup), copies every row into the JSON in `position` order, verifies the item counts and that every recipe still has an ingredient and a step before it drops the old tables, and rolls back on any mismatch. The downgrade rebuilds both tables from the JSON, and a round-trip test covers it.
+  - **Later:** searching by ingredient can use SQLite `json_each(...)`. AI import (AD-34) and embeddings read and write the same item shapes.
 
 ## Brownfield ratification
 

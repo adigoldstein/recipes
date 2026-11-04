@@ -1,3 +1,4 @@
+import json
 from collections.abc import Generator
 from datetime import UTC, datetime
 from decimal import Decimal
@@ -7,7 +8,8 @@ from pathlib import Path
 from typing import Annotated, Any
 
 from fastapi import Depends
-from sqlalchemy import Column, Dialect, Engine, Enum, Numeric, event
+from pydantic import BaseModel, TypeAdapter
+from sqlalchemy import JSON, Column, Dialect, Engine, Enum, Numeric, event
 from sqlalchemy.types import DateTime, TypeDecorator
 from sqlmodel import Session, SQLModel, create_engine
 
@@ -67,6 +69,38 @@ class Quantity(TypeDecorator[Decimal]):
         return None if value is None else value.quantize(AMOUNT_QUANTUM)
 
 
+class PydanticJson[Item: BaseModel](TypeDecorator[list[Item]]):
+    """A `JSON` column holding a list of Pydantic items (AD-41).
+
+    Like TypeORM's `simple-json`, but typed: it validates on the way in and builds
+    `Item` objects on the way out, so a bad stored value fails loudly at read time.
+    SQLAlchemy cannot see an item edited in place, so assign a new list instead.
+    """
+
+    impl = JSON
+    cache_ok = True
+
+    def __init__(self, item: type[Item]) -> None:
+        super().__init__()
+        self._item = item
+        self._adapter: TypeAdapter[list[Item]] = TypeAdapter(list[item])  # type: ignore[valid-type]
+
+    def process_bind_param(
+        self, value: list[Item] | None, dialect: Dialect
+    ) -> list[Any] | None:
+        if value is None:
+            return None
+        dumped: list[Any] = self._adapter.dump_python(
+            self._adapter.validate_python(value), mode="json"
+        )
+        return dumped
+
+    def process_result_value(
+        self, value: list[Any] | None, dialect: Dialect
+    ) -> list[Item] | None:
+        return None if value is None else self._adapter.validate_python(value)
+
+
 def enum_column(
     enum: type[StrEnum], name: str, *, nullable: bool = False
 ) -> "Column[Any]":
@@ -99,6 +133,8 @@ def get_engine(data_dir: Path) -> Engine:
     engine = create_engine(
         f"sqlite:///{data_dir / DB_FILENAME}",
         connect_args={"check_same_thread": False},
+        # Hebrew stays readable in the stored JSON (AD-41), not `ק` escapes.
+        json_serializer=lambda value: json.dumps(value, ensure_ascii=False),
     )
     event.listen(engine, "connect", _set_sqlite_pragmas)
     return engine

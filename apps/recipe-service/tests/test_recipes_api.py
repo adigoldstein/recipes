@@ -6,6 +6,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session
 
+from app.recipes.models import OriginalItem, SourceItem
 from app.recipes.service import total_minutes
 from app.recipes.units import SourceUnit, Unit
 from tests.factories import add_recipe, add_tag, ingredient, seeded_tag, step
@@ -117,10 +118,10 @@ def test_detail_returns_the_full_recipe(client: TestClient, session: Session) ->
         created_at=at(5),
         updated_at=at(6),
         ingredients=[
-            ingredient(1, "שמן", amount=Decimal("1.5"), unit=Unit.TBSP, note="זית"),
-            ingredient(0, "עגבניות", amount=Decimal("0.333"), unit=Unit.UNIT),
+            ingredient("שמן", amount=Decimal("1.5"), unit=Unit.TBSP, note="זית"),
+            ingredient("עגבניות", amount=Decimal("0.333"), unit=Unit.UNIT),
         ],
-        steps=[step(1, "לבשל"), step(0, "לחתוך")],
+        steps=[step("לבשל"), step("לחתוך")],
     )
     body = client.get(f"/api/recipes/{recipe.id}").json()
     assert body["id"] == str(recipe.id)
@@ -134,8 +135,9 @@ def test_detail_returns_the_full_recipe(client: TestClient, session: Session) ->
     assert body["photo"] is None
     assert body["created_at"] == "2026-10-05T12:00:00Z"
     assert body["updated_at"] == "2026-10-06T12:00:00Z"
-    assert [item["name"] for item in body["ingredients"]] == ["עגבניות", "שמן"]
-    assert [item["description"] for item in body["steps"]] == ["לחתוך", "לבשל"]
+    # Array order is display order (AD-41).
+    assert [item["name"] for item in body["ingredients"]] == ["שמן", "עגבניות"]
+    assert [item["description"] for item in body["steps"]] == ["לבשל", "לחתוך"]
 
 
 def test_description_and_notes_are_null_when_absent(
@@ -155,9 +157,9 @@ def test_amounts_are_json_numbers_and_to_taste_is_null(
     recipe = add_recipe(
         session,
         ingredients=[
-            ingredient(0, "קמח", amount=Decimal("1.5"), unit=Unit.CUP),
-            ingredient(1, "שום", amount=Decimal("0.333"), unit=Unit.CLOVE),
-            ingredient(2, "מלח"),
+            ingredient("קמח", amount=Decimal("1.5"), unit=Unit.CUP),
+            ingredient("שום", amount=Decimal("0.333"), unit=Unit.CLOVE),
+            ingredient("מלח"),
         ],
     )
     response = client.get(f"/api/recipes/{recipe.id}")
@@ -185,18 +187,18 @@ def test_original_is_null_unless_the_ingredient_was_edited(
         session,
         ingredients=[
             ingredient(
-                0,
                 "קימל",
                 amount=Decimal("2"),
                 unit=Unit.TSP,
-                has_original=True,
-                original_amount=Decimal("1"),
-                original_unit=Unit.TSP,
+                original=OriginalItem(amount=Decimal("1"), unit=Unit.TSP),
             ),
             ingredient(
-                1, "פלפל", amount=Decimal("1"), unit=Unit.TSP, has_original=True
+                "פלפל",
+                amount=Decimal("1"),
+                unit=Unit.TSP,
+                original=OriginalItem(amount=None, unit=None),
             ),
-            ingredient(2, "מלח", amount=Decimal("1"), unit=Unit.TSP),
+            ingredient("מלח", amount=Decimal("1"), unit=Unit.TSP),
         ],
     )
     cumin, pepper, salt = client.get(f"/api/recipes/{recipe.id}").json()["ingredients"]
@@ -213,26 +215,22 @@ def test_source_and_source_text_come_from_an_import(
         session,
         ingredients=[
             ingredient(
-                0,
                 "חמאה",
                 amount=Decimal("227"),
                 unit=Unit.G,
-                source_amount=Decimal("8"),
-                source_unit=SourceUnit.OZ,
+                source=SourceItem(amount=Decimal("8"), unit=SourceUnit.OZ),
             ),
             ingredient(
-                1,
                 "חלב",
                 amount=Decimal("240"),
                 unit=Unit.ML,
-                source_amount=Decimal("8.5"),
-                source_unit=SourceUnit.FL_OZ,
+                source=SourceItem(amount=Decimal("8.5"), unit=SourceUnit.FL_OZ),
             ),
-            ingredient(2, "סוכר", amount=Decimal("100"), unit=Unit.G),
+            ingredient("סוכר", amount=Decimal("100"), unit=Unit.G),
         ],
         steps=[
-            step(0, "לחמם ל-180 מעלות", source_text="Preheat to 350°F"),
-            step(1, "לאפות"),
+            step("לחמם ל-180 מעלות", source_text="Preheat to 350°F"),
+            step("לאפות"),
         ],
     )
     body = client.get(f"/api/recipes/{recipe.id}").json()
@@ -271,10 +269,10 @@ def test_detail_does_not_mix_in_other_recipes_children(
     add_recipe(
         session,
         title="אחר",
-        ingredients=[ingredient(0, "סוכר")],
-        steps=[step(0, "x")],
+        ingredients=[ingredient("סוכר")],
+        steps=[step("x")],
     )
-    mine = add_recipe(session, ingredients=[ingredient(0, "קמח")], steps=[step(0, "y")])
+    mine = add_recipe(session, ingredients=[ingredient("קמח")], steps=[step("y")])
     body = client.get(f"/api/recipes/{mine.id}").json()
     assert [i["name"] for i in body["ingredients"]] == ["קמח"]
     assert [s["description"] for s in body["steps"]] == ["y"]

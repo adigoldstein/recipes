@@ -1,14 +1,76 @@
-"""SQLModel tables owned by recipes."""
+"""SQLModel tables owned by recipes, and the items stored inside a recipe (AD-41)."""
 
 import uuid
 from datetime import datetime
 from decimal import Decimal
+from typing import Annotated
 
-from sqlalchemy import Index, Text, false
-from sqlmodel import Field, Relationship, SQLModel
+from pydantic import AfterValidator, BaseModel, ConfigDict, PlainSerializer
+from pydantic import Field as PydanticField
+from sqlalchemy import Column, Text, text
+from sqlmodel import Field, SQLModel
 
-from app.core.db import Quantity, UtcDateTime, enum_column, utcnow
+from app.core.db import AMOUNT_QUANTUM, PydanticJson, UtcDateTime, utcnow
 from app.recipes.units import SourceUnit, Unit
+
+
+def _quantize(value: Decimal) -> Decimal:
+    return value.quantize(AMOUNT_QUANTUM)
+
+
+# AD-31 / AD-41: an exact `Decimal` in Python, a string with 3 decimals in the JSON
+# (`"250.000"`), because a JSON number would be a float.
+StoredAmount = Annotated[
+    Decimal,
+    AfterValidator(_quantize),
+    PlainSerializer(lambda value: format(value, "f"), return_type=str),
+]
+
+
+class _Item(BaseModel):
+    """What the stored items share.
+
+    Frozen on purpose: SQLAlchemy cannot see an item edited in place, so a change
+    must build a new item (`model_copy`) and assign a new list. Instances are checked
+    again on write, so a bad value never reaches the database.
+    """
+
+    model_config = ConfigDict(
+        frozen=True, extra="forbid", revalidate_instances="always"
+    )
+
+
+class OriginalItem(_Item):
+    """The amount and unit before the first edit (FR-7); both null is "to taste"."""
+
+    amount: StoredAmount | None
+    unit: Unit | None
+
+
+class SourceItem(_Item):
+    """An imperial value an import converted to metric (FR-21), not the original."""
+
+    amount: StoredAmount
+    unit: SourceUnit
+
+
+class IngredientItem(_Item):
+    id: uuid.UUID = PydanticField(default_factory=uuid.uuid4)
+    name: str
+    note: str | None = None
+    amount: StoredAmount | None = None
+    unit: Unit | None = None
+    # `None` is no original; `OriginalItem(amount=None, unit=None)` is "originally to
+    # taste". There is no separate flag.
+    original: OriginalItem | None = None
+    source: SourceItem | None = None
+
+
+class StepItem(_Item):
+    id: uuid.UUID = PydanticField(default_factory=uuid.uuid4)
+    description: str
+    # The pre-conversion text, set only when an import converted a temperature.
+    source_text: str | None = None
 
 
 class Recipe(SQLModel, table=True):
@@ -37,65 +99,20 @@ class Recipe(SQLModel, table=True):
     created_at: datetime = Field(default_factory=utcnow, sa_type=UtcDateTime)
     updated_at: datetime = Field(default_factory=utcnow, sa_type=UtcDateTime)
 
-    ingredients: list["Ingredient"] = Relationship(
-        back_populates="recipe",
-        sa_relationship_kwargs={
-            "order_by": "Ingredient.position",
-            "cascade": "all, delete-orphan",
-            "passive_deletes": True,
-        },
+    # Array order is display order (AD-41). Always assign a new list when changing them.
+    ingredients: list[IngredientItem] = Field(
+        default_factory=list,
+        sa_column=Column(
+            PydanticJson(IngredientItem),
+            nullable=False,
+            server_default=text("'[]'"),
+        ),
     )
-    steps: list["Step"] = Relationship(
-        back_populates="recipe",
-        sa_relationship_kwargs={
-            "order_by": "Step.position",
-            "cascade": "all, delete-orphan",
-            "passive_deletes": True,
-        },
+    steps: list[StepItem] = Field(
+        default_factory=list,
+        sa_column=Column(
+            PydanticJson(StepItem),
+            nullable=False,
+            server_default=text("'[]'"),
+        ),
     )
-
-
-class Ingredient(SQLModel, table=True):
-    __tablename__ = "ingredient"
-    __table_args__ = (
-        Index("ix_ingredient_recipe_id_position", "recipe_id", "position"),
-    )
-
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    recipe_id: uuid.UUID = Field(foreign_key="recipe.id", ondelete="CASCADE")
-    position: int
-    name: str
-    note: str | None = None
-    amount: Decimal | None = Field(default=None, sa_type=Quantity)
-    unit: Unit | None = Field(
-        default=None, sa_column=enum_column(Unit, "unit", nullable=True)
-    )
-    # FR-7 original. `has_original` tells "originally to taste" (both NULL) from none.
-    has_original: bool = Field(
-        default=False, sa_column_kwargs={"server_default": false()}
-    )
-    original_amount: Decimal | None = Field(default=None, sa_type=Quantity)
-    original_unit: Unit | None = Field(
-        default=None, sa_column=enum_column(Unit, "original_unit", nullable=True)
-    )
-    # Set only when an import converted the value (FR-21); not the FR-7 original.
-    source_amount: Decimal | None = Field(default=None, sa_type=Quantity)
-    source_unit: SourceUnit | None = Field(
-        default=None, sa_column=enum_column(SourceUnit, "source_unit", nullable=True)
-    )
-
-    recipe: Recipe = Relationship(back_populates="ingredients")
-
-
-class Step(SQLModel, table=True):
-    __tablename__ = "step"
-    __table_args__ = (Index("ix_step_recipe_id_position", "recipe_id", "position"),)
-
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    recipe_id: uuid.UUID = Field(foreign_key="recipe.id", ondelete="CASCADE")
-    position: int
-    description: str = Field(sa_type=Text)
-    # The pre-conversion text, set only when an import converted a temperature.
-    source_text: str | None = Field(default=None, sa_type=Text)
-
-    recipe: Recipe = Relationship(back_populates="steps")
