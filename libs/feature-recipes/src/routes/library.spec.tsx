@@ -18,10 +18,10 @@ const SALAD = recipe('r4', 'Greek Salad');
 const ALL = [SHAKSHUKA, LASAGNA, CAKE, SALAD];
 
 const TAGS = [
-  { id: 't1', name: 'בוקר', pinned: true },
-  { id: 't4', name: 'ערב', pinned: true },
-  { id: 't2', name: 'על האש', pinned: false },
-  { id: 't3', name: 'מסיבות', pinned: false },
+  { id: 't1', name: 'בוקר', pinned: true, recipe_count: 0 },
+  { id: 't4', name: 'ערב', pinned: true, recipe_count: 0 },
+  { id: 't2', name: 'על האש', pinned: false, recipe_count: 0 },
+  { id: 't3', name: 'מסיבות', pinned: false, recipe_count: 0 },
 ];
 const BREAKFAST_AND_DINNER = recipe('r5', 'פשטידה', {
   tags: [
