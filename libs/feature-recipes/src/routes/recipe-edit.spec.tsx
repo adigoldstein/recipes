@@ -224,6 +224,27 @@ describe('RecipeEditPage', () => {
     });
   });
 
+  it('goes back to the recipe after an in-app visit, not to the recipe again', async () => {
+    const user = userEvent.setup();
+    serveRecipe();
+    const { router } = renderEdit('r1');
+    await screen.findByDisplayValue('פנקייק');
+    await user.click(screen.getByRole('link', { name: 'חזרה למתכון' }));
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe('/recipes/r1');
+    });
+    expect(router.state.historyAction).toBe('POP');
+  });
+
+  it('links to the recipe as the fallback for a direct visit', async () => {
+    serveRecipe();
+    renderEdit('r1', { direct: true });
+    await screen.findByDisplayValue('פנקייק');
+    expect(
+      screen.getByRole('link', { name: 'חזרה למתכון' }).getAttribute('href'),
+    ).toBe('/recipes/r1');
+  });
+
   it('says the recipe was not found', async () => {
     server.use(
       http.get('*/api/recipes/:id', () =>

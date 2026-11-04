@@ -7,8 +7,11 @@ import { Component as RecipeEditPage } from '../routes/recipe-edit';
 
 initI18n();
 
-/** Renders the edit form at `/recipes/:id/edit`, with stub routes for the recipe page. */
-export function renderEdit(id: string) {
+/**
+ * Renders the edit form at `/recipes/:id/edit`, with stub routes for the recipe page.
+ * Arriving from the recipe page is an in-app visit; `direct` is a visit with no history.
+ */
+export function renderEdit(id: string, { direct = false } = {}) {
   const router = createMemoryRouter(
     [
       { path: '/', element: <p>library stub</p> },
@@ -16,8 +19,10 @@ export function renderEdit(id: string) {
       { path: '/recipes/:id/edit', Component: RecipeEditPage },
     ],
     {
-      initialEntries: [`/recipes/${id}`, `/recipes/${id}/edit`],
-      initialIndex: 1,
+      initialEntries: direct
+        ? [`/recipes/${id}/edit`]
+        : [`/recipes/${id}`, `/recipes/${id}/edit`],
+      initialIndex: direct ? 0 : 1,
     },
   );
   const queryClient = new QueryClient({
