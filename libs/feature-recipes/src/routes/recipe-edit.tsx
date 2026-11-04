@@ -5,6 +5,7 @@ import { Link, useNavigate, useParams } from 'react-router';
 import {
   getErrorCode,
   invalidationMap,
+  useBackNavigation,
   recipesGetRecipeOptions,
   recipesGetRecipeQueryKey,
   recipesUpdateRecipeMutation,
@@ -74,6 +75,8 @@ export function RecipeEditPage() {
 }
 
 function RecipeEdit({ recipe }: { recipe: RecipeRead }) {
+  // Back returns to the recipe the person came from, as the detail page's back does.
+  const { onBack } = useBackNavigation();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -105,7 +108,9 @@ function RecipeEdit({ recipe }: { recipe: RecipeRead }) {
         <BackLink
           label={t('recipeForm.editBack')}
           link={(children) => (
-            <Link to={`/recipes/${recipe.id}`}>{children}</Link>
+            <Link to={`/recipes/${recipe.id}`} onClick={onBack}>
+              {children}
+            </Link>
           )}
         />
       </div>
