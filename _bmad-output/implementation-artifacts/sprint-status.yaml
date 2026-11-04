@@ -66,7 +66,7 @@ development_status:
   3-5-reset-an-ingredient-to-its-original: optional # moved to 7-5 (optional, nice to have); nothing in Epic 3 depends on it
   3-6-delete-a-recipe: done
   3-7a-recipe-photos-storage-upload-api-and-display: done
-  3-7b-recipe-photos-the-forms-upload-replace-remove: review
+  3-7b-recipe-photos-the-forms-upload-replace-remove: done
   3-8-duplicate-a-recipe: backlog # stretch / optional: can be cut without affecting any other story
   epic-3-retrospective: optional
 
@@ -80,7 +80,12 @@ development_status:
   5-2-import-from-pasted-text: backlog
   5-3-review-the-draft-before-saving: backlog
   5-4-import-from-a-url: backlog
-  5-5-progress-cancel-engine-choice-and-errors: backlog
+  5-5-cancel-engine-choice-and-errors: backlog # renamed 2026-11-04: progress moved to 5-6
+  5-6-live-import-progress-sse: backlog # AD-40
+  5-7-duplicate-check-before-a-url-import: backlog # AD-39
+  5-8-ai-dashboard-for-the-admin: backlog # AD-38; chart library to agree with Adi first
+  5-9-not-a-recipe-pre-check: backlog # later (AD-36): working mechanism first, edge cases later
+  5-10-import-evals-fixtures-scores-and-ci: backlog # AD-37
   epic-5-retrospective: optional
 
   epic-6: backlog
@@ -97,4 +102,10 @@ development_status:
   7-3-data-caching-tuning: backlog # REQUIRED (not optional): per-query staleTime for reference data like tags, invalidate on edits
   7-4-quick-pick-chips-for-pinned-tags-in-the-recipe-form: backlog # optional: toggle chips for pinned tags above the tag field (split out of 3.3)
   7-5-reset-ingredient-to-original: backlog # optional: "חזרה למקור" button in the edit form (moved from 3.5; the 3.4 hint stays meanwhile)
+  7-6-admin-merges-duplicate-tags: backlog # optional: admin merges two tags in one transaction (no fuzzy/LLM tag mapping, Adi 2026-11-04)
   epic-7-retrospective: optional
+
+  epic-8: backlog # planned 2026-11-04: semantic search, starts after Epic 5
+  8-1-recipe-embeddings: backlog
+  8-2-semantic-search-in-the-library: backlog
+  epic-8-retrospective: optional

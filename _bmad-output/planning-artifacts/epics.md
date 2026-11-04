@@ -236,7 +236,7 @@ Editors manage tags (add, rename, delete, pin or unpin, with usage counts), and 
 
 ### Epic 5: AI import
 
-Editors import a recipe from a link or from pasted text with Ollama (local) or Gemini. They get a Hebrew draft with suggested tags and photo, review the flagged fields, and save. Progress, cancel and per-engine timeouts make slow local runs usable. Story 5.1 is the spike that compares Ollama and Gemini and confirms the default engine.
+Editors import a recipe from a link or from pasted text with Ollama (local) or Gemini. They get a Hebrew draft with suggested tags and photo, review the flagged fields, and save. Live stage progress (SSE), cancel and per-engine timeouts make slow local runs usable. A URL that was already imported is caught before fetching. The admin sees import performance on an AI dashboard, and evals score providers on saved fixtures. Story 5.1 is the spike that compares Ollama and Gemini, confirms the default engine and measures the site blocking rate. (Updated 2026-11-04, AD-34 to AD-40.)
 **FRs covered:** FR17, FR18, FR19, FR20, FR21, FR24
 
 ### Epic 6: Ready to show
@@ -248,6 +248,11 @@ The app runs as one production container (`docker compose up`) with backups, str
 
 Small comforts for cooking on the phone: the screen stays awake, amounts show as pretty fractions, and a recipe can be shared as text. Split out of Story 1.11 (2026-10-28); it can be cut without affecting any other story. It also holds one optional admin story: editing a user's name and email (Story 7.2), and one REQUIRED story: data caching tuning (Story 7.3), which must not be cut with the rest.
 **FRs covered:** FR9 (Story 7.5 only), UX-DR22
+
+### Epic 8: Semantic search over our recipes
+
+Find recipes by meaning ("something light with lemon"), using embeddings from a local Ollama model and cosine similarity over our own recipes in SQLite. Planned 2026-11-04; starts after Epic 5. About 2 stories.
+**FRs covered:** none yet (a new capability; add an FR to the PRD when the epic starts)
 
 ## Epic 1: Browse and cook from the phone
 
@@ -786,6 +791,8 @@ So that I can find, for example, all barbecue party dishes (FR3 tags).
 
 Editors import a recipe from a link or from pasted text, get a Hebrew draft from Ollama (local) or Gemini, review it, and save.
 
+> Updated 2026-11-04 with Adi's approved AI import decisions (ARCHITECTURE-SPINE AD-34 to AD-40). The rule is: a working mechanism first, edge cases later. Stories 5.1–5.5 are the core. 5.6–5.8 add progress, duplicate check and the dashboard. 5.9 (not-a-recipe pre-check) and 5.10 (evals) can come later.
+
 ### Story 5.1: Spike: Ollama vs Gemini on real recipes
 
 As Adi,
@@ -796,8 +803,10 @@ So that the default engine is chosen on real numbers (AD-12).
 
 **Given** Ollama installed as the native Windows app (a 7B model, e.g. qwen) and a Gemini free-tier key
 **When** a standalone script under `tools/llm-spike/` runs about 5 real recipes (2 English pages, 3 Hebrew) through both, with the `DraftRecipe` JSON schema as the required output
-**Then** a results table records per recipe and engine: time, schema-valid yes/no, Hebrew quality (1–5, judged by Adi), units mapped correctly, and to-taste handling
-**And** the outcome is recorded in the architecture memlog: the default engine, the Ollama model name, and the timeout values
+**Then** a results table records per recipe and engine: time, schema-valid on the first try yes/no, valid after one retry with the error fed back yes/no (AD-34), Hebrew quality (1–5, judged by Adi), units mapped correctly, and to-taste handling
+**And** the script fetches about 15 of Adi's usual recipe sites with plain httpx and records how many return a bot-protection challenge or block page, so the real blocking rate is known (AD-35)
+**And** it checks that Ollama can stream the structured output so ingredients can be shown as they arrive (AD-40)
+**And** the outcome is recorded in the architecture memlog: the default engine, the Ollama model name, the timeout values, and the blocking rate
 **And** no app code is changed, and the script reads keys only from env
 
 ### Story 5.2: Import from pasted text
@@ -811,15 +820,16 @@ So that I don't retype recipes by hand (FR18, FR21, FR24).
 **Given** I'm signed in as an editor
 **When** I open "ייבוא", choose the "הדבקת טקסט" tab, paste text and submit (the page lives in a new `libs/feature-import`, tag `type:feature`, as a lazy subpath export; AD-2, AD-11)
 **Then** `POST /api/imports/text` (editor) calls the default provider through the `LlmProvider` registry, which in this story has the `ollama` and `fake` adapters and returns a `DraftRecipe` validated by Pydantic (AD-12, AD-22)
+**And** the adapter sends the `DraftRecipe` JSON schema as the provider's structured-output format, validates the reply, and on a validation failure retries once with the error fed back; a second failure returns `llm_invalid_output`. No Instructor library (AD-34)
 **And** the draft is in Hebrew (translated if the source is in another language), its units are mapped to the `Unit` enum, imperial units are converted by the deterministic table (oz→g, lb→g, fl oz→ml, friendly rounding; cups and spoons unchanged) with `source_amount`/`source_unit` kept, unquantifiable ingredients are to-taste, and units that are still unmappable are empty with the original text kept in the note (FR19, FR21)
 **And** a deterministic pass rewrites °F temperatures in the step text to °C, rounded to the nearest 5 (350°F becomes "180°C"), and keeps the unconverted step text as `source_text` for the "הצג מתכון מקורי" toggle; the conversions live in code with unit tests, never in the model's output (FR21)
 **And** the draft's description comes from the source's description when it has one, and its notes stay empty unless the source has notes or tips of its own (FR19)
 **And** the draft suggests tags chosen from the existing tag list. A tag name that is not in the list is proposed as a new tag in the draft, and is created only if the editor accepts it and saves (FR24)
 **And** the create form opens prefilled through router state (never the URL), via `draftToFormValues()`, and nothing is saved until "שמירה" (AD-22)
-**And** text with no recipe returns `no_recipe_found` ("לא נמצא מתכון בטקסט הזה"), and the text stays for editing
-**And** every import writes an `import_log` row (user, provider, ms, tokens, outcome), and the daily cap returns 429 `import_cap_reached` (AD-29)
+**And** a draft with no ingredients and no steps returns `no_recipe_found` ("לא נמצא מתכון בטקסט הזה"), and the text stays for editing
+**And** every import writes one `import_runs` row (user, provider, model, source kind, path, prompt version, latency, tokens, first-try valid, retried, outcome; the table is created here by an Alembic migration), and the daily cap returns 429 `import_cap_reached` (AD-29, AD-38)
 **And** the import dialog is a dialog on desktop and a full page on phone (UX-DR13)
-**And** tests use the deterministic `fake` provider (`FAKE:<scenario>`), so CI never calls a real model
+**And** tests use the deterministic `fake` provider (`FAKE:<scenario>`, including an invalid-then-valid scenario for the retry), so CI never calls a real model
 
 ### Story 5.3: Review the draft before saving
 
@@ -847,29 +857,107 @@ So that importing from cooking sites takes seconds (FR17).
 
 **Given** the "קישור" tab
 **When** I paste a URL and submit
-**Then** `POST /api/imports/url` (editor) fetches it only through `app/core/safe_fetch.py`: http/https only, public addresses only (re-checked on every redirect), with size and time caps (AD-13, AD-23)
-**And** schema.org Recipe JSON-LD (via recipe-scrapers) is used first. Otherwise readable text (via trafilatura) is used. The LLM always runs to translate, map units and suggest tags
+**Then** `POST /api/imports/url` (editor) fetches the page only through the `PageFetcher` port, whose httpx adapter follows `app/core/safe_fetch.py`: http/https only, public addresses only (re-checked on every redirect), with size and time caps (AD-13, AD-23, AD-35)
+**And** schema.org Recipe JSON-LD is used first. Otherwise readable text is used. The LLM always runs to translate, map units and suggest tags, and the `import_runs` row records the path (`json_ld` or `llm`)
 **And** the main photo URL (`Recipe.image`, else `og:image`) comes back as `photo_source_url`. The review form shows it with "הסרה"/"החלפה", and on save it is uploaded through `POST /api/photos {source_url}` via safe fetch, with the source domain stored as credit (AD-27)
-**And** blocked, failed or too-large fetches return `fetch_blocked`, `fetch_failed` or `fetch_too_large`, and the UI offers a one-click switch to "הדבקת טקסט" (FR17)
-**And** tests cover SSRF cases (localhost, private IPs, a redirect to a private IP) with the fake fetcher and fixture pages (`fake://<fixture>`)
+**And** a bot-protection challenge or block page is detected (it is never bypassed) and returns `fetch_challenged`; blocked, failed or too-large fetches return `fetch_blocked`, `fetch_failed` or `fetch_too_large`. For all of them the UI offers a one-click switch to "הדבקת טקסט" (FR17, AD-35)
+**And** tests cover SSRF cases (localhost, private IPs, a redirect to a private IP) and a saved challenge page, with the fake fetcher and fixture pages (`fake://<fixture>`)
 
-### Story 5.5: Progress, cancel, engine choice and errors
+### Story 5.5: Cancel, engine choice and errors
 
 As an editor,
-I want to see the import working, cancel it, and switch to Gemini if the local model is slow or weak,
+I want to cancel an import and switch to Gemini if the local model is slow or weak,
 So that slow local imports are still usable (FR20).
 
 **Acceptance Criteria:**
 
 **Given** an import is running
-**When** I watch the dialog
-**Then** it shows client-timed phase text ("מביאים את הדף…", "קוראים את המתכון…", "מארגנים…") with an indeterminate bar and "ביטול" (AD-22)
-**And** "ביטול" aborts the request, and the server stops waiting on the provider where possible
+**When** I tap "ביטול"
+**Then** the request is aborted, and the server stops waiting on the provider where possible
 **And** `GET /api/imports/providers` returns `[{name, timeout_s}]`, and the client aborts at `timeout_s + 5`. The Vite proxy and uvicorn timeouts exceed the largest provider timeout
-**And** the `gemini` adapter (google-genai SDK, model from `GEMINI_MODEL`, structured output validated by the same `DraftRecipe`) is added to the registry and enabled when `GEMINI_API_KEY` is set
+**And** the `gemini` adapter (google-genai SDK, model from `GEMINI_MODEL`, structured output validated by the same `DraftRecipe` with the same one retry, AD-34) is added to the registry and enabled when `GEMINI_API_KEY` is set
 **And** the dialog has an engine choice (מקומי / Gemini) listing only enabled providers, defaulting to the configured default and remembering the last choice
 **And** `llm_timeout`, `llm_unavailable`, `llm_quota` and `llm_invalid_output` show readable Hebrew messages with "לנסות שוב" and, when Gemini is enabled, "לנסות שוב עם Gemini". Nothing is saved
 **And** an unknown or disabled provider returns 400 `provider_unavailable`
+**And** until Story 5.6, the dialog shows an indeterminate spinner with "ביטול" (no percentage, no fake phase text)
+
+### Story 5.6: Live import progress (SSE)
+
+As an editor,
+I want to see what the import is really doing, and the ingredients as they appear,
+So that a slow local import never looks frozen (FR20, AD-40).
+
+**Acceptance Criteria:**
+
+**Given** an import from a URL or from text
+**When** it runs
+**Then** `POST /api/imports/url` and `POST /api/imports/text` answer with `text/event-stream` (FastAPI `StreamingResponse`), and the client reads it with `fetch` and a stream reader in `libs/data-access`
+**And** the server sends `stage` events for the real pipeline stages (`fetch`, `extract`, `validate`, `convert_units`, `translate`, each `started`/`done`/`skipped`), then a `draft` event; the dialog shows them as a Hebrew checklist. There is no percentage bar
+**And** with Ollama, `ingredient` events stream each ingredient as the model generates it, and the dialog lists them live; a provider that can't stream sends stage events only
+**And** errors before the stream starts (auth, CSRF, cap, duplicate, unknown provider) keep their HTTP status; errors after it starts arrive as an `error` event with the AD-28 code
+**And** "ביטול" aborts the stream, and the server detects the disconnect and cancels the provider call
+**And** tests cover the event order with the `fake` provider (including a streamed-ingredients scenario) and a client test with a mocked stream
+
+### Story 5.7: Duplicate check before a URL import
+
+As an editor,
+I want to be told when a link was already imported,
+So that I don't create the same recipe twice (FR17, AD-39).
+
+**Acceptance Criteria:**
+
+**Given** a recipe saved from `https://site.com/cake/?utm_source=x`
+**When** I import `http://site.com/cake`
+**Then** `POST /api/imports/url` checks the normalized source URL before fetching and returns 409 `import_duplicate` with `params: {recipe_id}`
+**And** the dialog asks "המתכון כבר קיים — לפתוח אותו או לייבא שוב?"; "לפתוח" goes to the recipe, and "לייבא שוב" resends with `allow_duplicate: true`
+**And** `normalize_source_url()` treats http and https the same, lowercases the host, and removes the trailing slash, the fragment, `utm_*` and known tracking params (`fbclid`, `gclid`, …), with unit tests for each rule
+**And** recipes get an indexed `source_url_key` column through an Alembic migration, filled for existing recipes that have a source URL, and kept in step on create and edit
+**And** no separate URL cache is added
+
+### Story 5.8: AI dashboard for the admin
+
+As Adi (admin),
+I want a page that shows how imports perform per provider and model,
+So that I choose engines and prompts on real numbers (AD-38).
+
+**Acceptance Criteria:**
+
+**Given** I'm signed in as an admin
+**When** I open the "AI dashboard" page (admin-only route in `libs/feature-import`, lazy loaded)
+**Then** `GET /api/admin/import-stats` (admin; 403 for editors) returns aggregates computed on request with SQL `GROUP BY` over `import_runs`: per provider/model the run count, success rate, first-try validation rate, retry rate, average and p95 latency, average tokens, the JSON-LD vs LLM split, and the outcome breakdown; plus runs per day for the last 30 days
+**And** an optional `?days=` filter and a `prompt_version` breakdown are supported
+**And** the page shows these as charts and a table, using design tokens only, in RTL and both themes. The chart library is agreed with Adi before the story starts
+**And** there is no background job and no stored aggregate table
+**And** API tests cover the aggregates on a seeded set of runs, and the page has a component test with MSW
+
+### Story 5.9: "Not a recipe" pre-check (later)
+
+As an editor,
+I want a quick, clear answer when a page or text has no recipe,
+So that I don't wait for a full import that can't succeed (FR17, FR18, AD-36).
+
+**Acceptance Criteria:**
+
+**Given** a URL or pasted text to import
+**When** the pipeline runs
+**Then** a separate pre-check runs before extraction: a page with schema.org Recipe JSON-LD passes straight away; otherwise a short LLM classification call (its own small schema, validated with one retry per AD-34) decides
+**And** a negative answer returns `no_recipe_found` without running extraction, shown as a `stage` event result in the progress view
+**And** the `import_runs` row records the pre-check outcome
+**And** tests use `fake` scenarios for recipe, not-a-recipe and an invalid classification reply
+
+### Story 5.10: Import evals: fixtures, scores and CI
+
+As Adi,
+I want a repeatable score for how well each provider and model imports recipes,
+So that a prompt or model change never makes drafts worse unnoticed (AD-37).
+
+**Acceptance Criteria:**
+
+**Given** about 20 fixtures under `apps/recipe-service/evals/fixtures/` (saved HTML and pasted text, deliberately including blogs without JSON-LD, Hebrew sites and pasted text), each with a hand-checked expected `DraftRecipe`
+**When** `nx run recipe-service:eval --provider=<name> --model=<model>` runs
+**Then** it runs the real pipeline over every fixture and scores each field (title, ingredients, amounts, units, steps, tags, translation), printing a per-fixture and total table
+**And** live runs on Adi's machine record each provider's responses, and the results table (per provider/model) is added to the README
+**And** CI runs the same script against the recorded responses through a replay adapter behind `LlmProvider`, so no real model is called (AD-16), and fails if the total score drops below a set threshold
 
 ## Epic 6: Ready to show
 
@@ -1034,3 +1122,53 @@ So that I can undo my tweaks when the original was better (FR9).
 **And** after saving, the server sees the amount and unit equal to the original, clears both original fields, and the ingredient looks as if it had never been edited (AD-4)
 **And** this works for thirds (⅓ saved as 0.333) and for an original that was to-taste
 **And** the e2e-ready test path is: edit cumin 1→2 tsp, save, see the hint, reset, save, and the hint is gone
+
+### Story 7.6: Admin merges duplicate tags (nice to have, optional)
+
+> Optional. Added 2026-11-04. Adi decided there is no fuzzy tag matching and no LLM tag mapping; duplicate tags are fixed by hand with this merge.
+
+As an admin,
+I want to merge two tags that mean the same thing,
+So that the tag list stays clean without editing each recipe.
+
+**Acceptance Criteria:**
+
+**Given** I'm signed in as an admin on the tags screen
+**When** I pick a tag to keep and a tag to merge into it, and confirm ("מיזוג")
+**Then** `POST /api/tags/{keep_id}/merge {from_id}` (admin; 403 for editors) moves every recipe from the merged tag to the kept tag, without duplicating a tag a recipe already has, and deletes the merged tag, all in **one transaction** (all or nothing)
+**And** merging a tag into itself or a missing tag returns 400 or 404 with an AD-28 code
+**And** the confirm dialog shows how many recipes will move, and the tags list and library refresh afterwards
+**And** API tests cover overlap (a recipe with both tags), the rollback on failure, and the role check
+
+## Epic 8: Semantic search over our recipes
+
+> Planned 2026-11-04 (approved by Adi). Starts after Epic 5. SQLite stays; no PostgreSQL. The architecture details (ADs) are written when the epic starts.
+
+### Story 8.1: Recipe embeddings
+
+As Adi,
+I want every recipe to have a meaning-based vector,
+So that the library can be searched by what a recipe is, not only by its title.
+
+**Acceptance Criteria:**
+
+**Given** an Ollama embedding model set in config
+**When** a recipe is created or edited, or `app.cli embed --all` runs
+**Then** an embedding of the title, description, ingredients and tags is computed through a provider port (like `LlmProvider`, with a deterministic `fake` for tests) and stored in SQLite with the model name, through an Alembic migration
+**And** a failed embedding never blocks saving the recipe; it is retried by the CLI
+**And** tests use the `fake` embedder, so CI never calls a real model
+
+### Story 8.2: Semantic search in the library
+
+As a visitor,
+I want to search for "something light with lemon" and get matching recipes,
+So that I find recipes by idea, not exact words.
+
+**Acceptance Criteria:**
+
+**Given** recipes with embeddings
+**When** I search in the library with the "חיפוש חכם" option
+**Then** `GET /api/recipes/semantic-search?q=` embeds the query and ranks recipes by cosine similarity computed in Python (`sqlite-vec` is optional, only if speed needs it), returning the top results
+**And** the results use the normal recipe cards, and the plain title search still works as before
+**And** when the embedding model is unavailable, the page falls back to the title search with a short notice
+**And** API tests use the `fake` embedder with fixed vectors
