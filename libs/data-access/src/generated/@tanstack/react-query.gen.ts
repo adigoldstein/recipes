@@ -3,8 +3,8 @@
 import { type DefaultError, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen.js';
-import { authChangePassword, authLogin, authLogout, authSession, healthGetHealth, type Options, photosGetLimits, photosUploadPhoto, recipesCreateRecipe, recipesDeleteRecipe, recipesGetRecipe, recipesListRecipes, recipesUpdateRecipe, tagsListTags, usersCreateUser, usersListUsers, usersUpdateUser } from '../sdk.gen.js';
-import type { AuthChangePasswordData, AuthChangePasswordError, AuthChangePasswordResponse, AuthLoginData, AuthLoginError, AuthLoginResponse, AuthLogoutData, AuthLogoutResponse, AuthSessionData, AuthSessionError, AuthSessionResponse, HealthGetHealthData, HealthGetHealthResponse, PhotosGetLimitsData, PhotosGetLimitsError, PhotosGetLimitsResponse, PhotosUploadPhotoData, PhotosUploadPhotoError, PhotosUploadPhotoResponse, RecipesCreateRecipeData, RecipesCreateRecipeError, RecipesCreateRecipeResponse, RecipesDeleteRecipeData, RecipesDeleteRecipeError, RecipesDeleteRecipeResponse, RecipesGetRecipeData, RecipesGetRecipeError, RecipesGetRecipeResponse, RecipesListRecipesData, RecipesListRecipesResponse, RecipesUpdateRecipeData, RecipesUpdateRecipeError, RecipesUpdateRecipeResponse, TagsListTagsData, TagsListTagsResponse, UsersCreateUserData, UsersCreateUserError, UsersCreateUserResponse, UsersListUsersData, UsersListUsersResponse, UsersUpdateUserData, UsersUpdateUserError, UsersUpdateUserResponse } from '../types.gen.js';
+import { authChangePassword, authLogin, authLogout, authSession, healthGetHealth, type Options, photosGetLimits, photosUploadPhoto, recipesCreateRecipe, recipesDeleteRecipe, recipesGetRecipe, recipesListRecipes, recipesUpdateRecipe, tagsCreateTag, tagsDeleteTag, tagsListTags, tagsUpdateTag, usersCreateUser, usersListUsers, usersUpdateUser } from '../sdk.gen.js';
+import type { AuthChangePasswordData, AuthChangePasswordError, AuthChangePasswordResponse, AuthLoginData, AuthLoginError, AuthLoginResponse, AuthLogoutData, AuthLogoutResponse, AuthSessionData, AuthSessionError, AuthSessionResponse, HealthGetHealthData, HealthGetHealthResponse, PhotosGetLimitsData, PhotosGetLimitsError, PhotosGetLimitsResponse, PhotosUploadPhotoData, PhotosUploadPhotoError, PhotosUploadPhotoResponse, RecipesCreateRecipeData, RecipesCreateRecipeError, RecipesCreateRecipeResponse, RecipesDeleteRecipeData, RecipesDeleteRecipeError, RecipesDeleteRecipeResponse, RecipesGetRecipeData, RecipesGetRecipeError, RecipesGetRecipeResponse, RecipesListRecipesData, RecipesListRecipesResponse, RecipesUpdateRecipeData, RecipesUpdateRecipeError, RecipesUpdateRecipeResponse, TagsCreateTagData, TagsCreateTagError, TagsCreateTagResponse, TagsDeleteTagData, TagsDeleteTagError, TagsDeleteTagResponse, TagsListTagsData, TagsListTagsResponse, TagsUpdateTagData, TagsUpdateTagError, TagsUpdateTagResponse, UsersCreateUserData, UsersCreateUserError, UsersCreateUserResponse, UsersListUsersData, UsersListUsersResponse, UsersUpdateUserData, UsersUpdateUserError, UsersUpdateUserResponse } from '../types.gen.js';
 
 /**
  * Login
@@ -274,6 +274,57 @@ export const tagsListTagsOptions = (options?: Options<TagsListTagsData>) => quer
     },
     queryKey: tagsListTagsQueryKey(options)
 });
+
+/**
+ * Create Tag
+ */
+export const tagsCreateTagMutation = (options?: Partial<Options<TagsCreateTagData>>): UseMutationOptions<TagsCreateTagResponse, TagsCreateTagError, Options<TagsCreateTagData>> => {
+    const mutationOptions: UseMutationOptions<TagsCreateTagResponse, TagsCreateTagError, Options<TagsCreateTagData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await tagsCreateTag({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Delete Tag
+ */
+export const tagsDeleteTagMutation = (options?: Partial<Options<TagsDeleteTagData>>): UseMutationOptions<TagsDeleteTagResponse, TagsDeleteTagError, Options<TagsDeleteTagData>> => {
+    const mutationOptions: UseMutationOptions<TagsDeleteTagResponse, TagsDeleteTagError, Options<TagsDeleteTagData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await tagsDeleteTag({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Update Tag
+ */
+export const tagsUpdateTagMutation = (options?: Partial<Options<TagsUpdateTagData>>): UseMutationOptions<TagsUpdateTagResponse, TagsUpdateTagError, Options<TagsUpdateTagData>> => {
+    const mutationOptions: UseMutationOptions<TagsUpdateTagResponse, TagsUpdateTagError, Options<TagsUpdateTagData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await tagsUpdateTag({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
 
 export const usersListUsersQueryKey = (options?: Options<UsersListUsersData>) => createQueryKey('usersListUsers', options);
 

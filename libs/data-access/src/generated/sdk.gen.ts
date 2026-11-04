@@ -2,7 +2,7 @@
 
 import { client } from './client.gen.js';
 import { type Client, type ClientMeta, formDataBodySerializer, type Options as Options2, type RequestResult, type TDataShape } from './client/index.js';
-import type { AuthChangePasswordData, AuthChangePasswordErrors, AuthChangePasswordResponses, AuthLoginData, AuthLoginErrors, AuthLoginResponses, AuthLogoutData, AuthLogoutResponses, AuthSessionData, AuthSessionErrors, AuthSessionResponses, HealthGetHealthData, HealthGetHealthResponses, PhotosGetLimitsData, PhotosGetLimitsErrors, PhotosGetLimitsResponses, PhotosUploadPhotoData, PhotosUploadPhotoErrors, PhotosUploadPhotoResponses, RecipesCreateRecipeData, RecipesCreateRecipeErrors, RecipesCreateRecipeResponses, RecipesDeleteRecipeData, RecipesDeleteRecipeErrors, RecipesDeleteRecipeResponses, RecipesGetRecipeData, RecipesGetRecipeErrors, RecipesGetRecipeResponses, RecipesListRecipesData, RecipesListRecipesResponses, RecipesUpdateRecipeData, RecipesUpdateRecipeErrors, RecipesUpdateRecipeResponses, TagsListTagsData, TagsListTagsResponses, UsersCreateUserData, UsersCreateUserErrors, UsersCreateUserResponses, UsersListUsersData, UsersListUsersResponses, UsersUpdateUserData, UsersUpdateUserErrors, UsersUpdateUserResponses } from './types.gen.js';
+import type { AuthChangePasswordData, AuthChangePasswordErrors, AuthChangePasswordResponses, AuthLoginData, AuthLoginErrors, AuthLoginResponses, AuthLogoutData, AuthLogoutResponses, AuthSessionData, AuthSessionErrors, AuthSessionResponses, HealthGetHealthData, HealthGetHealthResponses, PhotosGetLimitsData, PhotosGetLimitsErrors, PhotosGetLimitsResponses, PhotosUploadPhotoData, PhotosUploadPhotoErrors, PhotosUploadPhotoResponses, RecipesCreateRecipeData, RecipesCreateRecipeErrors, RecipesCreateRecipeResponses, RecipesDeleteRecipeData, RecipesDeleteRecipeErrors, RecipesDeleteRecipeResponses, RecipesGetRecipeData, RecipesGetRecipeErrors, RecipesGetRecipeResponses, RecipesListRecipesData, RecipesListRecipesResponses, RecipesUpdateRecipeData, RecipesUpdateRecipeErrors, RecipesUpdateRecipeResponses, TagsCreateTagData, TagsCreateTagErrors, TagsCreateTagResponses, TagsDeleteTagData, TagsDeleteTagErrors, TagsDeleteTagResponses, TagsListTagsData, TagsListTagsResponses, TagsUpdateTagData, TagsUpdateTagErrors, TagsUpdateTagResponses, UsersCreateUserData, UsersCreateUserErrors, UsersCreateUserResponses, UsersListUsersData, UsersListUsersResponses, UsersUpdateUserData, UsersUpdateUserErrors, UsersUpdateUserResponses } from './types.gen.js';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -127,6 +127,35 @@ export const recipesUpdateRecipe = <ThrowOnError extends boolean = false>(option
  * List Tags
  */
 export const tagsListTags = <ThrowOnError extends boolean = false>(options?: Options<TagsListTagsData, ThrowOnError>): RequestResult<TagsListTagsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<TagsListTagsResponses, unknown, ThrowOnError>({ url: '/api/tags', ...options });
+
+/**
+ * Create Tag
+ */
+export const tagsCreateTag = <ThrowOnError extends boolean = false>(options: Options<TagsCreateTagData, ThrowOnError>): RequestResult<TagsCreateTagResponses, TagsCreateTagErrors, ThrowOnError> => (options.client ?? client).post<TagsCreateTagResponses, TagsCreateTagErrors, ThrowOnError>({
+    url: '/api/tags',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete Tag
+ */
+export const tagsDeleteTag = <ThrowOnError extends boolean = false>(options: Options<TagsDeleteTagData, ThrowOnError>): RequestResult<TagsDeleteTagResponses, TagsDeleteTagErrors, ThrowOnError> => (options.client ?? client).delete<TagsDeleteTagResponses, TagsDeleteTagErrors, ThrowOnError>({ url: '/api/tags/{tag_id}', ...options });
+
+/**
+ * Update Tag
+ */
+export const tagsUpdateTag = <ThrowOnError extends boolean = false>(options: Options<TagsUpdateTagData, ThrowOnError>): RequestResult<TagsUpdateTagResponses, TagsUpdateTagErrors, ThrowOnError> => (options.client ?? client).patch<TagsUpdateTagResponses, TagsUpdateTagErrors, ThrowOnError>({
+    url: '/api/tags/{tag_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
  * List Users

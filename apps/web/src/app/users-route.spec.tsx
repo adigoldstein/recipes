@@ -18,6 +18,7 @@ const server = setupServer(
   http.get('*/api/auth/session', () =>
     HttpResponse.json({ user: sessionUser }),
   ),
+  http.get('*/api/tags', () => HttpResponse.json([])),
   http.get('*/api/users', () =>
     HttpResponse.json([
       { ...ADMIN, is_blocked: false, created_at: '2026-10-01T08:00:00Z' },
@@ -88,5 +89,21 @@ describe('/account', () => {
     const router = renderAt('/account');
     await waitFor(() => expect(router.state.location.pathname).toBe('/login'));
     expect(router.state.location.search).toBe('?next=%2Faccount');
+  });
+});
+
+describe('/tags', () => {
+  it('shows the Tags screen to an editor', async () => {
+    sessionUser = { ...ADMIN, role: 'editor' };
+    renderAt('/tags');
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'תגיות' }),
+    ).toBeTruthy();
+  });
+
+  it('sends a visitor to the login page, remembering /tags', async () => {
+    const router = renderAt('/tags');
+    await waitFor(() => expect(router.state.location.pathname).toBe('/login'));
+    expect(router.state.location.search).toBe('?next=%2Ftags');
   });
 });

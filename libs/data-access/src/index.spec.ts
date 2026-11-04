@@ -35,4 +35,22 @@ describe('data-access entry', () => {
     await invalidationMap.recipeWrite(queryClient);
     expect(invalidate).toHaveBeenCalledTimes(2);
   });
+
+  it('refreshes the tags, the list and every recipe page on a tag write', async () => {
+    const queryClient = new QueryClient();
+    for (const id of ['r1', 'r2']) {
+      queryClient.setQueryData(
+        recipesGetRecipeQueryKey({ path: { recipe_id: id } }),
+        { id },
+      );
+    }
+    queryClient.setQueryData(tagsListTagsQueryKey(), []);
+    queryClient.setQueryData(recipesListRecipesQueryKey(), []);
+    await invalidationMap.tagWrite(queryClient);
+    const stale = queryClient
+      .getQueryCache()
+      .getAll()
+      .filter((query) => query.state.isInvalidated);
+    expect(stale).toHaveLength(4);
+  });
 });

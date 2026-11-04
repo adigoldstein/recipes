@@ -40,6 +40,10 @@ export function createRoutes(queryClient: QueryClient): RouteObject[] {
             lazy: () => import('@bite-and-board/feature-recipes/recipe-edit'),
           },
           {
+            path: 'tags',
+            lazy: () => import('@bite-and-board/feature-tags/tags'),
+          },
+          {
             path: 'account',
             lazy: () => import('@bite-and-board/feature-auth/account'),
           },

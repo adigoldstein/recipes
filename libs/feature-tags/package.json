@@ -1,0 +1,20 @@
+{
+  "name": "@bite-and-board/feature-tags",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./tags": {
+      "types": "./src/routes/tags.tsx",
+      "import": "./src/routes/tags.tsx",
+      "default": "./src/routes/tags.tsx"
+    },
+    "./package.json": "./package.json"
+  },
+  "nx": {
+    "name": "feature-tags",
+    "tags": [
+      "type:feature"
+    ]
+  }
+}

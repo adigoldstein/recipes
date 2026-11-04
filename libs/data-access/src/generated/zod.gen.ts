@@ -30,6 +30,7 @@ export const zChangePasswordRequest = z.object({
 export const zErrorCode = z.enum([
     'recipe_not_found',
     'tag_not_found',
+    'tag_name_taken',
     'photo_not_found',
     'photo_too_large',
     'photo_dimensions_too_large',
@@ -172,6 +173,15 @@ export const zStepRead = z.object({
 });
 
 /**
+ * TagCreate
+ *
+ * Body of `POST /tags`: the name is normalized and length-checked.
+ */
+export const zTagCreate = z.object({
+    name: z.string()
+});
+
+/**
  * TagInput
  *
  * A tag in a recipe write: an existing tag by id, or a name to find or create.
@@ -187,7 +197,8 @@ export const zTagInput = z.object({
 export const zTagRead = z.object({
     id: z.uuid(),
     name: z.string(),
-    pinned: z.boolean()
+    pinned: z.boolean(),
+    recipe_count: z.int()
 });
 
 /**
@@ -210,6 +221,16 @@ export const zRecipeSummary = z.object({
     tags: z.array(zTagRef),
     title: z.string(),
     total_minutes: z.int().nullable()
+});
+
+/**
+ * TagUpdate
+ *
+ * Body of `PATCH /tags/{id}`: send only what changes.
+ */
+export const zTagUpdate = z.object({
+    name: z.string().nullish(),
+    pinned: z.boolean().nullish()
 });
 
 /**
@@ -490,6 +511,33 @@ export const zRecipesUpdateRecipeResponse = zRecipeRead;
  * Successful Response
  */
 export const zTagsListTagsResponse = z.array(zTagRead);
+
+export const zTagsCreateTagBody = zTagCreate;
+
+/**
+ * Successful Response
+ */
+export const zTagsCreateTagResponse = zTagRead;
+
+export const zTagsDeleteTagPath = z.object({
+    tag_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zTagsDeleteTagResponse = z.void();
+
+export const zTagsUpdateTagBody = zTagUpdate;
+
+export const zTagsUpdateTagPath = z.object({
+    tag_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zTagsUpdateTagResponse = zTagRead;
 
 /**
  * Response Users List Users

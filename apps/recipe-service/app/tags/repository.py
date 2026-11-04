@@ -51,11 +51,34 @@ class TagRepository:
         )
         return [(recipe_id, tag) for recipe_id, tag in self._session.exec(statement)]
 
-    def list_all(self) -> Sequence[Tag]:
-        """Every tag, pinned first, then by name."""
-        statement = select(Tag).order_by(
-            col(Tag.sort_order).asc().nulls_last(),
-            func.lower(col(Tag.name)),
-            col(Tag.id),
+    def list_all_with_counts(self) -> Sequence[tuple[Tag, int]]:
+        """Every tag with its recipe count, pinned first, then by name."""
+        statement = (
+            select(Tag, func.count(col(RecipeTag.recipe_id)))
+            .join(RecipeTag, col(RecipeTag.tag_id) == col(Tag.id), isouter=True)
+            .group_by(col(Tag.id))
+            .order_by(
+                col(Tag.sort_order).asc().nulls_last(),
+                func.lower(col(Tag.name)),
+                col(Tag.id),
+            )
         )
-        return self._session.exec(statement).all()
+        return [(tag, count) for tag, count in self._session.exec(statement)]
+
+    def count_recipes(self, tag_id: uuid.UUID) -> int:
+        statement = select(func.count()).where(col(RecipeTag.tag_id) == tag_id)
+        return self._session.exec(statement).one()
+
+    def next_sort_order(self) -> int:
+        """One past the last pinned tag, so a newly pinned tag goes last."""
+        top = self._session.exec(select(func.max(col(Tag.sort_order)))).one()
+        return 0 if top is None else top + 1
+
+    def delete(self, tag: Tag) -> None:
+        """Remove the tag and its recipe links."""
+        self._session.exec(delete(RecipeTag).where(col(RecipeTag.tag_id) == tag.id))
+        self._session.delete(tag)
+        self._session.flush()
+
+    def commit(self) -> None:
+        self._session.commit()
