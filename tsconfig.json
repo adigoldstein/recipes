@@ -29,6 +29,9 @@
     },
     {
       "path": "./libs/feature-users"
+    },
+    {
+      "path": "./libs/feature-tags"
     }
   ],
   "compilerOptions": {}

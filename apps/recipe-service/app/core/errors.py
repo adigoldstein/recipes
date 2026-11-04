@@ -11,6 +11,7 @@ class ErrorCode(StrEnum):
 
     RECIPE_NOT_FOUND = "recipe_not_found"
     TAG_NOT_FOUND = "tag_not_found"
+    TAG_NAME_TAKEN = "tag_name_taken"
     PHOTO_NOT_FOUND = "photo_not_found"
     PHOTO_TOO_LARGE = "photo_too_large"
     PHOTO_DIMENSIONS_TOO_LARGE = "photo_dimensions_too_large"

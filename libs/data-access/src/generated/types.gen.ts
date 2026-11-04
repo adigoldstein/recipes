@@ -38,7 +38,7 @@ export type ChangePasswordRequest = {
  *
  * Stable error codes; the client shows `errors.<code>` from he.json.
  */
-export type ErrorCode = 'recipe_not_found' | 'tag_not_found' | 'photo_not_found' | 'photo_too_large' | 'photo_dimensions_too_large' | 'photo_unsupported_type' | 'email_taken' | 'user_not_found' | 'password_too_short' | 'password_too_long' | 'invalid_credentials' | 'account_blocked' | 'last_admin' | 'rate_limited' | 'unauthorized' | 'forbidden' | 'csrf_header_missing';
+export type ErrorCode = 'recipe_not_found' | 'tag_not_found' | 'tag_name_taken' | 'photo_not_found' | 'photo_too_large' | 'photo_dimensions_too_large' | 'photo_unsupported_type' | 'email_taken' | 'user_not_found' | 'password_too_short' | 'password_too_long' | 'invalid_credentials' | 'account_blocked' | 'last_admin' | 'rate_limited' | 'unauthorized' | 'forbidden' | 'csrf_header_missing';
 
 /**
  * ErrorResponse
@@ -503,6 +503,18 @@ export type StepRead = {
 };
 
 /**
+ * TagCreate
+ *
+ * Body of `POST /tags`: the name is normalized and length-checked.
+ */
+export type TagCreate = {
+    /**
+     * Name
+     */
+    name: string;
+};
+
+/**
  * TagInput
  *
  * A tag in a recipe write: an existing tag by id, or a name to find or create.
@@ -534,6 +546,10 @@ export type TagRead = {
      * Pinned
      */
     pinned: boolean;
+    /**
+     * Recipe Count
+     */
+    recipe_count: number;
 };
 
 /**
@@ -550,6 +566,22 @@ export type TagRef = {
      * Name
      */
     name: string;
+};
+
+/**
+ * TagUpdate
+ *
+ * Body of `PATCH /tags/{id}`: send only what changes.
+ */
+export type TagUpdate = {
+    /**
+     * Name
+     */
+    name?: string | null;
+    /**
+     * Pinned
+     */
+    pinned?: boolean | null;
 };
 
 /**
@@ -1021,6 +1053,131 @@ export type TagsListTagsResponses = {
 };
 
 export type TagsListTagsResponse = TagsListTagsResponses[keyof TagsListTagsResponses];
+
+export type TagsCreateTagData = {
+    body: TagCreate;
+    path?: never;
+    query?: never;
+    url: '/api/tags';
+};
+
+export type TagsCreateTagErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type TagsCreateTagError = TagsCreateTagErrors[keyof TagsCreateTagErrors];
+
+export type TagsCreateTagResponses = {
+    /**
+     * Successful Response
+     */
+    201: TagRead;
+};
+
+export type TagsCreateTagResponse = TagsCreateTagResponses[keyof TagsCreateTagResponses];
+
+export type TagsDeleteTagData = {
+    body?: never;
+    path: {
+        /**
+         * Tag Id
+         */
+        tag_id: string;
+    };
+    query?: never;
+    url: '/api/tags/{tag_id}';
+};
+
+export type TagsDeleteTagErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type TagsDeleteTagError = TagsDeleteTagErrors[keyof TagsDeleteTagErrors];
+
+export type TagsDeleteTagResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type TagsDeleteTagResponse = TagsDeleteTagResponses[keyof TagsDeleteTagResponses];
+
+export type TagsUpdateTagData = {
+    body: TagUpdate;
+    path: {
+        /**
+         * Tag Id
+         */
+        tag_id: string;
+    };
+    query?: never;
+    url: '/api/tags/{tag_id}';
+};
+
+export type TagsUpdateTagErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type TagsUpdateTagError = TagsUpdateTagErrors[keyof TagsUpdateTagErrors];
+
+export type TagsUpdateTagResponses = {
+    /**
+     * Successful Response
+     */
+    200: TagRead;
+};
+
+export type TagsUpdateTagResponse = TagsUpdateTagResponses[keyof TagsUpdateTagResponses];
 
 export type UsersListUsersData = {
     body?: never;

@@ -70,6 +70,15 @@ describe('AccountMenu', () => {
     expect(item.getAttribute('href')).toBe('/account');
   });
 
+  it('gives every signed-in user a link to the Tags screen', async () => {
+    const user = userEvent.setup();
+    serveSession({ ...ADI, role: 'editor' });
+    renderMenu();
+    await user.click(await screen.findByRole('button', { name: 'Adi' }));
+    const item = await screen.findByRole('menuitem', { name: 'תגיות' });
+    expect(item.getAttribute('href')).toBe('/tags');
+  });
+
   it('leaves the Users link out for an editor', async () => {
     const user = userEvent.setup();
     serveSession({ ...ADI, role: 'editor' });

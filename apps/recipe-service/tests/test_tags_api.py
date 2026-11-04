@@ -44,8 +44,13 @@ def test_each_tag_has_exactly_id_name_and_pinned(
 ) -> None:
     free = add_tag(session, "על האש")
     tags = list_tags(client)
-    assert all(set(tag) == {"id", "name", "pinned"} for tag in tags)
-    assert {"id": str(free.id), "name": "על האש", "pinned": False} in tags
+    assert all(set(tag) == {"id", "name", "pinned", "recipe_count"} for tag in tags)
+    assert {
+        "id": str(free.id),
+        "name": "על האש",
+        "pinned": False,
+        "recipe_count": 0,
+    } in tags
 
 
 def test_unpinned_tags_follow_the_pinned_ones_ordered_by_name(
@@ -97,5 +102,6 @@ def test_operation_id_and_response_schema_are_published(app: FastAPI) -> None:
     assert schema["items"]["$ref"].endswith("/TagRead")
 
     tag_read = spec["components"]["schemas"]["TagRead"]
-    assert set(tag_read["properties"]) == {"id", "name", "pinned"}
-    assert set(tag_read["required"]) == {"id", "name", "pinned"}
+    fields = {"id", "name", "pinned", "recipe_count"}
+    assert set(tag_read["properties"]) == fields
+    assert set(tag_read["required"]) == fields

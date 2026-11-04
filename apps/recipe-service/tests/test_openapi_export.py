@@ -21,6 +21,7 @@ def test_export_writes_stable_sorted_json(tmp_path: Path) -> None:
     assert spec["components"]["schemas"]["ErrorCode"]["enum"] == [
         "recipe_not_found",
         "tag_not_found",
+        "tag_name_taken",
         "photo_not_found",
         "photo_too_large",
         "photo_dimensions_too_large",

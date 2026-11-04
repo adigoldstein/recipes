@@ -31,4 +31,18 @@ export const invalidationMap = {
           })
         : undefined,
     ]),
+  /**
+   * A tag write (add, rename, pin, delete) refreshes the tag list, the library list
+   * and every recipe page, since a rename or delete shows in all of them.
+   */
+  tagWrite: (queryClient: QueryClient) =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: tagsListTagsQueryKey() }),
+      queryClient.invalidateQueries({ queryKey: recipesListRecipesQueryKey() }),
+      queryClient.invalidateQueries({
+        predicate: ({ queryKey }) =>
+          (queryKey[0] as { _id?: string } | undefined)?._id ===
+          'recipesGetRecipe',
+      }),
+    ]),
 } satisfies Record<string, Invalidator>;
