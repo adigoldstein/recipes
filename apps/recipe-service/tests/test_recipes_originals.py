@@ -1,11 +1,10 @@
 """The FR-7..9 original-value truth table (AD-4, AD-20, AD-31)."""
 
-import uuid
 from decimal import Decimal
 
 import pytest
 
-from app.recipes.models import Ingredient
+from app.recipes.models import IngredientItem, OriginalItem
 from app.recipes.originals import apply_edit, quantity
 from app.recipes.units import Unit
 
@@ -19,25 +18,24 @@ ONE_TBSP: Value = (D("1"), Unit.TBSP)
 TWO_TBSP: Value = (D("2"), Unit.TBSP)
 
 
-def make(current: Value, original: Value | None = None) -> Ingredient:
-    ingredient = Ingredient(
-        recipe_id=uuid.uuid4(),
-        position=0,
+def make(current: Value, original: Value | None = None) -> IngredientItem:
+    return IngredientItem(
         name="כמון",
         amount=current[0],
         unit=current[1],
+        original=(
+            None
+            if original is None
+            else OriginalItem(amount=original[0], unit=original[1])
+        ),
     )
-    if original is not None:
-        ingredient.has_original = True
-        ingredient.original_amount, ingredient.original_unit = original
-    return ingredient
 
 
-def state(ingredient: Ingredient) -> tuple[Value, Value | None]:
+def state(ingredient: IngredientItem) -> tuple[Value, Value | None]:
     original = (
-        (ingredient.original_amount, ingredient.original_unit)
-        if ingredient.has_original
-        else None
+        None
+        if ingredient.original is None
+        else (ingredient.original.amount, ingredient.original.unit)
     )
     return (ingredient.amount, ingredient.unit), original
 
@@ -70,19 +68,19 @@ def test_original_truth_table(
     expected_current: Value,
     expected_original: Value | None,
 ) -> None:
-    ingredient = make(current, original)
-    apply_edit(ingredient, *new)
-    assert state(ingredient) == (expected_current, expected_original)
+    before = make(current, original)
+    after = apply_edit(before, *new)
+    assert state(after) == (expected_current, expected_original)
+    assert state(before) == (current, original)  # the input item is never changed
 
 
 def test_thirds_compare_after_quantizing() -> None:
-    ingredient = make((D("1"), Unit.CUP))
-    apply_edit(ingredient, D("0.33333"), Unit.CUP)
+    ingredient = apply_edit(make((D("1"), Unit.CUP)), D("0.33333"), Unit.CUP)
     assert state(ingredient) == ((D("0.333"), Unit.CUP), (D("1"), Unit.CUP))
     # Typing the same third again (0.333) is no change, so the original stays.
-    apply_edit(ingredient, D("0.333"), Unit.CUP)
+    ingredient = apply_edit(ingredient, D("0.333"), Unit.CUP)
     assert state(ingredient)[1] == (D("1"), Unit.CUP)
-    apply_edit(ingredient, D("1.0000"), Unit.CUP)
+    ingredient = apply_edit(ingredient, D("1.0000"), Unit.CUP)
     assert state(ingredient) == ((D("1"), Unit.CUP), None)
 
 

@@ -4,15 +4,15 @@ import uuid
 from collections.abc import Sequence
 from typing import Any, cast
 
-from sqlalchemy.orm import QueryableAttribute, selectinload
+from sqlalchemy.orm import QueryableAttribute, defer
 from sqlmodel import Session, col, select
 
 from app.recipes.models import Recipe
 
 
-def _attribute(relationship: object) -> "QueryableAttribute[Any]":
-    """SQLModel types relationships as plain lists; at runtime they are attributes."""
-    return cast("QueryableAttribute[Any]", relationship)
+def _attribute(column: object) -> "QueryableAttribute[Any]":
+    """SQLModel types columns as plain values; at runtime they are attributes."""
+    return cast("QueryableAttribute[Any]", column)
 
 
 class RecipeRepository:
@@ -20,9 +20,14 @@ class RecipeRepository:
         self._session = session
 
     def list_all(self) -> Sequence[Recipe]:
-        """Every recipe, newest first (AD-26); children are not loaded."""
-        statement = select(Recipe).order_by(
-            col(Recipe.created_at).desc(), col(Recipe.id)
+        """Every recipe, newest first (AD-26); ingredients and steps are not loaded."""
+        statement = (
+            select(Recipe)
+            .order_by(col(Recipe.created_at).desc(), col(Recipe.id))
+            .options(
+                defer(_attribute(Recipe.ingredients)),
+                defer(_attribute(Recipe.steps)),
+            )
         )
         return self._session.exec(statement).all()
 
@@ -32,13 +37,13 @@ class RecipeRepository:
         return {key for key in self._session.exec(statement) if key is not None}
 
     def add(self, recipe: Recipe) -> Recipe:
-        """Stage the recipe with its ingredients and steps; the caller commits."""
+        """Stage the recipe, ingredients and steps included; the caller commits."""
         self._session.add(recipe)
         self._session.flush()
         return recipe
 
     def delete(self, recipe: Recipe) -> None:
-        """Stage the removal; the database cascades to its ingredients, steps, tags."""
+        """Stage the removal; the database cascades to its tag links."""
         self._session.delete(recipe)
         self._session.flush()
 
@@ -49,13 +54,6 @@ class RecipeRepository:
         self._session.rollback()
 
     def get(self, recipe_id: uuid.UUID) -> Recipe | None:
-        """One recipe with its ingredients and steps, both ordered by position."""
-        statement = (
-            select(Recipe)
-            .where(Recipe.id == recipe_id)
-            .options(
-                selectinload(_attribute(Recipe.ingredients)),
-                selectinload(_attribute(Recipe.steps)),
-            )
-        )
+        """One recipe; its ingredients and steps come with the row, in order."""
+        statement = select(Recipe).where(Recipe.id == recipe_id)
         return self._session.exec(statement).first()

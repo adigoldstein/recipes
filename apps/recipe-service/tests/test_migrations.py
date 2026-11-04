@@ -1,3 +1,4 @@
+import json
 import uuid
 import warnings
 from collections.abc import Iterator
@@ -9,7 +10,7 @@ from alembic.autogenerate import compare_metadata
 from alembic.config import Config
 from alembic.migration import MigrationContext
 from fastapi.testclient import TestClient
-from sqlalchemy import Connection, inspect, text
+from sqlalchemy import JSON, Connection, inspect, text
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, select
 
@@ -18,7 +19,7 @@ from app.core.config import get_settings
 from app.core.db import get_engine
 from app.core.migrate import MIGRATIONS_DIR, migration_transaction, run_migrations
 from app.main import create_app
-from app.recipes.models import Ingredient, Recipe, Step
+from app.recipes.models import Recipe
 from app.tags.models import RecipeTag, Tag
 from tests.factories import (
     add_recipe,
@@ -63,8 +64,6 @@ def test_startup_creates_every_table(connection: Connection) -> None:
     assert set(inspect(connection).get_table_names()) == {
         "alembic_version",
         "recipe",
-        "ingredient",
-        "step",
         "tag",
         "recipe_tag",
         "user",
@@ -79,22 +78,21 @@ def test_recipe_columns(connection: Connection) -> None:
     assert columns["created_at"]["nullable"] is False
 
 
-def test_ingredient_and_step_columns(connection: Connection) -> None:
-    inspector = inspect(connection)
-    ingredient_columns = {c["name"]: c for c in inspector.get_columns("ingredient")}
-    for name in (
-        "original_amount",
-        "original_unit",
-        "source_amount",
-        "source_unit",
-        "amount",
-        "unit",
-        "note",
-    ):
-        assert ingredient_columns[name]["nullable"] is True, name
-    assert {c["name"]: c for c in inspector.get_columns("step")}["source_text"][
-        "nullable"
-    ]
+def test_ingredients_and_steps_are_json_columns_of_the_recipe(
+    connection: Connection,
+) -> None:
+    columns = {c["name"]: c for c in inspect(connection).get_columns("recipe")}
+    for name in ("ingredients", "steps"):
+        assert isinstance(columns[name]["type"], JSON), name
+        assert columns[name]["nullable"] is False, name
+    connection.execute(
+        text(
+            "INSERT INTO recipe (id, title, base_servings, created_at, updated_at) "
+            "VALUES ('r1', 'x', 1, '2026-01-01', '2026-01-01')"
+        )
+    )
+    row = connection.execute(text("SELECT ingredients, steps FROM recipe")).one()
+    assert tuple(row) == ("[]", "[]")
 
 
 def test_default_pinned_tags_have_fixed_ids_and_order(session: Session) -> None:
@@ -110,18 +108,17 @@ def test_migrating_again_changes_nothing(session: Session) -> None:
     assert len(session.exec(select(Tag)).all()) == len(DEFAULT_PINNED_TAGS)
 
 
-def test_children_are_deleted_with_their_recipe(session: Session) -> None:
+def test_tag_links_are_deleted_with_their_recipe(session: Session) -> None:
     party = add_tag(session, "מסיבות")
     recipe = add_recipe(
         session,
         tags=[party],
-        ingredients=[ingredient(0, "קמח")],
-        steps=[step(0, "לערבב")],
+        ingredients=[ingredient("קמח")],
+        steps=[step("לערבב")],
     )
     session.delete(recipe)
     session.commit()
-    assert session.exec(select(Ingredient)).all() == []
-    assert session.exec(select(Step)).all() == []
+    assert session.exec(select(Recipe)).all() == []
     assert session.exec(select(RecipeTag)).all() == []
     assert session.get(Tag, party.id) is not None
 
@@ -167,17 +164,6 @@ def test_a_recipe_can_have_no_tags_or_many(session: Session) -> None:
 def test_new_tags_are_not_pinned_by_default(session: Session) -> None:
     assert add_tag(session, "מסיבות").pinned is False
     assert add_tag(session, "חג", pinned=True).pinned is True
-
-
-def test_unit_check_constraint_rejects_unknown_codes(session: Session) -> None:
-    recipe = add_recipe(session)
-    with pytest.raises(IntegrityError):
-        session.exec(  # type: ignore[call-overload]
-            text(
-                "INSERT INTO ingredient (id, recipe_id, position, name, unit) "
-                "VALUES (:id, :recipe, 0, 'x', 'bogus')"
-            ).bindparams(id=uuid.uuid4().hex, recipe=recipe.id.hex)
-        )
 
 
 def test_models_and_migrations_agree(connection: Connection) -> None:
@@ -326,9 +312,12 @@ def test_upgrading_keeps_recipes_and_all_their_children(
     with migration_transaction(connection):
         command.upgrade(config, "head")
 
-    for table in ("recipe", "ingredient", "step", "recipe_tag"):
+    for table in ("recipe", "recipe_tag"):
         count = connection.execute(text(f"SELECT count(*) FROM {table}")).scalar_one()
         assert count == 1, table
+    row = connection.execute(text("SELECT ingredients, steps FROM recipe")).one()
+    assert [item["name"] for item in json.loads(row.ingredients)] == ["ביצים"]
+    assert [item["description"] for item in json.loads(row.steps)] == ["לערבב"]
 
 
 def test_foreign_keys_are_enforced_again_after_migrating(

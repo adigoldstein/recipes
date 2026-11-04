@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session, func, select
 
 from app.core.errors import AppError
-from app.recipes.models import Ingredient, Recipe, Step
+from app.recipes.models import Recipe
 from app.tags.models import RecipeTag, Tag
 from app.users.models import User
 from tests.factories import add_recipe, add_tag, add_user, ingredient, step
@@ -41,8 +41,8 @@ def saved(session: Session) -> Recipe:
         session,
         title="שקשוקה",
         tags=[tag],
-        ingredients=[ingredient(0, "בצל"), ingredient(1, "מלח")],
-        steps=[step(0, "מטגנים"), step(1, "מגישים")],
+        ingredients=[ingredient("בצל"), ingredient("מלח")],
+        steps=[step("מטגנים"), step("מגישים")],
     )
 
 
@@ -82,8 +82,6 @@ def test_delete_removes_the_recipe_and_its_parts_but_keeps_the_tag(
     assert response.status_code == 204
     assert response.content == b""
     assert count(session, Recipe) == 0
-    assert count(session, Ingredient) == 0
-    assert count(session, Step) == 0
     assert count(session, RecipeTag) == 0
     assert session.exec(select(Tag).where(Tag.name == "מהיר")).one() is not None
     assert client.get(url(recipe_id)).status_code == 404
@@ -96,13 +94,12 @@ def test_only_the_named_recipe_is_deleted(
     other = add_recipe(
         session,
         title="סלט",
-        ingredients=[ingredient(0, "מלפפון")],
-        steps=[step(0, "חותכים")],
+        ingredients=[ingredient("מלפפון")],
+        steps=[step("חותכים")],
     )
     assert client.delete(url(saved.id)).status_code == 204
     assert count(session, Recipe) == 1
-    assert count(session, Ingredient) == 1
-    assert client.get(url(other.id)).status_code == 200
+    assert len(client.get(url(other.id)).json()["ingredients"]) == 1
 
 
 def test_deleting_again_is_404(client: TestClient, editor: User, saved: Recipe) -> None:
@@ -133,7 +130,7 @@ def test_a_failed_delete_rolls_back(
     with pytest.raises(RuntimeError):
         service.delete_recipe(saved.id)
     assert count(session, Recipe) == 1
-    assert count(session, Ingredient) == 2
+    assert len(session.get_one(Recipe, saved.id).ingredients) == 2
 
 
 def test_the_service_raises_not_found(client: TestClient, session: Session) -> None:

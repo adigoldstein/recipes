@@ -1,12 +1,16 @@
+import json
 from datetime import UTC, datetime, timedelta, timezone
 from decimal import Decimal
 
 import pytest
+from pydantic import ValidationError
 from sqlalchemy import text
+from sqlalchemy.exc import StatementError
 from sqlmodel import Session
 
-from app.recipes.models import Ingredient, Recipe
-from tests.factories import add_recipe, ingredient
+from app.recipes.models import IngredientItem, Recipe
+from app.recipes.units import Unit
+from tests.factories import add_recipe, ingredient, step
 
 
 def test_every_connection_enforces_foreign_keys(session: Session) -> None:
@@ -15,16 +19,6 @@ def test_every_connection_enforces_foreign_keys(session: Session) -> None:
 
 def test_every_connection_uses_wal(session: Session) -> None:
     assert session.exec(text("PRAGMA journal_mode")).scalar_one() == "wal"  # type: ignore[call-overload]
-
-
-def test_child_row_with_unknown_recipe_is_rejected(session: Session) -> None:
-    session.add(
-        Ingredient(
-            recipe_id=Recipe(title="x", base_servings=1).id, position=0, name="x"
-        )
-    )
-    with pytest.raises(Exception, match="FOREIGN KEY"):
-        session.commit()
 
 
 def test_timestamps_round_trip_as_utc(session: Session) -> None:
@@ -47,11 +41,77 @@ def test_amounts_are_quantized_to_three_decimals(session: Session) -> None:
     recipe = add_recipe(
         session,
         ingredients=[
-            ingredient(0, "קמח", amount=Decimal("0.3333333")),
-            ingredient(1, "סוכר", amount=Decimal("1.5")),
-            ingredient(2, "מלח"),
+            ingredient("קמח", amount=Decimal("0.3333333")),
+            ingredient("סוכר", amount=Decimal("1.5")),
+            ingredient("מלח"),
         ],
     )
     session.expire_all()
     amounts = [item.amount for item in session.get_one(Recipe, recipe.id).ingredients]
     assert amounts == [Decimal("0.333"), Decimal("1.500"), None]
+
+
+def _raw_json(session: Session, recipe: Recipe, column: str) -> str:
+    row = session.exec(  # type: ignore[call-overload]
+        text(f"SELECT {column} FROM recipe WHERE id = :id").bindparams(id=recipe.id.hex)
+    )
+    return str(row.scalar_one())
+
+
+def test_amounts_are_stored_as_strings_with_three_decimals(session: Session) -> None:
+    recipe = add_recipe(
+        session,
+        ingredients=[
+            ingredient("קמח", amount=Decimal("0.3333333")),
+            ingredient("מלח"),
+        ],
+    )
+    stored = json.loads(_raw_json(session, recipe, "ingredients"))
+    assert [item["amount"] for item in stored] == ["0.333", None]
+
+
+def test_stored_json_keeps_hebrew_readable(session: Session) -> None:
+    recipe = add_recipe(
+        session, ingredients=[ingredient("קמח")], steps=[step("לערבב היטב")]
+    )
+    assert "קמח" in _raw_json(session, recipe, "ingredients")
+    assert "לערבב היטב" in _raw_json(session, recipe, "steps")
+
+
+def test_an_unknown_unit_in_the_stored_json_fails_when_read(session: Session) -> None:
+    recipe = add_recipe(session, ingredients=[ingredient("קמח", unit=Unit.G)])
+    session.exec(  # type: ignore[call-overload]
+        text(
+            "UPDATE recipe "
+            "SET ingredients = json_set(ingredients, '$[0].unit', 'bogus')"
+        )
+    )
+    session.commit()
+    session.expire_all()
+    with pytest.raises(ValidationError, match="unit"):
+        session.get_one(Recipe, recipe.id)
+
+
+def test_an_invalid_item_is_rejected_on_write(session: Session) -> None:
+    bad = IngredientItem.model_construct(name="קמח", unit="bogus")  # type: ignore[arg-type]
+    session.add(Recipe(title="x", base_servings=1, ingredients=[bad]))
+    # SQLAlchemy wraps what a type raises while binding a parameter.
+    with pytest.raises(StatementError, match="Input should be"):
+        session.commit()
+
+
+def test_a_new_list_is_saved_and_the_old_items_are_untouched(session: Session) -> None:
+    recipe = add_recipe(session, ingredients=[ingredient("קמח", amount=Decimal(1))])
+    first = recipe.ingredients[0]
+    recipe.ingredients = [first.model_copy(update={"amount": Decimal(2)})]
+    session.commit()
+    session.expire_all()
+    saved = session.get_one(Recipe, recipe.id).ingredients
+    assert [(item.id, item.amount) for item in saved] == [(first.id, Decimal("2.000"))]
+    assert first.amount == Decimal(1)
+
+
+def test_items_cannot_be_edited_in_place() -> None:
+    item = ingredient("קמח")
+    with pytest.raises(ValidationError, match="frozen"):
+        item.name = "סוכר"  # type: ignore[misc]

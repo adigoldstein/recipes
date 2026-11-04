@@ -297,8 +297,8 @@ def test_a_replaced_photo_drops_its_credit(
     recipe = add_recipe(
         session,
         title="עם קרדיט",
-        ingredients=[ingredient(0, "בצל")],
-        steps=[step(0, "מטגנים")],
+        ingredients=[ingredient("בצל")],
+        steps=[step("מטגנים")],
         photo_key=key,
         photo_credit_domain="commons.wikimedia.org",
     )

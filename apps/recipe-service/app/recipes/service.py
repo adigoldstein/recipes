@@ -10,7 +10,7 @@ from sqlmodel import Session
 from app.core.db import get_session, utcnow
 from app.core.errors import AppError, ErrorCode
 from app.photos.service import PhotoService, get_photo_service
-from app.recipes.models import Ingredient, Recipe, Step
+from app.recipes.models import IngredientItem, Recipe, StepItem
 from app.recipes.originals import apply_edit
 from app.recipes.repository import RecipeRepository
 from app.recipes.schemas import (
@@ -33,23 +33,23 @@ def total_minutes(prep: int | None, cook: int | None) -> int | None:
     return (prep or 0) + (cook or 0)
 
 
-def _ingredient_read(ingredient: Ingredient) -> IngredientRead:
+def _ingredient_read(item: IngredientItem) -> IngredientRead:
     original = (
-        OriginalValue(amount=ingredient.original_amount, unit=ingredient.original_unit)
-        if ingredient.has_original
+        OriginalValue(amount=item.original.amount, unit=item.original.unit)
+        if item.original is not None
         else None
     )
     source = (
-        SourceValue(amount=ingredient.source_amount, unit=ingredient.source_unit)
-        if ingredient.source_amount is not None and ingredient.source_unit is not None
+        SourceValue(amount=item.source.amount, unit=item.source.unit)
+        if item.source is not None
         else None
     )
     return IngredientRead(
-        id=ingredient.id,
-        name=ingredient.name,
-        amount=ingredient.amount,
-        unit=ingredient.unit,
-        note=ingredient.note,
+        id=item.id,
+        name=item.name,
+        amount=item.amount,
+        unit=item.unit,
+        note=item.note,
         original=original,
         source=source,
     )
@@ -109,22 +109,14 @@ class RecipeService:
             prep_time_minutes=data.prep_time_minutes,
             cook_time_minutes=data.cook_time_minutes,
             source_url=data.source_url,
+            ingredients=[
+                IngredientItem(
+                    name=item.name, amount=item.amount, unit=item.unit, note=item.note
+                )
+                for item in data.ingredients
+            ],
+            steps=[StepItem(description=item.description) for item in data.steps],
         )
-        recipe.ingredients = [
-            Ingredient(
-                recipe_id=recipe.id,
-                position=position,
-                name=item.name,
-                amount=item.amount,
-                unit=item.unit,
-                note=item.note,
-            )
-            for position, item in enumerate(data.ingredients)
-        ]
-        recipe.steps = [
-            Step(recipe_id=recipe.id, position=position, description=item.description)
-            for position, item in enumerate(data.steps)
-        ]
         try:
             self._repository.add(recipe)
             self._tags.assign_to_recipe(recipe.id, data.tags)
@@ -142,8 +134,8 @@ class RecipeService:
     ) -> RecipeRead:
         """Replace the whole recipe in one transaction (AD-4, AD-20).
 
-        Ingredients are matched by `id` and updated in place, so their originals
-        survive; omitted ones are deleted and ones without an `id` are inserted.
+        Ingredients are matched by `id` and keep their originals; omitted ones are
+        dropped and ones without an `id` are added.
         `user_id` is the editor; the seed has none.
         """
         recipe = self._repository.get(recipe_id)
@@ -179,29 +171,24 @@ class RecipeService:
         recipe.updated_at = utcnow()
         replaced_photo = self._change_photo(recipe, data)
 
-        ingredients: list[Ingredient] = []
-        for position, item in enumerate(data.ingredients):
+        ingredients: list[IngredientItem] = []
+        for item in data.ingredients:
             if item.id is None:
-                ingredient = Ingredient(
-                    recipe_id=recipe.id,
-                    position=position,
+                ingredient = IngredientItem(
                     name=item.name,
                     amount=item.amount,
                     unit=item.unit if item.amount is not None else None,
                     note=item.note,
                 )
             else:
-                ingredient = existing[item.id]
-                ingredient.position = position
-                ingredient.name = item.name
-                ingredient.note = item.note
-                apply_edit(ingredient, item.amount, item.unit)
+                ingredient = apply_edit(existing[item.id], item.amount, item.unit)
+                ingredient = ingredient.model_copy(
+                    update={"name": item.name, "note": item.note}
+                )
             ingredients.append(ingredient)
+        # New lists, never edits in place: SQLAlchemy does not see those (AD-41).
         recipe.ingredients = ingredients
-        recipe.steps = [
-            Step(recipe_id=recipe.id, position=position, description=item.description)
-            for position, item in enumerate(data.steps)
-        ]
+        recipe.steps = [StepItem(description=item.description) for item in data.steps]
         try:
             self._repository.add(recipe)
             self._tags.replace_for_recipe(recipe.id, data.tags)
@@ -228,7 +215,7 @@ class RecipeService:
         return previous
 
     def delete_recipe(self, recipe_id: uuid.UUID) -> None:
-        """Delete the recipe with its ingredients, steps and tag links (FR-10)."""
+        """Delete the recipe with its tag links (FR-10); its items go with the row."""
         recipe = self._repository.get(recipe_id)
         if recipe is None:
             raise AppError(404, ErrorCode.RECIPE_NOT_FOUND, "Recipe not found")

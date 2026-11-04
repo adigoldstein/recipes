@@ -787,6 +787,35 @@ So that I can find, for example, all barbecue party dishes (FR3 tags).
 **And** "ניקוי החיפוש" in the no-results state clears the tags too
 **And** the filter function in `libs/recipe-domain` gains tag tests
 
+### Story 4.R: Store ingredients and steps inside the recipe
+
+As the developer,
+I want a recipe's ingredients and steps stored inside the recipe row,
+So that the data matches the one-aggregate model (AD-4) before AI import and embeddings build on it (AD-41).
+
+_Backend only; added 2026-11-04 after Adi approved Winston's proposal. It sits between 4.2 and Epic 5._
+
+**Acceptance Criteria:**
+
+**Given** the app starts on a database that still has the `ingredient` and `step` tables
+**When** migration 0005 runs
+**Then** it first copies `app.db` to `app.db.bak-before-json` (never overwriting an existing backup)
+**And** every recipe gets its `ingredients` and `steps` JSON, in `position` order, with the same item ids, originals, `source` values and `source_text`
+**And** before the old tables are dropped it verifies the item counts match the row counts and every recipe has at least one ingredient and one step, and any mismatch rolls the whole migration back with the old tables untouched
+
+**Given** the migration was applied
+**When** the downgrade runs
+**Then** the `ingredient` and `step` tables are rebuilt from the JSON with the same ids and `position` equal to the array index, and the JSON columns are removed
+**And** a round-trip test (upgrade, downgrade, upgrade) on a seeded database returns the same recipes, and another test shows a bad row stops the migration
+
+**Given** the new storage
+**When** the existing API tests run
+**Then** they pass unchanged, and the regenerated `openapi.json` is byte-identical (AD-20)
+**And** amounts are stored as strings with 3 decimals inside the JSON and are `Decimal` in Python (AD-31)
+**And** `original: null` means no original and `original: {amount: null, unit: null}` means "originally to taste", with no `has_original` flag
+**And** the library list query does not load the two JSON columns
+**And** the frontend does not change
+
 ## Epic 5: AI import
 
 Editors import a recipe from a link or from pasted text, get a Hebrew draft from Ollama (local) or Gemini, review it, and save.

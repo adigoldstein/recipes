@@ -8,7 +8,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session
 
-from app.recipes.models import Ingredient, Recipe
+from app.recipes.models import Recipe
 from app.recipes.units import Unit
 from app.users.models import User
 from tests.factories import add_recipe, add_tag, add_user, ingredient, step
@@ -39,11 +39,11 @@ def saved(session: Session) -> Recipe:
         session,
         title="שקשוקה",
         ingredients=[
-            ingredient(0, "כמון", amount=Decimal(1), unit=Unit.TSP),
-            ingredient(1, "מלח"),
-            ingredient(2, "בצל", amount=Decimal(1), unit=Unit.UNIT),
+            ingredient("כמון", amount=Decimal(1), unit=Unit.TSP),
+            ingredient("מלח"),
+            ingredient("בצל", amount=Decimal(1), unit=Unit.UNIT),
         ],
-        steps=[step(0, "מטגנים")],
+        steps=[step("מטגנים")],
     )
 
 
@@ -160,7 +160,7 @@ def test_ingredients_are_matched_by_id_deleted_inserted_and_ordered(
 def test_an_ingredient_id_from_another_recipe_is_422(
     client: TestClient, session: Session, editor: User, saved: Recipe
 ) -> None:
-    other = add_recipe(session, title="אחר", ingredients=[ingredient(0, "סוכר")])
+    other = add_recipe(session, title="אחר", ingredients=[ingredient("סוכר")])
     other_ingredient = other.ingredients[0].id
     before = current(client, saved)
     payload = body(
@@ -177,7 +177,9 @@ def test_an_ingredient_id_from_another_recipe_is_422(
     assert error["type"] == "invalid"
     assert current(client, saved) == before
     session.expire_all()
-    assert session.get(Ingredient, other_ingredient) is not None
+    assert [item.id for item in session.get_one(Recipe, other.id).ingredients] == [
+        other_ingredient
+    ]
 
 
 def test_the_write_schema_still_validates(
