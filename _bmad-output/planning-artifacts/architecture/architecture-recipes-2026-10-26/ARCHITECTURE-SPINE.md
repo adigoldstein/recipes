@@ -7,7 +7,7 @@ paradigm: 'modular monolith: feature modules, each layered router → service �
 scope: 'MVP: apps/web (React), apps/recipe-service (FastAPI), libs/*'
 status: final
 created: '2026-10-26'
-updated: '2026-10-26'
+updated: '2026-11-04'
 binds: [F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, NFR-1..NFR-12]
 sources:
   - ../../prds/prd-recipes-2026-10-26/prd.md
@@ -149,8 +149,8 @@ flowchart LR
     - `gemini`: free tier, the optional backup.
     - `fake`: used by tests and CI, which never call a real model.
   - The import dialog lists the enabled providers and offers a one-click "retry with Gemini".
-  - Every provider returns schema-constrained JSON, validated against the shared Pydantic `DraftRecipe`. The draft is Hebrew-translated, has units mapped to the app list, and suggests tags from the existing list (new tag names are proposed in the draft).
-  - An import is **one synchronous request** with a per-provider timeout (`ollama` ≈ 180s, `gemini` 60s), and the client aborts it on cancel.
+  - Every provider returns schema-constrained JSON, validated against the shared Pydantic `DraftRecipe`, with one retry on a validation failure (AD-34). The draft is Hebrew-translated, has units mapped to the app list, and suggests tags from the existing list (new tag names are proposed in the draft).
+  - An import is **one request that streams its progress as SSE** (AD-40), with a per-provider timeout (`ollama` ≈ 180s, `gemini` 60s), and the client aborts it on cancel. _(Changed 2026-11-04: was "one synchronous request".)_
   - Drafts are **never persisted** (FR-19). A new provider means one adapter plus one config entry.
 
 ### AD-13 — Safe import pipeline [ADOPTED]
@@ -158,7 +158,7 @@ flowchart LR
 - **Binds:** FR-17, FR-18, NFR-10
 - **Prevents:** SSRF, runaway cost, and the LLM being used where structured data exists.
 - **Rule:**
-  - The pipeline order is fixed: safe fetch → schema.org JSON-LD extract → readable-text fallback → LLM.
+  - The pipeline order is fixed: duplicate check (AD-39) → safe fetch through the `PageFetcher` port (AD-35) → schema.org JSON-LD extract → readable-text fallback → LLM → validate (AD-34) → deterministic unit conversion. A "not a recipe" pre-check (AD-36) is added before the LLM in a later story.
   - The LLM always runs, for translation and mapping, but receives the JSON-LD when present.
   - Fetching only follows `http/https` to public addresses. It resolves DNS and rejects private, loopback and link-local addresses, including on every redirect. It caps size and time.
   - Imports require an editor session, with one daily import cap shared by all users and a `max_tokens` cap. Provider keys come from env only.
@@ -253,8 +253,8 @@ flowchart LR
 - **Prevents:** the client aborting slow local imports, error states that can't be told apart, and drafts leaking into the URL.
 - **Rule:**
   - **Timeouts:** `GET /api/imports/providers` (editor) returns `[{name, timeout_s}]`. The client aborts at `timeout_s + 5`, which replaces the UX's flat 60 s. The Vite proxy and uvicorn timeouts are set above the largest provider timeout.
-  - **Progress:** phase text is client-timed and cosmetic. There is no streaming in the MVP.
-  - **Errors:** import failures never return 422. They use these codes: `fetch_blocked`, `fetch_failed`, `fetch_too_large`, `no_recipe_found`, `llm_timeout`, `llm_unavailable`, `llm_quota`, `llm_invalid_output`, `import_cap_reached`, `provider_unavailable`.
+  - **Progress:** real pipeline stages streamed over SSE (AD-40). _(Changed 2026-11-04: was client-timed cosmetic phase text with no streaming.)_
+  - **Errors:** import failures never return 422. They use these codes: `fetch_blocked`, `fetch_challenged` (AD-35), `fetch_failed`, `fetch_too_large`, `no_recipe_found`, `import_duplicate` (AD-39), `llm_timeout`, `llm_unavailable`, `llm_quota`, `llm_invalid_output` (after the AD-34 retry), `import_cap_reached`, `provider_unavailable`.
   - **Recipe text fields:** `description` (a short intro) and `notes` (free multi-line tips and remarks) are separate nullable text columns and schema fields, limited by Pydantic to 500 and 5,000 characters (the form shows a live counter). The UI shows `notes` as plain text with line breaks kept, never as HTML. `DraftRecipe` fills `description` from the source and leaves `notes` null unless the source has its own.
   - **Draft shape:** `DraftRecipe` has every field nullable, plus `missing_fields: list[str]` (the server is authoritative) and `photo_source_url`. Its tags use the AD-25 tag reference.
   - **Draft hand-off:** the draft reaches the form only through router state, never the URL, mapped by one `draftToFormValues()`. A reload with no state shows an empty form.
@@ -264,7 +264,7 @@ flowchart LR
 
 - **Binds:** AD-13, AD-14
 - **Prevents:** SSRF through imported photo URLs, and unbounded downloads.
-- **Rule:** Every server-side fetch of a user-supplied or page-supplied URL goes through `app/core/safe_fetch.py`. It follows AD-13's rules (public addresses only, re-checked on each redirect, size and time caps) and checks the content type. It is a port, replaced by a fake fetcher when `LLM_PROVIDERS=fake`. The fake is deterministic by input (`fake://<fixture>`, `FAKE:<scenario>`) and refuses to start when `ENV=production`.
+- **Rule:** Every server-side fetch of a user-supplied or page-supplied URL goes through `app/core/safe_fetch.py`. It follows AD-13's rules (public addresses only, re-checked on each redirect, size and time caps) and checks the content type. It is a port, replaced by a fake fetcher when `LLM_PROVIDERS=fake`. Recipe pages are fetched through the `PageFetcher` port (AD-35), whose httpx adapter applies these same rules. The fake is deterministic by input (`fake://<fixture>`, `FAKE:<scenario>`) and refuses to start when `ENV=production`.
 
 ### AD-24 — Persistence and bootstrap [ADOPTED]
 
@@ -324,7 +324,7 @@ flowchart LR
 - **Binds:** NFR-1, NFR-6, NFR-10, operations
 - **Prevents:** secrets in logs, unrecoverable data loss, and misconfigured environments.
 - **Rule:**
-  - **Logging:** Python `logging`, pretty in dev and JSON in prod, with request IDs and redaction of passwords, cookies and keys. Each import writes one `import_log` row (provider, ms, tokens, outcome), which also counts the daily cap.
+  - **Logging:** Python `logging`, pretty in dev and JSON in prod, with request IDs and redaction of passwords, cookies and keys. Each import writes one `import_runs` row (AD-38; replaces the earlier `import_log`), which also counts the daily cap.
   - **Config:** the env matrix lives in a committed `.env.example`: `ENV`, `DATA_DIR`, `JWT_SECRET` (the app fails fast if it is missing), `COOKIE_SECURE`, `LLM_PROVIDERS`, `OLLAMA_URL` (`host.docker.internal` under compose), `GEMINI_API_KEY`, `GEMINI_MODEL`, `IMPORT_DAILY_CAP`, `LLM_MAX_TOKENS`, `APP_TIMEZONE`, `LOG_LEVEL`.
   - **Health:** `GET /api/health` (moved from `/health`) is the container `HEALTHCHECK`. A failed startup migration exits non-zero.
   - **Backup:** `app.cli backup` runs `VACUUM INTO` and tars the photos, with a documented restore. Scheduling is deferred with the host.
@@ -340,7 +340,7 @@ flowchart LR
   - **Blocking:** a blocked user's session is rejected on the next request. The session cookie is checked against `is_blocked` and `role` on every protected request, so a demotion takes effect immediately.
   - **Last admin:** the last active admin can't be demoted or blocked (409 `last_admin`).
   - **Authorship:** recipes carry `created_by` and `updated_by` (user ids), set only by `recipes.service`. The library is shared, so every editor can edit every recipe.
-  - **Import cap:** the daily import cap is global. `import_log` records the `user_id`.
+  - **Import cap:** the daily import cap is global. `import_runs` records the `user_id` (AD-38).
 
 ### AD-31 — Quantities [ADOPTED]
 
@@ -377,6 +377,75 @@ flowchart LR
   - **Recipe pages:** recipe-scrapers (JSON-LD) and trafilatura (readable text) parse imported pages.
   - **React Compiler:** wired through the official Babel plugin (`babel-plugin-react-compiler`) via the Vite plugin chain.
 
+> AD-34 to AD-40 were approved by Adi on 2026-11-04 (AI import decisions). The guiding order is: a working mechanism first, edge cases later.
+
+### AD-34 — Structured output: one schema, validate, one retry [ADOPTED]
+
+- **Binds:** AD-12, AD-22, F9
+- **Prevents:** malformed drafts reaching the form, a third-party structured-output library, and endless retry loops.
+- **Rule:**
+  - The single Pydantic `DraftRecipe` is the only output contract. Each adapter sends `DraftRecipe.model_json_schema()` to its provider's native structured-output option (Ollama `format`, Gemini `response_schema`).
+  - The reply is validated with `DraftRecipe.model_validate_json()`. On failure, the adapter retries **once**, feeding the validation error back to the model. A second failure returns `llm_invalid_output`.
+  - The Instructor library (or similar) is not used.
+  - The prompt text lives in the imports module with a `PROMPT_VERSION` constant, recorded on every run (AD-38).
+
+### AD-35 — Page fetching behind a `PageFetcher` port, no bot-protection bypass [ADOPTED]
+
+- **Binds:** AD-13, AD-23, FR-17
+- **Prevents:** scraping tricks in business code, a headless browser in the MVP image, and challenge pages sent to the LLM as if they were recipes.
+- **Rule:**
+  - `imports` depends only on the `PageFetcher` Protocol: `fetch(url) -> FetchedPage` (final URL, status, content type, HTML).
+  - The MVP adapter uses httpx with the AD-23 safe-fetch rules. BeautifulSoup parses the HTML (JSON-LD `<script>` blocks, `og:image`, and challenge detection). The fake fetcher (`fake://<fixture>`) implements the same port.
+  - Cloudflare and other bot protection are **never bypassed** (no browser impersonation, no solver services). A detected challenge or block page (status 403/503 with challenge markers, or a known interstitial) returns `fetch_challenged`, and the UI offers the "paste text" tab.
+  - A Playwright adapter is deferred; it would be one more adapter behind the same port. Spike 5.1 measures the real blocking rate on Adi's sites to decide whether it is ever needed.
+
+### AD-36 — "Not a recipe" pre-check [ADOPTED, later story]
+
+- **Binds:** AD-13, AD-22, FR-17, FR-18
+- **Prevents:** spending a full extraction run on pages or text that hold no recipe.
+- **Rule:** A separate, cheap check runs before extraction: a page with schema.org Recipe JSON-LD passes at once; otherwise a short LLM classification call (its own small schema, validated per AD-34) decides. A negative answer returns `no_recipe_found` without running extraction. It is a **later story** (5.9). Until then, extraction itself returns `no_recipe_found` when the draft has no ingredients and no steps.
+
+### AD-37 — Import evals: fixtures, scores, CI [ADOPTED]
+
+- **Binds:** AD-16, AD-17, NFR-1, NFR-9
+- **Prevents:** prompt or model changes that silently make drafts worse, and provider choices made on gut feeling.
+- **Rule:**
+  - About 20 saved fixtures live under `apps/recipe-service/evals/fixtures/`, each with its input (saved HTML or pasted text) and a hand-checked expected `DraftRecipe`. They deliberately include blogs without JSON-LD, Hebrew sites, and pasted text.
+  - An eval script (an Nx target, `recipe-service:eval`) runs the pipeline over the fixtures for a chosen provider and model, and scores **per field** (title, ingredients, amounts, units, steps, tags, translation).
+  - Live runs write a results table (per provider/model) that is kept in the README.
+  - CI runs the same script against **recorded provider responses** (a replay adapter behind `LlmProvider`), so it checks the pipeline and scoring without calling a real model (AD-16 holds). Recordings are refreshed by a live run on Adi's machine.
+
+### AD-38 — Import observability: `import_runs` and the AI dashboard [ADOPTED]
+
+- **Binds:** AD-29, AD-30, F9
+- **Prevents:** guessing which provider is slow, costly or unreliable, and a second log table drifting from the daily cap.
+- **Rule:**
+  - One `import_runs` table (via Alembic) replaces `import_log`. Each import writes one row: `user_id`, `provider`, `model`, `source_kind` (url/text), `path` (`json_ld` or `llm`), `prompt_version`, `latency_ms`, `input_tokens`, `output_tokens`, `first_try_valid` (bool), `retried` (bool), `outcome` (`ok` or an error code), `created_at`. It also counts the daily cap.
+  - An admin-only "AI dashboard" page in `libs/feature-import` reads `GET /api/admin/import-stats` (admin). The server computes the aggregates **on request** with SQL `GROUP BY` (by provider/model and by day). There is no background job and no pre-aggregated table.
+  - The charting library for the dashboard is still open (see Open).
+
+### AD-39 — Duplicate check by normalized source URL [ADOPTED]
+
+- **Binds:** AD-22, FR-17
+- **Prevents:** the same recipe imported twice by accident, and a separate URL cache.
+- **Rule:**
+  - One pure function `normalize_source_url()` (lowercase host, http and https treated the same, trailing slash removed, `utm_*` and known tracking params such as `fbclid` and `gclid` removed, fragment removed) has its own unit tests.
+  - Recipes store `source_url_key` (the normalized URL, indexed, via Alembic) next to `source_url`.
+  - Before fetching, a URL import checks the key. On a match, it returns 409 `import_duplicate` with `params: {recipe_id}`, and the UI asks "already exists — open it, or import again?". "Import again" resends with `allow_duplicate: true`.
+  - This replaces any separate cache of fetched URLs.
+
+### AD-40 — Live import progress over SSE [ADOPTED]
+
+- **Binds:** AD-12, AD-22, FR-20
+- **Prevents:** a fake percentage bar, and a slow local import that looks frozen.
+- **Rule:**
+  - `POST /api/imports/url` and `POST /api/imports/text` answer with `text/event-stream` (FastAPI `StreamingResponse`; no extra library). The client reads it with `fetch` and a stream reader (not `EventSource`, which can't POST or send the CSRF header).
+  - Events: `stage` `{name, status}` with `name` in `fetch | extract | validate | convert_units | translate` and `status` in `started | done | skipped`; `ingredient` `{index, partial}` while the model is still generating; `draft` `{DraftRecipe}` at the end; `error` `{code, params?}` per AD-28.
+  - Only real stages are reported. There is **no percentage bar**.
+  - Ingredients stream live with Ollama (streaming JSON, parsed incrementally). A provider that can't stream sends stage events only.
+  - Errors found before the stream starts (auth, CSRF, cap, duplicate, unknown provider) use normal HTTP status codes. After the stream starts, errors are `error` events.
+  - Cancel = the client aborts the request; the server notices the disconnect and cancels the provider call. Per-provider timeouts (AD-22) still apply.
+
 ## Brownfield ratification
 
 - `apps/recipe-service/app/api|db|models` (the layer-first scaffold) move into the AD-1 feature layout. `db` becomes `app/core/db.py`, `health` moves to `app/core`, and the models move into their modules. `app/core/metadata.py` imports all models for Alembic.
@@ -392,7 +461,7 @@ flowchart LR
 | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | API paths     | `/api/<plural-noun>`, kebab-case. JSON fields are snake_case on the wire, and the generated client uses them as-is.                                                                                                                                                                                |
 | Timestamps    | UTC ISO-8601 (`created_at`, `updated_at`)                                                                                                                                                                                                                                                          |
-| Errors        | 422 validation; 400 bad input or credentials; 401 no session on a protected call; 403 CSRF or insufficient role; 404 missing; 409 conflict (duplicate tag name); 413 upload too large; 429 rate limit or import cap; 502/504 provider failure or timeout. Body shape per AD-28 |
+| Errors        | 422 validation; 400 bad input or credentials; 401 no session on a protected call; 403 CSRF or insufficient role; 404 missing; 409 conflict (duplicate tag name, `import_duplicate`); 413 upload too large; 429 rate limit or import cap; 502/504 provider failure or timeout. Body shape per AD-28 |
 | Python naming | modules `snake_case`; schemas `RecipeCreate / RecipeRead / RecipeUpdate`                                                                                                                                                                                                                           |
 | TS naming     | components `PascalCase.tsx`; hooks `useX`; route modules `libs/feature-<name>/src/routes/<page>.tsx`                                                                                                                                                                                               |
 | Config        | env vars only, read once in `app/core/config` (pydantic-settings); no secrets in the repo                                                                                                                                                                                                          |
@@ -423,6 +492,7 @@ flowchart LR
 | google-genai SDK                                                   | 2.x; Flash model name in config (`GEMINI_MODEL`, e.g. `gemini-3.8-flash`) |
 | PyJWT                                                              | ≥2.13                                                                     |
 | mypy, import-linter, slowapi, recipe-scrapers, trafilatura         | current stable, pinned at scaffold                                        |
+| beautifulsoup4 (AD-35)                                             | current stable, pinned when Epic 5 starts                                 |
 | size-limit, babel-plugin-react-compiler, eslint-plugin-react-hooks | current stable (hooks ≥7 for compiler rules)                              |
 | MSW                                                                | 3.x                                                                       |
 | Storybook (`@nx/storybook`, React + Vite, addon-a11y)              | 10.x (10.6.4 pinned exactly in Story 1.5)                                 |
@@ -436,7 +506,7 @@ erDiagram
   RECIPE ||--o{ RECIPE_TAG : tagged
   TAG ||--o{ RECIPE_TAG : labels
   USER ||--o{ RECIPE : "created_by / updated_by"
-  USER ||--o{ IMPORT_LOG : runs
+  USER ||--o{ IMPORT_RUN : runs
 ```
 
 ```text
@@ -465,7 +535,7 @@ libs/
 | F4 original-value hints     | recipes.service                                              | AD-4               |
 | F6 scaling                  | libs/recipe-domain                                           | AD-31, AD-32       |
 | F8 users, roles, login      | auth + users modules · libs/feature-auth, libs/feature-users | AD-6, AD-21, AD-30 |
-| F9 AI import                | imports module + providers · libs/feature-import             | AD-12, AD-13       |
+| F9 AI import                | imports module + providers · libs/feature-import             | AD-12, AD-13, AD-34–AD-40 |
 | F10 tags                    | tags module · libs/feature-tags                              | AD-7               |
 | Photos                      | photos module                                                | AD-14              |
 | NFR-6 one-command run       | compose + nx dev target                                      | AD-15, AD-18       |
@@ -476,9 +546,13 @@ libs/
 
 - **Default LLM provider:** `ollama` for now; confirm after the spike (about 5 real recipes, timing plus Hebrew quality).
 - **Haiku adapter:** add when Adi buys credit (one adapter plus config). Writing it earlier is Adi's call.
+- **recipe-scrapers / trafilatura vs BeautifulSoup alone (AD-35):** keep both libraries on top of the HTML from `PageFetcher`, or let BeautifulSoup do all parsing. Decide with Adi after spike 5.1.
+- **Chart library for the AI dashboard (AD-38):** to propose to Adi before Story 5.8 (it must use the design tokens and stay out of the visitor bundle).
 
 ## Deferred
 
 - **Deployment host (PRD OQ-1):** after MVP. The constraint is set by AD-6 and AD-14: one origin plus a persistent volume for the SQLite file and photos.
 - **S3-compatible photo storage:** add when deployed storage needs it, behind `PhotoStorage`.
 - **Zustand:** add only on a proven client-state need.
+- **Playwright page fetcher (AD-35):** a possible later `PageFetcher` adapter, only if spike 5.1 shows a high blocking rate.
+- **Semantic search over our recipes (planned, approved 2026-11-04):** a new epic after the AI import epic (Epic 8, about 2 stories). Embeddings from an Ollama embedding model behind a port like `LlmProvider`, stored in SQLite, cosine similarity in Python; `sqlite-vec` is optional. SQLite stays; no PostgreSQL. ADs are written when the epic starts.
