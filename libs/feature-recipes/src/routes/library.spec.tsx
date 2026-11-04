@@ -2,6 +2,7 @@ import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { delay, http, HttpResponse } from 'msw';
 import { server, serveSession } from '../testing/server';
+import { setPhone } from '../testing/viewport';
 import { recipe, renderLibrary, serveRecipes } from '../testing/render-library';
 
 const SHAKSHUKA = recipe('r1', 'שקשוקה', {
@@ -291,13 +292,20 @@ describe('LibraryPage', () => {
   });
 
   describe('tag chips', () => {
-    it('shows "הכל", the quick chip and the pinned tags only, in the API order', async () => {
+    it('shows "הכל", the quick chip, the pinned tags and then the rest, on desktop', async () => {
       serveRecipes(WITH_TAGS);
       await loaded();
       const names = screen
         .getAllByRole('button')
         .map((button) => button.textContent);
-      expect(names).toEqual(['הכל', 'עד 30 דקות', 'בוקר', 'ערב']);
+      expect(names).toEqual([
+        'הכל',
+        'עד 30 דקות',
+        'בוקר',
+        'ערב',
+        'על האש',
+        'מסיבות',
+      ]);
       expect(chip('הכל').getAttribute('aria-pressed')).toBe('true');
     });
 
@@ -364,11 +372,37 @@ describe('LibraryPage', () => {
       expect(titles()).toEqual(['פשטידה', 'מרק']);
     });
 
-    it('filters by an existing tag that is not pinned, without a chip for it', async () => {
+    it('filters by an existing tag that is not pinned, shown as a pressed chip', async () => {
       serveRecipes(WITH_TAGS);
       await loaded('/?tags=t2');
       expect(titles()).toEqual(['שקשוקה']);
-      expect(screen.queryByRole('button', { name: 'על האש' })).toBeNull();
+      expect(chip('על האש').getAttribute('aria-pressed')).toBe('true');
+    });
+
+    it('on a phone shows no tag chips, only "תגיות", and picks tags in the sheet', async () => {
+      setPhone(true);
+      serveRecipes(WITH_TAGS);
+      const router = await loaded('/');
+      expect(screen.queryByRole('button', { name: 'ערב' })).toBeNull();
+      await userEvent.click(chip('תגיות'));
+      await userEvent.click(screen.getByRole('checkbox', { name: 'על האש' }));
+      expect(router.state.location.search).toBe('?tags=t2');
+      await userEvent.keyboard('{Escape}');
+      expect(titles()).toEqual(['שקשוקה']);
+      expect(chip('תגיות (1)')).toBeTruthy();
+      expect(screen.queryByRole('button', { name: 'עד 30 דקות' })).toBeNull();
+      await userEvent.click(chip('תגיות (1)'));
+      await userEvent.click(
+        screen.getByRole('checkbox', { name: 'עד 30 דקות' }),
+      );
+      expect(router.state.location.search).toBe('?tags=t2&fast=1');
+      await userEvent.keyboard('{Escape}');
+      expect(
+        await screen.findByRole('button', { name: 'תגיות (2)' }),
+      ).toBeTruthy();
+      await userEvent.click(chip('הכל'));
+      expect(router.state.location.search).toBe('');
+      expect(chip('הכל').getAttribute('aria-pressed')).toBe('true');
     });
 
     it('says nothing matched when no recipe has all the tags, and clears them', async () => {
