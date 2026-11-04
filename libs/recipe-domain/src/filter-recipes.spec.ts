@@ -65,6 +65,23 @@ describe('filterRecipes', () => {
     ).toEqual([]);
   });
 
+  it('ignores duplicated tag ids and the order they come in', () => {
+    expect(
+      filterRecipes(ALL, { ...NONE, tagIds: ['dessert', 'party', 'dessert'] }),
+    ).toEqual([cake]);
+    expect(
+      filterRecipes(ALL, { ...NONE, tagIds: ['party', 'dessert'] }),
+    ).toEqual(filterRecipes(ALL, { ...NONE, tagIds: ['dessert', 'party'] }));
+  });
+
+  it('never matches a recipe without tags when a tag is selected', () => {
+    expect(filterRecipes([salad], { ...NONE, tagIds: ['party'] })).toEqual([]);
+  });
+
+  it('finds nothing in an empty list', () => {
+    expect(filterRecipes([], { ...NONE, tagIds: ['party'] })).toEqual([]);
+  });
+
   it('matches nothing for a tag no recipe has', () => {
     expect(filterRecipes(ALL, { ...NONE, tagIds: ['unknown'] })).toEqual([]);
   });

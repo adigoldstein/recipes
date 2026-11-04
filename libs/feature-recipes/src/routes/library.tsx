@@ -48,6 +48,8 @@ export function LibraryPage() {
   const pinnedTags = (tags.data ?? []).filter((tag) => tag.pinned);
   const { filters, update, clear } = useLibraryFilters(knownTagIds);
   const query = useDeferredValue(filters.query);
+  // On a phone one button holds the tags and the quick chip; it counts both.
+  const activeCount = filters.tagIds.length + (filters.fastOnly ? 1 : 0);
 
   // "/" jumps to the search field, unless the user is already typing somewhere.
   useEffect(() => {
@@ -165,6 +167,19 @@ export function LibraryPage() {
             label: t('library.filter.fast'),
             pressed: filters.fastOnly,
             onPressedChange: (fastOnly) => update({ fastOnly }),
+          }}
+          onClearAll={() => update({ tagIds: [], fastOnly: false })}
+          more={{
+            label:
+              activeCount > 0
+                ? t('library.filter.moreCount', { count: activeCount })
+                : t('library.filter.more'),
+            title: t('library.filter.moreTitle'),
+            closeLabel: t('library.filter.moreClose'),
+            options: (tags.data ?? []).map((tag) => ({
+              id: tag.id,
+              label: tag.name,
+            })),
           }}
         />
       </div>

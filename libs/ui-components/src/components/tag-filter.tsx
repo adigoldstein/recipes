@@ -1,4 +1,6 @@
 import { cn } from '../lib/utils';
+import { useIsDesktop } from '../hooks/use-media-query';
+import { MoreTagsMenu } from './more-tags-menu';
 import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group';
 
 export interface TagFilterOption {
@@ -20,6 +22,20 @@ export interface TagFilterProps {
     pressed: boolean;
     onPressedChange: (pressed: boolean) => void;
   };
+  /**
+   * Every tag, pinned or not. On desktop the row shows them all (pinned first) and
+   * scrolls sideways. On a phone the whole row gives way to one button that opens a
+   * sheet with a checkbox for each tag and for the quick filter.
+   */
+  more?: {
+    label: string;
+    title: string;
+    closeLabel: string;
+    /** Every tag, pinned or not. */
+    options: readonly TagFilterOption[];
+  };
+  /** "הכל" on a phone: clears the tags and the quick chip in one step. */
+  onClearAll?: () => void;
   className?: string;
 }
 
@@ -41,8 +57,15 @@ export function TagFilter({
   selectedIds,
   onSelectedIdsChange,
   fast,
+  more,
+  onClearAll = () => onSelectedIdsChange([]),
   className,
 }: TagFilterProps) {
+  const desktop = useIsDesktop();
+  const unpinned = (more?.options ?? []).filter(
+    (option) => !options.some((pinned) => pinned.id === option.id),
+  );
+  const chips = [...options, ...unpinned];
   const value = [
     ...(selectedIds.length === 0 ? [ALL] : selectedIds),
     ...(fast.pressed ? [FAST] : []),
@@ -58,8 +81,35 @@ export function TagFilter({
     if (pressedAll) onSelectedIdsChange([]);
     else if (changed) onSelectedIdsChange(tags);
   };
+  if (!desktop && more) {
+    return (
+      <div className={cn('flex items-center gap-2 py-1', className)}>
+        <ToggleGroup
+          type="multiple"
+          aria-label={label}
+          value={selectedIds.length === 0 && !fast.pressed ? [ALL] : []}
+          onValueChange={(next) => {
+            if (!next.includes(ALL)) return;
+            onClearAll();
+          }}
+        >
+          <ToggleGroupItem value={ALL} className={CHIP}>
+            {allLabel}
+          </ToggleGroupItem>
+        </ToggleGroup>
+        <MoreTagsMenu
+          {...more}
+          fast={fast}
+          selectedIds={selectedIds}
+          onSelectedIdsChange={onSelectedIdsChange}
+        />
+      </div>
+    );
+  }
   return (
-    <div className={cn('overflow-x-auto py-1', className)}>
+    <div
+      className={cn('flex items-center gap-2 overflow-x-auto py-1', className)}
+    >
       <ToggleGroup
         type="multiple"
         aria-label={label}
@@ -73,7 +123,7 @@ export function TagFilter({
         <ToggleGroupItem value={FAST} className={CHIP}>
           {fast.label}
         </ToggleGroupItem>
-        {options.map((option) => (
+        {chips.map((option) => (
           <ToggleGroupItem key={option.id} value={option.id} className={CHIP}>
             {option.label}
           </ToggleGroupItem>

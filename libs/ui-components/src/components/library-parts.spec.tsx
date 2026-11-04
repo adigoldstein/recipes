@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { DirectionProvider } from './ui/direction';
 import { EmptyState } from './empty-state';
 import { RecipeCard, RecipeCardSkeleton } from './recipe-card';
@@ -257,5 +258,113 @@ describe('EmptyState', () => {
     render(<EmptyState title="עוד אין כאן מתכונים" />);
     expect(screen.queryByRole('button')).toBeNull();
     expect(document.querySelector('p')).toBeNull();
+  });
+});
+
+describe('TagFilter on a phone, with every tag', () => {
+  const pinned = [{ id: 'a', label: 'בוקר' }];
+  const all = [
+    { id: 'a', label: 'בוקר' },
+    { id: 'c', label: 'על האש' },
+  ];
+
+  function setup(selectedIds: string[] = [], fastPressed = false) {
+    const onSelectedIdsChange = vi.fn();
+    const onPressedChange = vi.fn();
+    const onClearAll = vi.fn();
+    render(
+      <DirectionProvider dir="rtl">
+        <TagFilter
+          label="תגיות"
+          allLabel="הכל"
+          options={pinned}
+          selectedIds={selectedIds}
+          onSelectedIdsChange={onSelectedIdsChange}
+          onClearAll={onClearAll}
+          fast={{
+            label: 'עד 30 דקות',
+            pressed: fastPressed,
+            onPressedChange,
+          }}
+          more={{
+            label: 'תגיות',
+            title: 'כל התגיות',
+            closeLabel: 'סגירה',
+            options: all,
+          }}
+        />
+      </DirectionProvider>,
+    );
+    return { onSelectedIdsChange, onPressedChange, onClearAll };
+  }
+
+  it('lists every tag with a checkbox and selects one', async () => {
+    const { onSelectedIdsChange } = setup();
+    await userEvent.click(screen.getByRole('button', { name: 'תגיות' }));
+    expect(screen.getAllByRole('checkbox')).toHaveLength(3);
+    await userEvent.click(screen.getByRole('checkbox', { name: 'על האש' }));
+    expect(onSelectedIdsChange).toHaveBeenCalledWith(['c']);
+  });
+
+  it('has "הכל", pressed while nothing is chosen, that clears tags and the quick filter', async () => {
+    const { onClearAll } = setup(['c'], true);
+    const all = screen.getByRole('button', { name: 'הכל' });
+    expect(all.getAttribute('aria-pressed')).toBe('false');
+    await userEvent.click(all);
+    expect(onClearAll).toHaveBeenCalledOnce();
+  });
+
+  it('has the quick filter as a checkbox in the sheet', async () => {
+    const { onPressedChange } = setup();
+    await userEvent.click(screen.getByRole('button', { name: 'תגיות' }));
+    await userEvent.click(screen.getByRole('checkbox', { name: 'עד 30 דקות' }));
+    expect(onPressedChange).toHaveBeenCalledWith(true);
+  });
+});
+
+describe('TagFilter on desktop, with every tag', () => {
+  const original = window.matchMedia;
+  beforeEach(() => {
+    window.matchMedia = ((query: string) => ({
+      media: query,
+      matches: true,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+    })) as unknown as typeof window.matchMedia;
+  });
+  afterEach(() => {
+    window.matchMedia = original;
+  });
+
+  it('scrolls every tag in the row, pinned first, with no sheet button', () => {
+    render(
+      <DirectionProvider dir="rtl">
+        <TagFilter
+          label="תגיות"
+          allLabel="הכל"
+          options={[{ id: 'a', label: 'בוקר' }]}
+          selectedIds={[]}
+          onSelectedIdsChange={vi.fn()}
+          fast={{
+            label: 'עד 30 דקות',
+            pressed: false,
+            onPressedChange: vi.fn(),
+          }}
+          more={{
+            label: 'תגיות',
+            title: 'כל התגיות',
+            closeLabel: 'סגירה',
+            options: [
+              { id: 'c', label: 'על האש' },
+              { id: 'a', label: 'בוקר' },
+            ],
+          }}
+        />
+      </DirectionProvider>,
+    );
+    const names = screen
+      .getAllByRole('button')
+      .map((button) => button.textContent);
+    expect(names).toEqual(['הכל', 'עד 30 דקות', 'בוקר', 'על האש']);
   });
 });

@@ -1,5 +1,6 @@
 import { client } from '@bite-and-board/data-access';
 import { server } from './server';
+import './viewport';
 
 // The generated client uses relative `/api` URLs, which Node's fetch rejects;
 // the page origin gives MSW something to match.

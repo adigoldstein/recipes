@@ -14,6 +14,8 @@ export * from './components/ui/dialog';
 export * from './components/ui/command';
 export * from './components/ui/dropdown-menu';
 export * from './components/ui/popover';
+export * from './components/ui/sheet';
+export * from './components/ui/checkbox';
 export * from './components/ui/input';
 export * from './components/ui/label';
 export * from './components/ui/select';
@@ -44,6 +46,11 @@ export {
   type TagFilterOption,
   type TagFilterProps,
 } from './components/tag-filter';
+export {
+  MoreTagsMenu,
+  type MoreTagsMenuProps,
+  type MoreTagsOption,
+} from './components/more-tags-menu';
 export {
   TagPicker,
   type TagPickerLabels,
