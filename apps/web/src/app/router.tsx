@@ -1,6 +1,7 @@
 import type { QueryClient } from '@tanstack/react-query';
 import type { RouteObject } from 'react-router';
 import { AppLayout } from './app-layout';
+import { lazyNewRecipePage } from './new-recipe-page';
 import { NotFound } from './not-found';
 import { protectedRoute } from './protected-route';
 import { RouteError } from './route-error';
@@ -33,7 +34,8 @@ export function createRoutes(queryClient: QueryClient): RouteObject[] {
         protectedRoute(queryClient, 'editor', [
           {
             path: 'recipes/new',
-            lazy: () => import('@bite-and-board/feature-recipes/recipe-new'),
+            // The form page with the AI import panel above it (the app joins them).
+            lazy: lazyNewRecipePage,
           },
           {
             path: 'recipes/:id/edit',

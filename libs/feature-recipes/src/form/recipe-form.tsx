@@ -1,7 +1,7 @@
 import type { ParseKeys } from 'i18next';
 import { useQuery } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
-import type { KeyboardEvent } from 'react';
+import { useEffect, type KeyboardEvent } from 'react';
 import {
   Controller,
   set,
@@ -31,6 +31,7 @@ import {
 import {
   Button,
   CharacterCounter,
+  cn,
   ConfirmDialog,
   FormField,
   RequiredMark,
@@ -75,6 +76,13 @@ export interface RecipeFormProps {
   /** Saves the recipe. A rejected promise shows its error on the form. */
   onSave: (payload: RecipeUpdate) => Promise<unknown>;
   submitLabel: string;
+  /**
+   * Locks the whole form while something else is filling it (an import): nothing in it
+   * can be focused, clicked or typed in, and screen readers skip it.
+   */
+  locked?: boolean;
+  /** Tells the page whether the editor changed anything, so an import can ask first. */
+  onDirtyChange?: (dirty: boolean) => void;
 }
 
 function rowError(errors: FieldErrors | undefined, field: string) {
@@ -388,6 +396,8 @@ export function RecipeForm({
   defaultValues,
   onSave,
   submitLabel,
+  locked = false,
+  onDirtyChange,
 }: RecipeFormProps) {
   const { t } = useTranslation();
   const issueMessage = useIssueMessage();
@@ -423,6 +433,9 @@ export function RecipeForm({
     mode: 'onTouched',
   });
   const { blocker, allowLeaving } = useUnsavedChangesGuard(isDirty);
+  useEffect(() => {
+    onDirtyChange?.(isDirty);
+  }, [isDirty, onDirtyChange]);
 
   const tagList = useQuery(tagsListTagsOptions());
   const limits = useQuery(photosGetLimitsOptions());
@@ -474,7 +487,16 @@ export function RecipeForm({
   });
 
   return (
-    <form onSubmit={onSubmit} noValidate className="flex flex-col gap-8">
+    <form
+      onSubmit={onSubmit}
+      noValidate
+      inert={locked}
+      aria-busy={locked}
+      className={cn(
+        'flex flex-col gap-8 transition-opacity',
+        locked && 'opacity-60',
+      )}
+    >
       <RequiredNote>{t('form.requiredNote')}</RequiredNote>
       <section
         aria-labelledby="details-heading"

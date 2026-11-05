@@ -82,3 +82,4 @@ export {
   ServingsStepper,
   type ServingsStepperProps,
 } from './components/servings-stepper';
+export { useIsDesktop, useMediaQuery } from './hooks/use-media-query';

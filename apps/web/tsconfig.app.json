@@ -50,6 +50,9 @@
       "path": "../../libs/feature-tags/tsconfig.lib.json"
     },
     {
+      "path": "../../libs/feature-import/tsconfig.lib.json"
+    },
+    {
       "path": "../../libs/feature-users/tsconfig.lib.json"
     },
     {
