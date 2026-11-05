@@ -7,7 +7,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from './ui/alert-dialog';
-import { Button } from './ui/button';
+import { PendingButton, SlowNote } from './pending-button';
 
 export interface ConfirmDialogProps {
   open: boolean;
@@ -21,6 +21,10 @@ export interface ConfirmDialogProps {
   onConfirm: () => void;
   /** The action is running: both buttons are disabled and the dialog cannot be dismissed. */
   pending?: boolean;
+  /** What the confirm button says while it works ("מוחקים"); defaults to `confirmLabel`. */
+  pendingLabel?: string;
+  /** Shown under the text when the action takes longer than usual ("זה לוקח יותר זמן"). */
+  slowNote?: string;
   /** Styles the confirm button as a destructive action. */
   destructive?: boolean;
   /** Why the action failed. It sits under the text and is announced when it appears. */
@@ -41,6 +45,8 @@ export function ConfirmDialog({
   cancelLabel,
   onConfirm,
   pending = false,
+  pendingLabel,
+  slowNote,
   destructive = false,
   error,
 }: ConfirmDialogProps) {
@@ -61,14 +67,16 @@ export function ConfirmDialog({
         <p role="alert" className="text-sm text-destructive">
           {error}
         </p>
+        {slowNote ? <SlowNote pending={pending}>{slowNote}</SlowNote> : null}
         <AlertDialogFooter>
-          <Button
+          <PendingButton
             variant={destructive ? 'destructive' : 'default'}
-            disabled={pending}
+            pending={pending}
+            pendingLabel={pendingLabel ?? confirmLabel}
             onClick={onConfirm}
           >
             {confirmLabel}
-          </Button>
+          </PendingButton>
           <AlertDialogCancel disabled={pending}>
             {cancelLabel}
           </AlertDialogCancel>

@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, Outlet, useLocation } from 'react-router';
 import { ThemeToggle, TopBar, Wordmark } from '@bite-and-board/ui-components';
+import { useOutcomeUnknown } from './use-outcome-unknown';
 import { useSessionExpiry } from './use-session-expiry';
 import { useTheme } from './theme';
 
@@ -28,6 +29,7 @@ export function AppLayout() {
   const shownPath = useRef(location.pathname);
 
   useSessionExpiry();
+  useOutcomeUnknown();
 
   // After a navigation to another page (not the first load), move focus to the
   // new page's h1 so screen readers announce it and keyboard users start at the

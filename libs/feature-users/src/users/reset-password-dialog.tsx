@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { getErrorCode, type UserRead } from '@bite-and-board/data-access';
 import {
   Button,
+  PendingButton,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -129,11 +130,13 @@ function ResetPasswordForm({
         {formError ? errorMessage(update.error) : null}
       </p>
       <DialogFooter>
-        <Button type="submit" disabled={update.isPending}>
-          {update.isPending
-            ? t('users.reset.submitting')
-            : t('users.reset.submit')}
-        </Button>
+        <PendingButton
+          type="submit"
+          pending={update.isPending}
+          pendingLabel={t('users.reset.submitting')}
+        >
+          {t('users.reset.submit')}
+        </PendingButton>
         <Button type="button" variant="outline" onClick={onDone}>
           {t('users.cancel')}
         </Button>

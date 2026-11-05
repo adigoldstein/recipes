@@ -80,6 +80,8 @@ export function DeleteRecipe({
         cancelLabel={t('detail.delete.cancel')}
         destructive
         pending={remove.isPending}
+        pendingLabel={t('detail.delete.pending')}
+        slowNote={t('pending.slow')}
         error={failed ? errorMessage(remove.error) : undefined}
         onConfirm={confirm}
       />

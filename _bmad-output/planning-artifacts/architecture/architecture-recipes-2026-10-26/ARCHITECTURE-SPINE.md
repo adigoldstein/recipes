@@ -474,6 +474,18 @@ flowchart LR
   - The state is not stored in the database (a restart clears it). Every attempt, including skipped ones, is still logged in `import_attempts` (AD-38), with a `skipped_cooldown` outcome.
   - This is not a per-user rate limit: the daily import cap (AD-29) already protects the quota.
 
+### AD-43 — Timeouts and a write whose outcome is unknown [ADOPTED]
+
+- **Binds:** AD-4, AD-12, AD-19, AD-25, AD-40, AD-42
+- **Prevents:** a half-saved recipe, a client that reports "failed" for a write that went through, and a proxy that cuts a slow import.
+- **Rule:** _(Approved by Adi 2026-11-05, after Winston checked the code.)_
+  - **The server transaction is the boundary of a write.** `create_recipe` and `update_recipe` add the recipe, link its tags (`assign_to_recipe` only flushes) and commit once; any error rolls back. Endpoints are sync functions run in a thread pool, so a client that disconnects does **not** stop a running write: it finishes and commits. No change to the server is needed for this.
+  - **A hard timeout lives on the server only where the server calls out:** the LLM providers (AD-12: `gemini-3.5-flash-lite` 30 s, `gemini-3.5-flash` 90 s, Groq 90 s). On a timeout the import answers 504 `llm_timeout` and logs the run; nothing else is written. Ordinary endpoints have no deadline. SQLite waits for a lock for its driver default of 5 s, then the write fails and rolls back; the value is set explicitly (`busy_timeout` 5000 ms) so it is documented.
+  - **The client has a safety net that is always longer than the server's own deadline,** so a definite server answer can arrive first: an import 95 s (90 s + 5), a photo upload 120 s, everything else 30 s. It is set in one place, the client's `fetch` (`libs/data-access`).
+  - **When the safety net fires**, the client answers with the error code `request_timeout` for a read or an import (the user may retry), and `outcome_unknown` for a write (save, delete, tag and user changes): the message says it is not clear whether the action completed, and the app refetches from the server before anything is offered again. Creating a recipe can duplicate on a blind retry; with one user that is accepted, and the message sends the editor to check the library first. Delete (a 404 counts as done), full replace on update, and unique tag names are safe to repeat.
+  - **No cancel or retry button appears while a request is running.** "Retry" shows only after a request has actually failed. While waiting, the UI follows Story 2.7: nothing for 0.3 s, then a spinner kept for at least 0.5 s, and a "taking longer than usual" note after 10 s (30 s for an import or a photo upload).
+  - **A reverse proxy in production must wait at least 120 s** (checked in Story 6.1); the deployment host is still open.
+
 ## Brownfield ratification
 
 - `apps/recipe-service/app/api|db|models` (the layer-first scaffold) move into the AD-1 feature layout. `db` becomes `app/core/db.py`, `health` moves to `app/core`, and the models move into their modules. `app/core/metadata.py` imports all models for Alembic.

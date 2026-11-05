@@ -12,7 +12,7 @@ import {
 } from '@bite-and-board/data-access';
 import {
   BackLink,
-  Button,
+  PendingButton,
   FormField,
   Input,
   RequiredNote,
@@ -113,11 +113,13 @@ export function LoginPage() {
           <p role="alert" className="text-sm text-destructive">
             {login.isError ? errorMessage(login.error) : null}
           </p>
-          <Button type="submit" disabled={login.isPending}>
-            {login.isPending
-              ? t('auth.login.submitting')
-              : t('auth.login.submit')}
-          </Button>
+          <PendingButton
+            type="submit"
+            pending={login.isPending}
+            pendingLabel={t('auth.login.submitting')}
+          >
+            {t('auth.login.submit')}
+          </PendingButton>
         </form>
       </div>
     </>

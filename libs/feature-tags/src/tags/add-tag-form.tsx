@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import {
-  Button,
   FormField,
+  PendingButton,
   Input,
   RequiredNote,
 } from '@bite-and-board/ui-components';
@@ -61,10 +61,15 @@ export function AddTagForm() {
             />
           )}
         </FormField>
-        <Button type="submit" disabled={create.isPending} className="mt-7">
+        <PendingButton
+          type="submit"
+          pending={create.isPending}
+          pendingLabel={t('tags.add.submitting')}
+          className="mt-7"
+        >
           <Plus aria-hidden="true" />
           {t('tags.add.submit')}
-        </Button>
+        </PendingButton>
       </div>
     </form>
   );

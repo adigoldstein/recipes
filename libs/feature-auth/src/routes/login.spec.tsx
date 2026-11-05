@@ -193,17 +193,20 @@ describe('LoginPage', () => {
     expect(called).toBe(false);
   });
 
-  it('disables the button while the request is in flight', async () => {
+  it('disables the button at once and shows "נכנסים" once the wait is noticeable', async () => {
     const user = userEvent.setup();
     server.use(
       http.post('*/api/auth/login', async () => {
-        await delay(50);
+        await delay(700);
         return HttpResponse.json({ user: ADI });
       }),
     );
     renderLogin();
     await fill(user);
     await user.click(submit());
+    // At once: disabled, still saying "כניסה", so a fast answer never flickers.
+    expect((submit() as HTMLButtonElement).disabled).toBe(true);
+    // After the short delay: the spinner and the present-tense label.
     const busy = await screen.findByRole('button', { name: 'נכנסים' });
     expect((busy as HTMLButtonElement).disabled).toBe(true);
   });

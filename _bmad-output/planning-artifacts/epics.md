@@ -224,7 +224,46 @@ Anyone can open ביס & סיר on a phone or desktop (Hebrew, RTL, light or dar
 Adi bootstraps the admin account, and users log in and out. Visitors read, editors change content, and the admin also manages users on the Users screen (add, change role, block, reset password). Everyone can change their own password.
 **FRs covered:** FR13, FR14, FR15, FR16, FR25, FR26, FR27
 
-### Epic 3: Create, edit and delete recipes
+#### Story 2.7: Waiting states for actions that call the server
+
+_Added 2026-11-05 (Adi, with Sally and Winston). Cross-cutting UX, so it sits at the end of Epic 2 and is built before the import work continues._
+
+As an editor,
+I want every button that waits on the server to show that it is working,
+So that I never wonder whether a tap did anything, and never tap twice (NFR1, AD-43).
+
+**Acceptance Criteria:**
+
+**Given** an action behind a button is running (save, delete, add or remove a tag, add or change a user, log in, change a password, import)
+**When** the request starts
+**Then** the button is disabled at once and marked `aria-busy`, so a second tap cannot repeat it
+**And** nothing else changes for the first 0.3 s, so a fast answer shows no flicker
+**And** after 0.3 s the button shows a spinner and its label in the present tense ("שומרים", "מוחקים"), the spinner stays for at least 0.5 s once shown, and the button keeps the same width
+**And** this is one shared `PendingButton` with one timing hook in `libs/ui-components`, used by every case above and by `ConfirmDialog` (its confirm button), with Storybook stories for idle, working and slow
+
+**Given** an action has run for 10 s (30 s for an import or a photo upload)
+**When** it is still waiting
+**Then** a status line says "זה לוקח יותר זמן מהרגיל" (a live region that is always in the page), and there is no cancel or retry button while the request runs
+**And** the spinner respects `prefers-reduced-motion`
+
+**Given** the editor pins or unpins a tag
+**When** they tap the pin
+**Then** the pin changes at once and rolls back with a message if the server refuses (the only optimistic action; delete and save wait for the server)
+
+**Given** a request exceeds the client safety net (an import 95 s, a photo upload 120 s, anything else 30 s; set once in the client's `fetch`)
+**When** the call is a read or an import
+**Then** the error `request_timeout` is shown with "לנסות שוב"
+**And** when the call is a write the error `outcome_unknown` is shown ("לא ברור אם הפעולה הושלמה"), every query is refetched from the server, and a retry is offered only after that (AD-43)
+**And** `request_timeout` and `outcome_unknown` have Hebrew messages, and tests cover both with a fake clock
+
+**Given** the SQLite connection is opened
+**When** it is configured
+**Then** `busy_timeout` is set to 5000 ms explicitly (AD-43)
+
+**And** EXPERIENCE.md has the waiting-state rules, and Story 6.1 requires a reverse-proxy read timeout of at least 120 s
+**And** the import panel's own status line and the form lock from Story 5.2 are unchanged
+
+## Epic 3: Create, edit and delete recipes
 
 Editors create recipes in the full form: ingredient and step rows, fractions, validation, and an unsaved-changes guard. They pick tags (creating new tags inline) and add a photo. Editing keeps "originally …" hints, and recipes can be deleted after a confirmation.
 **FRs covered:** FR4, FR6, FR7, FR8, FR10, FR22 (FR9 moved to the optional Story 7.5 in Epic 7)
@@ -1012,6 +1051,7 @@ So that it works like production on any machine (NFR6).
 **Then** a multi-stage Dockerfile builds the SPA and the API into one image, where FastAPI serves the SPA (with an `index.html` fallback only for non-`/api` and non-`/media` HTML requests), `/api/*` and `/media/*` (AD-15)
 **And** SQLite and the photos live on a `/data` volume and survive restarts, and migrations run on start
 **And** the container `HEALTHCHECK` calls `/api/health`
+**And** any reverse proxy in front of the app has a read timeout of at least 120 s, so a slow import is never cut off (AD-43)
 **And** `GEMINI_API_KEY` and `GROQ_API_KEY` are read from the environment (never baked into the image), and the compose file passes them through from `.env`
 **And** static assets get immutable cache headers, and `/media` gets long-lived caching
 

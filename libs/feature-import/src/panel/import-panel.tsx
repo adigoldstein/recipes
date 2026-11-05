@@ -10,6 +10,9 @@ import {
   Button,
   ConfirmDialog,
   FormField,
+  PendingButton,
+  SLOW_AFTER_LONG_MS,
+  SlowNote,
   Textarea,
 } from '@bite-and-board/ui-components';
 import { useErrorMessage } from '../shared/use-error-message';
@@ -151,13 +154,18 @@ export function ImportPanel({
           <p role="status" className="min-h-5 text-sm text-muted-foreground">
             {importText.isPending ? t('import.pending') : null}
           </p>
+          <SlowNote pending={importText.isPending} afterMs={SLOW_AFTER_LONG_MS}>
+            {t('pending.slow')}
+          </SlowNote>
           <div className="flex justify-end">
-            <Button type="submit" disabled={importText.isPending}>
+            <PendingButton
+              type="submit"
+              pending={importText.isPending}
+              pendingLabel={t('import.text.submitting')}
+            >
               <Sparkles aria-hidden="true" />
-              {importText.isPending
-                ? t('import.text.submitting')
-                : t('import.text.submit')}
-            </Button>
+              {t('import.text.submit')}
+            </PendingButton>
           </div>
         </form>
       )}
