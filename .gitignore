@@ -83,3 +83,6 @@ test-output
 
 # Local dev-server config for the Claude desktop preview
 .claude/launch.json
+
+# Story 5.1 spike: saved third-party pages
+tools/llm-spike/results/html/

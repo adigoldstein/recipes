@@ -97,10 +97,10 @@ From ARCHITECTURE-SPINE.md (AD-1 to AD-33). There is **no starter template**: th
 - Users and roles: `require_role("editor"|"admin")`. The `users` module is admin-only. Recipes record `created_by` and `updated_by`. The last admin can't be demoted or blocked (AD-30).
 - Errors are returned as `{detail, code, params}` with an `ErrorCode` enum, and the client shows Hebrew text from i18n. 422 errors map to form fields by `loc` and `type` (AD-28).
 - AI import:
-  - `LlmProvider` port with a registry of `ollama` (the default for now), `gemini` and `fake`, validated against a `DraftRecipe` Pydantic schema. Each provider has its own timeout, exposed by `GET /api/imports/providers`. Error codes are fixed, and `import_log` records imports and enforces the daily cap (AD-12, AD-22, AD-29).
+  - `LlmProvider` port with a registry of `gemini`, `groq` and `fake` (chain `gemini-3.5-flash-lite`, `gemini-3.5-flash`, `groq` as decided 2026-11-04; Ollama dropped), validated against a `DraftRecipe` Pydantic schema. Each provider has its own timeout, exposed by `GET /api/imports/providers`. Error codes are fixed, and `import_log` records imports and enforces the daily cap (AD-12, AD-22, AD-29).
   - The pipeline is safe fetch, then JSON-LD (recipe-scrapers), then readable text (trafilatura), then the LLM. `core/safe_fetch` handles every outbound URL (AD-13, AD-23).
   - The draft reaches the form through router state only, with `missing_fields` (AD-22).
-- **Spike before the import feature:** compare Ollama and Gemini on about 5 real recipes (2 English, 3 Hebrew) for time and Hebrew quality, then confirm the default provider. Ollama runs as the native Windows app.
+- **Spike before the import feature (done 2026-11-04):** the engines were compared on 15 real pages; the chain is in AD-12 and the results in `tools/llm-spike/RESULTS.md`. Hebrew quality scores from Adi are still open.
 - Frontend shape: "thin app, thick libs". `apps/web` is only the shell (router, providers, top bar). Pages and containers live in feature libs `libs/feature-{recipes,auth,users,tags,import}` (tag `type:feature`, never importing each other), and each feature lib is created by the first story that needs it (AD-2).
 - Frontend stack: React Router 8 lazy routes, TanStack Query, React Hook Form + Zod with `RecipeFormValues` and two mapping functions, i18next (`he.json`), and the React Compiler through the Babel plugin (AD-8 to AD-11, AD-22, AD-33).
 - Enforcement: mypy strict, import-linter, ESLint rules (no physical-direction utilities, arbitrary values, hex colours or the `style` prop in ui-components; jsx-a11y), and size-limit as the `web:size` target (AD-33).
@@ -236,7 +236,7 @@ Editors manage tags (add, rename, delete, pin or unpin, with usage counts), and 
 
 ### Epic 5: AI import
 
-Editors import a recipe from a link or from pasted text with Ollama (local) or Gemini. They get a Hebrew draft with suggested tags and photo, review the flagged fields, and save. Live stage progress (SSE), cancel and per-engine timeouts make slow local runs usable. A URL that was already imported is caught before fetching. The admin sees import performance on an AI dashboard, and evals score providers on saved fixtures. Story 5.1 is the spike that compares Ollama and Gemini, confirms the default engine and measures the site blocking rate. (Updated 2026-11-04, AD-34 to AD-40.)
+Editors import a recipe from a link or from pasted text with a free-tier chain of Gemini and Groq engines. They get a Hebrew draft with suggested tags and photo, review the flagged fields, and save. Live stage progress (SSE), cancel and per-engine timeouts make slow local runs usable. A URL that was already imported is caught before fetching. The admin sees import performance on an AI dashboard, and evals score providers on saved fixtures. Story 5.1 was the spike that compared the engines, chose the chain and measured the site blocking rate. (Updated 2026-11-04, AD-34 to AD-40.)
 **FRs covered:** FR17, FR18, FR19, FR20, FR21, FR24
 
 ### Epic 6: Ready to show
@@ -818,24 +818,28 @@ _Backend only; added 2026-11-04 after Adi approved Winston's proposal. It sits b
 
 ## Epic 5: AI import
 
-Editors import a recipe from a link or from pasted text, get a Hebrew draft from Ollama (local) or Gemini, review it, and save.
+Editors import a recipe from a link or from pasted text, get a Hebrew draft from a free-tier engine chain (Gemini flash-lite, then Gemini flash, then Groq), review it, and save.
+
+> Changed 2026-11-04 after the Story 5.1 spike (Adi): Ollama is dropped; the chain, timeouts and cool down are in AD-12, AD-38 and AD-42, and the results are in `tools/llm-spike/RESULTS.md`.
 
 > Updated 2026-11-04 with Adi's approved AI import decisions (ARCHITECTURE-SPINE AD-34 to AD-40). The rule is: a working mechanism first, edge cases later. Stories 5.1–5.5 are the core. 5.6–5.8 add progress, duplicate check and the dashboard. 5.9 (not-a-recipe pre-check) and 5.10 (evals) can come later.
 
-### Story 5.1: Spike: Ollama vs Gemini on real recipes
+### Story 5.1: Spike: pick the AI engines on real recipes (DONE 2026-11-04, results in `tools/llm-spike/RESULTS.md`)
 
 As Adi,
-I want to measure Ollama and Gemini on real recipes before building the feature,
-So that the default engine is chosen on real numbers (AD-12).
+I want to measure the candidate engines on real recipes before building the feature,
+So that the engine chain is chosen on real numbers (AD-12).
+
+_Outcome: the engines measured were Ollama (qwen2.5:7b), Gemini (flash and flash-lite) and Groq (gpt-oss-120b and qwen3.8-27b), on 15 pages. The chain is `gemini-3.5-flash-lite`, then `gemini-3.5-flash`, then Groq `gpt-oss-120b`; Ollama is dropped. The criteria below were the original plan; the open item is Adi's Hebrew quality scores._
 
 **Acceptance Criteria:**
 
-**Given** Ollama installed as the native Windows app (a 7B model, e.g. qwen) and a Gemini free-tier key
+**Given** Ollama installed as the native Windows app (a 7B model, e.g. qwen), a Gemini free-tier key and a Groq free-tier key
 **When** a standalone script under `tools/llm-spike/` runs about 5 real recipes (2 English pages, 3 Hebrew) through both, with the `DraftRecipe` JSON schema as the required output
 **Then** a results table records per recipe and engine: time, schema-valid on the first try yes/no, valid after one retry with the error fed back yes/no (AD-34), Hebrew quality (1–5, judged by Adi), units mapped correctly, and to-taste handling
 **And** the script fetches about 15 of Adi's usual recipe sites with plain httpx and records how many return a bot-protection challenge or block page, so the real blocking rate is known (AD-35)
 **And** it checks that Ollama can stream the structured output so ingredients can be shown as they arrive (AD-40)
-**And** the outcome is recorded in the architecture memlog: the default engine, the Ollama model name, the timeout values, and the blocking rate
+**And** the outcome is recorded in the architecture memlog: the engine chain, the model names, the timeout values, and the blocking rate (done)
 **And** no app code is changed, and the script reads keys only from env
 
 ### Story 5.2: Import from pasted text
@@ -848,7 +852,7 @@ So that I don't retype recipes by hand (FR18, FR21, FR24).
 
 **Given** I'm signed in as an editor
 **When** I open "ייבוא", choose the "הדבקת טקסט" tab, paste text and submit (the page lives in a new `libs/feature-import`, tag `type:feature`, as a lazy subpath export; AD-2, AD-11)
-**Then** `POST /api/imports/text` (editor) calls the default provider through the `LlmProvider` registry, which in this story has the `ollama` and `fake` adapters and returns a `DraftRecipe` validated by Pydantic (AD-12, AD-22)
+**Then** `POST /api/imports/text` (editor) calls the default provider through the `LlmProvider` registry, which in this story has the `gemini` (`gemini-3.5-flash-lite`, model name from config) and `fake` adapters and returns a `DraftRecipe` validated by Pydantic (AD-12, AD-22)
 **And** the adapter sends the `DraftRecipe` JSON schema as the provider's structured-output format, validates the reply, and on a validation failure retries once with the error fed back; a second failure returns `llm_invalid_output`. No Instructor library (AD-34)
 **And** the draft is in Hebrew (translated if the source is in another language), its units are mapped to the `Unit` enum, imperial units are converted by the deterministic table (oz→g, lb→g, fl oz→ml, friendly rounding; cups and spoons unchanged) with `source_amount`/`source_unit` kept, unquantifiable ingredients are to-taste, and units that are still unmappable are empty with the original text kept in the note (FR19, FR21)
 **And** a deterministic pass rewrites °F temperatures in the step text to °C, rounded to the nearest 5 (350°F becomes "180°C"), and keeps the unconverted step text as `source_text` for the "הצג מתכון מקורי" toggle; the conversions live in code with unit tests, never in the model's output (FR21)
@@ -856,7 +860,7 @@ So that I don't retype recipes by hand (FR18, FR21, FR24).
 **And** the draft suggests tags chosen from the existing tag list. A tag name that is not in the list is proposed as a new tag in the draft, and is created only if the editor accepts it and saves (FR24)
 **And** the create form opens prefilled through router state (never the URL), via `draftToFormValues()`, and nothing is saved until "שמירה" (AD-22)
 **And** a draft with no ingredients and no steps returns `no_recipe_found` ("לא נמצא מתכון בטקסט הזה"), and the text stays for editing
-**And** every import writes one `import_runs` row (user, provider, model, source kind, path, prompt version, latency, tokens, first-try valid, retried, outcome; the table is created here by an Alembic migration), and the daily cap returns 429 `import_cap_reached` (AD-29, AD-38)
+**And** every import writes one `import_runs` row (user, provider, model, source kind, path, prompt version, latency, tokens, first-try valid, retried, outcome) and one `import_attempts` row per engine tried (run, provider, model, attempt number, outcome, latency, tokens); both tables are created here by an Alembic migration (AD-38), and the daily cap returns 429 `import_cap_reached` (AD-29, AD-38)
 **And** the import dialog is a dialog on desktop and a full page on phone (UX-DR13)
 **And** tests use the deterministic `fake` provider (`FAKE:<scenario>`, including an invalid-then-valid scenario for the retry), so CI never calls a real model
 
@@ -895,8 +899,8 @@ So that importing from cooking sites takes seconds (FR17).
 ### Story 5.5: Cancel, engine choice and errors
 
 As an editor,
-I want to cancel an import and switch to Gemini if the local model is slow or weak,
-So that slow local imports are still usable (FR20).
+I want to cancel an import, and have a failing engine replaced automatically by the next one,
+So that an import still works when one free-tier engine is down or out of quota (FR20, AD-12, AD-42).
 
 **Acceptance Criteria:**
 
@@ -904,9 +908,11 @@ So that slow local imports are still usable (FR20).
 **When** I tap "ביטול"
 **Then** the request is aborted, and the server stops waiting on the provider where possible
 **And** `GET /api/imports/providers` returns `[{name, timeout_s}]`, and the client aborts at `timeout_s + 5`. The Vite proxy and uvicorn timeouts exceed the largest provider timeout
-**And** the `gemini` adapter (google-genai SDK, model from `GEMINI_MODEL`, structured output validated by the same `DraftRecipe` with the same one retry, AD-34) is added to the registry and enabled when `GEMINI_API_KEY` is set
-**And** the dialog has an engine choice (מקומי / Gemini) listing only enabled providers, defaulting to the configured default and remembering the last choice
-**And** `llm_timeout`, `llm_unavailable`, `llm_quota` and `llm_invalid_output` show readable Hebrew messages with "לנסות שוב" and, when Gemini is enabled, "לנסות שוב עם Gemini". Nothing is saved
+**And** the `groq` adapter (`openai/gpt-oss-120b` from config, `GROQ_API_KEY`, structured output validated by the same `DraftRecipe` with the same one retry, AD-34) is added to the registry, and the chain `gemini-3.5-flash-lite`, then `gemini-3.5-flash`, then `groq` runs in that order, each step enabled when its key is set (model names come from config, never code)
+**And** the chain moves to the next engine on a 429/503/quota error, a timeout, invalid JSON after the one retry, or an empty ingredient list (AD-12)
+**And** the in-memory cool down skips an engine for 5 minutes after 3 consecutive failures, and skips it until the reset time when a quota error says when it resets (AD-42), with unit tests for both rules using a fake clock
+**And** the dialog shows which engine produced the draft, and the manual engine choice is only a dev option behind config
+**And** when every engine fails, `llm_timeout`, `llm_unavailable`, `llm_quota` or `llm_invalid_output` show a readable Hebrew message with "לנסות שוב" and an offer to use the "הדבקת טקסט" tab. Nothing is saved
 **And** an unknown or disabled provider returns 400 `provider_unavailable`
 **And** until Story 5.6, the dialog shows an indeterminate spinner with "ביטול" (no percentage, no fake phase text)
 
@@ -922,7 +928,7 @@ So that a slow local import never looks frozen (FR20, AD-40).
 **When** it runs
 **Then** `POST /api/imports/url` and `POST /api/imports/text` answer with `text/event-stream` (FastAPI `StreamingResponse`), and the client reads it with `fetch` and a stream reader in `libs/data-access`
 **And** the server sends `stage` events for the real pipeline stages (`fetch`, `extract`, `validate`, `convert_units`, `translate`, each `started`/`done`/`skipped`), then a `draft` event; the dialog shows them as a Hebrew checklist. There is no percentage bar
-**And** with Ollama, `ingredient` events stream each ingredient as the model generates it, and the dialog lists them live; a provider that can't stream sends stage events only
+**And** when the provider streams its JSON (not yet verified for Gemini or Groq; the spike only proved it for Ollama, which is no longer in the chain), `ingredient` events stream each ingredient as the model generates it and the dialog lists them live; a provider that can't stream sends stage events only, and the story is complete without live ingredients
 **And** errors before the stream starts (auth, CSRF, cap, duplicate, unknown provider) keep their HTTP status; errors after it starts arrive as an `error` event with the AD-28 code
 **And** "ביטול" aborts the stream, and the server detects the disconnect and cancels the provider call
 **And** tests cover the event order with the `fake` provider (including a streamed-ingredients scenario) and a client test with a mocked stream
@@ -954,6 +960,7 @@ So that I choose engines and prompts on real numbers (AD-38).
 **Given** I'm signed in as an admin
 **When** I open the "AI dashboard" page (admin-only route in `libs/feature-import`, lazy loaded)
 **Then** `GET /api/admin/import-stats` (admin; 403 for editors) returns aggregates computed on request with SQL `GROUP BY` over `import_runs`: per provider/model the run count, success rate, first-try validation rate, retry rate, average and p95 latency, average tokens, the JSON-LD vs LLM split, and the outcome breakdown; plus runs per day for the last 30 days
+**And** the same endpoint returns, per provider/model, the failure rate over the last 20 attempts and the current consecutive-failure streak, computed from `import_attempts` (AD-38); the page flags a model with a streak of 3 or more or a failure rate above 30%, and shows which engines are in a cool down now (AD-42)
 **And** an optional `?days=` filter and a `prompt_version` breakdown are supported
 **And** the page shows these as charts and a table, using design tokens only, in RTL and both themes. The chart library is agreed with Adi before the story starts
 **And** there is no background job and no stored aggregate table
@@ -1005,7 +1012,7 @@ So that it works like production on any machine (NFR6).
 **Then** a multi-stage Dockerfile builds the SPA and the API into one image, where FastAPI serves the SPA (with an `index.html` fallback only for non-`/api` and non-`/media` HTML requests), `/api/*` and `/media/*` (AD-15)
 **And** SQLite and the photos live on a `/data` volume and survive restarts, and migrations run on start
 **And** the container `HEALTHCHECK` calls `/api/health`
-**And** `OLLAMA_URL` defaults to `http://host.docker.internal:11434` under compose
+**And** `GEMINI_API_KEY` and `GROQ_API_KEY` are read from the environment (never baked into the image), and the compose file passes them through from `.env`
 **And** static assets get immutable cache headers, and `/media` gets long-lived caching
 
 ### Story 6.2: Logging and backups
