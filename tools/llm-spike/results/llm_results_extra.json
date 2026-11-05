@@ -1,0 +1,382 @@
+{
+  "gemini": {
+    "x01": {
+      "model": "gemini-3.5-flash",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 14.5,
+      "raw": "{\"title\":\"סחוג ירוק\",\"description\":\"סחוג שבעת הרכיבים של משפחת מחבוב, גזור ושמור\",\"servings\":null,\"ingredients\":[{\"name\":\"פלפל חריף\",\"amount\":15,\"unit\":\"unit\",\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"כוסברה\",\"amount\":1,\"unit\":\"unit\",\"note\":\"זר אחד\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"שום\",\"amount\":1,\"unit\":\"unit\",\"note\":\"שיניים קלופות מראש שום אחד\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"כמון\",\"amount\":1,\"unit\":\"tbsp\",\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"הל\",\"amount\":1,\"unit\":\"tsp\",\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"מלח\",\"amount\":1,\"unit\":\"tbsp\",\"note\":\"חצי כף עד כף שטוחה\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"פלפל שחור\",\"amount\":1,\"unit\":\"tsp\",\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null}],\"steps\":[\"שמים את כל החומרים במעבד מזון עם להב פלדה וטוחנים למחית אחידה.\",\"שומרים בצנצנות במקרר.\"],\"tags\":[\"פרווה\",\"קל להכנה\"]}",
+      "n_ingredients": 7,
+      "n_steps": 2,
+      "to_taste": [],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "x04": {
+      "model": "gemini-3.5-flash",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 17.6,
+      "raw": "{\"title\":\"פלאפל, \\\"הקוסם\\\"\",\"description\":\"מתכון לפלאפל של מסעדת \\\"הקוסם\\\" בתל אביב.\",\"servings\":null,\"ingredients\":[{\"name\":\"גרגירי חומוס יבש\",\"amount\":1,\"unit\":\"kg\",\"note\":\"מושרים במים 12 שעות במקרר (2 ק\\\"ג חומוס לאחר ההשרייה)\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"בצל\",\"amount\":600,\"unit\":\"g\",\"note\":\"חתוך לקוביות\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"שום שלם\",\"amount\":100,\"unit\":\"g\",\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"פטרוזיליה\",\"amount\":1.5,\"unit\":\"package\",\"note\":\"חבילה קטנה\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"כוסברה\",\"amount\":1.5,\"unit\":\"package\",\"note\":\"חבילה קטנה\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"פלפל חריף ירוק\",\"amount\":80,\"unit\":\"g\",\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"כמון טחון\",\"amount\":1.5,\"unit\":\"tbsp\",\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"כוסברה טחונה\",\"amount\":1,\"unit\":\"tbsp\",\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"מלח רגיל\",\"amount\":1,\"unit\":\"tbsp\",\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"קצח\",\"amount\":0.5,\"unit\":\"tbsp\",\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"שומשום\",\"amount\":1,\"unit\":\"tbsp\",\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"סודה לשתייה\",\"amount\":1.5,\"unit\":\"tsp\",\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"שמן לטיגון עמוק\",\"amount\":null,\"unit\":null,\"note\":null,\"to_taste\":true,\"source_amount\":null,\"source_unit\":null}],\"steps\":[\"טוחנים את כל המצרכים יחד (ללא התבלינים).\",\"מעבירים לקערה גדולה ומוסיפים את התבלינים ומערבבים הכל יחד.\",\"מכינים כדורים ומטגנים כל אחד כ-2 דקות בשמן עמוק.\"],\"tags\":[\"פלאפל\",\"הקוסם\",\"אוכל רחוב\"]}",
+      "n_ingredients": 13,
+      "n_steps": 3,
+      "to_taste": ["שמן לטיגון עמוק"],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "x06": {
+      "model": "gemini-3.5-flash",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 50.5,
+      "raw": "{\n  \"title\": \"מסבחת חצילים\",\n  \"description\": \"מסבחה של גרגירי חומוס רכים ונמסים עם טחינה, חצילים קלויים ותתבילה חריפה, מתאימה כתוספת לאירועי על האש.\",\n  \"servings\": null,\n  \"ingredients\": [\n    {\n      \"name\": \"חצילים בינוניים\",\n      \"amount\": 3,\n      \"unit\": \"unit\",\n      \"note\": \"כמה שיותר קלים\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"גרגירי חומוס יבשים\",\n      \"amount\": 1,\n      \"unit\": \"cup\",\n      \"note\": \"מושרים במים ללילה עם כפית אבקת סודה לשתייה\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"טחינה גולמית\",\n      \"amount\": 1,\n      \"unit\": \"cup\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"מיץ לימון\",\n      \"amount\": 1,\n      \"unit\": \"unit\",\n      \"note\": \"מלימון אחד\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"מים קרים\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": \"לפי מידת הסמיכות שרוצים\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"מלח\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": null,\n      \"to_taste\": true,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"פלפל חריף\",\n      \"amount\": 1,\n      \"unit\": \"unit\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"מיץ לימון לתתבילה\",\n      \"amount\": 1,\n      \"unit\": \"tbsp\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"שיני שום\",\n      \"amount\": 2,\n      \"unit\": \"clove\",\n      \"note\": \"כתושות\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"כמון\",\n      \"amount\": 1,\n      \"unit\": \"pinch\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"שמן זית\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": \"מעט לתתבילה ועד להגשה\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"פטרוזיליה קצוצה\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": \"להגשה\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"פפריקה\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": \"מעט להגשה\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    }\n  ],\n  \"steps\": [\n    \"מסננים את גרגירי החומוס ממי ההשרייה ושוטפים היטב במים.\",\n    \"מכניסים את גרגירי החומוס לסיר, מוסיפים מים פושרים עד הסוף, מוסיפים כפית אבקת אפייה ומערבבים.\",\n    \"מניחים את הסיר על אש גבוהה ומביאים לרתיחה. כשהסיר כמעט רותח, מורידים את כל הקצף והקליפות בעזרת כף מחוררת.\",\n    \"כשרותח, מנמיכים לאש בינונית ומבשלים כשעה וחצי ללא כיסוי, עד שהגרגירים רכים ונמסים ונוצרת עיסה סמיכה של מים עמילניים וגרגירים. מוסיפים כפית מלח וממשיכים לבשל 5 דקות נוספות. משאירים את החומוס בתוך מי הבישול עד להגשה.\",\n    \"מערבבים היטב את כל מרכיבי הטחינה: טחינה גולמית, מיץ לימון, מים קרים ומלח.\",\n    \"מכינים את התתבילה: קוצצים את הפלפל החריף לקוביות קטנות ומוסיפים מיץ לימון, שום כתוש, כמון, מלח ומעט שמן זית.\",\n    \"קולים את החצילים על אש גלויה מכל הצדדים עד שהקליפה הופכת שחורה (כ-10 דקות לחציל בינוני).\",\n    \"מורידים מהאש, דוקרים את החצילים עם סכין בתחתית ובצדדים ומניחים במסננת כחצי שעה להגרת נוזלים.\",\n    \"מקלפים את קליפת החצילים, מסירים את העוקץ ומניחים בצלחת הגשה.\",\n    \"להגשה: חותכים את בשר החצילים לקוביות גדולות וממליחים מעט. מפזרים מעל את גרגירי החומוס, הטחינה, תלוליות תתבילה, פטרוזיליה קצוצה, פפריקה ושמן זית, ומגישים לצד פיתות חמות.\"\n  ],\n  \"tags\": [\n    \"מסבחה\",\n    \"חצילים\",\n    \"חומוס\",\n    \"טחינה\",\n    \"סלטים\",\n    \"על האש\"\n  ]\n}",
+      "n_ingredients": 13,
+      "n_steps": 10,
+      "to_taste": ["מלח"],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "x09": {
+      "model": "gemini-3.5-flash",
+      "valid_first": false,
+      "valid_after_retry": false,
+      "error": "HTTPStatusError: Client error '429 Too Many Requests' for url 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent'\nFor more information check: https://developer.mozilla.org/en-US/",
+      "secs": 55.9,
+      "raw": ""
+    },
+    "x10": {
+      "model": "gemini-3.5-flash",
+      "valid_first": false,
+      "valid_after_retry": false,
+      "error": "HTTPStatusError: Client error '429 Too Many Requests' for url 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent'\nFor more information check: https://developer.mozilla.org/en-US/",
+      "secs": 52.4,
+      "raw": ""
+    },
+    "x11": {
+      "model": "gemini-3.5-flash",
+      "valid_first": false,
+      "valid_after_retry": false,
+      "error": "HTTPStatusError: Client error '429 Too Many Requests' for url 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent'\nFor more information check: https://developer.mozilla.org/en-US/",
+      "secs": 51.2,
+      "raw": ""
+    },
+    "x12": {
+      "model": "gemini-3.5-flash",
+      "valid_first": false,
+      "valid_after_retry": false,
+      "error": "HTTPStatusError: Client error '429 Too Many Requests' for url 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent'\nFor more information check: https://developer.mozilla.org/en-US/",
+      "secs": 51.2,
+      "raw": ""
+    },
+    "x13": {
+      "model": "gemini-3.5-flash",
+      "valid_first": false,
+      "valid_after_retry": false,
+      "error": "HTTPStatusError: Client error '429 Too Many Requests' for url 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent'\nFor more information check: https://developer.mozilla.org/en-US/",
+      "secs": 51.4,
+      "raw": ""
+    },
+    "x14": {
+      "model": "gemini-3.5-flash",
+      "valid_first": false,
+      "valid_after_retry": false,
+      "error": "HTTPStatusError: Client error '429 Too Many Requests' for url 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent'\nFor more information check: https://developer.mozilla.org/en-US/",
+      "secs": 51.2,
+      "raw": ""
+    },
+    "x15": {
+      "model": "gemini-3.5-flash",
+      "valid_first": false,
+      "valid_after_retry": false,
+      "error": "HTTPStatusError: Client error '429 Too Many Requests' for url 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent'\nFor more information check: https://developer.mozilla.org/en-US/",
+      "secs": 51.2,
+      "raw": ""
+    }
+  },
+  "transport_retries": {
+    "gemini": 30,
+    "groq": 10
+  },
+  "groq:openai/gpt-oss-120b": {
+    "x01": {
+      "model": "openai/gpt-oss-120b",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 3.0,
+      "raw": "{\"title\":\"סחוג ירוק\",\"ingredients\":[{\"name\":\"פלפלים חריפים\",\"amount\":15,\"unit\":\"unit\"},{\"name\":\"זר כוסברה\",\"amount\":1,\"unit\":\"unit\"},{\"name\":\"שן שום\",\"amount\":1,\"unit\":\"clove\"},{\"name\":\"כמון\",\"amount\":1,\"unit\":\"tbsp\"},{\"name\":\"הל\",\"amount\":1,\"unit\":\"tsp\"},{\"name\":\"מלח\",\"to_taste\":true},{\"name\":\"פלפל שחור\",\"amount\":1,\"unit\":\"tsp\"}],\"steps\":[\"שמים את כל החומרים במעבד מזון עם להב פלדה וטוחנים למחית אחידה.\",\"שומרים בצנצנות במקרר.\"],\"tags\":[]}",
+      "n_ingredients": 7,
+      "n_steps": 2,
+      "to_taste": ["מלח"],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "x04": {
+      "model": "openai/gpt-oss-120b",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 3.6,
+      "raw": "{\"title\":\"פלאפל הקוסם\",\"description\":null,\"servings\":null,\"tags\":[],\"ingredients\":[{\"name\":\"גרגירי חומוס יבש\",\"amount\":1,\"unit\":\"kg\",\"note\":\"מושרים במים 12 שעות במקרר (2 ק\\\"ג חומוס לאחר ההשרייה)\",\"source_amount\":null,\"source_unit\":null,\"to_taste\":false},{\"name\":\"בצל, חתוך לקוביות\",\"amount\":600,\"unit\":\"g\",\"note\":null,\"source_amount\":null,\"source_unit\":null,\"to_taste\":false},{\"name\":\"שום שלם\",\"amount\":100,\"unit\":\"g\",\"note\":null,\"source_amount\":null,\"source_unit\":null,\"to_taste\":false},{\"name\":\"פטרוזיליה\",\"amount\":1.5,\"unit\":\"package\",\"note\":\"קטנות\",\"source_amount\":null,\"source_unit\":null,\"to_taste\":false},{\"name\":\"כוסברה\",\"amount\":1.5,\"unit\":\"package\",\"note\":\"קטנה\",\"source_amount\":null,\"source_unit\":null,\"to_taste\":false},{\"name\":\"פלפל חריף ירוק\",\"amount\":80,\"unit\":\"g\",\"note\":null,\"source_amount\":null,\"source_unit\":null,\"to_taste\":false},{\"name\":\"כמון טחון\",\"amount\":1.5,\"unit\":\"tbsp\",\"note\":null,\"source_amount\":null,\"source_unit\":null,\"to_taste\":false},{\"name\":\"כוסברה, טחונה\",\"amount\":1,\"unit\":\"tbsp\",\"note\":null,\"source_amount\":null,\"source_unit\":null,\"to_taste\":false},{\"name\":\"מלח רגיל\",\"amount\":1,\"unit\":\"tbsp\",\"note\":null,\"source_amount\":null,\"source_unit\":null,\"to_taste\":false},{\"name\":\"קצח\",\"amount\":0.5,\"unit\":\"tbsp\",\"note\":null,\"source_amount\":null,\"source_unit\":null,\"to_taste\":false},{\"name\":\"שומשום\",\"amount\":1,\"unit\":\"tbsp\",\"note\":null,\"source_amount\":null,\"source_unit\":null,\"to_taste\":false},{\"name\":\"שמן לטיגון עמוק\",\"amount\":null,\"unit\":null,\"note\":null,\"source_amount\":null,\"source_unit\":null,\"to_taste\":true}],\"steps\":[\"טוחנים את כל המצרכים יחד (ללא התבלינים).\",\"מעבירים לקערה גדולה ומוסיפים את התבלינים ומערבבים הכל יחד.\",\"מכינים כדורים ומטגנים כל אחד כ-2 דקות בשמן עמוק.\"]}",
+      "n_ingredients": 12,
+      "n_steps": 3,
+      "to_taste": ["שמן לטיגון עמוק"],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "x06": {
+      "model": "openai/gpt-oss-120b",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 6.5,
+      "raw": "{\"title\":\"מסבחת חצילים\",\"description\":\"מסבחת חצילים עם חומוס, טחינה ותתבילה, מתאימה לאירועים\",\"ingredients\":[{\"name\":\"חצילים בינוניים\",\"amount\":3,\"unit\":\"unit\",\"note\":\"כמה שיותר קלים\"},{\"name\":\"גרגירי חומוס יבשים\",\"amount\":1,\"unit\":\"cup\",\"note\":\"מושרים במים ללילה עם כפית אבקת סודה לשתייה\"},{\"name\":\"טחינה גולמית\",\"amount\":1,\"unit\":\"cup\"},{\"name\":\"מיץ לימון\",\"amount\":1,\"unit\":\"unit\",\"note\":\"מיץ מלימון אחד (לטחינה)\"},{\"name\":\"מים קרים\",\"to_taste\":true,\"note\":\"לפי מידת הסמיכות שרוצים\"},{\"name\":\"מלח\",\"to_taste\":true},{\"name\":\"פלפל חריף\",\"amount\":1,\"unit\":\"unit\"},{\"name\":\"מיץ לימון\",\"amount\":1,\"unit\":\"tbsp\",\"note\":\"לתתבילה\"},{\"name\":\"שיני שום\",\"amount\":2,\"unit\":\"unit\",\"note\":\"כתושות\"},{\"name\":\"כמון\",\"to_taste\":true},{\"name\":\"שמן זית\",\"to_taste\":true,\"note\":\"מעט\"},{\"name\":\"פטרוזיליה קצוצה\",\"to_taste\":true},{\"name\":\"פפריקה\",\"to_taste\":true},{\"name\":\"פיתות חמות\",\"to_taste\":true,\"note\":\"להגשה\"}],\"steps\":[\"לסנן את גרגירי החומוס ממי ההשרייה ולשטוף היטב במים.\",\"להכניס את גרגירי החומוס לסיר, להוסיף מים פושרים עד הסוף, להוסיף 1 כפית אבקת אפייה ולערבב.\",\"להניח את הסיר על אש גבוהה ולהביא לרתיחה.\",\"ברגע שהסיר כמעט רותח, להוציא (לכפות) את כל הקצף והקליפות בעזרת כף מחוררת.\",\"לאחר מכן, להנמיך את האש לאש בינונית ולבשל את החומוס כשעה וחצי, ללא כיסוי, עד שהמים מגיעים כמעט עד גובה החומוס, הגרגירים רכים ונמסים ונהיית מן עיסה סמיכה של גרגירים מפורקים ומים עמילניים. להוסיף כפית מלח ולהמשיך לבשל 5 דקות.\",\"לשמור שהסיר יהיה ברתיחה עדינה, שהגרגירי החומוס יקפצו והמים יהיו מעל גובה החומוס.\",\"להשאיר את החומוס במי הבישול עד להגשה.\",\"לערבב היטב את כל מרכיבי הטחינה.\",\"לקצוץ את הפלפל החריף לקוביות קטנות ולהוסיף את הלימון, השום, הכמון, המלח ומעט שמן זית (אפשר גם במעבד מזון קטן).\",\"לקלות את כל החצילים על אש גלויה מכל הצדדים עד שהקליפה שלהם הופכת לשחורה, כ-10 דקות לחציל בינוני. לאחר הקלייה, להוריד מהאש, לדקור את החצילים עם סכין בתחתית ובצדדים ולהניח אותם במסננת עם צלחת מתחת כחצי שעה כדי שיגירו את הנוזלים שלהם.\",\"לקלף את קליפת החצילים, להסיר את הראש (העוקץ) ולהניח אותם בצלחת הגשה או מגש. אם לא מגישים מיד, לסחוט עליהם מעט מיץ לימון כדי שלא ישחירו.\",\"לחתוך את בשר החצילים לקוביות גדולות, להמליח אותם מעט.\",\"לפזר מעל החצילים את גרגירי החומוס, מעל את הטחינה, תלוליות של תתבילה, פטרוזיליה קצוצה, פפריקה, שמן זית ולהגיש עם פיתות חמות.\"],\"tags\":[],\"servings\":null}",
+      "n_ingredients": 14,
+      "n_steps": 13,
+      "to_taste": [
+        "מים קרים",
+        "מלח",
+        "כמון",
+        "שמן זית",
+        "פטרוזיליה קצוצה",
+        "פפריקה",
+        "פיתות חמות"
+      ],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "x09": {
+      "model": "openai/gpt-oss-120b",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 53.2,
+      "raw": "{\"title\":\"שקשוקה\",\"description\":\"מתכון לשקשוקה קלאסית לארבע מנות\",\"servings\":4,\"tags\":[\"בוקר\",\"ערב\",\"קיץ\",\"ירקות\",\"ביצים\"],\"ingredients\":[{\"name\":\"שמן\"},{\"name\":\"פלפלים\",\"note\":\"קוביות\"},{\"name\":\"שום\"},{\"name\":\"בצל\",\"note\":\"קצוץ\"},{\"name\":\"עגבניות\"},{\"name\":\"מלח\",\"to_taste\":true},{\"name\":\"פלפלת חריפה\"},{\"name\":\"ביצים\"}],\"steps\":[\"מחממים את השמן במחבת בינונית מעל להבה גבוהה.\",\"מוסיפים את קוביות הפלפלים, את השום, את הבצל הקצוץ ואת העגבניות, בוחשים ומנמיכים את הלהבה.\",\"מאדים כמה דקות עד שהירקות התרככו באופן אחיד, ומערבבים מדי פעם.\",\"מתבלים במעט מלח, מבשלים כ-10-7 דקות.\",\"מוסיפים את הפלפלת החריפה ומבשלים עוד כמה דקות.\",\"שוברים את הביצים ומטילים אותן למרכז התבשיל.\",\"מבליעים בכף את החלבונים לתוך הרוטב, ומשתדלים לשמור את החלמונים בשלמותם.\",\"מבשלים עד שהביצים נקרשות.\",\"מסירים מן האש ומגישים חם.\"]}",
+      "n_ingredients": 8,
+      "n_steps": 9,
+      "to_taste": ["מלח"],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "x10": {
+      "model": "openai/gpt-oss-120b",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 4.0,
+      "raw": "{\"title\":\"שקשוקה\",\"ingredients\":[{\"name\":\"עגבניות\",\"amount\":10,\"unit\":\"unit\",\"to_taste\":false,\"note\":null,\"source_amount\":null,\"source_unit\":null},{\"name\":\"גמבה\",\"amount\":1,\"unit\":\"unit\",\"to_taste\":false,\"note\":null,\"source_amount\":null,\"source_unit\":null},{\"name\":\"פלפל חריף\",\"amount\":1,\"unit\":\"unit\",\"to_taste\":false,\"note\":null,\"source_amount\":null,\"source_unit\":null},{\"name\":\"ביצים\",\"amount\":6,\"unit\":\"unit\",\"to_taste\":false,\"note\":null,\"source_amount\":null,\"source_unit\":null},{\"name\":\"בזיליקום\",\"amount\":0.5,\"unit\":\"unit\",\"to_taste\":false,\"note\":\"רק העלים\",\"source_amount\":null,\"source_unit\":null},{\"name\":\"שום\",\"amount\":10,\"unit\":\"clove\",\"to_taste\":false,\"note\":null,\"source_amount\":null,\"source_unit\":null},{\"name\":\"שמן\",\"amount\":6,\"unit\":\"tbsp\",\"to_taste\":false,\"note\":null,\"source_amount\":null,\"source_unit\":null},{\"name\":\"פפריקה\",\"amount\":2,\"unit\":\"tbsp\",\"to_taste\":false,\"note\":\"חריפה\",\"source_amount\":null,\"source_unit\":null},{\"name\":\"פלפל שחור גרוס\",\"amount\":0.5,\"unit\":\"tsp\",\"to_taste\":false,\"note\":null,\"source_amount\":null,\"source_unit\":null},{\"name\":\"מלח\",\"amount\":0.5,\"unit\":\"tbsp\",\"to_taste\":false,\"note\":null,\"source_amount\":null,\"source_unit\":null}],\"steps\":[\"מקפלים את העגבניות על ידי השרייתן במים רותחים במשך 10 דקות, חותכים חיתוך X ומסירים את הקליפה.\",\"קוצצים את העגבניות הקלופות והגמבה לקוביות קטנות ושוות.\",\"קוצצים דק את השום והפלפל החריף.\",\"מחממים שמן במחבת גדולה כ‑2 דקות, מוסיפים את העגבניות, הגמבה, השום והפלפל החריף ומבשלים על אש גבוהה כ‑10 דקות עד שהנוזלים מתאדים.\",\"מוסיפים פפריקה, מלח ופלפל שחור, מערבבים.\",\"יוצרים 6 גומות בתערובת, שוברים ביצה בכל גומה ומפזרים מעט מלח מעל כל ביצה.\",\"קורעים את עלי הבזיליקום ומפזרים מעל.\",\"מנמיכים את האש, מכסים את המחבת ומבשלים עוד כ‑7 דקות עד שהביצים מבושלות.\"]}",
+      "n_ingredients": 10,
+      "n_steps": 8,
+      "to_taste": [],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "x11": {
+      "model": "openai/gpt-oss-120b",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 28.0,
+      "raw": "{\n  \"title\": \"עוגת קקאו\",\n  \"ingredients\": [\n    {\n      \"name\": \"קקאו איכותי\",\n      \"amount\": 1,\n      \"unit\": \"cup\",\n      \"to_taste\": false,\n      \"note\": null,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"קמח חצי חצי\",\n      \"amount\": 1,\n      \"unit\": \"cup\",\n      \"to_taste\": false,\n      \"note\": null,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"סוכר חום\",\n      \"amount\": 1,\n      \"unit\": \"cup\",\n      \"to_taste\": false,\n      \"note\": null,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"סודה לשתייה\",\n      \"amount\": 1,\n      \"unit\": \"tsp\",\n      \"to_taste\": false,\n      \"note\": null,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"מלח\",\n      \"amount\": 0.5,\n      \"unit\": \"tsp\",\n      \"to_taste\": false,\n      \"note\": null,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"שמן רגיל\",\n      \"amount\": 0.333333,\n      \"unit\": \"cup\",\n      \"to_taste\": false,\n      \"note\": null,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"מים\",\n      \"amount\": 1,\n      \"unit\": \"cup\",\n      \"to_taste\": false,\n      \"note\": null,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"שקדים טחונים\",\n      \"amount\": 2,\n      \"unit\": \"tbsp\",\n      \"to_taste\": false,\n      \"note\": null,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"חומץ\",\n      \"amount\": 1,\n      \"unit\": \"tsp\",\n      \"to_taste\": false,\n      \"note\": null,\n      \"source_amount\": null,\n      \"source_unit\": null\n    }\n  ],\n  \"steps\": [\n    \"מחממים תנור ל-180 מעלות ומניחים נייר אפייה בתוך תבנית.\",\n    \"מערבבים בקערה את הקקאו, הקמח, הסוכר, הסודה לשתייה והמלח.\",\n    \"מוסיפים את השמן, המים, השקדים הטחונים והחומץ, ומערבבים היטב עד שהתערובת חלקה.\",\n    \"מעבירים את התערובת לתבנית ואופים למשך 30-35 דקות או עד שמכניסים קיסם – והוא יוצא יבש.\",\n    \"מניחים את העוגה להתקרר לפני שמגישים.\",\n    \"במקום תבנית עוגה, ניתן להשתמש בתבניות אישיות – קאפקייקס, ולשים לב למשך זמן האפייה.\"\n  ],\n  \"tags\": []\n}",
+      "n_ingredients": 9,
+      "n_steps": 6,
+      "to_taste": [],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "x12": {
+      "model": "openai/gpt-oss-120b",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 3.8,
+      "raw": "{\"title\":\"שקשוקה בסיסית\",\"description\":\"מתכון לשקשוקה בסיסית לזכרו של מעוז\",\"ingredients\":[{\"name\":\"בצל\",\"amount\":1,\"unit\":\"unit\",\"note\":\"גדול\",\"to_taste\":false},{\"name\":\"שום\",\"amount\":3,\"unit\":\"clove\",\"to_taste\":false},{\"name\":\"עגבניות מרוסקות\",\"amount\":1,\"unit\":\"can\",\"to_taste\":false},{\"name\":\"עגבניות\",\"amount\":5,\"unit\":\"unit\",\"note\":\"טריות\",\"to_taste\":false},{\"name\":\"ביצים\",\"amount\":5,\"unit\":\"unit\",\"to_taste\":false},{\"name\":\"רסק עגבניות\",\"amount\":1,\"unit\":\"tbsp\",\"to_taste\":false},{\"name\":\"פפריקה\",\"amount\":1,\"unit\":\"tbsp\",\"to_taste\":false},{\"name\":\"מלח\",\"amount\":1,\"unit\":\"tsp\",\"to_taste\":false},{\"name\":\"פלפל שחור\",\"amount\":0.5,\"unit\":\"tsp\",\"to_taste\":false},{\"name\":\"כמון\",\"amount\":0.25,\"unit\":\"tsp\",\"to_taste\":false},{\"name\":\"שמן זית\",\"to_taste\":true}],\"steps\":[\"קוצצים בצל ומטגנים אותו בשמן זית עד להזהבה.\",\"כותשים 3 שיני שום (או פורסים, לעצלנים) ומוסיפים לבצל.\",\"מוסיפים את התבלינים: מלח, פלפל שחור ופפריקה. אחרי חצי דקה, כשהתבלינים \\\"נפתחים\\\" (נהיה ריח טוב וכיפי באוויר), מוסיפים רסק עגבניות.\",\"אחרי עוד דקה או שתיים – מוסיפים את העגבניות המרוסקות (ואם אתם הטיפוסים של מוצרי גלם טריים: תחתכו את העגבניות לקוביות גדולות ותוסיפו למחבת).\",\"מחכים. נותנים לכל העסק להתבשל עשר דקות לפחות, עדיף 20 דקות. כשתערובת השקשוקה טעימה – מוסיפים את הביצים.\",\"שוברים את הביצים, יוצרים גומות, ושמים כל ביצה בגומה משלה.\",\"מנמיכים את האש (או את עצמת האינדוקציה, לבורגנים) ומכסים. אחרי כמה דקות הביצים יהיו מוכנות.\"],\"tags\":[\"שקשוקה\",\"מתכון\"]}",
+      "n_ingredients": 11,
+      "n_steps": 7,
+      "to_taste": ["שמן זית"],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "x13": {
+      "model": "openai/gpt-oss-120b",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 10.9,
+      "raw": "{\"title\":\"לחם בננה\",\"ingredients\":[{\"name\":\"קמח לכל מטרה\",\"amount\":2,\"unit\":\"cup\"},{\"name\":\"סודה לשתייה\",\"amount\":1,\"unit\":\"tsp\"},{\"name\":\"מלח\",\"amount\":0.25,\"unit\":\"tsp\"},{\"name\":\"חמאה (שומן צמחי)\",\"amount\":0.5,\"unit\":\"cup\",\"note\":\"השתמשתי בקיצור צמחי\"},{\"name\":\"סוכר חום\",\"amount\":0.75,\"unit\":\"cup\"},{\"name\":\"ביצים\",\"amount\":2,\"unit\":\"unit\",\"note\":\"טרופות\"},{\"name\":\"בננה מרוסקת\",\"amount\":1,\"unit\":\"cup\",\"note\":\"3 בננות בשלות\"}],\"steps\":[\"לחמם תנור ל-350 מעלות. לשמן קלות תבנית לחם בגודל 9x5 אינץ'.\",\"בקערה גדולה, לערבב קמח, סודה לשתייה ומלח. בקערה נפרדת, להקציף יחד חמאה וסוכר חום. להוסיף ביצים ובננות מרוסקות ולערבב עד לקבלת תערובת אחידה. להוסיף את תערובת הבננה לתערובת הקמח; לערבב רק עד שהקמח מתרכך. לשפוך את הבצק לתבנית המוכנה.\",\"לאפות בתנור המחומם במשך 60 עד 65 דקות, עד שקיסם המוכנס למרכז הלחם יוצא יבש. לתת ללחם להתקרר בתבנית 10 דקות, ואז להפוך אותו על רשת קירור.\"],\"tags\":[]}",
+      "n_ingredients": 7,
+      "n_steps": 3,
+      "to_taste": [],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "x14": {
+      "model": "openai/gpt-oss-120b",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 30.6,
+      "raw": "{\"title\":\"לחם בננה קלאסי\",\"description\":null,\"servings\":null,\"tags\":[],\"ingredients\":[{\"name\":\"בננות\",\"amount\":null,\"unit\":null,\"source_amount\":null,\"source_unit\":null,\"to_taste\":false,\"note\":null},{\"name\":\"חמאה\",\"amount\":null,\"unit\":null,\"source_amount\":null,\"source_unit\":null,\"to_taste\":false,\"note\":null},{\"name\":\"סוכר\",\"amount\":null,\"unit\":null,\"source_amount\":null,\"source_unit\":null,\"to_taste\":false,\"note\":null},{\"name\":\"ביצה\",\"amount\":null,\"unit\":null,\"source_amount\":null,\"source_unit\":null,\"to_taste\":false,\"note\":null},{\"name\":\"תמצית וניל\",\"amount\":null,\"unit\":null,\"source_amount\":null,\"source_unit\":null,\"to_taste\":false,\"note\":null},{\"name\":\"קמח\",\"amount\":null,\"unit\":null,\"source_amount\":null,\"source_unit\":null,\"to_taste\":false,\"note\":null},{\"name\":\"סודה לשתייה\",\"amount\":null,\"unit\":null,\"source_amount\":null,\"source_unit\":null,\"to_taste\":false,\"note\":null},{\"name\":\"מלח\",\"amount\":null,\"unit\":null,\"source_amount\":null,\"source_unit\":null,\"to_taste\":false,\"note\":null},{\"name\":\"אגוזים\",\"amount\":null,\"unit\":null,\"source_amount\":null,\"source_unit\":null,\"to_taste\":false,\"note\":null},{\"name\":\"שבבי שוקולד\",\"amount\":null,\"unit\":null,\"source_amount\":null,\"source_unit\":null,\"to_taste\":false,\"note\":null}],\"steps\":[\"לחמם את התנור ל‑175°C (350°F). לשמן ולרפד תבנית לחם בגודל 9x5 אינץ'.\",\"למעוך את הבננות בקערת ערבוב גדולה ולהשאיר בצד.\",\"הקציף חמאה וסוכר בעזרת מתקן הפדל.\",\"להוסיף ביצה ותמצית וניל. לערבב עד שהחומרים מתאחדים היטב, אך לא יותר.\",\"להוסיף את הבננות המעוכות ולערבב היטב.\",\"בקערה נפרדת, לערבב קמח, סודה לשתייה ומלח.\",\"להוסיף את החומרים היבשים לתערובת הבננה ולקפל בעדינות עד שהכל מתאחד.\",\"אם משתמשים באגוזים או שבבי שוקולד, לקפל אותם כעת.\",\"לשפוך את הבלילה לתבנית המוכנה וליישר את החלק העליון.\",\"לאפות במשך 55–60 דקות, או עד שקיסם המוכנס למרכז יוצא נקי.\",\"להתקרר בתבנית במשך 10 דקות לפני העברה לרשת קירור להמשך קירור עד הסוף.\"]}",
+      "n_ingredients": 10,
+      "n_steps": 11,
+      "to_taste": [],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "x15": {
+      "model": "openai/gpt-oss-120b",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 25.4,
+      "raw": "{\"title\":\"חזה עוף אפוי בתנור\",\"description\":null,\"servings\":null,\"tags\":[],\"ingredients\":[],\"steps\":[]}",
+      "n_ingredients": 0,
+      "n_steps": 0,
+      "to_taste": [],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    }
+  },
+  "gemini:gemini-3.5-flash-lite": {
+    "x01": {
+      "model": "gemini-3.5-flash-lite",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 2.4,
+      "raw": "{\n  \"title\": \"סחוג ירוק\",\n  \"description\": \"סחוג שבעת הרכיבים של משפחת מחבוב, גזור ושמור\",\n  \"servings\": null,\n  \"ingredients\": [\n    {\n      \"name\": \"פלפלים חריפים\",\n      \"amount\": 15.0,\n      \"unit\": \"unit\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"כוסברה\",\n      \"amount\": 1.0,\n      \"unit\": \"unit\",\n      \"note\": \"זר\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"שום\",\n      \"amount\": 1.0,\n      \"unit\": \"unit\",\n      \"note\": \"שיניים קלופות מראש שום אחד\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"כמון\",\n      \"amount\": 1.0,\n      \"unit\": \"tbsp\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"הל\",\n      \"amount\": 1.0,\n      \"unit\": \"tsp\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"מלח\",\n      \"amount\": 0.5,\n      \"unit\": \"tbsp\",\n      \"note\": \"עד כף שטוחה\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"פלפל שחור\",\n      \"amount\": 1.0,\n      \"unit\": \"tsp\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    }\n  ],\n  \"steps\": [\n    \"שמים את כל החומרים במעבד מזון עם להב פלדה וטוחנים למחית אחידה. שומרים בצנצנות במקרר.\"\n  ],\n  \"tags\": [\n    \"פרווה\",\n    \"רטבים\"\n  ]\n}",
+      "n_ingredients": 7,
+      "n_steps": 1,
+      "to_taste": [],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "x04": {
+      "model": "gemini-3.5-flash-lite",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 4.4,
+      "raw": "{\n  \"title\": \"פלאפל וחומוס הקוסם\",\n  \"description\": \"המתכון הסודי לפלאפל, חצילים מטוגנים וחומוס מהמוסד התל-אביבי הקוסם\",\n  \"servings\": null,\n  \"ingredients\": [\n    {\n      \"name\": \"גרגירי חומוס יבש\",\n      \"amount\": 1.0,\n      \"unit\": \"kg\",\n      \"note\": \"מושרים במים 12 שעות במקרר\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"בצל\",\n      \"amount\": 600.0,\n      \"unit\": \"g\",\n      \"note\": \"חתוך לקוביות\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"שום\",\n      \"amount\": 100.0,\n      \"unit\": \"g\",\n      \"note\": \"שלם\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"פטרוזיליה\",\n      \"amount\": 1.5,\n      \"unit\": \"package\",\n      \"note\": \"קטנות\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"כוסברה\",\n      \"amount\": 1.5,\n      \"unit\": \"package\",\n      \"note\": \"קטנה\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"פלפל חריף ירוק\",\n      \"amount\": 80.0,\n      \"unit\": \"g\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"כמון טחון\",\n      \"amount\": 1.5,\n      \"unit\": \"tbsp\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"כוסברה טחונה\",\n      \"amount\": 1.0,\n      \"unit\": \"tbsp\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"מלח רגיל\",\n      \"amount\": 1.0,\n      \"unit\": \"tbsp\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"קצח\",\n      \"amount\": 0.5,\n      \"unit\": \"tbsp\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"שומשום\",\n      \"amount\": 1.0,\n      \"unit\": \"tbsp\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"סודה לשתייה\",\n      \"amount\": 1.5,\n      \"unit\": \"tsp\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"שמן לטיגון עמוק\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"חציל\",\n      \"amount\": 1.0,\n      \"unit\": \"unit\",\n      \"note\": \"קלוף\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"מלח גס\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": \"חופן\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"קמח\",\n      \"amount\": 0.5,\n      \"unit\": \"cup\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"קורנפלור\",\n      \"amount\": 0.5,\n      \"unit\": \"cup\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"חומוס מבושל\",\n      \"amount\": 1.15,\n      \"unit\": \"kg\",\n      \"note\": \"מבושל היטב\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"טחינה גולמית\",\n      \"amount\": 1.5,\n      \"unit\": \"l\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"מים קרים\",\n      \"amount\": 1.0,\n      \"unit\": \"l\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"מלח רגיל\",\n      \"amount\": 21.0,\n      \"unit\": \"g\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"מלח לימון\",\n      \"amount\": 25.0,\n      \"unit\": \"g\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    }\n  ],\n  \"steps\": [\n    \"טוחנים את כל המצרכים יחד (ללא התבלינים).\",\n    \"מעבירים לקערה גדולה ומוסיפים את התבלינים ומערבבים הכל יחד.\",\n    \"מכינים כדורים ומטגנים כל אחד כ-2 דקות בשמן עמוק.\",\n    \"פורסים את החציל לפרוסות דקות.\",\n    \"מניחים את החצילים במגש ומפזרים מעל מלח גס. משאירים בצד כשעה וחצי.\",\n    \"שוטפים את החצילים ומניחים במסננת לכ- 15 דקות על מנת שיזלגו מהם כל הנוזלים.\",\n    \"טובלים כל חתיכה בקמח וקורנפלור.\",\n    \"מטגנים כ- 7 דקות בשמן עמוק, כשתי דקות לכל צד, הופכים פעמיים במהלך הטיגון.\",\n    \"טוחנים את כל הגרגירים יחד עם המלח לימון והמלח הרגיל.\",\n    \"מוסיפים חצי ליטר מים.\",\n    \"טוחנים יחד במשך 3 דקות.\",\n    \"מוסיפים רבע ליטר מים קרים.\",\n    \"מוסיפים 0.75 ליטר טחינה.\",\n    \"טוחנים הכל כ- 2 דקות.\",\n    \"מוסיפים רבע ליטר מים ואת שארית הטחינה.\",\n    \"טוחנים כ- 2 דקות נוספות ומגישים.\"\n  ],\n  \"tags\": [\n    \"פלאפל\",\n    \"חומוס\",\n    \"חצילים מטוגנים\",\n    \"הקוסם\"\n  ]\n}",
+      "n_ingredients": 22,
+      "n_steps": 16,
+      "to_taste": [],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "x06": {
+      "model": "gemini-3.5-flash-lite",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 4.1,
+      "raw": "{\n  \"title\": \"מסבחת חצילים\",\n  \"description\": \"המסבחה זה בעצם גרגירי חומוס רכים רכים, לא טחונים, בתוספת טחינה. לזה צרפתי חצילים קלויים ויש לכם תוספת נפלאה לכל אירועי ה\\\"על האשים\\\" שהולכים ומתקרבים.\",\n  \"servings\": null,\n  \"ingredients\": [\n    {\n      \"name\": \"חצילים בינוניים\",\n      \"amount\": 3,\n      \"unit\": \"unit\",\n      \"note\": \"כמה שיותר קלים\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"גרגירי חומוס יבשים\",\n      \"amount\": 1,\n      \"unit\": \"cup\",\n      \"note\": \"מושרים במים ללילה עם כפית אבקת סודה לשתייה\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"טחינה גולמית\",\n      \"amount\": 1,\n      \"unit\": \"cup\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"מיץ לימון\",\n      \"amount\": 1,\n      \"unit\": \"unit\",\n      \"note\": \"מלימון אחד\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"מים קרים\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": \"לפי מידת הסמיכות שרוצים\",\n      \"to_taste\": true,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"מלח\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": null,\n      \"to_taste\": true,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"פלפל חריף\",\n      \"amount\": 1,\n      \"unit\": \"unit\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"מיץ לימון\",\n      \"amount\": 1,\n      \"unit\": \"tbsp\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"שיני שום\",\n      \"amount\": 2,\n      \"unit\": \"clove\",\n      \"note\": \"כתושות\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"כמון\",\n      \"amount\": null,\n      \"unit\": \"pinch\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"שמן זית\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": \"מעט\",\n      \"to_taste\": true,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"פטרוזיליה קצוצה\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": null,\n      \"to_taste\": true,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"שמן זית\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": null,\n      \"to_taste\": true,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"פפריקה\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": \"מעט\",\n      \"to_taste\": true,\n      \"source_amount\": null,\n      \"source_unit\": null\n    }\n  ],\n  \"steps\": [\n    \"לסנן את גרגירי החומוס ממי ההשרייה ולשטוף היטב במים.\",\n    \"להכניס את גרגירי החומוס לסיר, להוסיף מים פושרים עד הסוף, להוסיף 1 כפית אבקת אפייה ולערבב.\",\n    \"להניח את הסיר על אש גבוהה ולהביא לרתיחה.\",\n    \"ברגע שהסיר כמעט רותח, להוציא את כל הקצף והקליפות בעזרת כף מחוררת.\",\n    \"כשרותח, להנמיך את האש לאש בינונית ולבשל את החומוס כשעה וחצי, ללא כיסוי, עד שהמים מגיעים כמעט עד גובה החומוס, הגרגירים רכים ונמסים ונהיית מן עיסה סמיכה של גרגירים מפורקים ומים עמילאניים. להוסיף כפית מלח ולהמשיך לבשל 5 דקות.\",\n    \"יש להשאיר את החומוס בתוך מי הבישול עד להגשה.\",\n    \"לערבב היטב את כל מרכיבי הטחינה.\",\n    \"לקצוץ את הפלפל החריף לקוביות קטנות ולהוסיף את הלימון, שום, כמון, מלח ומעט שמן זית.\",\n    \"לקלות את כל החצילים על אש גלויה מכל הצדדים עד שהקליפה שלהם הופכת לשחורה, כ-10 דקות לחציל בינוני.\",\n    \"להוריד מהאש, לדקור את החצילים עם סכין בתחתית ובצדדים ולהניח אותם במסננת עם צלחת מתחת כחצי שעה כדי שיגירו את הנוזלים שלהם.\",\n    \"לקלף את קליפת החצילים, להוריד להם את הראש ולהניח אותם בצלחת הגשה או מגש.\",\n    \"לחתוך את בשר החצילים לקוביות גדולות, להמליח אותם מעט.\",\n    \"לפזר מעל החצילים את גרגירי החומוס, מעל את הטחינה, תלוליות של תתבילה, פטרוזיליה קצוצה, פפריקה, שמן זית ולהגיש עם פיתות חמות.\"\n  ],\n  \"tags\": [\n    \"חצילים\",\n    \"חומוס\",\n    \"מסבחה\",\n    \"תוספות\",\n    \"סלטים\"\n  ]\n}",
+      "n_ingredients": 14,
+      "n_steps": 13,
+      "to_taste": [
+        "מים קרים",
+        "מלח",
+        "שמן זית",
+        "פטרוזיליה קצוצה",
+        "שמן זית",
+        "פפריקה"
+      ],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "x09": {
+      "model": "gemini-3.5-flash-lite",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 2.2,
+      "raw": "{\n  \"title\": \"שקשוקה\",\n  \"description\": \"מבחר מתכונים להכנת שקשוקה קלילה ומהירה.\",\n  \"servings\": 4,\n  \"ingredients\": [\n    {\n      \"name\": \"שמן\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": null,\n      \"to_taste\": true\n    },\n    {\n      \"name\": \"פלפלים\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": \"חתולים לקוביות\",\n      \"to_taste\": false\n    },\n    {\n      \"name\": \"שום\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": null,\n      \"to_taste\": false\n    },\n    {\n      \"name\": \"בצל\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": \"קצוץ\",\n      \"to_taste\": false\n    },\n    {\n      \"name\": \"עגבניות\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": null,\n      \"to_taste\": false\n    },\n    {\n      \"name\": \"מלח\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": null,\n      \"to_taste\": true\n    },\n    {\n      \"name\": \"פלפלת חריפה\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": null,\n      \"to_taste\": false\n    },\n    {\n      \"name\": \"ביצים\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": null,\n      \"to_taste\": false\n    }\n  ],\n  \"steps\": [\n    \"מחממים את השמן במחבת בינונית מעל להבה גבוהה.\",\n    \"מוסיפים את קוביות הפלפלים, את השום, את הבצל הקצוץ ואת העגבניות, בוחשים ומנמיכים את הלהבה.\",\n    \"מאדים כמה דקות עד שהירקות התרככו באופן אחיד. מדי פעם מערבבים.\",\n    \"מתבלים במעט מלח, מבשלים כ-7-10 דקות.\",\n    \"מוסיפים את הפלפלת החריפה ומבשלים עוד כמה דקות.\",\n    \"שוברים את הביצים ומטילים אותן למרכז התבשיל.\",\n    \"מבליעים בכף את החלבונים לתוך הרוטב, ומשתדלים לשמור את החלמונים בשלמותם.\",\n    \"מבשלים עד שהביצים נקרשות. מסירים מן האש ומגישים חם.\"\n  ],\n  \"tags\": [\n    \"שקשוקה\",\n    \"ארוחת ערב\",\n    \"מהיר\"\n  ]\n}",
+      "n_ingredients": 8,
+      "n_steps": 8,
+      "to_taste": ["שמן", "מלח"],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "x10": {
+      "model": "gemini-3.5-flash-lite",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 3.2,
+      "raw": "{\n  \"title\": \"שקשוקה\",\n  \"description\": \"השקשוקה מגיעה אלינו מארצות צפון אפריקה ויש בה משהו פשוט וממכר שהופך אותה למאכל לגיטימי בכל שעה ביום. הנה מתכון מנצח לשקשוקה מלאה בטעמים.\",\n  \"servings\": null,\n  \"ingredients\": [\n    {\n      \"name\": \"עגבניות\",\n      \"amount\": 10,\n      \"unit\": \"unit\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"גמבה\",\n      \"amount\": 1,\n      \"unit\": \"unit\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"פלפל חריף\",\n      \"amount\": 1,\n      \"unit\": \"unit\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"ביצים\",\n      \"amount\": 6,\n      \"unit\": \"unit\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"בזיליקום\",\n      \"amount\": 0.5,\n      \"unit\": \"cup\",\n      \"note\": \"רק העלים\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"שום\",\n      \"amount\": 10,\n      \"unit\": \"clove\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"שמן\",\n      \"amount\": 6,\n      \"unit\": \"tbsp\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"פפריקה\",\n      \"amount\": 2,\n      \"unit\": \"tbsp\",\n      \"note\": \"למיטיבי לכת: פפריקה חריפה\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"פלפל שחור גרוס\",\n      \"amount\": 0.5,\n      \"unit\": \"tsp\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"מלח\",\n      \"amount\": 0.5,\n      \"unit\": \"tbsp\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    }\n  ],\n  \"steps\": [\n    \"ראשית, יש לקלף את העגבניות. כך תעשו את זה בקלות: ממלאים קערה גדולה במים רותחים, מסמנים X בינוני בתחתית כל עגבנייה בעזרת סכין חד ומשרים את העגבניות במים החמים במשך 10 דקות. בשלב הזה, קליפת העגבנייה תתחיל להיפרד מעצמה, ובעזרת סכין מפרידים את שאר הקליפה.\",\n    \"קוצצים את העגבניות הקלופות והגמבה לריבועים קטנים ושווים.\",\n    \"קוצצים דק את השום והפלפל החריף.\",\n    \"מחממים במחבת גדולה את השמן, ולאחר כ2 דקות, מוסיפים למחבת את העגבניות, הגמבה השום הפלפל החריף שקצצנו.\",\n    \"מבשלים את הירקות על אש מעט גבוהה למשך 10 דקות, עד שרוב הנוזלים מתאדים.\",\n    \"מוסיפים את הפפריקה למחבת, מערבבים ומתבלים גם במלח ופלפל שחור.\",\n    \"יוצרים 6 גומות בתערובת העגבניות שבמחבת, שוברים ביצה לצלחת ומעבירים כל אחת לגומה נפרדת. מעל כל ביצה זורים מעט מלח.\",\n    \"קורעים גס בידיים את עלי הבזיליקום ומפזרים מעל.\",\n    \"מנמיכים את האש, מכסים את המחבת במכסה תואם או נייר אלומיניום ומשאירים את השקשוקה להתבשל במשך כ-7 דקות נוספות, עד שהביצים עשויות היטב ומכבים את האש.\"\n  ],\n  \"tags\": [\n    \"שקשוקה\",\n    \"ארוחת בוקר\",\n    \"מהיר\",\n    \"צמחוני\"\n  ]\n}",
+      "n_ingredients": 10,
+      "n_steps": 9,
+      "to_taste": [],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "x11": {
+      "model": "gemini-3.5-flash-lite",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 3.5,
+      "raw": "{\n  \"title\": \"עוגת קקאו\",\n  \"description\": null,\n  \"servings\": null,\n  \"ingredients\": [\n    {\n      \"name\": \"קקאו איכותי\",\n      \"amount\": 1,\n      \"unit\": \"cup\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"קמח חצי חצי\",\n      \"amount\": 1,\n      \"unit\": \"cup\",\n      \"note\": \"חצי קמח מלא, וחצי קמח רגיל\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"סוכר חום\",\n      \"amount\": 1,\n      \"unit\": \"cup\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"סודה לשתייה\",\n      \"amount\": 1,\n      \"unit\": \"tsp\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"מלח\",\n      \"amount\": 0.5,\n      \"unit\": \"tsp\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"שמן רגיל\",\n      \"amount\": 0.33,\n      \"unit\": \"cup\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"מים\",\n      \"amount\": 1,\n      \"unit\": \"cup\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"שקדים טחונים\",\n      \"amount\": 2,\n      \"unit\": \"tbsp\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"חומץ\",\n      \"amount\": 1,\n      \"unit\": \"tsp\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    }\n  ],\n  \"steps\": [\n    \"מחממים תנור ל-180 מעלות ומניחים נייר אפייה בתוך תבנית.\",\n    \"מערבבים בקערה את הקקאו, הקמח, הסוכר, הסודה לשתייה והמלח.\",\n    \"מוסיפים את השמן, המים, השקדים הטחונים והחומץ, ומערבבים היטב עד שהתערובת חלקה.\",\n    \"מעבירים את התערובת לתבנית ואופים למשך 30-35 דקות או עד שמכניסים קיסם – והוא יוצא יבש.\",\n    \"מניחים את העוגה להתקרר לפני שמגישים.\"\n  ],\n  \"tags\": [\n    \"עוגות\",\n    \"קינוחים\",\n    \"טבעוני\"\n  ]\n}",
+      "n_ingredients": 9,
+      "n_steps": 5,
+      "to_taste": [],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "x12": {
+      "model": "gemini-3.5-flash-lite",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 3.0,
+      "raw": "{\n  \"title\": \"שקשוקה בסיסית\",\n  \"description\": \"מתכון לשקשוקה לזכרו של סמ\\\"ר מעוז מורל הי\\\"ד\",\n  \"servings\": null,\n  \"ingredients\": [\n    {\n      \"name\": \"בצל\",\n      \"amount\": 1,\n      \"unit\": \"unit\",\n      \"note\": \"גדול\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"שום\",\n      \"amount\": 3,\n      \"unit\": \"clove\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"עגבניות מרוסקות\",\n      \"amount\": 1,\n      \"unit\": \"can\",\n      \"note\": \"או 5 עגבניות טריות\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"ביצים\",\n      \"amount\": 5,\n      \"unit\": \"unit\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"רסק עגבניות\",\n      \"amount\": 1,\n      \"unit\": \"tbsp\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"פפריקה\",\n      \"amount\": 1,\n      \"unit\": \"tbsp\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"מלח\",\n      \"amount\": 1,\n      \"unit\": \"tsp\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"פלפל שחור\",\n      \"amount\": 0.5,\n      \"unit\": \"tsp\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"כמון\",\n      \"amount\": 0.25,\n      \"unit\": \"tsp\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"שמן זית\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": null,\n      \"to_taste\": true,\n      \"source_amount\": null,\n      \"source_unit\": null\n    }\n  ],\n  \"steps\": [\n    \"קוצצים בצל ומטגנים אותו בשמן זית עד להזהבה.\",\n    \"כותשים 3 שיני שום (או פורסים, לעצלנים) ומוסיפים לבצל.\",\n    \"מוסיפים את התבלינים: מלח, פלפל שחור ופפריקה. אחרי חצי דקה, כשהתבלינים נפתחים, מוסיפים רסק עגבניות.\",\n    \"אחרי עוד דקה או שתיים – מוסיפים את העגבניות המרוסקות (ואם אתם הטיפוסים של מוצרי גלם טריים: תחתכו את העגבניות לקוביות גדולות ותוסיפו למחבת).\",\n    \"עכשיו מחכים. נותנים לכל העסק להתבשל עשר דקות לפחות, עדיף 20 דקות. כשתערובת השקשוקה טעימה – מוסיפים את הביצים.\",\n    \"שברו את הביצים, צרו גומות, ושימו כל ביצה בגומה משלה.\",\n    \"מנמיכים את האש ומכסים. אחרי כמה דקות הביצים יהיו מוכנות.\"\n  ],\n  \"tags\": [\n    \"שקשוקה\",\n    \"ארוחת בוקר\",\n    \"לזכרו של מעוז מורל\"\n  ]\n}",
+      "n_ingredients": 10,
+      "n_steps": 7,
+      "to_taste": ["שמן זית"],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "x13": {
+      "model": "gemini-3.5-flash-lite",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 2.4,
+      "raw": "{\n  \"title\": \"לחם בננה\",\n  \"description\": null,\n  \"servings\": null,\n  \"ingredients\": [\n    {\n      \"name\": \"קמח לבן\",\n      \"amount\": 2,\n      \"unit\": \"cup\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"אבקת אפייה\",\n      \"amount\": 1,\n      \"unit\": \"tsp\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"מלח\",\n      \"amount\": 0.25,\n      \"unit\": \"tsp\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"חמאה\",\n      \"amount\": 0.5,\n      \"unit\": \"cup\",\n      \"note\": \"השתמשתי במרגרינה צמחית\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"סוכר חום\",\n      \"amount\": 0.75,\n      \"unit\": \"cup\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"ביצים\",\n      \"amount\": 2,\n      \"unit\": \"unit\",\n      \"note\": \"מרוסקות\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"מחית בננה בשלה מדי\",\n      \"amount\": 1,\n      \"unit\": \"cup\",\n      \"note\": \"3 בננות\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    }\n  ],\n  \"steps\": [\n    \"חממו מראש את התנור ל-350 מעלות. משנו קלות תבנית אינגליש קייק בגודל 9x5 אינץ'.\",\n    \"בקערה גדולה, ערבבו יחד את הקמח, אבקת האפייה והמלח. בקערה נפרדת, הקציפו יחד את החמאה והסוכר החום. הוסיפו את הביצים ומחית הבננות וערבבו עד לאיחוד. הוסיפו את תערובת הבננות לתערובת הקמח; ערבבו רק עד להרטבת החומרים. שפכו את הבלילה לתבנית האפייה המוזמנת.\",\n    \"אפו בתנור שחומם מראש במשך 60 עד 65 דקות, עד שקיסם הננעץ במרכז הלחם יוצא נקי. תנו ללחם להצטנן בתבנית במשך 10 דקות, ואז הפכו אותו על רשת קירור.\"\n  ],\n  \"tags\": []\n}",
+      "n_ingredients": 7,
+      "n_steps": 3,
+      "to_taste": [],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "x14": {
+      "model": "gemini-3.5-flash-lite",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 2.9,
+      "raw": "{\n  \"title\": \"מתכון קלאסי לחם בננה\",\n  \"description\": null,\n  \"servings\": null,\n  \"ingredients\": [\n    {\n      \"name\": \"בננות\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"חמאה\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"סוכر\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"ביצה\",\n      \"amount\": 1.0,\n      \"unit\": \"unit\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"תמצית וניל\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"קמח\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"אבקת סודה לשתייה\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"מלח\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": null,\n      \"to_taste\": true,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"אגוזים או שוקולד צ'יפס\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": \"אופציונלי\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    }\n  ],\n  \"steps\": [\n    \"חממו מראש את התנור ל-175 מעלות צלזיוס (350 מעלות פרנהייט).\",\n    \"מעכו את הבננות בקערת ערבוב גדולה והניחו בצד.\",\n    \"הקציפו חמאה וסוכר באמצעות מיקסר.\",\n    \"הוסיפו ביצה ווניל. ערבבו עד לאיחוד בלבד. אל תערבבו יתר על המידה.\",\n    \"הוסיפו את הבננות המעוכות וערבבו היטב.\",\n    \"בקבערה נפרדת, ערבבו יחד את הקמח, אבקת הסודה לשתייה והמלח.\",\n    \"הוסיפו את החומרים היבשים לתערובת הבננה וקפלו בעדינות עד לאיחוד בלבד.\",\n    \"אם משתמשים באגוזים או שוקולד צ'יפס, קפלו אותם פנימה כעת.\",\n    \"שפכו את הבלילה לתבנית שהוכנה מראש ויישרו את החלק העליון.\",\n    \"אפו במשך 55-60 דקות, או עד שקיסם הננעץ במרכז יוצא נקי.\",\n    \"הצננו בתבנית במשך 10 דקות לפני העברה לרשת קירור לקירור מלא.\"\n  ],\n  \"tags\": [\n    \"אפייה\",\n    \"עוגת בננה\",\n    \"קינוח\"\n  ]\n}",
+      "n_ingredients": 9,
+      "n_steps": 11,
+      "to_taste": ["מלח"],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "x15": {
+      "model": "gemini-3.5-flash-lite",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 1.3,
+      "raw": "{\n  \"title\": \"10 ארוחות עוף קלות\",\n  \"description\": \"אוסף של 10 ארוחות עוף מהירות, קלות וטעימות שניתן להכין באמצע השבוע או לאורחים.\",\n  \"servings\": null,\n  \"ingredients\": [],\n  \"steps\": [\n    \"בחר את מתכון העוף האהוב עליך מתוך הרשימה.\",\n    \"הכן את המרכיבים הטריים הנדרשים למנה הנבחרת.\",\n    \"בשל או אפה לפי סוג המתכון והגש חם.\"\n  ],\n  \"tags\": [\n    \"עוף\",\n    \"ארוחת ערב\",\n    \"מתכונים קלים\"\n  ]\n}",
+      "n_ingredients": 0,
+      "n_steps": 3,
+      "to_taste": [],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    }
+  }
+}

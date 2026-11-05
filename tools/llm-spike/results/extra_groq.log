@@ -1,0 +1,20 @@
+x01 input chars: 414
+x04 input chars: 1591
+x06 input chars: 2257
+x09 input chars: 3708
+x10 input chars: 1446
+x11 input chars: 963
+x12 input chars: 3228
+x13 input chars: 1149
+x14 input chars: 793
+x15 input chars: 2962
+groq:openai/gpt-oss-120b x01 {'valid_first': True, 'valid_after_retry': True, 'error': None, 'secs': 3.0, 'n_ingredients': 7, 'n_steps': 2, 'to_taste': ['מלח'], 'no_unit_with_amount': [], 'source_units_kept': 0}
+groq:openai/gpt-oss-120b x04 {'valid_first': True, 'valid_after_retry': True, 'error': None, 'secs': 3.6, 'n_ingredients': 12, 'n_steps': 3, 'to_taste': ['שמן לטיגון עמוק'], 'no_unit_with_amount': [], 'source_units_kept': 0}
+groq:openai/gpt-oss-120b x06 {'valid_first': True, 'valid_after_retry': True, 'error': None, 'secs': 6.5, 'n_ingredients': 14, 'n_steps': 13, 'to_taste': ['מים קרים', 'מלח', 'כמון', 'שמן זית', 'פטרוזיליה קצוצה', 'פפריקה', 'פיתות חמות'], 'no_unit_with_amount': [], 'source_units_kept': 0}
+groq:openai/gpt-oss-120b x09 {'valid_first': True, 'valid_after_retry': True, 'error': None, 'secs': 53.2, 'n_ingredients': 8, 'n_steps': 9, 'to_taste': ['מלח'], 'no_unit_with_amount': [], 'source_units_kept': 0}
+groq:openai/gpt-oss-120b x10 {'valid_first': True, 'valid_after_retry': True, 'error': None, 'secs': 4.0, 'n_ingredients': 10, 'n_steps': 8, 'to_taste': [], 'no_unit_with_amount': [], 'source_units_kept': 0}
+groq:openai/gpt-oss-120b x11 {'valid_first': True, 'valid_after_retry': True, 'error': None, 'secs': 28.0, 'n_ingredients': 9, 'n_steps': 6, 'to_taste': [], 'no_unit_with_amount': [], 'source_units_kept': 0}
+groq:openai/gpt-oss-120b x12 {'valid_first': True, 'valid_after_retry': True, 'error': None, 'secs': 3.8, 'n_ingredients': 11, 'n_steps': 7, 'to_taste': ['שמן זית'], 'no_unit_with_amount': [], 'source_units_kept': 0}
+groq:openai/gpt-oss-120b x13 {'valid_first': True, 'valid_after_retry': True, 'error': None, 'secs': 10.9, 'n_ingredients': 7, 'n_steps': 3, 'to_taste': [], 'no_unit_with_amount': [], 'source_units_kept': 0}
+groq:openai/gpt-oss-120b x14 {'valid_first': True, 'valid_after_retry': True, 'error': None, 'secs': 30.6, 'n_ingredients': 10, 'n_steps': 11, 'to_taste': [], 'no_unit_with_amount': [], 'source_units_kept': 0}
+groq:openai/gpt-oss-120b x15 {'valid_first': True, 'valid_after_retry': True, 'error': None, 'secs': 25.4, 'n_ingredients': 0, 'n_steps': 0, 'to_taste': [], 'no_unit_with_amount': [], 'source_units_kept': 0}

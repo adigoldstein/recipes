@@ -1,0 +1,353 @@
+{
+  "gemini": {
+    "en-handletheheat": {
+      "model": "gemini-3.5-flash",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 48.1,
+      "raw": "{\"title\":\"עוגיות שוקולד צ'יפס בסגנון מאפייה\",\"description\":\"עוגיות שוקולד צ'יפס עבות, לעיסות ונימוחות במרכז עם שוליים פריכים וטעם עשיר של וניל ובאטרסקוטש.\",\"servings\":26,\"ingredients\":[{\"name\":\"קמח לכל המטרה\",\"amount\":null,\"unit\":null,\"note\":\"מומלץ לשקול במאזניים דיגיטליים או למדוד בשיטת הכף והניקוי\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"סודה לשתייה\",\"amount\":null,\"unit\":null,\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"מלח\",\"amount\":1,\"unit\":\"tsp\",\"note\":\"להפחית ל-½ כפית אם משתמשים בחמאה מומלחת\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"חמאה לא מומלחת\",\"amount\":null,\"unit\":null,\"note\":\"בטמפרטורת חדר קרירה (כ-19 מעלות צלזיוס)\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"סוכר לבן\",\"amount\":null,\"unit\":null,\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"סוכר חום\",\"amount\":null,\"unit\":null,\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"ביצים\",\"amount\":null,\"unit\":null,\"note\":\"בטמפרטורת החדר; ניתן להחליף ב-50 גרם יוגורט חלק לא ממותק\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"תמצית וניל\",\"amount\":null,\"unit\":null,\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"שוקולד צ'יפס חצי מתוק\",\"amount\":null,\"unit\":null,\"note\":\"ניתן להפחית ל-1.5 כוסות\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"מלח ים אטלנטי/פתיתי\",\"amount\":null,\"unit\":null,\"note\":\"לפיזור מעל העוגיות כשהן יוצאות מהתנור\",\"to_taste\":true,\"source_amount\":null,\"source_unit\":null}],\"steps\":[\"טורפים יחד את הרכיבים היבשים כדי לפזר באופן שווה את המלח והסודה לשתייה.\",\"מוסיפים את החמאה בטמפרטורת חדר קרירה (כ-19 מעלות צלזיוס).\",\"מקציפים את החמאה והסוכרים במשך 2-3 דקות במהירות בינונית-גבוהה עד לקבלת תערובת בהירה ותפוחה, ומגרדים את דפנות הקערה.\",\"מוסיפים את הביצים והווניל בטמפרטורת החדר ומערבבים, ומגרדים שוב את דפנות הקערה.\",\"מוסיפים את הרכיבים היבשים ומערבבים במהירות נמוכה.\",\"מערבבים פנימה את השוקולד צ'יפס ידנית בעזרת מרית סיליקון קשיחה.\",\"אופים או עוטפים את הבצק היטב בניילון נצמד ומקררים במקרר עד 72 שעות לשיפור הטעם והמרקם.\"],\"tags\":[\"עוגיות\",\"שוקולד צ'יפס\",\"קינוחים\",\"מאפים\"]}",
+      "n_ingredients": 10,
+      "n_steps": 7,
+      "to_taste": ["מלח ים אטלנטי/פתיתי"],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "en-caputo": {
+      "model": "gemini-3.5-flash",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 18.5,
+      "raw": "{\"title\":\"מתכון לפיצה ניאפוליטנית אותנטית - בצק מסורתי עם קמח קפוטו 00\",\"description\":\"תעוררו את הפיצאולו שבכם על ידי הכנת פיצה ניאפוליטנית משלכם!\",\"servings\":6,\"ingredients\":[{\"name\":\"שמרי אינסטנט\",\"amount\":3,\"unit\":\"g\",\"note\":\"1 כפית\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"קמח פיצה קפוטו 00\",\"amount\":null,\"unit\":null,\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"מים\",\"amount\":null,\"unit\":null,\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"מלח\",\"amount\":null,\"unit\":null,\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"קמח סמולינה קפוטו\",\"amount\":null,\"unit\":null,\"note\":\"לקימוח קל של משטח העבודה\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"תוספות אהובות (מומלץ עגבניות צ'או)\",\"amount\":null,\"unit\":null,\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null}],\"steps\":[\"בעזרת מיקסר עם וו לישה, מוסיפים 3 גרם (1 כפית) שמרי אינסטנט וקמח פיצה קפוטו 00 ומערבבים במהירות הראשונה במשך 2 דקות.\",\"מוסיפים את המים ומערבבים במשך 5 דקות.\",\"לאחר מכן, מוסיפים את המלח ומערבבים במשך 10-12 דקות, או עד שהבצק חלק ומקבל צורה עגולה וחלקה.\",\"מוציאים את הבצק מהמיקסר ומניחים לו לנוח במשך 30 דקות.\",\"מחלקים את הבצק לשש כדורים במשקל 270 גרם כל אחד ומניחים אותם במגש בצק.\",\"מניחים לכדורי הבצק לנוח בטמפרטורת החדר במשך שעה אחת לפני שמכניסים אותם למקרר ל-24 שעות.\",\"למחרת, מוציאים את הבצק מהמקרר 3-4 שעות לפני השימוש המיועד.\",\"שעה לפני האפייה, מדליקים תנור בחום גבוה (כמו אוני, גוזני או ברוויל) ומניחים לו להגיע לטמפרטורה הרצויה. מומלץ לאפות בטמפרטורות הגבוהות ביותר - 900 מעלות פרנהייט ומעלה עבור קרום ניאפוליטני אמיתי.\",\"לאחר מכן, מותחים את הפיצה על משטח מקומח בקלות בסמולינה של קפוטו, ואז מוסיפים את התוספות האהובות עליכם (מומלץ עגבניות צ'או!).\",\"מעבירים את הפיצה למרדה פיצה ומחליקים אותה בעדינות מהמרדה לתוך התנור שחומם מראש.\",\"ברגע שהפיצה בתנור, מתחילים לסובב אותה כל 20 שניות בערך כדי למנוע שריפה של השוליים (הקורניצ'ונה). לאחר כ-90-120 שניות (תלוי בטמפרטורת התנור), הפיצה שלכם אמורה להיות מוכנה להוצאה מהתנור.\",\"מומלץ לחתוך ולהגיש את הפיצות מיד.\"],\"tags\":[\"פיצה\",\"פיצה ניאפוליטנית\",\"בצק פיצה\",\"אוכל איטלקי\"]}",
+      "n_ingredients": 6,
+      "n_steps": 12,
+      "to_taste": [],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "he-anatelisha": {
+      "model": "gemini-3.5-flash",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 27.8,
+      "raw": "{\"title\":\"קובה בורגול מטוגנת\",\"description\":\"מתכון לקובה בורגול פריכה במילוי בשר בקר טחון, בצלים, תבלינים, צנוברים וצימוקים.\",\"servings\":null,\"ingredients\":[{\"name\":\"בורגול דק (ג'רישה)\",\"amount\":2.0,\"unit\":\"cup\",\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"סולת\",\"amount\":1.0,\"unit\":\"cup\",\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"מים רותחים\",\"amount\":3.0,\"unit\":\"cup\",\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"מלח\",\"amount\":1.0,\"unit\":\"tsp\",\"note\":\"למעטפת\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"פפריקה מתוקה\",\"amount\":1.0,\"unit\":\"tsp\",\"note\":\"שטוחה\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"כורכום\",\"amount\":0.5,\"unit\":\"tsp\",\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"שמן\",\"amount\":0.25,\"unit\":\"cup\",\"note\":\"למעטפת\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"קמח\",\"amount\":0.5,\"unit\":\"cup\",\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"מים חמימים\",\"amount\":0.25,\"unit\":\"cup\",\"note\":\"רבע עד חצי כוס, לפי מידת הצורך\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"בשר בקר טחון\",\"amount\":700.0,\"unit\":\"g\",\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"בצל גדול\",\"amount\":5.0,\"unit\":\"unit\",\"note\":\"קצוצים\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"בהרט לקובה\",\"amount\":1.0,\"unit\":\"tbsp\",\"note\":\"כף מלאה\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"הל\",\"amount\":0.25,\"unit\":\"tsp\",\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"פלפל שחור/לבן\",\"amount\":1.0,\"unit\":\"tsp\",\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"מלח\",\"amount\":1.0,\"unit\":\"tsp\",\"note\":\"כפית מלאה למילוי, לפי טעם אישי\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"שמן\",\"amount\":4.0,\"unit\":\"tbsp\",\"note\":\"4-5 כפות, למילוי\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"צנוברים קלויים\",\"amount\":null,\"unit\":null,\"note\":\"מומלץ להוסיף\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"צימוקים בהירים\",\"amount\":4.0,\"unit\":\"tbsp\",\"note\":\"קצוצים, מומלץ להוסיף\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"שמן עמוק\",\"amount\":null,\"unit\":null,\"note\":\"לטיגון\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null}],\"steps\":[\"בקערה מניחים בורגול דק, סולת ו-3 כוסות מים רותחים. מערבבים ומכסים. מניחים בצד לשעה.\",\"בעזרת מזלג מאווררים מעט את תערובת הסולת והבורגול וטוחנים במטחנת בשר (או במעבד מזון).\",\"מוסיפים את שאר מרכיבי המעטפת ולשים היטב לבצק נעים ונוח (מתחילים עם רבע כוס מים ומוסיפים לפי מידת הצורך).\",\"מכסים בניילון נצמד ושמים למנוחה של שעה.\",\"מכינים את המילוי: מחממים שמן בסיר רחב, מוסיפים את הבשר ומטגנים עד שהנוזלים מתאדים, ומוסיפים את הבצל.\",\"מטגנים כ-10 דקות ומוסיפים תבלינים. מערבבים היטב, מוסיפים צנוברים וצימוקים, מערבבים ומסירים מהאש. מצננים לחלוטין.\",\"מכינים את הקובות: עובדים קבוע עם ידיים רטובות או עם מעט שמן. לוקחים מעט מהבצק ויוצרים עיגול. בעזרת האגודל יוצרים חור באמצע ומרחיבים אותו בעדינות.\",\"ממלאים במילוי הבשר, סוגרים ומהדקים. מניחים על נייר אפייה נקי וממשיכים כך עם השאר.\",\"מחממים שמן עמוק ומטגנים את הקובות עד להזהבה. מומלץ להגיש לצד עמבה וטחינה.\"],\"tags\":[\"קובה\",\"בורגול\",\"בשר בקר\",\"טיגון עמוק\",\"מטבח עיראקי\"]}",
+      "n_ingredients": 19,
+      "n_steps": 9,
+      "to_taste": [],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "he-kobiedri": {
+      "model": "gemini-3.5-flash",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 22.3,
+      "raw": "{\"title\":\"סמבוסק פיצה ומשולשת פטריות בטאבון\",\"description\":\"מתכון להכנת סמבוסק פיצה מפורסם ומשולשת פטריות פריכים מבחוץ ורכים מבפנים בטאבון ביתי.\",\"servings\":15,\"ingredients\":[{\"name\":\"קמח לבן מנופה\",\"amount\":1,\"unit\":\"kg\",\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"שמרים טריים\",\"amount\":50,\"unit\":\"g\",\"note\":\"או 20 גרם שמרים יבשים (1 כף)\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"מלח\",\"amount\":20,\"unit\":\"g\",\"note\":\"כף אחת (לבצק)\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"מים חמימים\",\"amount\":500,\"unit\":\"ml\",\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"אבקת סודה לשתייה\",\"amount\":0.5,\"unit\":\"tsp\",\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"סוכר\",\"amount\":20,\"unit\":\"g\",\"note\":\"כף אחת (לבצק)\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"גבינה צהובה מגורדת\",\"amount\":0.5,\"unit\":\"kg\",\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"עגבניות במיץ\",\"amount\":1,\"unit\":\"can\",\"note\":\"לרוטב\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"רסק עגבניות מרוכז\",\"amount\":1,\"unit\":\"tbsp\",\"note\":\"לרוטב\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"אורגנו\",\"amount\":1,\"unit\":\"tsp\",\"note\":\"לרוטב\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"סוכר\",\"amount\":1,\"unit\":\"tsp\",\"note\":\"לרוטב\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"מלח\",\"amount\":0.5,\"unit\":\"tsp\",\"note\":\"לרוטב\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"משולשי גבינה מותכת\",\"amount\":14,\"unit\":\"unit\",\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"פטריות שמפניון חתוכות\",\"amount\":1,\"unit\":\"can\",\"note\":\"מסוננת מנוזל\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"מלח\",\"amount\":null,\"unit\":null,\"note\":\"למילוי הפטריות\",\"to_taste\":true,\"source_amount\":null,\"source_unit\":null},{\"name\":\"שומשום\",\"amount\":null,\"unit\":null,\"note\":\"לציפוי\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"ביצה\",\"amount\":null,\"unit\":null,\"note\":\"להברשה לפני ציפוי השומשום\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null}],\"steps\":[\"בקערת מיקסר עם וו לישה שמים את הקמח, השמרים, הסוכר ואבקת הסודה.\",\"מפעילים מהירות 3 ומוסיפים בהדרגה את המים.\",\"ברגע שנוצר בצק מוסיפים את המלח ולשים כ-10 דקות.\",\"מכסים את הבצק במגבת ומתפיחים 40 דקות להכפלת הנפח.\",\"מוציאים את הבצק ויוצרים כדורים: לסמבוסק פיצה יוצרים 8 כדורים גדולים כגודל קלמנטינה, ולסמבוסק פטריות יוצרים 14 כדורים כגודל כדור פינג פונג (כל 2 כדורים ישמשו לסמבוסק אחד).\",\"מכסים את הכדורים ומתפיחים כ-20 דקות נוספות.\",\"מערבבים בקערה את מרכיבי רוטב הפיצה.\",\"להכנת סמבוסק פיצה: פותחים את הכדור הגדול דק עם מעט קמח על השיש, שמים במרכז מעט מרוטב הפיצה והרבה גבינה צהובה, מקפלים כל דופן לכיוון המרכז ליצירת משולש, מורחים בביצה והופכים בזהירות על שומשום. מתפיחים מכוסה עוד 10 דקות.\",\"להכנת משולשת פטריות: פותחים 2 כדורי בצק, שמים במרכז כמות פטריות, מעט מלח ו-2 חתיכות גבינה מותכת. מורחים את השוליים בביצה, סוגרים עם עיגול בצק נוסף, מהדקים וחותכים את הדפנות עם קערה עגולה, מורחים בביצה ומצפים בשומשום.\",\"מחממים את הטאבון במצב פיצה ל-370 מעלות.\",\"מכניסים 4 יחידות לטאבון כשהוא חם ואופים במשך 2:30 דקות.\"],\"tags\":[\"סמבוסק\",\"פיצה\",\"פטריות\",\"טאבון\",\"מאפים\"]}",
+      "n_ingredients": 17,
+      "n_steps": 11,
+      "to_taste": ["מלח"],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "he-foodgever": {
+      "model": "gemini-3.5-flash",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 11.0,
+      "raw": "{\"title\":\"הום פרייז של דיקסי\",\"description\":\"הום פרייז אפויים בתנור ברוטב קרמי של צ'ילי מתוק ושמנת לבישול עם בצל ופלפל מוקפצים.\",\"servings\":null,\"ingredients\":[{\"name\":\"תפוחי אדמה בינוניים-גדולים\",\"amount\":4,\"unit\":\"unit\",\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"פלפל אדום\",\"amount\":1,\"unit\":\"unit\",\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"בצלים גדולים\",\"amount\":2,\"unit\":\"unit\",\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"רוטב צ'ילי מתוק\",\"amount\":1,\"unit\":\"cup\",\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"שמנת לבישול 15%\",\"amount\":0.33,\"unit\":\"cup\",\"note\":null,\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"שמן רגיל\",\"amount\":3,\"unit\":\"tbsp\",\"note\":\"1 כף לאפייה ו-2 כפות לטיגון\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"מלח\",\"amount\":1,\"unit\":\"tsp\",\"note\":\"ועוד קצת לטיגון\",\"to_taste\":false,\"source_amount\":null,\"source_unit\":null},{\"name\":\"סוכר\",\"amount\":null,\"unit\":null,\"note\":null,\"to_taste\":true,\"source_amount\":null,\"source_unit\":null}],\"steps\":[\"מחממים תנור ל-200 מעלות.\",\"חותכים את תפוחי האדמה לקוביות קטנות, מערבבים עם כפית מלח וכף שמן רגיל, ומכניסים לתנור לכ-30-40 דקות עד שהן שחומות אך לא שרופות.\",\"בזמן שתפוחי האדמה בתנור, חותכים את הבצלים והפלפלים לרצועות דקות מאוד.\",\"מחממים ווק על אש גבוהה עם 2 כפות שמן ומטגנים את הבצל והפלפל עם קצת מלח וקצת סוכר במשך 20-25 דקות עם מכסה סגור, עד שהם שקופים וטיפה שחומים.\",\"מנמיכים את האש, מוסיפים פנימה את רוטב הצ'ילי המתוק והשמנת לבישול ומערבבים היטב.\",\"מוסיפים את תפוחי האדמה האפויים לווק, מערבבים היטב ומבשלים יחד עוד כמה דקות.\"],\"tags\":[\"תוספות\",\"תפוחי אדמה\",\"הום פרייז\",\"צמחוני\"]}",
+      "n_ingredients": 8,
+      "n_steps": 6,
+      "to_taste": ["סוכר"],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    }
+  },
+  "transport_retries": {
+    "gemini": 3,
+    "groq": 7
+  },
+  "ollama": {
+    "en-handletheheat": {
+      "model": "qwen2.5:7b",
+      "valid_first": false,
+      "valid_after_retry": false,
+      "error": "ReadTimeout: timed out",
+      "secs": 902.2,
+      "raw": ""
+    },
+    "en-caputo": {
+      "model": "qwen2.5:7b",
+      "valid_first": false,
+      "valid_after_retry": false,
+      "error": "HTTPStatusError: Server error '500 Internal Server Error' for url 'http://localhost:11434/api/chat'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500",
+      "secs": 151.0,
+      "raw": ""
+    },
+    "he-anatelisha": {
+      "model": "qwen2.5:7b",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 179.6,
+      "raw": "{\n  \"title\": \"קובה בורגול\",\n  \"ingredients\": [\n    {\n      \"name\": \"בורגול דק\",\n      \"amount\": 2,\n      \"unit\": \"cup\",\n      \"to_taste\": false\n    },\n    {\n      \"name\": \"סולת\",\n      \"amount\": 1,\n      \"unit\": \"cup\",\n      \"to_taste\": false\n    },\n    {\n      \"name\": \"מים רותחים\",\n      \"amount\": 3,\n      \"unit\": \"cup\",\n      \"to_taste\": false\n    },\n    {\n      \"name\": \"מלח\",\n      \"amount\": null,\n      \"unit\": null,\n      \"to_taste\": true\n    },\n    {\n      \"name\": \"פפריקה מתוקה\",\n      \"amount\": null,\n      \"unit\": null,\n      \"to_taste\": true\n    },\n    {\n      \"name\": \"קורכום\",\n      \"amount\": null,\n      \"unit\": null,\n      \"to_taste\": true\n    },\n    {\n      \"name\": \"שמן\",\n      \"amount\": 1,\n      \"unit\": \"cup\",\n      \"to_taste\": true\n    },\n    {\n      \"name\": \"קמח\",\n      \"amount\": 0.25,\n      \"unit\": \"cup\",\n      \"to_taste\": true\n    },\n    {\n      \"name\": \"מים חמימים\",\n      \"amount\": 0.25,\n      \"unit\": \"cup\",\n      \"to_taste\": true\n    },\n    {\n      \"name\": \"בשר בקר טחון\",\n      \"amount\": 700,\n      \"unit\": \"g\",\n      \"to_taste\": false\n    },\n    {\n      \"name\": \"בצלים גדולים\",\n      \"amount\": 5,\n      \"unit\": \"unit\",\n      \"to_taste\": false\n    },\n    {\n      \"name\": \"הרט לקובה\",\n      \"amount\": 1,\n      \"unit\": \"tsp\",\n      \"to_taste\": false\n    },\n    {\n      \"name\": \"הל\",\n      \"amount\": 0.25,\n      \"unit\": \"tsp\",\n      \"to_taste\": false\n    },\n    {\n      \"name\": \"פלפל שחור/לבן\",\n      \"amount\": 1,\n      \"unit\": \"tsp\",\n      \"to_taste\": false\n    },\n    {\n      \"name\": \"מלח\",\n      \"amount\": 1,\n      \"unit\": \"tsp\",\n      \"to_taste\": true\n    },\n    {\n      \"name\": \"צנוברים\",\n      \"amount\": 4,\n      \"unit\": \"unit\",\n      \"to_taste\": false\n    },\n    {\n      \"name\": \"צימוקים בהירים\",\n      \"amount\": 4,\n      \"unit\": \"unit\",\n      \"to_taste\": false\n    }\n  ],\n  \"steps\": [\n    \"בבקערה מניחים 2 כוסות בורגול דק, כוס סולת ו-3 כוסות מים רותחים. מערבבים ומכסים. מניחים בצד לשעה.\",\n    \"בעזרת מזלג מאווררים מעט את תערובת הסולת והבורגול וטוחנים במטחנת בשר (אפשר במעבד מזון). מוסיפים את שאר מרכיבי המעטפת ולשים היטב לבצק נעים ונוח. (מתחילים עם רבע כוס מים ומוסיפים לפי מידת הצורך). מכסים בניילון נצמד ושמים למנוחה של שעה.\",\n    \"/Internal steps for making the filling are not included in the JSON format./\",\n    \"מחממים שמן עמוק ומטגנים את הקובות עד הזהבה. מומלץ להגיש לצד עמבה וטחינה.\",\n    \"הכינים את המילוי: מחממים שמן בסיר רחב ומוסיפים את הבשר, מטגנים עד שהנוזלים מתאדים ומוסיפים את הבצל. מטגנים כ-10 דקות ומוסיפים תבלינים. מערבבים היטב, מוסיפים צנוברים וצימוקים, מערבבים ומסירים מהאש. מצננים לחלוטין.\"\n  ]\n}",
+      "n_ingredients": 17,
+      "n_steps": 5,
+      "to_taste": [
+        "מלח",
+        "פפריקה מתוקה",
+        "קורכום",
+        "שמן",
+        "קמח",
+        "מים חמימים",
+        "מלח"
+      ],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "he-kobiedri": {
+      "model": "qwen2.5:7b",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 245.5,
+      "raw": "{\n  \"title\": \"סמבוסק פיצה ופטריות\",\n  \"ingredients\": [\n    {\n      \"name\": \"קמח לבן מנופה\",\n      \"amount\": 1,\n      \"unit\": \"kg\",\n      \"to_taste\": false\n    },\n    {\n      \"name\": \"שמרים טריים\",\n      \"amount\": 50,\n      \"unit\": \"g\",\n      \"to_taste\": false\n    },\n    {\n      \"name\": \"שמרים יבשים\",\n      \"amount\": 20,\n      \"unit\": \"g\",\n      \"to_taste\": false\n    },\n    {\n      \"name\": \"מלח\",\n      \"amount\": 20,\n      \"unit\": \"g\",\n      \"to_taste\": false\n    },\n    {\n      \"name\": \"מים חמימים\",\n      \"amount\": 500,\n      \"unit\": \"ml\",\n      \"to_taste\": false\n    },\n    {\n      \"name\": \"אבקת סודה\",\n      \"amount\": 1,\n      \"unit\": \"clove\",\n      \"to_taste\": false\n    },\n    {\n      \"name\": \"סוכר\",\n      \"amount\": 20,\n      \"unit\": \"g\",\n      \"to_taste\": false\n    },\n    {\n      \"name\": \"גבינה צהובה מגורדת\",\n      \"amount\": 0.5,\n      \"unit\": \"kg\",\n      \"to_taste\": false\n    },\n    {\n      \"name\": \"עגבניות\",\n      \"amount\": null,\n      \"unit\": \"clove\",\n      \"to_taste\": false,\n      \"source_amount\": 1,\n      \"source_unit\": \"fl_oz\"\n    },\n    {\n      \"name\": \"רסק עגבניות\",\n      \"amount\": 1,\n      \"unit\": \"clove\",\n      \"to_taste\": false\n    },\n    {\n      \"name\": \"אורגנו\",\n      \"amount\": 1,\n      \"unit\": \"clove\",\n      \"to_taste\": false\n    },\n    {\n      \"name\": \"מלח\",\n      \"amount\": 0.5,\n      \"unit\": \"clove\",\n      \"to_taste\": false\n    },\n    {\n      \"name\": \"משולשי גבינה משולשת/מותכת\",\n      \"amount\": 14,\n      \"unit\": null,\n      \"to_taste\": false\n    },\n    {\n      \"name\": \"פטריות שמפניון חתוכות מסוננת מנוזל\",\n      \"amount\": null,\n      \"unit\": \"clove\",\n      \"to_taste\": false,\n      \"source_amount\": 1,\n      \"source_unit\": \"fl_oz\"\n    },\n    {\n      \"name\": \"שומשום\",\n      \"amount\": null,\n      \"unit\": null,\n      \"to_taste\": false\n    }\n  ],\n  \"steps\": [\n    \"בבקערת מיקסר עם וו לישה שמים את הקמח, השמרים, הסוכר ואבקת הסודה\",\n    \"מפעילים מהירות 3 ומוסיפים בהדרגה את המים\",\n    \"ברגע שנוצר בצק מוסיפים את המלח ולשים כ-10 דקות\",\n    \"הבצק יוצא מעט קשה אך נוח מבצקים אחרים\",\n    \"מכסים את הבצק במגבת ומתפיחים 40 דקות להכפלת הנפח\",\n    \"מוציאים את הבצק ויוצרים כדורים\",\n    \"לסמבוסק פיצה יוצרים כדורים יחסית גדולים כגודל קלמנטינה יצאו 8 כדורים\",\n    \"ולסמבוסק פטריות יוצרים 14 כדורים כגודל כדור פינג פונג כל 2 כדורים ישמשו לסמבוסק אחד\",\n    \"מכסים את הכדורים ומתפיחים כ-20 דקות נוספות\",\n    \"מערבבים בקערה את מרכיבי רוטב הפיצה\",\n    \"לסמבוסק לפיצה: פותחים את הכדור הגדול עם טיפונת קמח על השיש לא הרבה, ופותחים דק\",\n    \"שמים במרכז טיפונת מרוטב הפיצה והרבה גבינה צהובה מקפלים כל דופן לכיוון המרכז ליצירת משולש\",\n    \"מורחים את המשולש בביצה והופכים בזהירות על שומשום\",\n    \"מתפיחים את המשולשים מכוסים במגבת עוד 10 דק\",\n    \"למשולשת פטריות: פותחים 2 כדורי בצק, שמים כמות פטריות יפה במרכז הכדור, מעט מלח, ו-2 חתיכות גבינה מותכת, מורחים את השוליים בביצה וסוגרים עם עיגול נוסף, מהדקים מעט ועם קערה עגולה חותכים את הדפנות, מורחים ומצפים בשומשום\",\n    \"מחממים את הטאבון מצב פיצה 370 מעלות 2:30 דקות\",\n    \"מכניסים 4 יחידות לטאבון כאשר הוא חם\",\n    \"לוחצים התחלה השעון יתחיל לזוז וכשיסתיימו ה-2:30 דקות תקבלו את ביס החלומות בהתחייבות\",\n    \"כמובן שאפשר ורצוי להגיש עם ביצה קשה, ירקות שאוהבים וכל מה שמתחשק לכם ליד\"\n  ],\n  \"servings\": 15,\n  \"tags\": [\n    \"סמבוסק\",\n    \"פיצה\",\n    \"פטריות\"\n  ]\n}",
+      "n_ingredients": 15,
+      "n_steps": 19,
+      "to_taste": [],
+      "no_unit_with_amount": ["משולשי גבינה משולשת/מותכת"],
+      "source_units_kept": 2
+    },
+    "he-foodgever": {
+      "model": "qwen2.5:7b",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 109.3,
+      "raw": "{\n  \"title\": \"הום פרייז של דיקסי\",\n  \"ingredients\": [\n    {\n      \"name\": \"תפוחי אדמה\",\n      \"amount\": null,\n      \"unit\": null,\n      \"to_taste\": true\n    },\n    {\n      \"name\": \"פלפל אדום\",\n      \"amount\": null,\n      \"unit\": null,\n      \"to_taste\": true\n    },\n    {\n      \"name\": \"בצלים גדולים\",\n      \"amount\": null,\n      \"unit\": null,\n      \"to_taste\": true\n    },\n    {\n      \"name\": \"רוטב צ'ילי מתוק\",\n      \"amount\": 1,\n      \"unit\": \"cup\"\n    },\n    {\n      \"name\": \"שמנת לבישול 15%\",\n      \"amount\": 1,\n      \"unit\": \"tbsp\"\n    }\n  ],\n  \"steps\": [\n    \"מחממים את התנור ל-200 מעלות\",\n    \"חתכים את תפוחי האדמה לקוביות קטנות\",\n    \"ערבבים את הקוביות עם כפית מלח וכף שמן רגיל\",\n    \"זורקים את הקוביות לתנור, שמה הם צריכות להיות בערך 30-40 דקות עד שהן שחומות אבל לא שרופות\",\n    \"חptune את הבצלים ואת הפלפלים לרצועות דקות מאוד\",\n    \"חUME את ווק עם אש גבוהה ו-2 כפות שמן וטיגנים עם קצת מלח וקצת סוכר\",\n    \"מנמיכים את האש\",\n    \"קורה למישהו שאוהבים ונותנים לו לשפוך פנימה את הצ’ילי והשמנת\",\n    \"ערבבים טוב\",\n    \"שופכים את תפוחי האדמה פנימה ונותנים להכל להתבשל עוד כמה דקות\",\n    \"מגישים עם סלט ותוכניות לדיאטה\"\n  ]\n}",
+      "n_ingredients": 5,
+      "n_steps": 11,
+      "to_taste": ["תפוחי אדמה", "פלפל אדום", "בצלים גדולים"],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    }
+  },
+  "ollama_stream_probe": {
+    "chunks": 804,
+    "first_chunk_secs": 2.4,
+    "total_secs": 133.1,
+    "chars": 1946,
+    "streams_incrementally": true
+  },
+  "groq:qwen/qwen3.8-27b": {
+    "en-handletheheat": {
+      "model": "qwen/qwen3.8-27b",
+      "valid_first": false,
+      "valid_after_retry": true,
+      "error": null,
+      "first_error": "1 validation error for DraftRecipe\ntitle\n  Field required [type=missing, input_value={'ingredients': [], 'steps': []}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.14/v/missing",
+      "secs": 0.9,
+      "raw": "{\"ingredients\": [], \"steps\": [], \"title\": \"עוגיות שוקולד בסגנון מאפייה\"}",
+      "n_ingredients": 0,
+      "n_steps": 0,
+      "to_taste": [],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "en-caputo": {
+      "model": "qwen/qwen3.8-27b",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 1.5,
+      "raw": "{\"ingredients\": [], \"steps\": [\"באמצעות מיקסר עם צמידת בצק, מוסיפים 3 גרם (1 כפית) שמרים יבשים וקמח פיצריה Caputo \\\"00\\\" ומערבבים במהירות הראשונה למשך 2 דקות.\", \"מוסיפים מים ומערבבים למשך 5 דקות.\", \"לאחר מכן, מוסיפים מלח ומערבבים למשך 10-12 דקות, או עד שהבצק חלק ויוצר כדור.\", \"מסירים את הבצק מהמיקסר ומאפשרים לו לנוח למשך 30 דקות.\", \"מחלקים את הבצק לששה כדורים של 270 גרם כל אחד ומניחים אותם במגש בצק.\", \"מאפשרים לכדורי הבצק לנוח בטמפרטורת החדר למשך שעה לפני שמניחים אותם במקרר למשך 24 שעות.\", \"ביום המחרת, מסירים את הבצק מהמקרר 3-4 שעות לפני השימוש המיועד.\", \"שעה לפני האפייה, מניעים את התנור בחום גבוה (כמו Ooni, Gozney או Breville) ומאפשרים לו להגיע לטמפרטורה. מומלץ לאפות בטמפרטורות הגבוהות ביותר - 900 מעלות או יותר לקרום נאפוליטני אמיתי.\", \"לאחר מכן, ממתחים את הפיצה על משטח מקומט קלות באמצעות סמיולינה Caputo, ואז מוסיפים את הגבינות המועדפות עליכם (אנו ממליצים על עגבניות Ciao!).\", \"מעבירים את הפיצה ללוח פיצה ומחליקים בעדינות את הפיצה מהלוח לתנור המונע מראש.\", \"ברגע שהפיצה בתנור, מתחילים להפוך אותה כל 20 שניות בערך כדי למנוע שריפה על הקרום (cornicone). לאחר כ-90-120 שניות (תלוי בטמפרטורת התנור), הפיצה צריכה להיות מוכנה להוצאה מהתנור.\", \"אנו ממליצים לחתוך ולגשת את הפיצות מיד.\"], \"title\": \"מתכון לפיצה נאפוליטנית אותנטית - בצק מסורתי עם קמח Caputo 00\"}",
+      "n_ingredients": 0,
+      "n_steps": 12,
+      "to_taste": [],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "he-anatelisha": {
+      "model": "qwen/qwen3.8-27b",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 10.2,
+      "raw": "{\"ingredients\": [{\"name\": \"בורגול דק (ג'רישה)\", \"to_taste\": false, \"unit\": \"cup\"}, {\"name\": \"סולת\", \"to_taste\": false, \"unit\": \"cup\"}, {\"name\": \"מים רותחים\", \"to_taste\": false, \"unit\": \"cup\"}, {\"name\": \"מלח\", \"to_taste\": false, \"unit\": \"tsp\"}, {\"name\": \"פפריקה מתוקה\", \"to_taste\": false, \"unit\": \"tsp\"}, {\"name\": \"כורכום\", \"to_taste\": false, \"unit\": \"tsp\"}, {\"name\": \"שמן\", \"to_taste\": false, \"unit\": \"cup\"}, {\"name\": \"קמח\", \"to_taste\": false, \"unit\": \"cup\"}, {\"name\": \"מים חמימים\", \"to_taste\": false, \"unit\": \"cup\"}, {\"name\": \"בשר בקר טחון\", \"to_taste\": false, \"unit\": \"g\"}, {\"name\": \"בצל\", \"to_taste\": false, \"unit\": \"unit\"}, {\"name\": \"בהרט לקובה\", \"to_taste\": false, \"unit\": \"tbsp\"}, {\"name\": \"הל\", \"to_taste\": false, \"unit\": \"tsp\"}, {\"name\": \"פלפל שחור/לבן\", \"to_taste\": false, \"unit\": \"tsp\"}, {\"name\": \"מלח\", \"to_taste\": true, \"unit\": null}, {\"name\": \"שמן\", \"to_taste\": false, \"unit\": \"tbsp\"}, {\"name\": \"צנוברים קלויים\", \"to_taste\": true, \"unit\": null}, {\"name\": \"צימוקים בהירים קצוצים\", \"to_taste\": false, \"unit\": \"tbsp\"}, {\"name\": \"שמן לטיגון\", \"to_taste\": true, \"unit\": null}], \"steps\": [\"בקערה מניחים בורגול דק, סולת ו-3 כוסות מים רותחים. מערבבים ומכסים. מניחים בצד לשעה.\", \"בעזרת מזלג מאווררים מעט את תערובת הסולת והבורגול וטוחנים במטחנת בשר (אפשר במעבד מזון).\", \"מוסיפים את שאר מרכיבי המעטפת ולשים היטב לבצק נעים ונוח. (מתחילים עם רבע כוס מים ומוסיפים לפי מידת הצורך).\", \"מכסים בניילון נצמד ושמים למנוחה של שעה.\", \"מחממים שמן בסיר רחב ומוסיפים את הבשר, מטגנים עד שהנוזלים מתאדים ומוסיפים את הבצל.\", \"מטגנים כ-10 דק' ומוסיפים תבלינים. מערבבים היטב, מוסיפים צנוברים וצימוקים, מערבבים ומסירים מהאש.\", \"מצננים לחלוטין.\", \"עובדים קבוע עם ידיים רטובות או עם מעט שמן.\", \"לוקחים מעט מהבצק ויוצרים עיגול. בעזרת האגודל יוצרים חור באמצע ומרחיבים אותו בעדינות. ממלאים במילוי הבשר וסוגרים ומהדקים. מניחים על נייר אפיה נקי. ממשיכים כך עם השאר.\", \"מחממים שמן עמוק ומטגנים את הקובות עד הזהבה.\"], \"title\": \"קובה בורגול\"}",
+      "n_ingredients": 19,
+      "n_steps": 10,
+      "to_taste": ["מלח", "צנוברים קלויים", "שמן לטיגון"],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "he-kobiedri": {
+      "model": "qwen/qwen3.8-27b",
+      "valid_first": false,
+      "valid_after_retry": true,
+      "error": null,
+      "first_error": "1 validation error for DraftRecipe\ntitle\n  Field required [type=missing, input_value={'ingredients': [{'name':...ת בהתחייבות']}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.14/v/missing",
+      "secs": 61.7,
+      "raw": "{\"ingredients\": [{\"name\": \"קמח לבן מנופה\", \"to_taste\": false, \"unit\": \"g\"}, {\"name\": \"שמרים טריים\", \"to_taste\": false, \"unit\": \"g\"}, {\"name\": \"מלח\", \"to_taste\": false, \"unit\": \"g\"}, {\"name\": \"מים חמימים\", \"to_taste\": false, \"unit\": \"ml\"}, {\"name\": \"אבקת סודה\", \"to_taste\": false, \"unit\": \"tsp\"}, {\"name\": \"סוכר\", \"to_taste\": false, \"unit\": \"g\"}, {\"name\": \"גבינה צהובה מגורדת\", \"to_taste\": false, \"unit\": \"g\"}, {\"name\": \"עגבניות במיץ (קופסת שימורים)\", \"to_taste\": false, \"unit\": \"can\"}, {\"name\": \"רסק עגבניות מרוכז\", \"to_taste\": false, \"unit\": \"tbsp\"}, {\"name\": \"אורגנו\", \"to_taste\": false, \"unit\": \"tsp\"}, {\"name\": \"סוכר\", \"to_taste\": false, \"unit\": \"tsp\"}, {\"name\": \"מלח\", \"to_taste\": false, \"unit\": \"tsp\"}, {\"name\": \"גבינה משולשת/מותכת\", \"to_taste\": false, \"unit\": \"slice\"}, {\"name\": \"פטריות שמפניון חתוכות (קופסת שימורים)\", \"to_taste\": false, \"unit\": \"can\"}, {\"name\": \"מלח\", \"to_taste\": true, \"unit\": null}, {\"name\": \"שומשום\", \"to_taste\": true, \"unit\": null}], \"steps\": [\"בקערת מיקסר עם וו לישה שמים את הקמח, השמרים, הסוכר ואבקת הסודה\", \"מפעילים מהירות 3 ומוסיפים בהדרגה את המים\", \"ברגע שנוצר בצק מוסיפים את המלח ולשים כ-10 דקות\", \"מכסים את הבצק במגבת ומתפיחים 40 דקות להכפלת הנפח\", \"מוציאים את הבצק ויוצרים כדורים\", \"לסמבוסק פיצה יוצרים כדורים יחסית גדולים כגודל קלמנטינה (יצאו 8 כדורים)\", \"ולסמבוסק פטריות יוצרים 14 כדורים כגודל כדור פינג פונג (כל 2 כדורים ישמשו לסמבוסק אחד)\", \"מכסים את הכדורים ומתפיחים כ-20 דקות נוספות\", \"מערבבים בקערה את מרכיבי רוטב הפיצה\", \"פותחים את הכדור הגדול עם טיפונת קמח על השיש לא הרבה, ופותחים דק\", \"שמים במרכז טיפונת מרוטב הפיצה והרבה גבינה צהובה\", \"מקפלים כל דופן לכיוון המרכז ליצירת משולש\", \"מורחים את המשולש בביצה והופכים בזהירות על שומשום\", \"מתפיחים את המשולשים מכוסים במגבת עוד 10 דק\", \"פותחים 2 כדורי בצק, שמים כמות פטריות יפה במרכז הכדור, מעט מלח, ו-2 חתיכות גבינה מותכת\", \"מורחים את השוליים בביצה וסוגרים עם עיגול נוסף\", \"מהדקים מעט ועם קערה עגולה חותכים את הדפנות\", \"מורחים ומצפים בשומשום\", \"מחממים את הטאבון מצב פיצה 370 מעלות 2:30 דקות\", \"מכניסים 4 יחידות לטאבון כאשר הוא חם\", \"לוחצים התחלה השעון יתחיל לזוז וכשיסתיימו ה-2:30 דקות תקבלו את ביס החלומות בהתחייבות\"], \"title\": \"סמבוסק פיצה ופטריות בטאבון\"}",
+      "n_ingredients": 16,
+      "n_steps": 21,
+      "to_taste": ["מלח", "שומשום"],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "he-foodgever": {
+      "model": "qwen/qwen3.8-27b",
+      "valid_first": false,
+      "valid_after_retry": false,
+      "error": "RuntimeError: HTTP 400: {\"error\":{\"message\":\"Failed to generate JSON. Please adjust your prompt. See 'failed_generation' for more details.\",\"type\":\"invalid_request_error\",\"code\":\"json_validate_failed\",\"failed_gener",
+      "secs": 49.7,
+      "raw": ""
+    }
+  },
+  "groq:openai/gpt-oss-120b": {
+    "en-handletheheat": {
+      "model": "openai/gpt-oss-120b",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 6.3,
+      "raw": "{\n  \"title\": \"עוגיות שוקולד צ'יפס של טסה\",\n  \"description\": \"עוגיות עבות, רכות וטעימות עם טעם וניל ובוטרסקוטש, מלאות שוקולד צ'יפס. קלה להכנה, כ-30 דקות.\",\n  \"tags\": [\"עוגיות\", \"שוקולד\", \"קינוח\"],\n  \"ingredients\": [\n    {\n      \"name\": \"קמח לכל מטרה\",\n      \"amount\": null,\n      \"unit\": null,\n      \"source_amount\": null,\n      \"source_unit\": null,\n      \"note\": null,\n      \"to_taste\": true\n    },\n    {\n      \"name\": \"סודה לשתייה\",\n      \"amount\": null,\n      \"unit\": null,\n      \"source_amount\": null,\n      \"source_unit\": null,\n      \"note\": null,\n      \"to_taste\": true\n    },\n    {\n      \"name\": \"מלח\",\n      \"amount\": 0.5,\n      \"unit\": \"tsp\",\n      \"source_amount\": null,\n      \"source_unit\": null,\n      \"note\": \"חצי כפית, להפחתת מלח אם משתמשים בחמאה מומלחת\",\n      \"to_taste\": false\n    },\n    {\n      \"name\": \"מלח ים קצוץ\",\n      \"amount\": null,\n      \"unit\": null,\n      \"source_amount\": null,\n      \"source_unit\": null,\n      \"note\": \"להפזרים לפני האפייה\",\n      \"to_taste\": true\n    },\n    {\n      \"name\": \"חמאה (לא מומלחת)\",\n      \"amount\": null,\n      \"unit\": null,\n      \"source_amount\": null,\n      \"source_unit\": null,\n      \"note\": null,\n      \"to_taste\": true\n    },\n    {\n      \"name\": \"סוכר לבן\",\n      \"amount\": null,\n      \"unit\": null,\n      \"source_amount\": null,\n      \"source_unit\": null,\n      \"note\": null,\n      \"to_taste\": true\n    },\n    {\n      \"name\": \"סוכר חום\",\n      \"amount\": null,\n      \"unit\": null,\n      \"source_amount\": null,\n      \"source_unit\": null,\n      \"note\": null,\n      \"to_taste\": true\n    },\n    {\n      \"name\": \"ביצים\",\n      \"amount\": null,\n      \"unit\": null,\n      \"source_amount\": null,\n      \"source_unit\": null,\n      \"note\": null,\n      \"to_taste\": true\n    },\n    {\n      \"name\": \"יוגורט (להחלפת ביצים)\",\n      \"amount\": 50,\n      \"unit\": \"g\",\n      \"source_amount\": null,\n      \"source_unit\": null,\n      \"note\": \"אם אין ביצים, השתמשו ב‑50 גרם יוגורט טבעי ללא טעם\",\n      \"to_taste\": false\n    },\n    {\n      \"name\": \"וניל\",\n      \"amount\": null,\n      \"unit\": null,\n      \"source_amount\": null,\n      \"source_unit\": null,\n      \"note\": null,\n      \"to_taste\": true\n    },\n    {\n      \"name\": \"שוקולד צ'יפס\",\n      \"amount\": 1,\n      \"unit\": \"cup\",\n      \"source_amount\": null,\n      \"source_unit\": null,\n      \"note\": \"אופציונלי, ניתן להפחית ל‑1 ½ כוסות או להחליף בחלקים\",\n      \"to_taste\": false\n    },\n    {\n      \"name\": \"אגוזים\",\n      \"amount\": 1,\n      \"unit\": \"cup\",\n      \"source_amount\": null,\n      \"source_unit\": null,\n      \"note\": \"אופציונלי\",\n      \"to_taste\": false\n    }\n  ],\n  \"steps\": [\n    \"הקציפו יחד את המרכיבים היבשים. זה עוזר לפזר באופן אחיד את המלח והסודה לשתייה.\",\n    \"הוסיפו את החמאה. ודאו שהיא בטמפרטורת חדר קרירה (כ‑67°F) כדי למנוע עוגיות שטוחות. אפשר להשתמש במיקסר ידני או במיקסר עומד.\",\n    \"הקציפו את החמאה והסוכרים. זה ייקח כ‑2‑3 דקות במהירות בינונית‑גבוהה.\",\n    \"הקצפה צריכה להיות קלה ותפוחה, בצבע בהיר ובמרקם נפח. גררו את הקערה לפחות פעם אחת.\",\n    \"הוסיפו ביצים ווניל. ודאו שהביצים בטמפרטורת חדר כדי להתמזג באופן אחיד. גררו את הקערה שוב.\",\n    \"הוסיפו את המרכיבים היבשים. התחילו לערבב במהירות נמוכה כדי למנוע ענן קמח.\",\n    \"הוסיפו את שוקולד הצ'יפס. כדי למנוע עבודה יתרה של המיקסר או הבצק, ערבבו ידנית עם מרית גומי קשיחה.\",\n    \"אפו או קפאו. אם יש זמן, עטפו את כל המסה של הבצק או חלקו לכדורים וכסו היטב בניילון לפני שמכניסים למקרר עד 72 שעות לשיפור הטעם והמרקם.\"\n  ],\n  \"servings\": null\n}",
+      "n_ingredients": 12,
+      "n_steps": 8,
+      "to_taste": [
+        "קמח לכל מטרה",
+        "סודה לשתייה",
+        "מלח ים קצוץ",
+        "חמאה (לא מומלחת)",
+        "סוכר לבן",
+        "סוכר חום",
+        "ביצים",
+        "וניל"
+      ],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "en-caputo": {
+      "model": "openai/gpt-oss-120b",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 4.5,
+      "raw": "{\n  \"title\": \"מתכון פיצה נפוליטנית אותנטית - בצק מסורתי עם קמח קפוטו 00\",\n  \"servings\": 6,\n  \"tags\": [],\n  \"description\": null,\n  \"ingredients\": [\n    {\n      \"name\": \"שמרים מיידיים\",\n      \"amount\": 3,\n      \"unit\": \"g\",\n      \"source_amount\": null,\n      \"source_unit\": null,\n      \"note\": \"1 כפית\",\n      \"to_taste\": false\n    },\n    {\n      \"name\": \"קמח קפוטו 00 פיצרייה\",\n      \"amount\": null,\n      \"unit\": null,\n      \"source_amount\": null,\n      \"source_unit\": null,\n      \"note\": null,\n      \"to_taste\": false\n    },\n    {\n      \"name\": \"מים\",\n      \"amount\": null,\n      \"unit\": null,\n      \"source_amount\": null,\n      \"source_unit\": null,\n      \"note\": null,\n      \"to_taste\": false\n    },\n    {\n      \"name\": \"מלח\",\n      \"amount\": null,\n      \"unit\": null,\n      \"source_amount\": null,\n      \"source_unit\": null,\n      \"note\": null,\n      \"to_taste\": false\n    },\n    {\n      \"name\": \"סמולינה קפוטו\",\n      \"amount\": null,\n      \"unit\": null,\n      \"source_amount\": null,\n      \"source_unit\": null,\n      \"note\": null,\n      \"to_taste\": false\n    }\n  ],\n  \"steps\": [\n    \"השתמש במיקסר עם מתאם וו הבצק, הוסף 3 גרם (1 כפית) שמרים מיידיים וקמח קפוטו 00 פיצרייה וערבב במהירות הראשונה במשך 2 דקות.\",\n    \"הוסף את המים וערבב במשך 5 דקות.\",\n    \"לאחר מכן, הוסף את המלח וערבב במשך 10-12 דקות, או עד שהבצק חלק ויוצר צורת דלעת.\",\n    \"הסר את הבצק מהמיקסר ותן לו לנוח במשך 30 דקות.\",\n    \"חלק את הבצק לשישה כדורים של 270 גרם והנח אותם במגש לבצק.\",\n    \"תן לכדורי הבצק לנוח בטמפרטורת החדר במשך שעה לפני שמכניסים למקרר למשך 24 שעות.\",\n    \"ביום הבא, הוצא את הבצק מהמקרר 3-4 שעות לפני השימוש המתוכנן.\",\n    \"שעה לפני האפייה, הפעל תנור חום גבוה (כמו Ooni, Gozney או Breville) ותן לו להגיע לטמפרטורה. אנו ממליצים לאפות בטמפרטורות הגבוהות ביותר - 900 מעלות או יותר לקבלת קרום נפוליטני אמיתי.\",\n    \"לאחר מכן, מתיחה של הפיצה על משטח מקומח קלות בעזרת סמולינה קפוטו, ואז הוסף את התוספות האהובות עליך (אנו ממליצים על עגבניות Ciao!).\",\n    \"העבר את הפיצה למלקח פיצה והזז בעדינות את הפיצה מהמלקח לתוך התנור המחומם מראש.\",\n    \"כאשר הפיצה בתנור, התחל לסובב אותה כל 20 שניות כדי למנוע שריפה של הקורניקונה (הקרום). לאחר כ-90-120 שניות (בהתאם לטמפרטורת התנור), הפיצה מוכנה להסרה מהתנור.\",\n    \"אנו ממליצים לחתוך ולהגיש את הפיצות מיד.\"\n  ]\n}",
+      "n_ingredients": 5,
+      "n_steps": 12,
+      "to_taste": [],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "he-anatelisha": {
+      "model": "openai/gpt-oss-120b",
+      "valid_first": false,
+      "valid_after_retry": true,
+      "error": null,
+      "first_error": "1 validation error for DraftRecipe\nsteps\n  Field required [type=missing, input_value={'title': 'קובה בו...ne, 'to_taste': False}]}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.14/v/missing",
+      "secs": 67.4,
+      "raw": "{\"title\":\"קובה בורגול\",\"description\":null,\"ingredients\":[{\"name\":\"בורגול דק\",\"amount\":2,\"unit\":\"cup\",\"source_amount\":null,\"source_unit\":null,\"note\":null,\"to_taste\":false},{\"name\":\"סולת\",\"amount\":1,\"unit\":\"cup\",\"source_amount\":null,\"source_unit\":null,\"note\":null,\"to_taste\":false},{\"name\":\"מים רותחים\",\"amount\":3,\"unit\":\"cup\",\"source_amount\":null,\"source_unit\":null,\"note\":null,\"to_taste\":false},{\"name\":\"מלח\",\"amount\":1,\"unit\":\"tsp\",\"source_amount\":null,\"source_unit\":null,\"note\":null,\"to_taste\":false},{\"name\":\"פפריקה מתוקה\",\"amount\":1,\"unit\":\"tsp\",\"source_amount\":null,\"source_unit\":null,\"note\":null,\"to_taste\":false},{\"name\":\"כורכום\",\"amount\":0.5,\"unit\":\"tsp\",\"source_amount\":null,\"source_unit\":null,\"note\":null,\"to_taste\":false},{\"name\":\"שמן\",\"amount\":0.25,\"unit\":\"cup\",\"source_amount\":null,\"source_unit\":null,\"note\":null,\"to_taste\":false},{\"name\":\"קמח\",\"amount\":0.5,\"unit\":\"cup\",\"source_amount\":null,\"source_unit\":null,\"note\":null,\"to_taste\":false},{\"name\":\"מים חמימים\",\"amount\":null,\"unit\":\"cup\",\"source_amount\":null,\"source_unit\":null,\"note\":\"רבע עד חצי כוס\",\"to_taste\":false},{\"name\":\"בשר בקר טחון\",\"amount\":700,\"unit\":\"g\",\"source_amount\":null,\"source_unit\":null,\"note\":null,\"to_taste\":false},{\"name\":\"בצל גדול קצוץ\",\"amount\":5,\"unit\":\"unit\",\"source_amount\":null,\"source_unit\":null,\"note\":null,\"to_taste\":false},{\"name\":\"הרט לקובה\",\"amount\":1,\"unit\":\"tbsp\",\"source_amount\":null,\"source_unit\":null,\"note\":null,\"to_taste\":false},{\"name\":\"הל\",\"amount\":0.25,\"unit\":\"tsp\",\"source_amount\":null,\"source_unit\":null,\"note\":null,\"to_taste\":false},{\"name\":\"פלפל שחור/לבן\",\"amount\":1,\"unit\":\"tsp\",\"source_amount\":null,\"source_unit\":null,\"note\":null,\"to_taste\":false},{\"name\":\"מלח\",\"amount\":null,\"unit\":null,\"source_amount\":null,\"source_unit\":null,\"note\":null,\"to_taste\":true},{\"name\":\"שמן\",\"amount\":null,\"unit\":\"tbsp\",\"source_amount\":null,\"source_unit\":null,\"note\":\"4-5 כפות\",\"to_taste\":false},{\"name\":\"צנוברים קלויים\",\"amount\":null,\"unit\":null,\"source_amount\":null,\"source_unit\":null,\"note\":\"אופציונלי\",\"to_taste\":false},{\"name\":\"צימוקים בהירים קצוצים\",\"amount\":4,\"unit\":\"tbsp\",\"source_amount\":null,\"source_unit\":null,\"note\":null,\"to_taste\":false},{\"name\":\"שמן עמוק לטיגון\",\"amount\":null,\"unit\":null,\"source_amount\":null,\"source_unit\":null,\"note\":null,\"to_taste\":false}],\"steps\":[\"בקערה מניחים בורגול דק, סולת ו‑3 כוסות מים רותחים, מערבבים ומכסים, משאירים לשעה.\",\"בעזרת מזלג מאווררים מעט את תערובת הסולת והבורגול וטוחנים במטחנת בשר (או במעבד מזון).\",\"מוסיפים את שאר מרכיבי המעטפת ולשים היטב עד לקבלת בצק נעים ונוח (מתחילים עם רבע כוס מים ומוסיפים לפי הצורך). מכסים בניילון נצמד ומשאירים למנוחה של שעה.\",\"מחממים שמן בסיר רחב, מוסיפים את הבשר הטחון ומטגנים עד שהנוזלים מתאדים.\",\"מוסיפים את הבצל הקצוץ, מטגנים כ‑10 דקות, מוסיפים את ההרט, הל, הפלפלים והמלח, מערבבים היטב.\",\"מוסיפים צנוברים וצימוקים, מערבבים ומסירים מהאש, מצננים לחלוטין.\",\"מרדדים את הבצק, יוצרים עיגול, יוצרים חור במרכז ומרחיבים בעדינות, ממלאים במילוי הבשר וסוגרים, מהדקים. מניחים על נייר אפייה.\",\"מחממים שמן עמוק ומטגנים את הקובות עד להזהבה. מגישים עם עמבה וטחינה.\"]}",
+      "n_ingredients": 19,
+      "n_steps": 8,
+      "to_taste": ["מלח"],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "he-kobiedri": {
+      "model": "openai/gpt-oss-120b",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 54.4,
+      "raw": "{\n  \"title\": \"סמבוסק פיצה\",\n  \"description\": \"מתכון לסמבוסק פיצה בטאבון עם רוטב עגבניות וגבינה צהובה.\",\n  \"servings\": 15,\n  \"tags\": [\"פיצה\", \"סמבוסק\", \"טאבון\"],\n  \"ingredients\": [\n    {\"name\":\"קמח לבן מנופה\",\"amount\":1,\"unit\":\"kg\"},\n    {\"name\":\"שמרים טריים\",\"amount\":50,\"unit\":\"g\"},\n    {\"name\":\"שמרים יבשים\",\"amount\":20,\"unit\":\"g\",\"note\":\"כף\"},\n    {\"name\":\"מלח\",\"amount\":20,\"unit\":\"g\"},\n    {\"name\":\"מים חמימים\",\"amount\":500,\"unit\":\"ml\"},\n    {\"name\":\"אבקת סודה\",\"amount\":0.5,\"unit\":\"tsp\"},\n    {\"name\":\"סוכר\",\"amount\":20,\"unit\":\"g\"},\n    {\"name\":\"גבינה צהובה מגורדת\",\"amount\":0.5,\"unit\":\"kg\"},\n    {\"name\":\"עגבניות משומרות במיץ\",\"unit\":\"can\"},\n    {\"name\":\"רסק עגבניות מרוכז\",\"amount\":1,\"unit\":\"tbsp\"},\n    {\"name\":\"אורגנו\",\"amount\":1,\"unit\":\"tsp\"},\n    {\"name\":\"סוכר (לרוטב)\",\"amount\":1,\"unit\":\"tsp\"},\n    {\"name\":\"מלח (לרוטב)\",\"amount\":0.5,\"unit\":\"tsp\"},\n    {\"name\":\"משולשי גבינה משולשת/מותכת\",\"amount\":14,\"unit\":\"unit\"},\n    {\"name\":\"פטריות שמפניון משומרות\",\"unit\":\"can\"},\n    {\"name\":\"מלח (למילוי פטריות)\",\"to_taste\":true},\n    {\"name\":\"שומשום\",\"to_taste\":true},\n    {\"name\":\"ביצה\",\"to_taste\":true}\n  ],\n  \"steps\": [\n    \"בקערת מיקסר עם וו לישה שמים את הקמח, השמרים, הסוכר ואבקת הסודה.\",\n    \"מפעילים מהירות 3 ומוסיפים בהדרגה את המים.\",\n    \"ברגע שנוצר בצק מוסיפים את המלח ולשים כ-10 דקות.\",\n    \"מכסים את הבצק במגבת ומתפיחים 40 דקות להכפלת הנפח.\",\n    \"מוציאים את הבצק ויוצרים כדורים.\",\n    \"לסמבוסק פיצה יוצרים 8 כדורים גדולים, ולסמבוסק פטריות יוצרים 14 כדורים קטנים; כל שני כדורים משמשים לסמבוסק אחד.\",\n    \"מכסים את הכדורים ומתפיחים כ-20 דקות נוספות.\",\n    \"מערבבים בקערה את מרכיבי רוטב הפיצה.\",\n    \"לסמבוסק פיצה: פותחים כדור גדול, משטחים, שמים במרכז רוטב פיצה והרבה גבינה צהובה, מקפלים לכל דופן ליצירת משולש, מורחים בביצה ומפזרים שומשום, ומתפיחים 10 דקות במגבת.\",\n    \"לסמבוסק פטריות: פותחים שני כדורי בצק, ממלאים בפטריות, מלח ו-2 חתיכות גבינה מותכת, מורחים בביצה, סוגרים, חותכים את הדפנות, ומצפים בשומשום.\",\n    \"מחממים את הטאבון במצב פיצה ל-370°C למשך 2 דקות ו-30 שניות.\",\n    \"מכניסים 4 יחידות לטאבון חם, לוחצים להתחלה והשעון רץ; לאחר 2 דקות ו-30 שניות יוצאים הסמבוסקים.\",\n    \"מגישים עם ביצה קשה, ירקות או כל תוספת לפי הטעם.\"\n  ]\n}",
+      "n_ingredients": 18,
+      "n_steps": 13,
+      "to_taste": ["מלח (למילוי פטריות)", "שומשום", "ביצה"],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "he-foodgever": {
+      "model": "openai/gpt-oss-120b",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 4.2,
+      "raw": "{\"title\":\"הום פרייז של דיקסי\",\"description\":\"מתכון ביתי של הום פרייז עם רוטב צ׳ילי מתוק ושמנת לבישול, מבוסס על מתכון של דיקסי האמריקאית.\",\"servings\":null,\"tags\":[],\"ingredients\":[{\"name\":\"תפוחי אדמה\",\"amount\":4,\"unit\":\"unit\",\"note\":\"בינוניים-גדולים\"},{\"name\":\"פלפל אדום\",\"amount\":1,\"unit\":\"unit\",\"note\":\"לא גמבה\"},{\"name\":\"בצל\",\"amount\":2,\"unit\":\"unit\",\"note\":\"גדול\"},{\"name\":\"רוטב צ’ילי מתוק\",\"amount\":1,\"unit\":\"cup\"},{\"name\":\"שמנת לבישול 15%\",\"amount\":0.33,\"unit\":\"cup\"},{\"name\":\"מלח\",\"to_taste\":true},{\"name\":\"שמן רגיל\",\"to_taste\":true},{\"name\":\"שמן\",\"amount\":2,\"unit\":\"tbsp\",\"note\":\"ל ווק\"},{\"name\":\"סוכר\",\"to_taste\":true}],\"steps\":[\"מחממים תנור ל-200 מעלות.\",\"חותכים את תפוחי האדמה לקוביות קטנות ומערבבים עם כפית מלח וכף שמן רגיל, ומכניסים לתנור 30-40 דקות עד שהן שחומות אך לא שרופות.\",\"חותכים את הבצלים והפלפלים לרצועות דקות מאוד.\",\"מחממים ווק עם אש גבוהה ו-2 כפות שמן, מטגנים את הבצלים והפלפלים עם קצת מלח וקצת סוכר 20-25 דקות עם מכסה סגור עד שהם שקופים, עייפים וטיפה שחומים.\",\"מנמיכים את האש ומוסיפים לתוך הווק את רוטב הצ׳ילי המתוק והשמנת לבישול, מערבבים היטב.\",\"מוסיפים את תפוחי האדמה המטוגנים או האפויים לתוך הווק, מערבבים ומבשלים עוד כמה דקות.\",\"מגישים עם סלט ותוכניות לדיאטה.\"]}",
+      "n_ingredients": 9,
+      "n_steps": 7,
+      "to_taste": ["מלח", "שמן רגיל", "סוכר"],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    }
+  },
+  "gemini:gemini-3.5-flash-lite": {
+    "en-handletheheat": {
+      "model": "gemini-3.5-flash-lite",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 3.3,
+      "raw": "{\n  \"title\": \"עוגיות שוקולד צ'יפס בסגנון מאפייה\",\n  \"description\": \"עוגיות שוקולד צ'יפס עבות, לעיסות ונימוחות עם קצוות פריכים.\",\n  \"servings\": null,\n  \"ingredients\": [\n    {\n      \"name\": \"קמח לבן\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": \"מדוד היטב\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"סודה לשתייה\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"מלח\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": \"מומלץ מלח ים דק\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"חמאה\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": \"לא מלוחה, בטמפרטורת החדר הקרה\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"סוכר לבן\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": \"סוכר גרגירים\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"סוכר חום\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"ביצים\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": \"בטמפרטורת החדר\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"תמצית וניל\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"שוקולד צ'יפס\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": \"עדיף חצי מתוק\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    }\n  ],\n  \"steps\": [\n    \"לערבב יחד את החומרים היבשים כדי לפזר באופן אחיד את המלח והסודה לשתייה.\",\n    \"להוסיף את החמאה. לוודא שהיא בטמפרטורת החדר הקרה.\",\n    \"להקציף את החמאה והסוכרים במשך 2-3 דקות במהירות בינונית-גבוהה עד לקבלת תערובת בהירה ואוורירית.\",\n    \"להוסיף את הביצים והווניל, ולוודא שהביצים בטמפרטורת החדר.\",\n    \"להוסיף את החומרים היבשים ולהתחיל לערבב במהירות נמוכה.\",\n    \"להוסיף את השוקולד צ'יפס ולערבב ידנית בעזרת לקקן.\",\n    \"לאפות או לקרר את בצק העוגיות במקרר לפני האפייה לקבלת מרקם וטעם משופרים.\"\n  ],\n  \"tags\": [\n    \"עוגיות\",\n    \"שוקולד צ'יפס\",\n    \"אפייה\",\n    \"קינוחים\"\n  ]\n}",
+      "n_ingredients": 9,
+      "n_steps": 7,
+      "to_taste": [],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "en-caputo": {
+      "model": "gemini-3.5-flash-lite",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 3.1,
+      "raw": "{\n  \"title\": \"מתכון לפיצה נפוליטנית אותנטית\",\n  \"description\": \"הכינו פיצה נפוליטנית משלכם עם בצק מסורתי וקמח קאפוטו 00.\",\n  \"servings\": 6,\n  \"ingredients\": [\n    {\n      \"name\": \"שמרים אינסטנט\",\n      \"amount\": 3,\n      \"unit\": \"g\",\n      \"note\": \"1 כפית\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"קמח פיצרייה קאפוטו 00\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"מים\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"מלח\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"סמולינה קאפוטו\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": \"לקימוح השיש\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"עגבניות צ'או\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": \"לתוספות\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    }\n  ],\n  \"steps\": [\n    \"באמצעות מיקסר עם וו לישה, הוסיפו את שמרים האינסטנט וקמח הפיצרייה קאפוטו 00 וערבבו במהירות הראשונה במשך 2 דקות.\",\n    \"הוסיפו את המים וערבבו במשך 5 דקות.\",\n    \"לאחר מכן, הוסיפו את המלח וערבבו במשך 10-12 דקות, או עד שהבצק חלק ויוצר צורת דלעת.\",\n    \"הוציאו את הבצק מהמיקסר והניחו לו לנוח במשך 30 דקות.\",\n    \"חלקו את הבצק לשישה כדורים במשקל 270 גרם כל אחד והניחו אותם במגש התפחה.\",\n    \"הניחו לכדורי הבצק לנוח בטמפרטורת החדר במשך שעה אחת לפני הכנסתם למקרר למשך 24 שעות.\",\n    \"ביום העוקב, הוציאו את הבצק מהמקרר 3-4 שעות לפני השימוש המיועד.\",\n    \"שעה לפני האפייה, הדליקו את התנור בחום גבוה ותנו לו להגיע לטמפרטורה, מומלץ לאפות בטמפרטורות הגבוהות ביותר של 900 מעלות ומעלה לקראסט נפוליטני אמיתי.\",\n    \"לאחר מכן, מתחו את הפיצה על משטח עבודה מקומח קלות באמצעות סמולינה של קאפוטו, ואז הוסיפו את התוספות האהובות עליכם.\",\n    \"העבירו את הפיצה למרדדת פיצה (מרבד) והחליקו אותה בעדינות מהמרדדת אל תוך התנור שחומם מראש.\",\n    \"ברגע שהפיצה בפנים, התחילו לסובב אותה כל 20 שניות בערך כדי להימנע מחריכה על השוליים. לאחר כ-90-120 שניות הפיצה תהיה מוכנה להוצאה.\",\n    \"אנו ממליצים לחתוך ולהגיש את הפיצות מיד.\"\n  ],\n  \"tags\": [\n    \"פיצה\",\n    \"איטלקי\",\n    \"אפייה\"\n  ]\n}",
+      "n_ingredients": 6,
+      "n_steps": 12,
+      "to_taste": [],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "he-anatelisha": {
+      "model": "gemini-3.5-flash-lite",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 4.2,
+      "raw": "{\n  \"title\": \"קובה בורגול\",\n  \"description\": \"קובה בורגול מסורתית מעולה, מבצק בורגול וסולת ומילוי בשר עשיר.\",\n  \"servings\": null,\n  \"ingredients\": [\n    {\n      \"name\": \"בורגול דק\",\n      \"amount\": 2.0,\n      \"unit\": \"cup\",\n      \"note\": \"ג'רישה\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"סולת\",\n      \"amount\": 1.0,\n      \"unit\": \"cup\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"מים רותחים\",\n      \"amount\": 3.0,\n      \"unit\": \"cup\",\n      \"note\": \"משתמשים באותה הכוס\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"מלח\",\n      \"amount\": 1.0,\n      \"unit\": \"tsp\",\n      \"note\": \"למעטפת\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"פפריקה מתוקה\",\n      \"amount\": 1.0,\n      \"unit\": \"tsp\",\n      \"note\": \"כפית שטוחה\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"כורכום\",\n      \"amount\": 0.5,\n      \"unit\": \"tsp\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"שמן\",\n      \"amount\": 0.25,\n      \"unit\": \"cup\",\n      \"note\": \"למעטפת\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"קמח\",\n      \"amount\": 0.5,\n      \"unit\": \"cup\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"מים חמימים\",\n      \"amount\": 0.5,\n      \"unit\": \"cup\",\n      \"note\": \"רבע עד חצי כוס\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"בשר בקר טחון\",\n      \"amount\": 700.0,\n      \"unit\": \"g\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"בצלים\",\n      \"amount\": 5.0,\n      \"unit\": \"unit\",\n      \"note\": \"גדולים קצוצים\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"בהרט לקובה\",\n      \"amount\": 1.0,\n      \"unit\": \"tbsp\",\n      \"note\": \"כף מלאה\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"הל\",\n      \"amount\": 0.25,\n      \"unit\": \"tsp\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"פלפל שחור/לבן\",\n      \"amount\": 1.0,\n      \"unit\": \"tsp\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"מלח\",\n      \"amount\": 1.0,\n      \"unit\": \"tsp\",\n      \"note\": \"לפי טעם אישי, כפית מלאה\",\n      \"to_taste\": true,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"שמן\",\n      \"amount\": 4.5,\n      \"unit\": \"tbsp\",\n      \"note\": \"4-5 כפות שמן למילוי\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"צנוברים\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": \"קלויים, מומלץ להוסיף\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"צימוקים בהירים\",\n      \"amount\": 4.0,\n      \"unit\": \"tbsp\",\n      \"note\": \"קצוצים\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"שמן\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": \"עמוק לטיגון\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    }\n  ],\n  \"steps\": [\n    \"בקערה מניחים בורגול דק סולת ו 3 כוסות מים רותחים. מערבבים ומכסים. מניחים בצד לשעה\",\n    \"בעזרת מזלג מאווררים מעט את תערובת הסולת והבורגול וטוחנים במטחנת בשר (אפשר במעבד מזון)\",\n    \"מוסיפים את שאר מרכיבי המעטפת ולשים היטב לבצק נעים ונוח. (מתחילים עם רבע כוס מים ומוסיפים לפי מידת הצורך).\",\n    \"מכסים בניילון נצמד ושמים למנוחה של שעה.\",\n    \"מחממים שמן בסיר רחב ומוסיפים את הבשר, מטגנים עד שהנוזלים מתאדים ומוסיפים את הבצל.\",\n    \"מטגנים כ 10 דק' ומוסיפים תבלינים . מערבבים היטב, מוסיפים צנוברים וצימוקים, מערבבים ומסירים מהאש.\",\n    \"מצננים לחלוטין.\",\n    \"עובדים קבוע עם ידיים רטובות או עם מעט שמן. לוקחים מעט מהבצק ויוצרים עיגול. בעזרת האגודל יוצרים חור באמצע ומרחיבים אותו בעדינות ממלאים במילוי הבשר וסוגרים ומהדקים. מניחים על נייר אפיה נקי. ממשיכים כך עם השאר.\",\n    \"מחממים שמן עמוק ומטגנים את הקובות עד הזהבה.\"\n  ],\n  \"tags\": [\n    \"קובה\",\n    \"אוכל עיראקי\",\n    \"מטגנים\",\n    \"בשר\"\n  ]\n}",
+      "n_ingredients": 19,
+      "n_steps": 9,
+      "to_taste": ["מלח"],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    },
+    "he-kobiedri": {
+      "model": "gemini-3.5-flash-lite",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 4.4,
+      "raw": "{\n  \"title\": \"סמבוסק פיצה ופטריות בטאבון\",\n  \"description\": \"סמבוסק פיצה ופטריות מדהים ופריח שמוכן בטאבון.\",\n  \"servings\": 15,\n  \"ingredients\": [\n    {\n      \"name\": \"קמח לבן מנופה\",\n      \"amount\": 1,\n      \"unit\": \"kg\",\n      \"note\": \"לבצק\",\n      \"to_taste\": false,\n      \"source_amount\": 1,\n      \"source_unit\": \"lb\"\n    },\n    {\n      \"name\": \"שמרים טריים או יבשים\",\n      \"amount\": 50,\n      \"unit\": \"g\",\n      \"note\": \"שמרית או 20 גרם שמרים יבשים (כף)\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"מלח\",\n      \"amount\": 20,\n      \"unit\": \"g\",\n      \"note\": \"כף אחת לבצק\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"מים חמימים\",\n      \"amount\": 500,\n      \"unit\": \"ml\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"אבקת סודה\",\n      \"amount\": 0.5,\n      \"unit\": \"tsp\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"סוכר\",\n      \"amount\": 20,\n      \"unit\": \"g\",\n      \"note\": \"כף\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"גבינה צהובה מגורדת\",\n      \"amount\": 0.5,\n      \"unit\": \"kg\",\n      \"note\": \"למילוי פיצה\",\n      \"to_taste\": false,\n      \"source_amount\": 1,\n      \"source_unit\": \"lb\"\n    },\n    {\n      \"name\": \"עגבניות במיץ\",\n      \"amount\": 1,\n      \"unit\": \"can\",\n      \"note\": \"קופסת שימורים לרוטב\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"רסק עגבניות מרוכז\",\n      \"amount\": 1,\n      \"unit\": \"tbsp\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"אורגנו\",\n      \"amount\": 1,\n      \"unit\": \"tsp\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"סוכר\",\n      \"amount\": 1,\n      \"unit\": \"tsp\",\n      \"note\": \"לרוטב\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"מלח\",\n      \"amount\": 0.5,\n      \"unit\": \"tsp\",\n      \"note\": \"לרוטב\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"גבינה משולשת או מותכת\",\n      \"amount\": 14,\n      \"unit\": \"unit\",\n      \"note\": \"משולשים למילוי המשולשת פטריות\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"פטריות שמפניון חתוכות מסוננת מנוזל\",\n      \"amount\": 1,\n      \"unit\": \"can\",\n      \"note\": \"קופסת שימורים\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"מלח\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": \"מעט למילוי פטריות\",\n      \"to_taste\": true,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"שומשום\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": \"לציפוי\",\n      \"to_taste\": true,\n      \"source_amount\": null,\n      \"source_unit\": null\n    }\n  ],\n  \"steps\": [\n    \"בקערת מיקסר עם וו לישה שמים את הקמח, השמרים, הסוכר ואבקת הסודה.\",\n    \"מפעילים מהירות 3 ומוסיפים בהדרגה את המים, ברגע שנוצר בצק מוסיפים את המלח ולשים כ-10 דקות.\",\n    \"מכסים את הבצק במגבת ומתפיחים 40 דקות להכפלת הנפח.\",\n    \"מוציאים את הבצק ויוצרים כדורים. לסמבוסק פיצה יוצרים 8 כדורים גודל קלמנטינה ולסמבוסק פטריות 14 כדורים כגודל כדור פינג פונג (כל 2 כדורים ישמשו לסמבוסק אחד).\",\n    \"מכסים את הכדורים ומתפיחים כ-20 דקות נוספות.\",\n    \"מערבבים בקערה את מרכיבי רוטב הפיצה.\",\n    \"לסמבוסק פיצה: פותחים את הכדור הגדול עם טיפונת קמח על השיש דק, שמים במרכז טיפונת רוטב פיצה והרבה גבינה צהובה, מקפלים כל דופן לכיוון המרכז ליצירת משולש, מורחים בביצה והופכים על שומשום. מתפיחים מכוסים 10 דקות.\",\n    \"למשולשת פטריות: פותחים 2 כדורי בצק, שמים פטריות במרכז, מעט מלח ו-2 חתיכות גבינה מותכת, מורחים שוליים בביצה וסוגרים עם עיגול נוסף, מהדקים וחותכים דפנות עם קערה עגולה, מורחים ומצפים בשומשום.\",\n    \"מחממים את הטאבון במצב פיצה 370 מעלות ומכניסים 4 יחידות למשך 2:30 דקות עד להזהבה.\"\n  ],\n  \"tags\": [\n    \"סמבוסק\",\n    \"פיצה\",\n    \"פטריות\",\n    \"טאבון\",\n    \"מאפים\"\n  ]\n}",
+      "n_ingredients": 16,
+      "n_steps": 9,
+      "to_taste": ["מלח", "שומשום"],
+      "no_unit_with_amount": [],
+      "source_units_kept": 2
+    },
+    "he-foodgever": {
+      "model": "gemini-3.5-flash-lite",
+      "valid_first": true,
+      "valid_after_retry": true,
+      "error": null,
+      "secs": 2.6,
+      "raw": "{\n  \"title\": \"הום פרייז של דיקסי\",\n  \"description\": \"הום פרייז ביתיים ברוטב צ'ילי ושמנת עם תפוחי אדמה אפויים ובצלים מטוגנים.\",\n  \"servings\": null,\n  \"ingredients\": [\n    {\n      \"name\": \"תפוחי אדמה\",\n      \"amount\": 4,\n      \"unit\": \"unit\",\n      \"note\": \"בינוניים-גדולים\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"פלפל אדום\",\n      \"amount\": 1,\n      \"unit\": \"unit\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"בצלים\",\n      \"amount\": 2,\n      \"unit\": \"unit\",\n      \"note\": \"גדולים\",\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"רוטב צ'ילי מתוק\",\n      \"amount\": 1,\n      \"unit\": \"cup\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"שמנת לבישול 15%\",\n      \"amount\": 0.33,\n      \"unit\": \"cup\",\n      \"note\": null,\n      \"to_taste\": false,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"מלח\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": null,\n      \"to_taste\": true,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"שמן\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": null,\n      \"to_taste\": true,\n      \"source_amount\": null,\n      \"source_unit\": null\n    },\n    {\n      \"name\": \"סוכר\",\n      \"amount\": null,\n      \"unit\": null,\n      \"note\": null,\n      \"to_taste\": true,\n      \"source_amount\": null,\n      \"source_unit\": null\n    }\n  ],\n  \"steps\": [\n    \"מחממים תנור ל-200 מעלות.\",\n    \"חותכים את תפוחי האדמה לקוביות קטנות.\",\n    \"מערבבים את קוביות תפוחי האדמה עם כפית מלח וכף שמן, ואופים בתנור במשך 30-40 דקות עד שהן שחומות אך לא שרופות.\",\n    \"בזמן שהתנור פועל, חותכים את הבצלים והפלפלים לרצועות דקות מאוד.\",\n    \"מחממים ווק על אש גבוהה עם 2 כפות שמן ומטגנים את הבצלים והפלפלים עם קצת מלח וקצת סוכר במשך 20-25 דקות עם מכסה סגור, עד שהם שקופים, עייפים וטיפה שחומים, ולאחר מכן מנמיכים את האש.\",\n    \"מוסיפים לווק את הצ'ילי והשמנת ומערבבים היטב.\",\n    \"שופכים את תפוחי האדמה האפויים פנימה, מערבבים טוב ונותנים להכל להתבשל עוד כמה דקות.\",\n    \"מגישים חם.\"\n  ],\n  \"tags\": [\n    \"הום פרייז\",\n    \"תפוחי אדמה\",\n    \"חלבי\",\n    \"תוספות\"\n  ]\n}",
+      "n_ingredients": 8,
+      "n_steps": 8,
+      "to_taste": ["מלח", "שמן", "סוכר"],
+      "no_unit_with_amount": [],
+      "source_units_kept": 0
+    }
+  }
+}

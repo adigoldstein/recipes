@@ -1,0 +1,16 @@
+en-handletheheat input chars: 12000
+en-caputo input chars: 1858
+he-anatelisha input chars: 1781
+he-kobiedri input chars: 2532
+he-foodgever input chars: 2543
+ollama en-handletheheat {'valid_first': False, 'valid_after_retry': False, 'error': 'ReadTimeout: timed out', 'secs': 902.2}
+ollama en-caputo {'valid_first': False, 'valid_after_retry': False, 'error': "HTTPStatusError: Server error '500 Internal Server Error' for url 'http://localhost:11434/api/chat'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500", 'secs': 151.0}
+ollama he-anatelisha {'valid_first': True, 'valid_after_retry': True, 'error': None, 'secs': 179.6, 'n_ingredients': 17, 'n_steps': 5, 'to_taste': ['מלח', 'פפריקה מתוקה', 'קורכום', 'שמן', 'קמח', 'מים חמימים', 'מלח'], 'no_unit_with_amount': [], 'source_units_kept': 0}
+ollama he-kobiedri {'valid_first': True, 'valid_after_retry': True, 'error': None, 'secs': 245.5, 'n_ingredients': 15, 'n_steps': 19, 'to_taste': [], 'no_unit_with_amount': ['משולשי גבינה משולשת/מותכת'], 'source_units_kept': 2}
+ollama he-foodgever {'valid_first': True, 'valid_after_retry': True, 'error': None, 'secs': 109.3, 'n_ingredients': 5, 'n_steps': 11, 'to_taste': ['תפוחי אדמה', 'פלפל אדום', 'בצלים גדולים'], 'no_unit_with_amount': [], 'source_units_kept': 0}
+en-handletheheat input chars: 12000
+en-caputo input chars: 1858
+he-anatelisha input chars: 1781
+he-kobiedri input chars: 2532
+he-foodgever input chars: 2543
+stream probe: {'chunks': 804, 'first_chunk_secs': 2.4, 'total_secs': 133.1, 'chars': 1946, 'streams_incrementally': True}
