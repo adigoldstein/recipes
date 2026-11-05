@@ -145,12 +145,14 @@ flowchart LR
 - **Rule:**
   - `imports` depends only on the `LlmProvider` Protocol: `extract(source) -> DraftRecipe`.
   - Adapters are registered **by name** in a provider registry, enabled from config:
-    - `ollama`: local, the default for now.
-    - `gemini`: free tier, the optional backup.
+    - `gemini`: free tier, model names from config (`gemini-3.5-flash-lite` first, then `gemini-3.5-flash`).
+    - `groq`: free tier, `openai/gpt-oss-120b`, the last engine in the chain.
     - `fake`: used by tests and CI, which never call a real model.
-  - The import dialog lists the enabled providers and offers a one-click "retry with Gemini".
+  - Changed 2026-11-04 after the Story 5.1 spike (Adi): the default order is `gemini-3.5-flash-lite`, then `gemini-3.5-flash`, then Groq `gpt-oss-120b`, then a clear "paste the text" message. Ollama and Groq's qwen model are dropped (too slow on the dev PC, and empty drafts). Results: `tools/llm-spike/RESULTS.md`.
+  - The chain moves to the next engine on a 429/503/quota error, on invalid JSON after the one retry, or on an empty ingredient list. A daily-quota 429 is never waited out.
+  - The import dialog shows which engine produced the draft.
   - Every provider returns schema-constrained JSON, validated against the shared Pydantic `DraftRecipe`, with one retry on a validation failure (AD-34). The draft is Hebrew-translated, has units mapped to the app list, and suggests tags from the existing list (new tag names are proposed in the draft).
-  - An import is **one request that streams its progress as SSE** (AD-40), with a per-provider timeout (`ollama` ≈ 180s, `gemini` 60s), and the client aborts it on cancel. _(Changed 2026-11-04: was "one synchronous request".)_
+  - An import is **one request that streams its progress as SSE** (AD-40), with a per-provider timeout (`gemini-3.5-flash-lite` 30s, `gemini-3.5-flash` 90s, `groq` 90s; set from the Story 5.1 spike), and the client aborts it on cancel. _(Changed 2026-11-04: was "one synchronous request".)_
   - Drafts are **never persisted** (FR-19). A new provider means one adapter plus one config entry.
 
 ### AD-13 — Safe import pipeline [ADOPTED]
@@ -178,7 +180,7 @@ flowchart LR
 
 - **Binds:** NFR-6, AD-6, AD-14, deployment
 - **Prevents:** cross-origin cookie problems, and split deploy units drifting apart.
-- **Rule:** The production image is a single container. FastAPI serves the built SPA (with fallback to `index.html` for client routes), `/api/*` and `/media/*`. The SQLite file and the photos live on one mounted volume (`/data`). `docker compose up` runs this image locally. Day-to-day dev is `npm run dev`: Nx runs `web` and `recipe-service` together, and Vite proxies `/api` and `/media` to FastAPI. Ollama runs as the native Windows app and is reached by URL from config.
+- **Rule:** The production image is a single container. FastAPI serves the built SPA (with fallback to `index.html` for client routes), `/api/*` and `/media/*`. The SQLite file and the photos live on one mounted volume (`/data`). `docker compose up` runs this image locally. Day-to-day dev is `npm run dev`: Nx runs `web` and `recipe-service` together, and Vite proxies `/api` and `/media` to FastAPI. The AI engines (Gemini, Groq) are hosted free-tier APIs reached with keys from config (Ollama was dropped on 2026-11-04).
 
 ### AD-16 — Tests per layer, never a real model [ADOPTED]
 
@@ -384,7 +386,7 @@ flowchart LR
 - **Binds:** AD-12, AD-22, F9
 - **Prevents:** malformed drafts reaching the form, a third-party structured-output library, and endless retry loops.
 - **Rule:**
-  - The single Pydantic `DraftRecipe` is the only output contract. Each adapter sends `DraftRecipe.model_json_schema()` to its provider's native structured-output option (Ollama `format`, Gemini `response_schema`).
+  - The single Pydantic `DraftRecipe` is the only output contract. Each adapter sends `DraftRecipe.model_json_schema()` to its provider's native structured-output option (Gemini `responseJsonSchema`, Groq `response_format` of type `json_schema`). A reply that passes the schema but has no ingredients counts as a failure (the spike saw this with one Groq model).
   - The reply is validated with `DraftRecipe.model_validate_json()`. On failure, the adapter retries **once**, feeding the validation error back to the model. A second failure returns `llm_invalid_output`.
   - The Instructor library (or similar) is not used.
   - The prompt text lives in the imports module with a `PROMPT_VERSION` constant, recorded on every run (AD-38).
@@ -421,6 +423,7 @@ flowchart LR
 - **Prevents:** guessing which provider is slow, costly or unreliable, and a second log table drifting from the daily cap.
 - **Rule:**
   - One `import_runs` table (via Alembic) replaces `import_log`. Each import writes one row: `user_id`, `provider`, `model`, `source_kind` (url/text), `path` (`json_ld` or `llm`), `prompt_version`, `latency_ms`, `input_tokens`, `output_tokens`, `first_try_valid` (bool), `retried` (bool), `outcome` (`ok` or an error code), `created_at`. It also counts the daily cap.
+  - _(Added 2026-11-04, Adi.)_ Each engine tried in the chain also writes one `import_attempts` row (`run_id`, `provider`, `model`, `attempt_no`, `outcome` of `ok` or an error code, `latency_ms`, `input_tokens`, `output_tokens`, `created_at`), so a run that fell back from one engine to the next shows every step. Failure rates and **consecutive-failure streaks per provider/model** are computed from `import_attempts` on request, and the dashboard flags a model with a failure streak or a high recent failure rate (the thresholds are set in Story 5.8).
   - An admin-only "AI dashboard" page in `libs/feature-import` reads `GET /api/admin/import-stats` (admin). The server computes the aggregates **on request** with SQL `GROUP BY` (by provider/model and by day). There is no background job and no pre-aggregated table.
   - The charting library for the dashboard is still open (see Open).
 
@@ -442,7 +445,7 @@ flowchart LR
   - `POST /api/imports/url` and `POST /api/imports/text` answer with `text/event-stream` (FastAPI `StreamingResponse`; no extra library). The client reads it with `fetch` and a stream reader (not `EventSource`, which can't POST or send the CSRF header).
   - Events: `stage` `{name, status}` with `name` in `fetch | extract | validate | convert_units | translate` and `status` in `started | done | skipped`; `ingredient` `{index, partial}` while the model is still generating; `draft` `{DraftRecipe}` at the end; `error` `{code, params?}` per AD-28.
   - Only real stages are reported. There is **no percentage bar**.
-  - Ingredients stream live with Ollama (streaming JSON, parsed incrementally). A provider that can't stream sends stage events only.
+  - Ingredients stream live when the provider streams JSON that can be parsed incrementally. The spike proved this only for Ollama, which is no longer in the chain; Gemini and Groq streaming is **not yet verified**. A provider that can't stream sends stage events only, and live ingredients are an extra, not a requirement.
   - Errors found before the stream starts (auth, CSRF, cap, duplicate, unknown provider) use normal HTTP status codes. After the stream starts, errors are `error` events.
   - Cancel = the client aborts the request; the server notices the disconnect and cancels the provider call. Per-provider timeouts (AD-22) still apply.
 
@@ -459,6 +462,17 @@ flowchart LR
   - **API contract unchanged (AD-20):** the regenerated `openapi.json` is byte-identical, and the frontend does not change.
   - **Migration 0005 (AD-29):** backs up `app.db` first (never overwriting an earlier backup), copies every row into the JSON in `position` order, verifies the item counts and that every recipe still has an ingredient and a step before it drops the old tables, and rolls back on any mismatch. The downgrade rebuilds both tables from the JSON, and a round-trip test covers it.
   - **Later:** searching by ingredient can use SQLite `json_each(...)`. AI import (AD-34) and embeddings read and write the same item shapes.
+
+### AD-42 — Provider cool down (circuit breaker) [ADOPTED]
+
+- **Binds:** AD-12, AD-22, AD-38
+- **Prevents:** every import waiting on an engine that is down, wasted quota on retry storms, and waiting hours for a daily quota to return.
+- **Rule:** _(Approved by Adi 2026-11-04.)_
+  - The provider chain (AD-12) keeps a small **in-memory** state per provider/model: the count of consecutive failures. A failure is a 429, 503, timeout, invalid JSON after the AD-34 retry, or an empty ingredient list.
+  - After **3 consecutive failures**, the engine is skipped for **5 minutes** and the chain moves straight to the next one. One success resets the count.
+  - A quota error that says when it resets (for example "retry in 13h") skips the engine until then, and it is never waited out or retried.
+  - The state is not stored in the database (a restart clears it). Every attempt, including skipped ones, is still logged in `import_attempts` (AD-38), with a `skipped_cooldown` outcome.
+  - This is not a per-user rate limit: the daily import cap (AD-29) already protects the quota.
 
 ## Brownfield ratification
 
@@ -530,7 +544,7 @@ apps/
   recipe-service/app/
     core/              # config, db, errors, security
     recipes/ tags/ auth/ users/ imports/ photos/   # each: router.py service.py repository.py models.py schemas.py
-    imports/providers/ # ollama.py gemini.py fake.py registry.py
+    imports/providers/ # gemini.py groq.py fake.py registry.py
 libs/
   feature-recipes/     # pages + containers: library, detail, editor (src/routes/<page>.tsx)
   feature-auth/        # login, account
@@ -558,9 +572,9 @@ libs/
 
 ## Open
 
-- **Default LLM provider:** `ollama` for now; confirm after the spike (about 5 real recipes, timing plus Hebrew quality).
+- **Hebrew quality scores:** the spike's default chain (AD-12) is decided, but Adi still scores the Hebrew drafts (1-5) in `tools/llm-spike/results/drafts.html`; the order may change if a score is poor.
 - **Haiku adapter:** add when Adi buys credit (one adapter plus config). Writing it earlier is Adi's call.
-- **recipe-scrapers / trafilatura vs BeautifulSoup alone (AD-35):** keep both libraries on top of the HTML from `PageFetcher`, or let BeautifulSoup do all parsing. Decide with Adi after spike 5.1.
+- **recipe-scrapers / trafilatura vs BeautifulSoup alone (AD-35):** keep both libraries on top of the HTML from `PageFetcher`, or let BeautifulSoup do all parsing. Decide with Adi after spike 5.1. _Spike result (2026-11-04): recipe-scrapers worked on exactly the 6 of 14 pages where BeautifulSoup JSON-LD parsing also worked, and failed on the other 8, so it adds nothing; the recommendation is BeautifulSoup alone, with trafilatura only if plain text cleaning proves noisy. Awaiting Adi's decision._
 - **Chart library for the AI dashboard (AD-38):** to propose to Adi before Story 5.8 (it must use the design tokens and stay out of the visitor bundle).
 
 ## Deferred
