@@ -4,8 +4,8 @@ import pytest
 from fastapi import FastAPI
 from pydantic import ValidationError
 
+from app.core.units import COUNTABLE_UNITS, SourceUnit, Unit
 from app.recipes.schemas import DESCRIPTION_MAX_LENGTH, NOTES_MAX_LENGTH, RecipeRead
-from app.recipes.units import COUNTABLE_UNITS, SourceUnit, Unit
 
 
 @pytest.fixture

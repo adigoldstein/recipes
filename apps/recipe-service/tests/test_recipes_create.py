@@ -7,11 +7,11 @@ from pydantic import ValidationError
 from sqlmodel import Session, col, func, select
 
 from app.core.errors import AppError, ErrorCode
+from app.core.units import Unit
 from app.photos.service import get_photo_service
 from app.recipes.models import Recipe
 from app.recipes.schemas import IngredientCreate, RecipeCreate, StepCreate
 from app.recipes.service import RecipeService, get_recipe_service
-from app.recipes.units import Unit
 from app.tags.models import Tag
 from app.tags.schemas import TagInput
 from app.tags.service import get_tag_service

@@ -8,8 +8,8 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session
 
+from app.core.units import Unit
 from app.recipes.models import Recipe
-from app.recipes.units import Unit
 from app.users.models import User
 from tests.factories import add_recipe, add_tag, add_user, ingredient, step
 

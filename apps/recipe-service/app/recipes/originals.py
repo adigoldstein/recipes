@@ -7,8 +7,8 @@ uses amounts quantized to 3 decimals; "to taste" is an amount of None, with no u
 from decimal import Decimal
 
 from app.core.db import AMOUNT_QUANTUM
+from app.core.units import Unit
 from app.recipes.models import IngredientItem, OriginalItem
-from app.recipes.units import Unit
 
 Quantity = tuple[Decimal | None, Unit | None]
 

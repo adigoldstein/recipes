@@ -4,9 +4,9 @@ from decimal import Decimal
 
 import pytest
 
+from app.core.units import Unit
 from app.recipes.models import IngredientItem, OriginalItem
 from app.recipes.originals import apply_edit, quantity
-from app.recipes.units import Unit
 
 D = Decimal
 Value = tuple[Decimal | None, Unit | None]

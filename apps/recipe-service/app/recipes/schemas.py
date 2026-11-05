@@ -15,8 +15,8 @@ from pydantic import (
 )
 
 from app.core.db import AMOUNT_QUANTUM
+from app.core.units import SourceUnit, Unit
 from app.photos.schemas import PHOTO_KEY_PATTERN, PhotoRead
-from app.recipes.units import SourceUnit, Unit
 from app.tags.schemas import TagInput, TagRef
 
 DESCRIPTION_MAX_LENGTH = 500
