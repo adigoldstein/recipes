@@ -3,16 +3,25 @@ import { render } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { initI18n } from '@bite-and-board/i18n';
 import { DirectionProvider, Toaster } from '@bite-and-board/ui-components';
-import { Component as RecipeNewPage } from '../routes/recipe-new';
+import { RecipeNewPage, type RecipeNewPageProps } from '../routes/recipe-new';
 
 initI18n();
 
-/** Renders the new-recipe form with stub routes for the library and a saved recipe. */
-export function renderNew(from?: string) {
+/**
+ * Renders the new-recipe form with stub routes for the library and a saved recipe.
+ * `importPanel` fills the page's import slot, like the app does with the AI import.
+ */
+export function renderNew(
+  from?: string,
+  importPanel?: RecipeNewPageProps['importPanel'],
+) {
   const router = createMemoryRouter(
     [
       { path: '/', element: <p>library stub</p> },
-      { path: '/recipes/new', Component: RecipeNewPage },
+      {
+        path: '/recipes/new',
+        element: <RecipeNewPage importPanel={importPanel} />,
+      },
       { path: '/recipes/:id', element: <p>recipe page stub</p> },
     ],
     from

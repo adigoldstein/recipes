@@ -4,10 +4,12 @@ import { HttpResponse, http } from 'msw';
 import {
   recipesListRecipesQueryKey,
   tagsListTagsQueryKey,
+  type DraftRecipe,
   type RecipeRead,
 } from '@bite-and-board/data-access';
 import { toast } from '@bite-and-board/ui-components';
 import { renderNew } from '../testing/render-new';
+import type { RecipeNewPageProps } from './recipe-new';
 import { server } from '../testing/server';
 
 const SAVED: RecipeRead = {
@@ -64,6 +66,96 @@ describe('RecipeNewPage', () => {
   // Toasts live in a module-level store, so one test's would show in the next.
   afterEach(() => {
     toast.dismiss();
+  });
+
+  describe('the import slot', () => {
+    const DRAFT: DraftRecipe = {
+      title: 'עוגיות שוקולד',
+      description: 'עוגיות רכות.',
+      base_servings: 24,
+      prep_time_minutes: 15,
+      ingredients: [{ name: 'קמח', amount: 2, unit: 'cup' }, { name: 'מלח' }],
+      steps: [{ description: 'מערבבים.' }, { description: 'אופים.' }],
+      tags: ['קינוח'],
+      new_tags: ['עוגיות'],
+    };
+
+    /** A stand-in panel: three buttons that drive the slot, and a line showing `dirty`. */
+    const panel: NonNullable<RecipeNewPageProps['importPanel']> = (api) => (
+      <section aria-label="panel stub">
+        <button type="button" onClick={() => api.onDraft(DRAFT)}>
+          fill
+        </button>
+        <button type="button" onClick={() => api.onBusyChange(true)}>
+          busy
+        </button>
+        <button type="button" onClick={() => api.onBusyChange(false)}>
+          idle
+        </button>
+        <p>dirty: {String(api.dirty)}</p>
+      </section>
+    );
+
+    it('has no panel when the app does not provide one', () => {
+      renderNew();
+      expect(screen.queryByLabelText('panel stub')).toBeNull();
+    });
+
+    it('fills the form from a draft the panel hands over', async () => {
+      const user = userEvent.setup();
+      renderNew(undefined, panel);
+      await user.click(screen.getByRole('button', { name: 'fill' }));
+      expect(field('שם המתכון')).toHaveProperty('value', 'עוגיות שוקולד');
+      expect(field('שם המצרך 1')).toHaveProperty('value', 'קמח');
+      expect(field('שם המצרך 2')).toHaveProperty('value', 'מלח');
+      expect(field('שלב 2')).toHaveProperty('value', 'אופים.');
+      expect(screen.getByText('קינוח')).toBeTruthy();
+      expect(screen.getByText('עוגיות')).toBeTruthy();
+    });
+
+    it('saves nothing until the editor presses save', async () => {
+      const sent = serveCreate();
+      const user = userEvent.setup();
+      renderNew(undefined, panel);
+      await user.click(screen.getByRole('button', { name: 'fill' }));
+      expect(sent).toHaveLength(0);
+      await user.click(save());
+      await screen.findByText('recipe page stub');
+      expect(sent).toHaveLength(1);
+      expect(sent[0]).toMatchObject({
+        title: 'עוגיות שוקולד',
+        tags: [{ name: 'קינוח' }, { name: 'עוגיות' }],
+      });
+    });
+
+    it('locks the whole form while the panel is busy and frees it after', async () => {
+      const user = userEvent.setup();
+      renderNew(undefined, panel);
+      const form = () => field('שם המתכון').closest('form');
+      expect(form()?.hasAttribute('inert')).toBe(false);
+      await user.click(screen.getByRole('button', { name: 'busy' }));
+      expect(form()?.hasAttribute('inert')).toBe(true);
+      expect(form()?.getAttribute('aria-busy')).toBe('true');
+      await user.click(screen.getByRole('button', { name: 'idle' }));
+      expect(form()?.hasAttribute('inert')).toBe(false);
+    });
+
+    it('tells the panel when the editor has changed the form', async () => {
+      const user = userEvent.setup();
+      renderNew(undefined, panel);
+      expect(screen.getByText('dirty: false')).toBeTruthy();
+      await user.type(field('שם המתכון'), 'פשטידה');
+      expect(await screen.findByText('dirty: true')).toBeTruthy();
+    });
+
+    it('keeps what was typed when the panel never fills the form', async () => {
+      const user = userEvent.setup();
+      renderNew(undefined, panel);
+      await user.type(field('שם המתכון'), 'פשטידה');
+      await user.click(screen.getByRole('button', { name: 'busy' }));
+      await user.click(screen.getByRole('button', { name: 'idle' }));
+      expect(field('שם המתכון')).toHaveProperty('value', 'פשטידה');
+    });
   });
 
   describe('the form', () => {

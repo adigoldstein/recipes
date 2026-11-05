@@ -32,6 +32,9 @@
     },
     {
       "path": "./libs/feature-tags"
+    },
+    {
+      "path": "./libs/feature-import"
     }
   ],
   "compilerOptions": {}
