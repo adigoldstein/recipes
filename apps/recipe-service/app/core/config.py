@@ -39,6 +39,9 @@ class Settings(BaseSettings):
     gemini_model: str = "gemini-3.5-flash-lite"
     # Seconds to wait for Gemini before the import fails (Story 5.1 spike).
     gemini_timeout_seconds: PositiveInt = 30
+    anthropic_api_key: SecretStr | None = None
+    anthropic_model: str = "claude-haiku-5-5"
+    anthropic_timeout_seconds: PositiveInt = 30
     import_daily_cap: PositiveInt = 50
     # The longest pasted text an import accepts, in characters.
     import_max_chars: PositiveInt = 20_000
@@ -64,7 +67,7 @@ class Settings(BaseSettings):
             return [name.strip() for name in value.split(",") if name.strip()]
         return value
 
-    @field_validator("gemini_api_key", mode="before")
+    @field_validator("gemini_api_key", "anthropic_api_key", mode="before")
     @classmethod
     def _blank_key_is_none(cls, value: object) -> object:
         return None if isinstance(value, str) and not value.strip() else value
