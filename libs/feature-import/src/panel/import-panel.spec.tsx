@@ -88,7 +88,7 @@ describe('ImportPanel', () => {
   });
 
   it('shows progress, tells the page it is busy, and blocks a second request', async () => {
-    const sent = serveDraft(150);
+    const sent = serveDraft(800);
     const user = userEvent.setup();
     const { onBusyChange } = renderPanel();
     await open(user);
@@ -98,10 +98,11 @@ describe('ImportPanel', () => {
       await screen.findByText('מכינים טיוטה. זה יכול לקחת כמה שניות.'),
     ).toBeTruthy();
     expect(onBusyChange).toHaveBeenCalledWith(true);
-    expect(screen.getByRole('button', { name: 'מכינים טיוטה' })).toHaveProperty(
-      'disabled',
-      true,
-    );
+    // At once: disabled; after the short delay the button shows its working label.
+    expect(submit()).toHaveProperty('disabled', true);
+    expect(
+      await screen.findByRole('button', { name: 'מכינים טיוטה' }),
+    ).toHaveProperty('disabled', true);
     expect(textbox()).toHaveProperty('disabled', true);
     await screen.findByText(/^המתכון יובא/);
     expect(sent).toHaveLength(1);

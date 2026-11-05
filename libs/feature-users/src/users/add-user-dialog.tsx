@@ -11,6 +11,7 @@ import {
 } from '@bite-and-board/data-access';
 import {
   Button,
+  PendingButton,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -204,9 +205,13 @@ function AddUserForm({ onDone }: { onDone: () => void }) {
         {formError ? errorMessage(create.error) : null}
       </p>
       <DialogFooter>
-        <Button type="submit" disabled={create.isPending}>
-          {create.isPending ? t('users.add.submitting') : t('users.add.submit')}
-        </Button>
+        <PendingButton
+          type="submit"
+          pending={create.isPending}
+          pendingLabel={t('users.add.submitting')}
+        >
+          {t('users.add.submit')}
+        </PendingButton>
         <Button type="button" variant="outline" onClick={onDone}>
           {t('users.add.cancel')}
         </Button>

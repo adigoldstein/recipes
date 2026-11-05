@@ -83,3 +83,17 @@ export {
   type ServingsStepperProps,
 } from './components/servings-stepper';
 export { useIsDesktop, useMediaQuery } from './hooks/use-media-query';
+export {
+  PendingButton,
+  SlowNote,
+  type PendingButtonProps,
+  type SlowNoteProps,
+} from './components/pending-button';
+export {
+  PENDING_DELAY_MS,
+  PENDING_MIN_MS,
+  SLOW_AFTER_LONG_MS,
+  SLOW_AFTER_MS,
+  usePendingVisible,
+  useSlowPending,
+} from './hooks/use-pending';

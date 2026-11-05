@@ -109,7 +109,11 @@ Behavioural only. The visual specs are in `DESIGN.md.Components`.
 | Not found | Detail and unknown routes | "המתכון לא נמצא" with "חזרה לרשימה". |
 | Photo upload | Form | An inline thumbnail with upload progress. A wrong type or too large a file is rejected with the allowed limits shown beside the field (limits set in architecture). |
 | No photo | Detail | The photo slot is omitted. The title opens the page. With a photo, the title and description come first and the photo follows them (as on the cards). |
-| Import running | Import | Phase text, an indeterminate progress bar, and Cancel. The rest of the app is still usable on desktop [ASSUMPTION]. |
+| Action running | Any button that waits on the server | The button is disabled at once. After 0.3 s it shows a spinner and a present-tense label ("שומרים", "מוחקים") at the same width, kept for at least 0.5 s. No cancel or retry while it runs (Story 2.7, AD-43). |
+| Action slow | Same | After 10 s (30 s for an import or photo upload) a line says "זה לוקח יותר זמן מהרגיל". |
+| Outcome unknown | A write that passed the client's time limit | "לא ברור אם הפעולה הושלמה"; the app refetches before offering a retry. A read or an import gets "לנסות שוב". |
+| Pin a tag | Tags | The pin changes at once and rolls back with a message if the server refuses. |
+| Import running | New-recipe page | The form is locked, the panel shows "מכינים טיוטה"; no Cancel (changed 2026-11-05: a cancel button could leave the user unsure what was saved). |
 | Import fetch failed | Import / URL tab | A message suggesting the paste tab, with a one-click switch that keeps the dialog open (FR-17). |
 | Import no recipe | Import / text tab | "לא נמצא מתכון בטקסט הזה". The text is kept so it can be fixed. |
 | Import LLM error or timeout | Import | A readable reason (service unavailable, quota, too slow) and "לנסות שוב". Nothing is saved. |

@@ -16,6 +16,8 @@ from sqlmodel import Session, SQLModel, create_engine
 from app.core.config import Settings, get_settings
 
 DB_FILENAME = "app.db"
+# Written out, so the wait is documented rather than a driver default (AD-43).
+BUSY_TIMEOUT_MS = 5000
 
 # Stable constraint names, so Alembic batch mode can recreate SQLite tables.
 # Set before any model is defined: models import this module.
@@ -122,6 +124,8 @@ def _set_sqlite_pragmas(dbapi_connection: Any, _record: Any) -> None:
     cursor = dbapi_connection.cursor()
     cursor.execute("PRAGMA foreign_keys=ON")
     cursor.execute("PRAGMA journal_mode=WAL")
+    # How long a write waits for the lock before it fails and rolls back (AD-43).
+    cursor.execute(f"PRAGMA busy_timeout={BUSY_TIMEOUT_MS}")
     cursor.close()
 
 

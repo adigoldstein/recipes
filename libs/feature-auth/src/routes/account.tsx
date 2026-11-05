@@ -14,7 +14,7 @@ import {
 } from '@bite-and-board/data-access';
 import {
   BackLink,
-  Button,
+  PendingButton,
   FormField,
   Input,
   RequiredNote,
@@ -164,11 +164,13 @@ function ChangePasswordSection() {
         <p role="alert" className="text-sm text-destructive">
           {formLevelError}
         </p>
-        <Button type="submit" disabled={change.isPending}>
-          {change.isPending
-            ? t('account.password.submitting')
-            : t('account.password.submit')}
-        </Button>
+        <PendingButton
+          type="submit"
+          pending={change.isPending}
+          pendingLabel={t('account.password.submitting')}
+        >
+          {t('account.password.submit')}
+        </PendingButton>
       </form>
     </section>
   );

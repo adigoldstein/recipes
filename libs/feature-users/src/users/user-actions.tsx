@@ -64,6 +64,7 @@ function ConfirmChange({
       cancelLabel={t('users.cancel')}
       destructive={change === 'block'}
       pending={update.isPending}
+      pendingLabel={t('users.change.pending')}
       error={update.isError ? errorMessage(update.error) : undefined}
       onConfirm={() =>
         update.mutate(

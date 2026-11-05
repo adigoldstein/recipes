@@ -1,7 +1,8 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { HttpResponse, http } from 'msw';
+import { HttpResponse, delay, http } from 'msw';
 import type { TagRead } from '@bite-and-board/data-access';
+import { toast } from '@bite-and-board/ui-components';
 import { server } from '../testing/server';
 import { renderTags, serveTags } from '../testing/render-tags';
 
@@ -196,6 +197,49 @@ describe('TagsPage', () => {
     await waitFor(() =>
       expect(seen.bodies).toEqual([{ pinned: true }, { pinned: false }]),
     );
+  });
+
+  it('pins at once, before the server has answered', async () => {
+    const user = userEvent.setup();
+    serveTags([SOUP, BBQ]);
+    server.use(
+      http.patch('*/api/tags/:id', async () => {
+        await delay(400);
+        return HttpResponse.json({ ...BBQ, pinned: true });
+      }),
+    );
+    renderTags();
+    await user.click(
+      await screen.findByRole('button', { name: 'נעיצת על האש לסינון מהיר' }),
+    );
+    // The label flipped already: the request is still running.
+    expect(
+      screen.getByRole('button', { name: 'ביטול הנעיצה של על האש' }),
+    ).toBeTruthy();
+  });
+
+  it('puts the pin back and says so when the server refuses', async () => {
+    const user = userEvent.setup();
+    const error = vi.spyOn(toast, 'error');
+    serveTags([SOUP, BBQ]);
+    server.use(
+      http.patch('*/api/tags/:id', () =>
+        HttpResponse.json({ detail: 'boom' }, { status: 500 }),
+      ),
+    );
+    renderTags();
+    await user.click(
+      await screen.findByRole('button', { name: 'נעיצת על האש לסינון מהיר' }),
+    );
+    await waitFor(() =>
+      expect(error).toHaveBeenCalledWith(
+        'העדכון לא הצליח, והתגית חזרה למצבה הקודם',
+      ),
+    );
+    expect(
+      await screen.findByRole('button', { name: 'נעיצת על האש לסינון מהיר' }),
+    ).toBeTruthy();
+    error.mockRestore();
   });
 
   it('confirms a delete with the usage count, then deletes', async () => {

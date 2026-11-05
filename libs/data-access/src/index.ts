@@ -10,8 +10,12 @@ export { client } from './generated/client.gen';
 export {
   CSRF_HEADER,
   CSRF_VALUE,
+  OUTCOME_UNKNOWN_EVENT,
+  SAFETY_NET_MS,
   SESSION_EXPIRED_EVENT,
   configureClient,
+  fetchWithSafetyNet,
+  safetyNetMs,
 } from './client';
 export { getErrorCode, getErrorParams } from './errors';
 export { uploadPhoto, type UploadPhotoOptions } from './upload-photo';

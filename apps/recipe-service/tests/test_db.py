@@ -17,6 +17,11 @@ def test_every_connection_enforces_foreign_keys(session: Session) -> None:
     assert session.exec(text("PRAGMA foreign_keys")).scalar_one() == 1  # type: ignore[call-overload]
 
 
+def test_every_connection_waits_five_seconds_for_a_lock(session: Session) -> None:
+    """Written out, not a driver default (AD-43)."""
+    assert session.exec(text("PRAGMA busy_timeout")).scalar() == 5000  # type: ignore[call-overload]
+
+
 def test_every_connection_uses_wal(session: Session) -> None:
     assert session.exec(text("PRAGMA journal_mode")).scalar_one() == "wal"  # type: ignore[call-overload]
 

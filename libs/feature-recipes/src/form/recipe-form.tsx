@@ -34,8 +34,10 @@ import {
   cn,
   ConfirmDialog,
   FormField,
+  PendingButton,
   RequiredMark,
   RequiredNote,
+  SlowNote,
   Input,
   PhotoField,
   Select,
@@ -688,13 +690,16 @@ export function RecipeForm({
             {t('recipeForm.photo.waiting')}
           </p>
         ) : null}
-        <Button
+        <SlowNote pending={isSubmitting}>{t('pending.slow')}</SlowNote>
+        <PendingButton
           type="submit"
           size="lg"
-          disabled={isSubmitting || photo.uploading}
+          pending={isSubmitting}
+          pendingLabel={t('recipeForm.saving')}
+          disabled={photo.uploading}
         >
-          {isSubmitting ? t('recipeForm.saving') : submitLabel}
-        </Button>
+          {submitLabel}
+        </PendingButton>
       </div>
       <ConfirmDialog
         open={blocker.state === 'blocked'}

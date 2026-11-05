@@ -1,6 +1,11 @@
 import { client } from './generated/client.gen';
 import type { PhotoUploaded } from './generated/types.gen';
-import { CSRF_HEADER, CSRF_VALUE, SESSION_EXPIRED_EVENT } from './client';
+import {
+  CSRF_HEADER,
+  CSRF_VALUE,
+  SAFETY_NET_MS,
+  SESSION_EXPIRED_EVENT,
+} from './client';
 
 export interface UploadPhotoOptions {
   /** Called with the share of the file sent so far, from 0 to 1. */
@@ -57,6 +62,12 @@ export function uploadPhoto(
     });
     request.addEventListener('error', () =>
       reject(new Error('Network error during upload')),
+    );
+    // The same safety net as every other call (AD-43). The server may still have kept
+    // the photo, but an unattached photo is harmless: it is cleaned up later.
+    request.timeout = SAFETY_NET_MS.upload;
+    request.addEventListener('timeout', () =>
+      reject({ detail: 'The upload took too long', code: 'request_timeout' }),
     );
     request.addEventListener('abort', () =>
       reject(new DOMException('Upload aborted', 'AbortError')),

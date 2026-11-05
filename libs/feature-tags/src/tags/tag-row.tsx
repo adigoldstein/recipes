@@ -101,6 +101,8 @@ function DeleteTag({ tag }: { tag: TagRead }) {
           cancelLabel={t('tags.cancel')}
           destructive
           pending={remove.isPending}
+          pendingLabel={t('tags.delete.pending')}
+          slowNote={t('pending.slow')}
           error={remove.isError ? errorMessage(remove.error) : undefined}
           onConfirm={() =>
             remove.mutate(
@@ -133,9 +135,11 @@ export function TagRow({ tag }: { tag: TagRead }) {
           name: tag.name,
         })}
         pressed={tag.pinned}
-        disabled={update.isPending}
         onPressedChange={(pinned) =>
-          update.mutate({ path: { tag_id: tag.id }, body: { pinned } })
+          update.mutate(
+            { path: { tag_id: tag.id }, body: { pinned } },
+            { onError: () => toast.error(t('tags.pin.failed')) },
+          )
         }
       >
         <Pin aria-hidden="true" />
