@@ -8,17 +8,17 @@ Standalone scripts, no app code changed. Keys come from env only (`tools/llm-spi
 
 ## Decision (approved by Adi in the thread)
 
-Provider chain, free tier only: `gemini-3.5-flash-lite` first, then `gemini-3.5-flash`, then Groq `openai/gpt-oss-120b`. Last resort: a clear message with the paste-text path. Ollama is optional, not in the default chain. Paid Gemini is Adi's choice, not the plan.
+Provider chain, free tier only: `gemini-3.5-flash-lite` first, then `gemini-3.5-flash`, then Groq `openai/gpt-oss-120b`. Last resort: a clear message with the paste-text path. Ollama is optional, not in the default chain. The plan is the free tier first; Adi buys credit only if the free tier proves not enough. Paid Gemini is not the default.
 
 ## Results (15 real pages: 2 English, 13 Hebrew; first try = schema-valid with no retry)
 
-| Engine | Valid first try | Time per page | Notes |
-|---|---|---|---|
-| Gemini 3.5 flash-lite | 15/15 | 1-4 s | no quota errors in ~33 calls |
-| Gemini 3.5 flash | 8/8 before quota ran out | 11-50 s | free tier: 20 requests/day (Google's 429 message) |
-| Groq gpt-oss-120b | 14/15 (15/15 after retry) | 3-67 s | slow runs were free-tier rate limits |
-| Groq qwen3.8-27b | failed | - | valid JSON with zero ingredients, one server error |
-| Ollama qwen2.5:7b (CPU, Intel Arc) | 3/5 | 110-245 s | one 500, one 15-minute timeout |
+| Engine                             | Valid first try           | Time per page | Notes                                              |
+| ---------------------------------- | ------------------------- | ------------- | -------------------------------------------------- |
+| Gemini 3.5 flash-lite              | 15/15                     | 1-4 s         | no quota errors in ~33 calls                       |
+| Gemini 3.5 flash                   | 8/8 before quota ran out  | 11-50 s       | free tier: 20 requests/day (Google's 429 message)  |
+| Groq gpt-oss-120b                  | 14/15 (15/15 after retry) | 3-67 s        | slow runs were free-tier rate limits               |
+| Groq qwen3.8-27b                   | failed                    | -             | valid JSON with zero ingredients, one server error |
+| Ollama qwen2.5:7b (CPU, Intel Arc) | 3/5                       | 110-245 s     | one 500, one 15-minute timeout                     |
 
 - Ollama streams structured output incrementally (first chunk 2.4 s, ~800 chunks), so streaming ingredients (AD-40) is feasible, but the speed on this PC is not practical.
 - A schema-valid draft with zero ingredients must count as a failure (qwen3.8-27b, and the "10 recipes roundup" page for every engine).
