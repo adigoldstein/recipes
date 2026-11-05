@@ -1,6 +1,6 @@
 import type { ParseKeys } from 'i18next';
 import { useQuery } from '@tanstack/react-query';
-import { Plus } from 'lucide-react';
+import { Flag, Plus } from 'lucide-react';
 import { useEffect, type KeyboardEvent } from 'react';
 import {
   Controller,
@@ -64,6 +64,7 @@ import {
   issueFieldPath,
   validateRecipeForm,
 } from './recipe-form-validation';
+import type { DraftReview, ReviewableField } from './draft-to-form-values';
 import { RowActions } from './row-actions';
 import { usePhotoUpload } from './use-photo-upload';
 import { useIssueMessage } from './use-issue-message';
@@ -85,6 +86,14 @@ export interface RecipeFormProps {
   locked?: boolean;
   /** Tells the page whether the editor changed anything, so an import can ask first. */
   onDirtyChange?: (dirty: boolean) => void;
+  /**
+   * Set when the form was filled from an imported draft (Story 5.3): a banner tells how
+   * many fields need the editor, fields the source left out are flagged until filled,
+   * and the form checks itself once so required gaps show at once.
+   */
+  review?: DraftReview;
+  /** "ביטול" on the review banner: the page throws the draft away. */
+  onDiscard?: () => void;
 }
 
 function rowError(errors: FieldErrors | undefined, field: string) {
@@ -400,6 +409,8 @@ export function RecipeForm({
   submitLabel,
   locked = false,
   onDirtyChange,
+  review,
+  onDiscard,
 }: RecipeFormProps) {
   const { t } = useTranslation();
   const issueMessage = useIssueMessage();
@@ -427,6 +438,7 @@ export function RecipeForm({
     clearErrors,
     getValues,
     setValue,
+    trigger,
     formState: { errors, isSubmitting, isDirty },
   } = useForm<RecipeFormValues>({
     defaultValues,
@@ -439,6 +451,12 @@ export function RecipeForm({
     onDirtyChange?.(isDirty);
   }, [isDirty, onDirtyChange]);
 
+  // A draft can leave required fields empty. Checking once on arrival shows them now,
+  // like Angular's markAllAsTouched(), instead of only after the first "save".
+  useEffect(() => {
+    if (review) void trigger();
+  }, [review, trigger]);
+
   const tagList = useQuery(tagsListTagsOptions());
   const limits = useQuery(photosGetLimitsOptions());
   const photo = usePhotoUpload({
@@ -450,6 +468,34 @@ export function RecipeForm({
   const photoPreview = useWatch({ control, name: 'photoPreview' });
   const description = useWatch({ control, name: 'description' });
   const notes = useWatch({ control, name: 'notes' });
+  const [servings, prepTime, cookTime] = useWatch({
+    control,
+    name: ['base_servings', 'prep_time_minutes', 'cook_time_minutes'],
+  });
+  const tags = useWatch({ control, name: 'tags' });
+  const filled: Record<ReviewableField, boolean> = {
+    base_servings: servings.trim() !== '',
+    prep_time_minutes: prepTime.trim() !== '',
+    cook_time_minutes: cookTime.trim() !== '',
+  };
+  // A flagged field is one the source left out; the flag clears once it is filled.
+  const flagged = new Set(
+    (review?.missingFields ?? []).filter((name) => !filled[name]),
+  );
+  const flagText = (name: ReviewableField) =>
+    flagged.has(name) ? t('recipeForm.review.complete') : undefined;
+  // The banner counts flagged fields and fields with a check error, each once.
+  const needAttention = new Set<string>([
+    ...flagged,
+    ...Object.keys(errors).filter((name) => name !== 'root'),
+  ]).size;
+  const pendingNewTags = (tags ?? []).filter(
+    (tag) =>
+      !tag.id &&
+      (review?.newTags ?? []).some(
+        (name) => name.toLocaleLowerCase() === tag.name.toLocaleLowerCase(),
+      ),
+  );
   const formError = errors.root?.server?.message;
   const tagsError = firstTagMessage(errors.tags);
 
@@ -499,6 +545,35 @@ export function RecipeForm({
         locked && 'opacity-60',
       )}
     >
+      {review && (needAttention > 0 || review.translated) ? (
+        <div
+          role="status"
+          aria-label={t('recipeForm.review.label')}
+          className="flex items-start justify-between gap-3 rounded-lg border-2 border-flag bg-card px-3 py-2 text-flag"
+        >
+          <div className="flex flex-col gap-1">
+            {needAttention > 0 ? (
+              <p className="flex items-center gap-2 font-medium">
+                <Flag aria-hidden="true" className="size-4 shrink-0" />
+                {t('recipeForm.review.needAttention', { count: needAttention })}
+              </p>
+            ) : null}
+            {review.translated ? (
+              <p>{t('recipeForm.review.translated')}</p>
+            ) : null}
+          </div>
+          {onDiscard ? (
+            <Button
+              type="button"
+              variant="ghost"
+              className="shrink-0 text-foreground"
+              onClick={onDiscard}
+            >
+              {t('recipeForm.review.discard')}
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
       <RequiredNote>{t('form.requiredNote')}</RequiredNote>
       <section
         aria-labelledby="details-heading"
@@ -552,6 +627,7 @@ export function RecipeForm({
             id="recipe-servings"
             label={t('recipeForm.servings')}
             required
+            flag={flagText('base_servings')}
             error={errors.base_servings?.message}
           >
             {(field) => (
@@ -566,6 +642,7 @@ export function RecipeForm({
           <FormField
             id="recipe-prep"
             label={t('recipeForm.prepTime')}
+            flag={flagText('prep_time_minutes')}
             error={errors.prep_time_minutes?.message}
           >
             {(field) => (
@@ -580,6 +657,7 @@ export function RecipeForm({
           <FormField
             id="recipe-cook"
             label={t('recipeForm.cookTime')}
+            flag={flagText('cook_time_minutes')}
             error={errors.cook_time_minutes?.message}
           >
             {(field) => (
@@ -640,6 +718,13 @@ export function RecipeForm({
         <FormField
           id="recipe-tags"
           label={t('recipeForm.tags.label')}
+          hint={
+            pendingNewTags.length > 0
+              ? t('recipeForm.review.newTags', {
+                  names: pendingNewTags.map((tag) => tag.name).join(', '),
+                })
+              : undefined
+          }
           error={tagsError}
         >
           {(tagsField) => (

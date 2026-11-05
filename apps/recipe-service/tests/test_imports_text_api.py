@@ -116,6 +116,17 @@ def test_fields_the_source_did_not_give_are_flagged(
     ]
 
 
+def test_a_translated_draft_is_marked_and_a_text_import_has_no_source_url(
+    client: TestClient, editor: User
+) -> None:
+    english = run_import(client, "FAKE:english").json()
+    assert english["translated"] is True
+    assert english["missing_fields"] == ["base_servings"]
+    ok = run_import(client, "FAKE:ok").json()
+    assert ok["translated"] is False
+    assert ok["source_url"] is None
+
+
 def test_imperial_units_and_fahrenheit_are_converted_by_the_code(
     client: TestClient, editor: User
 ) -> None:

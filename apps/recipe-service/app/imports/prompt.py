@@ -4,7 +4,7 @@ from collections.abc import Sequence
 
 from app.core.units import Unit
 
-PROMPT_VERSION = "2026-11-05.2"
+PROMPT_VERSION = "2026-11-05.3"
 
 _UNITS = ", ".join(unit.value for unit in Unit)
 
@@ -29,7 +29,9 @@ Rules:
   sentences. notes: only if the source has its own tips or notes, otherwise null.
 - tags: choose from the existing tags below only. Put a tag name that is not in the
   list in `new_tags`. Use at most 4 tags in total.
-- Leave `missing_fields` empty.
+- Set `translated` to true only if you translated the source into Hebrew; false when
+  it was already in Hebrew.
+- Leave `missing_fields` and `source_url` empty.
 - If the text is not a recipe, return empty `ingredients` and `steps`."""
 
 

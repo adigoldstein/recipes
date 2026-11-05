@@ -90,6 +90,10 @@ export type DraftRecipe = {
      */
     prep_time_minutes?: number | null;
     /**
+     * Source Url
+     */
+    source_url?: string | null;
+    /**
      * Steps
      */
     steps?: Array<DraftStep>;
@@ -101,6 +105,10 @@ export type DraftRecipe = {
      * Title
      */
     title: string;
+    /**
+     * Translated
+     */
+    translated?: boolean;
 };
 
 /**

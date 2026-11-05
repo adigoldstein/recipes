@@ -20,6 +20,12 @@ export interface FormFieldProps {
   error?: string;
   /** A line of help under the control. */
   hint?: string;
+  /**
+   * Marks the field as still to be completed (an imported draft left it empty): a 2 px
+   * `flag` border around the control and this text under it (the text steps aside for
+   * an error). Gone when the caller stops passing it.
+   */
+  flag?: string;
   /** A character counter, shown at the end of the line under the control. */
   counter?: ReactNode;
   className?: string;
@@ -39,20 +45,32 @@ export function FormField({
   required,
   error,
   hint,
+  flag,
   counter,
   className,
   children,
 }: FormFieldProps) {
+  const flagText = flag && !error ? flag : undefined;
   const describedBy =
     [
       hint ? `${id}-hint` : null,
       error ? `${id}-error` : null,
+      flagText ? `${id}-flag` : null,
       counter ? `${id}-counter` : null,
     ]
       .filter(Boolean)
       .join(' ') || undefined;
   return (
-    <div className={cn('flex flex-col gap-2', className)}>
+    <div
+      className={cn(
+        'flex flex-col gap-2',
+        // The control is the label's next sibling; flagging it adds no wrapper, so
+        // the control keeps its place in the tree (and its focus) when the flag clears.
+        flag &&
+          '[&>:nth-child(2)]:rounded-md [&>:nth-child(2)]:outline-2 [&>:nth-child(2)]:outline-offset-2 [&>:nth-child(2)]:outline-flag',
+        className,
+      )}
+    >
       <Label htmlFor={id}>
         {label}
         {required ? <RequiredMark /> : null}
@@ -63,7 +81,7 @@ export function FormField({
         'aria-required': required ? true : undefined,
         'aria-describedby': describedBy,
       })}
-      {hint || error || counter ? (
+      {hint || error || flagText || counter ? (
         <div className="flex items-start justify-between gap-3 text-sm">
           <div className="flex min-w-0 flex-col gap-1">
             {hint ? (
@@ -74,6 +92,11 @@ export function FormField({
             {error ? (
               <p id={`${id}-error`} className="text-destructive">
                 {error}
+              </p>
+            ) : null}
+            {flagText ? (
+              <p id={`${id}-flag`} className="text-flag">
+                {flagText}
               </p>
             ) : null}
           </div>

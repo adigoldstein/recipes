@@ -54,6 +54,8 @@ _IMPERIAL: dict[str, Any] = {
     ],
 }
 
+_ENGLISH: dict[str, Any] = {**_COOKIES, "translated": True, "base_servings": None}
+
 _EMPTY: dict[str, Any] = {"title": "אין כאן מתכון", "ingredients": [], "steps": []}
 
 # An ingredient with amount 0 breaks the schema (amount must be above zero).
@@ -78,6 +80,7 @@ def _raise(error: type[Exception], detail: str) -> Callable[[int], RawReply]:
 SCENARIOS: dict[str, Callable[[int], RawReply]] = {
     "ok": lambda _call: _reply(_COOKIES),
     "imperial": lambda _call: _reply(_IMPERIAL),
+    "english": lambda _call: _reply(_ENGLISH),
     "empty": lambda _call: _reply(_EMPTY),
     "invalid": lambda _call: _reply(_INVALID),
     "invalid-then-valid": lambda call: _reply(_INVALID if call == 1 else _COOKIES),
