@@ -3,6 +3,7 @@
 from collections.abc import Callable
 
 from app.core.config import Settings
+from app.imports.providers.anthropic import AnthropicProvider
 from app.imports.providers.base import LlmProvider
 from app.imports.providers.fake import FakeProvider
 from app.imports.providers.gemini import GeminiProvider
@@ -23,8 +24,20 @@ def _build_gemini(settings: Settings) -> LlmProvider:
     )
 
 
+def _build_anthropic(settings: Settings) -> LlmProvider:
+    if settings.anthropic_api_key is None:
+        raise ProviderUnavailableError("anthropic has no API key")
+    return AnthropicProvider(
+        api_key=settings.anthropic_api_key.get_secret_value(),
+        model=settings.anthropic_model,
+        timeout_seconds=settings.anthropic_timeout_seconds,
+        max_output_tokens=settings.llm_max_tokens,
+    )
+
+
 _BUILDERS: dict[str, Callable[[Settings], LlmProvider]] = {
     "gemini": _build_gemini,
+    "anthropic": _build_anthropic,
     "fake": lambda _settings: FakeProvider(),
 }
 
