@@ -4,6 +4,7 @@ import { HttpResponse, http } from 'msw';
 import {
   recipesListRecipesQueryKey,
   tagsListTagsQueryKey,
+  type DraftRecipe,
   type RecipeRead,
 } from '@bite-and-board/data-access';
 import { toast } from '@bite-and-board/ui-components';
@@ -68,7 +69,7 @@ describe('RecipeNewPage', () => {
   });
 
   describe('the import slot', () => {
-    const DRAFT = {
+    const DRAFT: DraftRecipe = {
       title: 'עוגיות שוקולד',
       description: 'עוגיות רכות.',
       base_servings: 24,
@@ -77,7 +78,7 @@ describe('RecipeNewPage', () => {
       steps: [{ description: 'מערבבים.' }, { description: 'אופים.' }],
       tags: ['קינוח'],
       new_tags: ['עוגיות'],
-    } as const;
+    };
 
     /** A stand-in panel: three buttons that drive the slot, and a line showing `dirty`. */
     const panel: NonNullable<RecipeNewPageProps['importPanel']> = (api) => (
