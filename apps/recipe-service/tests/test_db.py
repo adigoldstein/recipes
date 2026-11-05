@@ -8,8 +8,8 @@ from sqlalchemy import text
 from sqlalchemy.exc import StatementError
 from sqlmodel import Session
 
+from app.core.units import Unit
 from app.recipes.models import IngredientItem, Recipe
-from app.recipes.units import Unit
 from tests.factories import add_recipe, ingredient, step
 
 

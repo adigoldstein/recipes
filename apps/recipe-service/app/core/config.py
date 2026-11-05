@@ -31,13 +31,17 @@ class Settings(BaseSettings):
     data_dir: Path = Path("./data")
     jwt_secret: SecretStr
     cookie_secure: bool = True
+    # Import engines to enable, in order; the first is the default (AD-12).
     llm_providers: Annotated[list[str], NoDecode] = Field(
-        default_factory=lambda: ["ollama"]
+        default_factory=lambda: ["gemini"]
     )
-    ollama_url: str = "http://localhost:11434"
     gemini_api_key: SecretStr | None = None
-    gemini_model: str = "gemini-3.8-flash"
+    gemini_model: str = "gemini-3.5-flash-lite"
+    # Seconds to wait for Gemini before the import fails (Story 5.1 spike).
+    gemini_timeout_seconds: PositiveInt = 30
     import_daily_cap: PositiveInt = 50
+    # The longest pasted text an import accepts, in characters.
+    import_max_chars: PositiveInt = 20_000
     llm_max_tokens: PositiveInt = 4096
     # Photo uploads (AD-27): the largest file, and the largest picture (width x height)
     # a decoder is allowed to open, so a small file cannot expand into gigabytes.

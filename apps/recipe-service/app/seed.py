@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 from pathlib import Path
 
+from app.core.units import Unit
 from app.photos.service import PhotoService
 from app.recipes.schemas import (
     IngredientCreate,
@@ -19,7 +20,6 @@ from app.recipes.schemas import (
     StepCreate,
 )
 from app.recipes.service import RecipeService
-from app.recipes.units import Unit
 from app.tags.schemas import TagInput
 
 HALF = Decimal("0.5")  # ½

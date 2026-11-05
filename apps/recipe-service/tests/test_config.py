@@ -19,11 +19,12 @@ def test_defaults(monkeypatch: pytest.MonkeyPatch) -> None:
     assert settings.env is Environment.PRODUCTION
     assert settings.data_dir == Path("./data")
     assert settings.cookie_secure is True
-    assert settings.llm_providers == ["ollama"]
-    assert settings.ollama_url == "http://localhost:11434"
+    assert settings.llm_providers == ["gemini"]
     assert settings.gemini_api_key is None
-    assert settings.gemini_model == "gemini-3.8-flash"
+    assert settings.gemini_model == "gemini-3.5-flash-lite"
+    assert settings.gemini_timeout_seconds == 30
     assert settings.import_daily_cap == 50
+    assert settings.import_max_chars == 20_000
     assert settings.llm_max_tokens == 4096
     assert settings.photo_max_bytes == 10 * 1024 * 1024
     assert settings.photo_max_pixels == 40_000_000
@@ -58,12 +59,12 @@ def test_env_example_lists_every_setting() -> None:
 def test_reads_env_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("JWT_SECRET")
     (tmp_path / ".env").write_text(
-        "JWT_SECRET=from-file\nLLM_PROVIDERS=ollama, gemini\nGEMINI_API_KEY=\n",
+        "JWT_SECRET=from-file\nLLM_PROVIDERS=gemini, fake\nGEMINI_API_KEY=\n",
         encoding="utf-8",
     )
     settings = load_settings()
     assert settings.jwt_secret.get_secret_value() == "from-file"
-    assert settings.llm_providers == ["ollama", "gemini"]
+    assert settings.llm_providers == ["gemini", "fake"]
     assert settings.gemini_api_key is None
 
 

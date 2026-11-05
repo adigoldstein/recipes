@@ -11,7 +11,7 @@ from sqlalchemy import Column, Text, text
 from sqlmodel import Field, SQLModel
 
 from app.core.db import AMOUNT_QUANTUM, PydanticJson, UtcDateTime, utcnow
-from app.recipes.units import SourceUnit, Unit
+from app.core.units import SourceUnit, Unit
 
 
 def _quantize(value: Decimal) -> Decimal:

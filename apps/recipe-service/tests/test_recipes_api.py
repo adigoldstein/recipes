@@ -6,9 +6,9 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session
 
+from app.core.units import SourceUnit, Unit
 from app.recipes.models import OriginalItem, SourceItem
 from app.recipes.service import total_minutes
-from app.recipes.units import SourceUnit, Unit
 from tests.factories import add_recipe, add_tag, ingredient, seeded_tag, step
 
 

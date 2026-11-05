@@ -3,8 +3,8 @@
 import { type DefaultError, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen.js';
-import { authChangePassword, authLogin, authLogout, authSession, healthGetHealth, type Options, photosGetLimits, photosUploadPhoto, recipesCreateRecipe, recipesDeleteRecipe, recipesGetRecipe, recipesListRecipes, recipesUpdateRecipe, tagsCreateTag, tagsDeleteTag, tagsListTags, tagsUpdateTag, usersCreateUser, usersListUsers, usersUpdateUser } from '../sdk.gen.js';
-import type { AuthChangePasswordData, AuthChangePasswordError, AuthChangePasswordResponse, AuthLoginData, AuthLoginError, AuthLoginResponse, AuthLogoutData, AuthLogoutResponse, AuthSessionData, AuthSessionError, AuthSessionResponse, HealthGetHealthData, HealthGetHealthResponse, PhotosGetLimitsData, PhotosGetLimitsError, PhotosGetLimitsResponse, PhotosUploadPhotoData, PhotosUploadPhotoError, PhotosUploadPhotoResponse, RecipesCreateRecipeData, RecipesCreateRecipeError, RecipesCreateRecipeResponse, RecipesDeleteRecipeData, RecipesDeleteRecipeError, RecipesDeleteRecipeResponse, RecipesGetRecipeData, RecipesGetRecipeError, RecipesGetRecipeResponse, RecipesListRecipesData, RecipesListRecipesResponse, RecipesUpdateRecipeData, RecipesUpdateRecipeError, RecipesUpdateRecipeResponse, TagsCreateTagData, TagsCreateTagError, TagsCreateTagResponse, TagsDeleteTagData, TagsDeleteTagError, TagsDeleteTagResponse, TagsListTagsData, TagsListTagsResponse, TagsUpdateTagData, TagsUpdateTagError, TagsUpdateTagResponse, UsersCreateUserData, UsersCreateUserError, UsersCreateUserResponse, UsersListUsersData, UsersListUsersResponse, UsersUpdateUserData, UsersUpdateUserError, UsersUpdateUserResponse } from '../types.gen.js';
+import { authChangePassword, authLogin, authLogout, authSession, healthGetHealth, importsImportText, type Options, photosGetLimits, photosUploadPhoto, recipesCreateRecipe, recipesDeleteRecipe, recipesGetRecipe, recipesListRecipes, recipesUpdateRecipe, tagsCreateTag, tagsDeleteTag, tagsListTags, tagsUpdateTag, usersCreateUser, usersListUsers, usersUpdateUser } from '../sdk.gen.js';
+import type { AuthChangePasswordData, AuthChangePasswordError, AuthChangePasswordResponse, AuthLoginData, AuthLoginError, AuthLoginResponse, AuthLogoutData, AuthLogoutResponse, AuthSessionData, AuthSessionError, AuthSessionResponse, HealthGetHealthData, HealthGetHealthResponse, ImportsImportTextData, ImportsImportTextError, ImportsImportTextResponse, PhotosGetLimitsData, PhotosGetLimitsError, PhotosGetLimitsResponse, PhotosUploadPhotoData, PhotosUploadPhotoError, PhotosUploadPhotoResponse, RecipesCreateRecipeData, RecipesCreateRecipeError, RecipesCreateRecipeResponse, RecipesDeleteRecipeData, RecipesDeleteRecipeError, RecipesDeleteRecipeResponse, RecipesGetRecipeData, RecipesGetRecipeError, RecipesGetRecipeResponse, RecipesListRecipesData, RecipesListRecipesResponse, RecipesUpdateRecipeData, RecipesUpdateRecipeError, RecipesUpdateRecipeResponse, TagsCreateTagData, TagsCreateTagError, TagsCreateTagResponse, TagsDeleteTagData, TagsDeleteTagError, TagsDeleteTagResponse, TagsListTagsData, TagsListTagsResponse, TagsUpdateTagData, TagsUpdateTagError, TagsUpdateTagResponse, UsersCreateUserData, UsersCreateUserError, UsersCreateUserResponse, UsersListUsersData, UsersListUsersResponse, UsersUpdateUserData, UsersUpdateUserError, UsersUpdateUserResponse } from '../types.gen.js';
 
 /**
  * Login
@@ -134,6 +134,25 @@ export const healthGetHealthOptions = (options?: Options<HealthGetHealthData>) =
     },
     queryKey: healthGetHealthQueryKey(options)
 });
+
+/**
+ * Import Text
+ *
+ * Turn pasted recipe text into a Hebrew draft. Nothing is saved.
+ */
+export const importsImportTextMutation = (options?: Partial<Options<ImportsImportTextData>>): UseMutationOptions<ImportsImportTextResponse, ImportsImportTextError, Options<ImportsImportTextData>> => {
+    const mutationOptions: UseMutationOptions<ImportsImportTextResponse, ImportsImportTextError, Options<ImportsImportTextData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await importsImportText({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
 
 /**
  * Upload Photo

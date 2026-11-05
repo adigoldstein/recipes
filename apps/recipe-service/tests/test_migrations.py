@@ -67,6 +67,8 @@ def test_startup_creates_every_table(connection: Connection) -> None:
         "tag",
         "recipe_tag",
         "user",
+        "import_runs",
+        "import_attempts",
     }
 
 
