@@ -27,6 +27,14 @@ class ErrorCode(StrEnum):
     UNAUTHORIZED = "unauthorized"
     FORBIDDEN = "forbidden"
     CSRF_HEADER_MISSING = "csrf_header_missing"
+    NO_RECIPE_FOUND = "no_recipe_found"
+    IMPORT_TEXT_TOO_LONG = "import_text_too_long"
+    IMPORT_CAP_REACHED = "import_cap_reached"
+    PROVIDER_UNAVAILABLE = "provider_unavailable"
+    LLM_TIMEOUT = "llm_timeout"
+    LLM_UNAVAILABLE = "llm_unavailable"
+    LLM_QUOTA = "llm_quota"
+    LLM_INVALID_OUTPUT = "llm_invalid_output"
 
 
 class ErrorResponse(BaseModel):

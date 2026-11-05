@@ -37,6 +37,14 @@ def test_export_writes_stable_sorted_json(tmp_path: Path) -> None:
         "unauthorized",
         "forbidden",
         "csrf_header_missing",
+        "no_recipe_found",
+        "import_text_too_long",
+        "import_cap_reached",
+        "provider_unavailable",
+        "llm_timeout",
+        "llm_unavailable",
+        "llm_quota",
+        "llm_invalid_output",
     ]
 
 

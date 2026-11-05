@@ -2,7 +2,7 @@
 
 import { client } from './client.gen.js';
 import { type Client, type ClientMeta, formDataBodySerializer, type Options as Options2, type RequestResult, type TDataShape } from './client/index.js';
-import type { AuthChangePasswordData, AuthChangePasswordErrors, AuthChangePasswordResponses, AuthLoginData, AuthLoginErrors, AuthLoginResponses, AuthLogoutData, AuthLogoutResponses, AuthSessionData, AuthSessionErrors, AuthSessionResponses, HealthGetHealthData, HealthGetHealthResponses, PhotosGetLimitsData, PhotosGetLimitsErrors, PhotosGetLimitsResponses, PhotosUploadPhotoData, PhotosUploadPhotoErrors, PhotosUploadPhotoResponses, RecipesCreateRecipeData, RecipesCreateRecipeErrors, RecipesCreateRecipeResponses, RecipesDeleteRecipeData, RecipesDeleteRecipeErrors, RecipesDeleteRecipeResponses, RecipesGetRecipeData, RecipesGetRecipeErrors, RecipesGetRecipeResponses, RecipesListRecipesData, RecipesListRecipesResponses, RecipesUpdateRecipeData, RecipesUpdateRecipeErrors, RecipesUpdateRecipeResponses, TagsCreateTagData, TagsCreateTagErrors, TagsCreateTagResponses, TagsDeleteTagData, TagsDeleteTagErrors, TagsDeleteTagResponses, TagsListTagsData, TagsListTagsResponses, TagsUpdateTagData, TagsUpdateTagErrors, TagsUpdateTagResponses, UsersCreateUserData, UsersCreateUserErrors, UsersCreateUserResponses, UsersListUsersData, UsersListUsersResponses, UsersUpdateUserData, UsersUpdateUserErrors, UsersUpdateUserResponses } from './types.gen.js';
+import type { AuthChangePasswordData, AuthChangePasswordErrors, AuthChangePasswordResponses, AuthLoginData, AuthLoginErrors, AuthLoginResponses, AuthLogoutData, AuthLogoutResponses, AuthSessionData, AuthSessionErrors, AuthSessionResponses, HealthGetHealthData, HealthGetHealthResponses, ImportsImportTextData, ImportsImportTextErrors, ImportsImportTextResponses, PhotosGetLimitsData, PhotosGetLimitsErrors, PhotosGetLimitsResponses, PhotosUploadPhotoData, PhotosUploadPhotoErrors, PhotosUploadPhotoResponses, RecipesCreateRecipeData, RecipesCreateRecipeErrors, RecipesCreateRecipeResponses, RecipesDeleteRecipeData, RecipesDeleteRecipeErrors, RecipesDeleteRecipeResponses, RecipesGetRecipeData, RecipesGetRecipeErrors, RecipesGetRecipeResponses, RecipesListRecipesData, RecipesListRecipesResponses, RecipesUpdateRecipeData, RecipesUpdateRecipeErrors, RecipesUpdateRecipeResponses, TagsCreateTagData, TagsCreateTagErrors, TagsCreateTagResponses, TagsDeleteTagData, TagsDeleteTagErrors, TagsDeleteTagResponses, TagsListTagsData, TagsListTagsResponses, TagsUpdateTagData, TagsUpdateTagErrors, TagsUpdateTagResponses, UsersCreateUserData, UsersCreateUserErrors, UsersCreateUserResponses, UsersListUsersData, UsersListUsersResponses, UsersUpdateUserData, UsersUpdateUserErrors, UsersUpdateUserResponses } from './types.gen.js';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -65,6 +65,20 @@ export const authSession = <ThrowOnError extends boolean = false>(options?: Opti
  * Get Health
  */
 export const healthGetHealth = <ThrowOnError extends boolean = false>(options?: Options<HealthGetHealthData, ThrowOnError>): RequestResult<HealthGetHealthResponses, unknown, ThrowOnError> => (options?.client ?? client).get<HealthGetHealthResponses, unknown, ThrowOnError>({ url: '/api/health', ...options });
+
+/**
+ * Import Text
+ *
+ * Turn pasted recipe text into a Hebrew draft. Nothing is saved.
+ */
+export const importsImportText = <ThrowOnError extends boolean = false>(options: Options<ImportsImportTextData, ThrowOnError>): RequestResult<ImportsImportTextResponses, ImportsImportTextErrors, ThrowOnError> => (options.client ?? client).post<ImportsImportTextResponses, ImportsImportTextErrors, ThrowOnError>({
+    url: '/api/imports/text',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
  * Upload Photo

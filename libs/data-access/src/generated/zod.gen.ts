@@ -23,6 +23,14 @@ export const zChangePasswordRequest = z.object({
 });
 
 /**
+ * DraftStep
+ */
+export const zDraftStep = z.object({
+    description: z.string().min(1),
+    source_text: z.string().nullish()
+});
+
+/**
  * ErrorCode
  *
  * Stable error codes; the client shows `errors.<code>` from he.json.
@@ -45,7 +53,15 @@ export const zErrorCode = z.enum([
     'rate_limited',
     'unauthorized',
     'forbidden',
-    'csrf_header_missing'
+    'csrf_header_missing',
+    'no_recipe_found',
+    'import_text_too_long',
+    'import_cap_reached',
+    'provider_unavailable',
+    'llm_timeout',
+    'llm_unavailable',
+    'llm_quota',
+    'llm_invalid_output'
 ]);
 
 /**
@@ -65,6 +81,13 @@ export const zErrorResponse = z.object({
  */
 export const zHealthRead = z.object({
     status: z.literal('ok')
+});
+
+/**
+ * ImportTextRequest
+ */
+export const zImportTextRequest = z.object({
+    text: z.string().min(1)
 });
 
 /**
@@ -145,6 +168,16 @@ export const zSourceUnit = z.enum([
     'lb',
     'fl_oz'
 ]);
+
+/**
+ * DraftSource
+ *
+ * An imperial value found in the source; the code converts it to metric (FR-21).
+ */
+export const zDraftSource = z.object({
+    amount: z.number().gt(0),
+    unit: zSourceUnit
+});
 
 /**
  * SourceValue
@@ -251,6 +284,34 @@ export const zUnit = z.enum([
     'can',
     'package'
 ]);
+
+/**
+ * DraftIngredient
+ */
+export const zDraftIngredient = z.object({
+    amount: z.number().gt(0).nullish(),
+    name: z.string().min(1),
+    note: z.string().nullish(),
+    source: zDraftSource.nullish(),
+    unit: zUnit.nullish()
+});
+
+/**
+ * DraftRecipe
+ */
+export const zDraftRecipe = z.object({
+    base_servings: z.int().gte(1).lte(100).nullish(),
+    cook_time_minutes: z.int().gte(0).nullish(),
+    description: z.string().max(500).nullish(),
+    ingredients: z.array(zDraftIngredient).optional(),
+    missing_fields: z.array(z.string()).optional(),
+    new_tags: z.array(z.string()).optional(),
+    notes: z.string().max(5000).nullish(),
+    prep_time_minutes: z.int().gte(0).nullish(),
+    steps: z.array(zDraftStep).optional(),
+    tags: z.array(z.string()).optional(),
+    title: z.string().min(1).max(120)
+});
 
 /**
  * IngredientCreate
@@ -449,6 +510,13 @@ export const zAuthSessionResponse = zSessionResponse;
  * Successful Response
  */
 export const zHealthGetHealthResponse = zHealthRead;
+
+export const zImportsImportTextBody = zImportTextRequest;
+
+/**
+ * Successful Response
+ */
+export const zImportsImportTextResponse = zDraftRecipe;
 
 export const zPhotosUploadPhotoBody = zBodyPhotosUploadPhoto;
 

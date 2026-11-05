@@ -34,11 +34,108 @@ export type ChangePasswordRequest = {
 };
 
 /**
+ * DraftIngredient
+ */
+export type DraftIngredient = {
+    /**
+     * Amount
+     */
+    amount?: number | null;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Note
+     */
+    note?: string | null;
+    source?: DraftSource | null;
+    unit?: Unit | null;
+};
+
+/**
+ * DraftRecipe
+ */
+export type DraftRecipe = {
+    /**
+     * Base Servings
+     */
+    base_servings?: number | null;
+    /**
+     * Cook Time Minutes
+     */
+    cook_time_minutes?: number | null;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Ingredients
+     */
+    ingredients?: Array<DraftIngredient>;
+    /**
+     * Missing Fields
+     */
+    missing_fields?: Array<string>;
+    /**
+     * New Tags
+     */
+    new_tags?: Array<string>;
+    /**
+     * Notes
+     */
+    notes?: string | null;
+    /**
+     * Prep Time Minutes
+     */
+    prep_time_minutes?: number | null;
+    /**
+     * Steps
+     */
+    steps?: Array<DraftStep>;
+    /**
+     * Tags
+     */
+    tags?: Array<string>;
+    /**
+     * Title
+     */
+    title: string;
+};
+
+/**
+ * DraftSource
+ *
+ * An imperial value found in the source; the code converts it to metric (FR-21).
+ */
+export type DraftSource = {
+    /**
+     * Amount
+     */
+    amount: number;
+    unit: SourceUnit;
+};
+
+/**
+ * DraftStep
+ */
+export type DraftStep = {
+    /**
+     * Description
+     */
+    description: string;
+    /**
+     * Source Text
+     */
+    source_text?: string | null;
+};
+
+/**
  * ErrorCode
  *
  * Stable error codes; the client shows `errors.<code>` from he.json.
  */
-export type ErrorCode = 'recipe_not_found' | 'tag_not_found' | 'tag_name_taken' | 'photo_not_found' | 'photo_too_large' | 'photo_dimensions_too_large' | 'photo_unsupported_type' | 'email_taken' | 'user_not_found' | 'password_too_short' | 'password_too_long' | 'invalid_credentials' | 'account_blocked' | 'last_admin' | 'rate_limited' | 'unauthorized' | 'forbidden' | 'csrf_header_missing';
+export type ErrorCode = 'recipe_not_found' | 'tag_not_found' | 'tag_name_taken' | 'photo_not_found' | 'photo_too_large' | 'photo_dimensions_too_large' | 'photo_unsupported_type' | 'email_taken' | 'user_not_found' | 'password_too_short' | 'password_too_long' | 'invalid_credentials' | 'account_blocked' | 'last_admin' | 'rate_limited' | 'unauthorized' | 'forbidden' | 'csrf_header_missing' | 'no_recipe_found' | 'import_text_too_long' | 'import_cap_reached' | 'provider_unavailable' | 'llm_timeout' | 'llm_unavailable' | 'llm_quota' | 'llm_invalid_output';
 
 /**
  * ErrorResponse
@@ -75,6 +172,16 @@ export type HealthRead = {
      * Status
      */
     status: 'ok';
+};
+
+/**
+ * ImportTextRequest
+ */
+export type ImportTextRequest = {
+    /**
+     * Text
+     */
+    text: string;
 };
 
 /**
@@ -796,6 +903,59 @@ export type HealthGetHealthResponses = {
 };
 
 export type HealthGetHealthResponse = HealthGetHealthResponses[keyof HealthGetHealthResponses];
+
+export type ImportsImportTextData = {
+    body: ImportTextRequest;
+    path?: never;
+    query?: never;
+    url: '/api/imports/text';
+};
+
+export type ImportsImportTextErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+    /**
+     * Bad Gateway
+     */
+    502: ErrorResponse;
+    /**
+     * Gateway Timeout
+     */
+    504: ErrorResponse;
+};
+
+export type ImportsImportTextError = ImportsImportTextErrors[keyof ImportsImportTextErrors];
+
+export type ImportsImportTextResponses = {
+    /**
+     * Successful Response
+     */
+    200: DraftRecipe;
+};
+
+export type ImportsImportTextResponse = ImportsImportTextResponses[keyof ImportsImportTextResponses];
 
 export type PhotosUploadPhotoData = {
     body: BodyPhotosUploadPhoto;
