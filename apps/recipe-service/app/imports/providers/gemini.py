@@ -86,8 +86,8 @@ def _raise_for_status(response: httpx.Response) -> None:
     # are enough to tell a retired model from an overload.
     logger.warning("Gemini returned HTTP %s: %s", status, response.text[:300])
     if status == 429:
-        raise LlmQuotaError("Gemini quota exhausted")
-    raise LlmUnavailableError(f"Gemini returned HTTP {status}")
+        raise LlmQuotaError("Gemini quota exhausted", status)
+    raise LlmUnavailableError(f"Gemini returned HTTP {status}", status)
 
 
 def _read_reply(payload: dict[str, Any]) -> RawReply:

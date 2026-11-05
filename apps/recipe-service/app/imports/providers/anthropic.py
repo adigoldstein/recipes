@@ -98,8 +98,8 @@ def _raise_for_status(response: httpx.Response) -> None:
     # are enough to tell an overload from a bad key or an exhausted quota.
     logger.warning("Claude returned HTTP %s: %s", status, response.text[:300])
     if status == 429:
-        raise LlmQuotaError("Claude quota exhausted")
-    raise LlmUnavailableError(f"Claude returned HTTP {status}")
+        raise LlmQuotaError("Claude quota exhausted", status)
+    raise LlmUnavailableError(f"Claude returned HTTP {status}", status)
 
 
 def _read_reply(payload: dict[str, Any]) -> RawReply:

@@ -98,16 +98,18 @@ def test_overload_is_unavailable_and_the_status_is_in_the_message() -> None:
     def handler(_request: httpx.Request) -> httpx.Response:
         return httpx.Response(529, json={"error": {"type": "overloaded_error"}})
 
-    with pytest.raises(LlmUnavailableError, match="HTTP 529"):
+    with pytest.raises(LlmUnavailableError, match="HTTP 529") as caught:
         provider(handler).extract("text", [])
+    assert caught.value.upstream_status == 529
 
 
 def test_rate_limit_is_a_quota_error() -> None:
     def handler(_request: httpx.Request) -> httpx.Response:
         return httpx.Response(429, json={"error": {"type": "rate_limit_error"}})
 
-    with pytest.raises(LlmQuotaError):
+    with pytest.raises(LlmQuotaError) as caught:
         provider(handler).extract("text", [])
+    assert caught.value.upstream_status == 429
 
 
 def test_a_timeout_is_a_timeout_error() -> None:

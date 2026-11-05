@@ -18,9 +18,11 @@ class LlmError(Exception):
 
     code: ErrorCode
 
-    def __init__(self, detail: str) -> None:
+    def __init__(self, detail: str, upstream_status: int | None = None) -> None:
         super().__init__(detail)
         self.detail = detail
+        # The HTTP status the provider answered with, when it answered at all.
+        self.upstream_status = upstream_status
 
 
 class LlmTimeoutError(LlmError):

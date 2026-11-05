@@ -64,7 +64,14 @@ class ImportService:
         try:
             result = provider.extract(text, existing_tags)
         except LlmError as error:
-            self._record(provider, user_id, started, error.code, None)
+            self._record(
+                provider,
+                user_id,
+                started,
+                error.code,
+                None,
+                upstream_status=error.upstream_status,
+            )
             raise AppError(_LLM_STATUS[error.code], error.code, error.detail) from error
 
         draft = _finish(result.draft, existing_tags)
@@ -105,6 +112,7 @@ class ImportService:
         started: float,
         outcome: str,
         result: LlmResult | None,
+        upstream_status: int | None = None,
     ) -> None:
         """One run row and its one attempt row (AD-38)."""
         latency_ms = round((time.perf_counter() - started) * 1000)
@@ -132,6 +140,7 @@ class ImportService:
             latency_ms=latency_ms,
             input_tokens=usage.input_tokens,
             output_tokens=usage.output_tokens,
+            upstream_status=upstream_status,
         )
         self._repository.add_run(run, [attempt])
         self._repository.commit()

@@ -53,6 +53,8 @@ class ImportAttempt(SQLModel, table=True):
     latency_ms: int
     input_tokens: int | None = None
     output_tokens: int | None = None
+    # The HTTP status the provider returned on a failed call (None on success).
+    upstream_status: int | None = None
     created_at: datetime = Field(default_factory=utcnow, sa_type=UtcDateTime)
 
 
