@@ -1,0 +1,406 @@
+[
+  {
+    "n": 1,
+    "url": "https://www.mako.co.il/food-recipes/recipes_column-sauces/Recipe-970802992c89c11004.htm",
+    "domain": "www.mako.co.il",
+    "plain": {
+      "status": 200,
+      "blocked": false,
+      "bytes": 159946,
+      "secs": 0.35,
+      "error": null
+    },
+    "browser_ua": {
+      "status": 200,
+      "blocked": false,
+      "bytes": 159946,
+      "secs": 0.23,
+      "error": null
+    },
+    "jsonld_recipe": true,
+    "jsonld_ingredients": 7,
+    "recipe_scrapers": {
+      "ok": true,
+      "title": "סחוג ירוק - מתכון של גיל חובב | mako",
+      "ingredients": 7
+    },
+    "trafilatura_chars": 414,
+    "trafilatura_has_ingredient_word": true
+  },
+  {
+    "n": 2,
+    "url": "https://handletheheat.com/bakery-style-chocolate-chip-cookies/",
+    "domain": "handletheheat.com",
+    "plain": {
+      "status": 200,
+      "blocked": false,
+      "bytes": 1206622,
+      "secs": 0.1,
+      "error": null
+    },
+    "browser_ua": {
+      "status": 200,
+      "blocked": false,
+      "bytes": 1206622,
+      "secs": 0.12,
+      "error": null
+    },
+    "jsonld_recipe": true,
+    "jsonld_ingredients": 9,
+    "recipe_scrapers": {
+      "ok": true,
+      "title": "Bakery Style Chocolate Chip Cookies",
+      "ingredients": 9
+    },
+    "trafilatura_chars": 14186,
+    "trafilatura_has_ingredient_word": true
+  },
+  {
+    "n": 3,
+    "url": "https://www.foodgever.com/%D7%94%D7%95%D7%9D-%D7%A4%D7%A8%D7%99%D7%99%D7%96-%D7%A9%D7%9C-%D7%93%D7%99%D7%A7%D7%A1%D7%99/",
+    "domain": "www.foodgever.com",
+    "plain": {
+      "status": 200,
+      "blocked": false,
+      "bytes": 65454,
+      "secs": 0.86,
+      "error": null
+    },
+    "browser_ua": {
+      "status": 200,
+      "blocked": false,
+      "bytes": 65454,
+      "secs": 0.59,
+      "error": null
+    },
+    "jsonld_recipe": false,
+    "recipe_scrapers": {
+      "ok": false,
+      "error": "NoSchemaFoundInWildMode: recipe-scrapers (15.13.0) exception: No Recipe Schema found at https://www.foodg"
+    },
+    "trafilatura_chars": 2543,
+    "trafilatura_has_ingredient_word": false
+  },
+  {
+    "n": 4,
+    "url": "https://www.ynet.co.il/articles/0,7340,L-4743852,00.html",
+    "domain": "www.ynet.co.il",
+    "plain": {
+      "status": 200,
+      "blocked": false,
+      "bytes": 170449,
+      "secs": 0.04,
+      "error": null
+    },
+    "browser_ua": {
+      "status": 200,
+      "blocked": false,
+      "bytes": 170449,
+      "secs": 0.05,
+      "error": null
+    },
+    "jsonld_recipe": false,
+    "recipe_scrapers": {
+      "ok": false,
+      "error": "NoSchemaFoundInWildMode: recipe-scrapers (15.13.0) exception: No Recipe Schema found at https://www.ynet."
+    },
+    "trafilatura_chars": 1591,
+    "trafilatura_has_ingredient_word": true
+  },
+  {
+    "n": 5,
+    "url": "https://caputoflour.com/blogs/recipes/neapolitan-pizza",
+    "domain": "caputoflour.com",
+    "plain": {
+      "status": 200,
+      "blocked": false,
+      "bytes": 260570,
+      "secs": 0.26,
+      "error": null
+    },
+    "browser_ua": {
+      "status": 200,
+      "blocked": false,
+      "bytes": 260570,
+      "secs": 0.23,
+      "error": null
+    },
+    "jsonld_recipe": true,
+    "jsonld_ingredients": 7,
+    "recipe_scrapers": {
+      "ok": true,
+      "title": "Neapolitan Pizza",
+      "ingredients": 7
+    },
+    "trafilatura_chars": 1858,
+    "trafilatura_has_ingredient_word": true
+  },
+  {
+    "n": 6,
+    "url": "https://heninthekitchen.com/blog/2018/04/10/%D7%A4%D7%A8%D7%A7-47-%D7%9E%D7%A1%D7%91%D7%97%D7%AA-%D7%97%D7%A6%D7%99%D7%9C%D7%99%D7%9D/",
+    "domain": "heninthekitchen.com",
+    "plain": {
+      "status": 200,
+      "blocked": false,
+      "bytes": 651401,
+      "secs": 0.07,
+      "error": null
+    },
+    "browser_ua": {
+      "status": 200,
+      "blocked": false,
+      "bytes": 651401,
+      "secs": 0.06,
+      "error": null
+    },
+    "jsonld_recipe": true,
+    "jsonld_ingredients": 5,
+    "recipe_scrapers": {
+      "ok": true,
+      "title": "מסבחת חצילים",
+      "ingredients": 5
+    },
+    "trafilatura_chars": 2257,
+    "trafilatura_has_ingredient_word": true
+  },
+  {
+    "n": 7,
+    "url": "https://www.anatelisha.co.il/%D7%A7%D7%95%D7%91%D7%94-%D7%91%D7%95%D7%A8%D7%92%D7%95%D7%9C-%D7%9E%D7%98%D7%95%D7%92%D7%A0%D7%AA/",
+    "domain": "www.anatelisha.co.il",
+    "plain": {
+      "status": 200,
+      "blocked": false,
+      "bytes": 319181,
+      "secs": 0.05,
+      "error": null
+    },
+    "browser_ua": {
+      "status": 200,
+      "blocked": false,
+      "bytes": 319181,
+      "secs": 0.06,
+      "error": null
+    },
+    "jsonld_recipe": false,
+    "recipe_scrapers": {
+      "ok": false,
+      "error": "NoSchemaFoundInWildMode: recipe-scrapers (15.13.0) exception: No Recipe Schema found at https://www.anate"
+    },
+    "trafilatura_chars": 1781,
+    "trafilatura_has_ingredient_word": true
+  },
+  {
+    "n": 8,
+    "url": "https://kobiedri.co.il/recipes/%D7%A1%D7%9E%D7%91%D7%95%D7%A1%D7%A7-%D7%A4%D7%99%D7%A6%D7%94-%D7%95%D7%A1%D7%9E%D7%91%D7%95%D7%A1%D7%A7-%D7%9E%D7%A9%D7%95%D7%9C%D7%A9%D7%AA-%D7%A4%D7%98%D7%A8%D7%99%D7%95%D7%AA-%D7%91%D7%93%D7%99/",
+    "domain": "kobiedri.co.il",
+    "plain": {
+      "status": 200,
+      "blocked": false,
+      "bytes": 382740,
+      "secs": 1.67,
+      "error": null
+    },
+    "browser_ua": {
+      "status": 200,
+      "blocked": false,
+      "bytes": 382740,
+      "secs": 1.66,
+      "error": null
+    },
+    "jsonld_recipe": false,
+    "recipe_scrapers": {
+      "ok": false,
+      "error": "NoSchemaFoundInWildMode: recipe-scrapers (15.13.0) exception: No Recipe Schema found at https://kobiedri."
+    },
+    "trafilatura_chars": 1719,
+    "trafilatura_has_ingredient_word": false
+  },
+  {
+    "n": 9,
+    "url": "https://www.maariv.co.il/food/article-485623",
+    "domain": "www.maariv.co.il",
+    "plain": {
+      "status": 200,
+      "blocked": false,
+      "bytes": 256352,
+      "secs": 0.45,
+      "error": null
+    },
+    "browser_ua": {
+      "status": 200,
+      "blocked": false,
+      "bytes": 259639,
+      "secs": 0.08,
+      "error": null
+    },
+    "jsonld_recipe": false,
+    "recipe_scrapers": {
+      "ok": false,
+      "error": "NoSchemaFoundInWildMode: recipe-scrapers (15.13.0) exception: No Recipe Schema found at https://www.maari"
+    },
+    "trafilatura_chars": 3708,
+    "trafilatura_has_ingredient_word": false
+  },
+  {
+    "n": 10,
+    "url": "https://www.kikar.co.il/breakfast-and-brunch/147646",
+    "domain": "www.kikar.co.il",
+    "plain": {
+      "status": 200,
+      "blocked": false,
+      "bytes": 505067,
+      "secs": 0.07,
+      "error": null
+    },
+    "browser_ua": {
+      "status": 200,
+      "blocked": false,
+      "bytes": 505067,
+      "secs": 0.06,
+      "error": null
+    },
+    "jsonld_recipe": true,
+    "jsonld_ingredients": 10,
+    "recipe_scrapers": {
+      "ok": true,
+      "title": "אדום אדום: מתכון שקשוקה עסיסית שמתאימה לכל זמן",
+      "ingredients": 10
+    },
+    "trafilatura_chars": 1446,
+    "trafilatura_has_ingredient_word": true
+  },
+  {
+    "n": 11,
+    "url": "https://www.jdn.co.il/food/2007766/",
+    "domain": "www.jdn.co.il",
+    "plain": {
+      "status": 200,
+      "blocked": false,
+      "bytes": 417004,
+      "secs": 0.06,
+      "error": null
+    },
+    "browser_ua": {
+      "status": 200,
+      "blocked": false,
+      "bytes": 417004,
+      "secs": 0.06,
+      "error": null
+    },
+    "jsonld_recipe": false,
+    "recipe_scrapers": {
+      "ok": false,
+      "error": "NoSchemaFoundInWildMode: recipe-scrapers (15.13.0) exception: No Recipe Schema found at https://www.jdn.c"
+    },
+    "trafilatura_chars": 963,
+    "trafilatura_has_ingredient_word": true
+  },
+  {
+    "n": 12,
+    "url": "https://www.srugim.co.il/1107116-%D7%9C%D7%96%D7%9B%D7%A8%D7%95-%D7%A9%D7%9C-%D7%9E%D7%A2%D7%95%D7%96-%D7%9E%D7%95%D7%A8%D7%9C-%D7%94%D7%99%D7%93-%D7%9E%D7%AA%D7%9B%D7%95%D7%9F-%D7%9C%D7%A9%D7%A7%D7%A9%D7%95%D7%A7%D7%94-%D7%9E",
+    "domain": "www.srugim.co.il",
+    "plain": {
+      "status": 200,
+      "blocked": false,
+      "bytes": 509989,
+      "secs": 0.06,
+      "error": null
+    },
+    "browser_ua": {
+      "status": 200,
+      "blocked": false,
+      "bytes": 509989,
+      "secs": 0.06,
+      "error": null
+    },
+    "jsonld_recipe": false,
+    "recipe_scrapers": {
+      "ok": false,
+      "error": "NoSchemaFoundInWildMode: recipe-scrapers (15.13.0) exception: No Recipe Schema found at https://www.srugi"
+    },
+    "trafilatura_chars": 3228,
+    "trafilatura_has_ingredient_word": true
+  },
+  {
+    "n": 13,
+    "url": "https://www.food.com/recipe/banana-bread-1-125047",
+    "domain": "www.food.com",
+    "plain": {
+      "status": 200,
+      "blocked": false,
+      "bytes": 255942,
+      "secs": 0.41,
+      "error": null
+    },
+    "browser_ua": {
+      "status": 200,
+      "blocked": false,
+      "bytes": 255942,
+      "secs": 0.25,
+      "error": null
+    },
+    "jsonld_recipe": true,
+    "jsonld_ingredients": 7,
+    "recipe_scrapers": {
+      "ok": true,
+      "title": "Banana Bread 1",
+      "ingredients": 7
+    },
+    "trafilatura_chars": 1149,
+    "trafilatura_has_ingredient_word": true
+  },
+  {
+    "n": 14,
+    "url": "https://www.bakingheritage.com/recipes/classic-banana-bread-recipe",
+    "domain": "www.bakingheritage.com",
+    "plain": {
+      "status": 200,
+      "blocked": false,
+      "bytes": 217005,
+      "secs": 0.91,
+      "error": null
+    },
+    "browser_ua": {
+      "status": 200,
+      "blocked": false,
+      "bytes": 217005,
+      "secs": 0.55,
+      "error": null
+    },
+    "jsonld_recipe": true,
+    "jsonld_ingredients": 9,
+    "recipe_scrapers": {
+      "ok": true,
+      "title": "Classic Banana Bread Recipe",
+      "ingredients": 9
+    },
+    "trafilatura_chars": 793,
+    "trafilatura_has_ingredient_word": true
+  },
+  {
+    "n": 15,
+    "url": "https://flavormosaic.com/10-easy-chicken-dinner-recipes/",
+    "domain": "flavormosaic.com",
+    "plain": {
+      "status": 200,
+      "blocked": false,
+      "bytes": 426588,
+      "secs": 0.09,
+      "error": null
+    },
+    "browser_ua": {
+      "status": 200,
+      "blocked": false,
+      "bytes": 426588,
+      "secs": 0.06,
+      "error": null
+    },
+    "jsonld_recipe": false,
+    "recipe_scrapers": {
+      "ok": false,
+      "error": "NoSchemaFoundInWildMode: recipe-scrapers (15.13.0) exception: No Recipe Schema found at https://flavormos"
+    },
+    "trafilatura_chars": 2962,
+    "trafilatura_has_ingredient_word": true
+  }
+]

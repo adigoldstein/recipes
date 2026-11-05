@@ -1,0 +1,20 @@
+x01 input chars: 414
+x04 input chars: 1591
+x06 input chars: 2257
+x09 input chars: 3708
+x10 input chars: 1446
+x11 input chars: 963
+x12 input chars: 3228
+x13 input chars: 1149
+x14 input chars: 793
+x15 input chars: 2962
+gemini x01 {'valid_first': True, 'valid_after_retry': True, 'error': None, 'secs': 14.5, 'n_ingredients': 7, 'n_steps': 2, 'to_taste': [], 'no_unit_with_amount': [], 's
+gemini x06 {'valid_first': True, 'valid_after_retry': True, 'error': None, 'secs': 50.5, 'n_ingredients': 13, 'n_steps': 10, 'to_taste': ['מלח'], 'no_unit_with_amount': [], 'source_units_kept': 0}
+gemini x09 {'valid_first': False, 'valid_after_retry': False, 'error': "HTTPStatusError: Client error '429 Too Many Requests' for url 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent'\nFor more information check: https://developer.mozilla.org/en-US/", 'secs': 55.9}
+gemini x10 {'valid_first': False, 'valid_after_retry': False, 'error': "HTTPStatusError: Client error '429 Too Many Requests' for url 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent'\nFor more information check: https://developer.mozilla.org/en-US/", 'secs': 52.4}
+ource_units_kept': 0}
+gemini x04 {'valid_first': True, 'valid_after_retry': True, 'error': None, 'secs': 17.6, 'n_ingredients': 13, 'n_steps': 3, 'to_taste': ['שמן לטיגון עמוק'], 'no_unit_with_amount': [], 'source_units_kept': 0}gemini x11 {'valid_first': False, 'valid_after_retry': False, 'error': "HTTPStatusError: Client error '429 Too Many Requests' for url 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent'\nFor more information check: https://developer.mozilla.org/en-US/", 'secs': 51.2}
+gemini x12 {'valid_first': False, 'valid_after_retry': False, 'error': "HTTPStatusError: Client error '429 Too Many Requests' for url 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent'\nFor more information check: https://developer.mozilla.org/en-US/", 'secs': 51.2}
+gemini x13 {'valid_first': False, 'valid_after_retry': False, 'error': "HTTPStatusError: Client error '429 Too Many Requests' for url 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent'\nFor more information check: https://developer.mozilla.org/en-US/", 'secs': 51.4}
+gemini x14 {'valid_first': False, 'valid_after_retry': False, 'error': "HTTPStatusError: Client error '429 Too Many Requests' for url 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent'\nFor more information check: https://developer.mozilla.org/en-US/", 'secs': 51.2}
+gemini x15 {'valid_first': False, 'valid_after_retry': False, 'error': "HTTPStatusError: Client error '429 Too Many Requests' for url 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent'\nFor more information check: https://developer.mozilla.org/en-US/", 'secs': 51.2}
