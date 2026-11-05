@@ -308,9 +308,11 @@ export const zDraftRecipe = z.object({
     new_tags: z.array(z.string()).optional(),
     notes: z.string().max(5000).nullish(),
     prep_time_minutes: z.int().gte(0).nullish(),
+    source_url: z.string().max(2048).nullish(),
     steps: z.array(zDraftStep).optional(),
     tags: z.array(z.string()).optional(),
-    title: z.string().min(1).max(120)
+    title: z.string().min(1).max(120),
+    translated: z.boolean().optional().default(false)
 });
 
 /**

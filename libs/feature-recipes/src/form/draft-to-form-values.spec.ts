@@ -1,5 +1,5 @@
 import type { DraftRecipe } from '@bite-and-board/data-access';
-import { draftToFormValues } from './draft-to-form-values';
+import { draftReview, draftToFormValues } from './draft-to-form-values';
 import { emptyFormValues } from './recipe-form-values';
 
 const DRAFT: DraftRecipe = {
@@ -52,10 +52,10 @@ describe('draftToFormValues', () => {
     ]);
   });
 
-  it('uses the default servings when the draft has none', () => {
+  it('leaves the servings empty when the draft has none, so the review flags it', () => {
     expect(
       draftToFormValues({ title: 'x', base_servings: null }).base_servings,
-    ).toBe(emptyFormValues().base_servings);
+    ).toBe('');
   });
 
   it('keeps one empty row when the draft has no ingredients or steps', () => {
@@ -69,5 +69,37 @@ describe('draftToFormValues', () => {
     expect(values.photoPreview).toBeNull();
     expect(values.photoKey).toBeUndefined();
     expect(values.source_url).toBe('');
+  });
+
+  it('carries the source link of the draft', () => {
+    expect(
+      draftToFormValues({ title: 'x', source_url: 'https://a.example/r' })
+        .source_url,
+    ).toBe('https://a.example/r');
+  });
+});
+
+describe('draftReview', () => {
+  it('lists the reviewable fields the server reported missing', () => {
+    expect(
+      draftReview({
+        title: 'x',
+        missing_fields: ['cook_time_minutes', 'base_servings', 'other'],
+        translated: true,
+        new_tags: ['עוגיות'],
+      }),
+    ).toEqual({
+      missingFields: ['base_servings', 'cook_time_minutes'],
+      translated: true,
+      newTags: ['עוגיות'],
+    });
+  });
+
+  it('is empty for a draft with nothing to review', () => {
+    expect(draftReview({ title: 'x' })).toEqual({
+      missingFields: [],
+      translated: false,
+      newTags: [],
+    });
   });
 });

@@ -68,6 +68,77 @@ describe('RecipeNewPage', () => {
     toast.dismiss();
   });
 
+  describe('reviewing an imported draft', () => {
+    const REVIEW_DRAFT: DraftRecipe = {
+      title: 'Cookies',
+      base_servings: null,
+      prep_time_minutes: 15,
+      cook_time_minutes: null,
+      ingredients: [{ name: 'קמח', amount: 2, unit: 'cup' }],
+      steps: [{ description: 'אופים.' }],
+      tags: ['קינוח'],
+      new_tags: ['עוגיות'],
+      missing_fields: ['base_servings', 'cook_time_minutes'],
+      translated: true,
+    };
+    const panel: NonNullable<RecipeNewPageProps['importPanel']> = (api) => (
+      <button type="button" onClick={() => api.onDraft(REVIEW_DRAFT)}>
+        fill
+      </button>
+    );
+
+    it('has no banner on a plain form', () => {
+      renderNew(undefined, panel);
+      expect(screen.queryByRole('status', { name: 'בדיקת הטיוטה' })).toBeNull();
+    });
+
+    it('counts the fields to complete, mentions the translation and flags the fields', async () => {
+      const user = userEvent.setup();
+      renderNew(undefined, panel);
+      await user.click(screen.getByRole('button', { name: 'fill' }));
+      const banner = screen.getByRole('status', { name: 'בדיקת הטיוטה' });
+      expect(banner.textContent).toContain('שני שדות דורשים השלמה');
+      expect(banner.textContent).toContain('המתכון תורגם מאנגלית');
+      expect(screen.getAllByText('יש להשלים')).toHaveLength(1);
+      // Servings is flagged and also required, so it shows its error as well.
+      expect(field('מספר מנות').getAttribute('aria-invalid')).toBe('true');
+      expect(field('זמן בישול בדקות')).toBeTruthy();
+    });
+
+    it('clears a flag, and the count, once the field is filled', async () => {
+      const user = userEvent.setup();
+      renderNew(undefined, panel);
+      await user.click(screen.getByRole('button', { name: 'fill' }));
+      await user.type(field('זמן בישול בדקות'), '12');
+      expect(screen.queryByText('יש להשלים')).toBeNull();
+      expect(
+        screen.getByRole('status', { name: 'בדיקת הטיוטה' }).textContent,
+      ).toContain('שדה אחד דורש השלמה');
+    });
+
+    it('tells which suggested tags are only created on save', async () => {
+      const user = userEvent.setup();
+      renderNew(undefined, panel);
+      await user.click(screen.getByRole('button', { name: 'fill' }));
+      expect(
+        screen.getByText('תגיות חדשות שייווצרו רק בשמירה: עוגיות'),
+      ).toBeTruthy();
+      await user.click(
+        screen.getByRole('button', { name: 'הסרת התגית עוגיות' }),
+      );
+      expect(screen.queryByText(/תגיות חדשות שייווצרו/)).toBeNull();
+    });
+
+    it('discards the draft with "ביטול"', async () => {
+      const user = userEvent.setup();
+      renderNew(undefined, panel);
+      await user.click(screen.getByRole('button', { name: 'fill' }));
+      await user.click(screen.getByRole('button', { name: 'ביטול' }));
+      expect(field('שם המתכון')).toHaveProperty('value', '');
+      expect(screen.queryByRole('status', { name: 'בדיקת הטיוטה' })).toBeNull();
+    });
+  });
+
   describe('the import slot', () => {
     const DRAFT: DraftRecipe = {
       title: 'עוגיות שוקולד',

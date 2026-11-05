@@ -69,3 +69,7 @@ class DraftRecipe(BaseModel):
     new_tags: list[str] = Field(default_factory=list)
     # Fields the source did not give, for the review step (filled by the code).
     missing_fields: list[str] = Field(default_factory=list)
+    # True when the source was not in Hebrew and the model translated it (FR19).
+    translated: bool = False
+    # The page the draft came from; filled by the code for a URL import, null for text.
+    source_url: str | None = Field(default=None, max_length=2048)

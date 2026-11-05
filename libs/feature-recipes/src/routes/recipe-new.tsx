@@ -11,7 +11,11 @@ import {
   type RecipeCreate,
 } from '@bite-and-board/data-access';
 import { BackLink, toast } from '@bite-and-board/ui-components';
-import { draftToFormValues } from '../form/draft-to-form-values';
+import {
+  draftReview,
+  draftToFormValues,
+  type DraftReview,
+} from '../form/draft-to-form-values';
 import { RecipeForm } from '../form/recipe-form';
 import {
   emptyFormValues,
@@ -47,6 +51,8 @@ export function RecipeNewPage({ importPanel }: RecipeNewPageProps = {}) {
   const [start, setStart] = useState<{ key: number; values: RecipeFormValues }>(
     () => ({ key: 0, values: emptyFormValues() }),
   );
+  // Set while the form holds an imported draft; reloading the page clears it.
+  const [review, setReview] = useState<DraftReview>();
   const [busy, setBusy] = useState(false);
   const [dirty, setDirty] = useState(false);
 
@@ -65,11 +71,22 @@ export function RecipeNewPage({ importPanel }: RecipeNewPageProps = {}) {
     await navigate(`/recipes/${recipe.id}`, { replace: true });
   };
 
-  const fill = (draft: DraftRecipe) =>
+  const fill = (draft: DraftRecipe) => {
+    setReview(draftReview(draft));
     setStart((current) => ({
       key: current.key + 1,
       values: draftToFormValues(draft),
     }));
+  };
+
+  // "ביטול" on the review banner: back to an empty form, as if nothing was imported.
+  const discard = () => {
+    setReview(undefined);
+    setStart((current) => ({
+      key: current.key + 1,
+      values: emptyFormValues(),
+    }));
+  };
 
   return (
     <div className="mx-auto max-w-detail pb-8">
@@ -99,6 +116,8 @@ export function RecipeNewPage({ importPanel }: RecipeNewPageProps = {}) {
         submitLabel={t('recipeForm.save')}
         locked={busy}
         onDirtyChange={setDirty}
+        review={review}
+        onDiscard={discard}
       />
     </div>
   );

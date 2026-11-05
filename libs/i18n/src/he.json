@@ -386,6 +386,16 @@
       "types": "JPEG, PNG או WebP",
       "failed": "העלאת התמונה לא הצליחה. אפשר לנסות שוב"
     },
+    "review": {
+      "label": "בדיקת הטיוטה",
+      "needAttention_one": "שדה אחד דורש השלמה",
+      "needAttention_two": "שני שדות דורשים השלמה",
+      "needAttention_other": "{{count}} שדות דורשים השלמה",
+      "translated": "המתכון תורגם מאנגלית",
+      "complete": "יש להשלים",
+      "discard": "ביטול",
+      "newTags": "תגיות חדשות שייווצרו רק בשמירה: {{names}}"
+    },
     "tags": {
       "label": "תגיות",
       "trigger": "הוספת תגית",

@@ -181,6 +181,18 @@
             ],
             "title": "Prep Time Minutes"
           },
+          "source_url": {
+            "anyOf": [
+              {
+                "maxLength": 2048,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          },
           "steps": {
             "items": {
               "$ref": "#/components/schemas/DraftStep"
@@ -200,6 +212,11 @@
             "minLength": 1,
             "title": "Title",
             "type": "string"
+          },
+          "translated": {
+            "default": false,
+            "title": "Translated",
+            "type": "boolean"
           }
         },
         "required": [
