@@ -1,7 +1,7 @@
 """Business rules for photos; other modules call this layer, never the repository."""
 
 import uuid
-from collections.abc import Collection
+from collections.abc import Callable, Collection
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from io import BytesIO
@@ -10,6 +10,15 @@ from PIL import Image, ImageOps, UnidentifiedImageError
 
 from app.core.config import get_settings
 from app.core.errors import AppError, ErrorCode
+from app.core.safe_fetch import (
+    FETCH_HTTP_STATUS,
+    FetchBlockedError,
+    FetchedResponse,
+    FetchError,
+    FetchFailedError,
+    FetchLimits,
+    safe_get,
+)
 from app.photos.schemas import PhotoLimits, PhotoRead
 from app.photos.storage import LocalPhotoStorage, PhotoStorage
 
@@ -30,6 +39,16 @@ UNATTACHED_MAX_AGE = timedelta(hours=24)
 class UploadLimits:
     max_bytes: int
     max_pixels: int
+    # The longest download of a photo from a link, redirects included.
+    fetch_timeout_seconds: float = 15
+
+
+# Downloads a URL under the safe-fetch rules; replaced in tests.
+Fetch = Callable[[str, FetchLimits], FetchedResponse]
+
+
+def _safe_fetch(url: str, limits: FetchLimits) -> FetchedResponse:
+    return safe_get(url, limits, accept="image/webp,image/png,image/jpeg,image/*")
 
 
 def _unsupported() -> AppError:
@@ -65,9 +84,12 @@ def _encode(image: Image.Image) -> bytes:
 
 
 class PhotoService:
-    def __init__(self, storage: PhotoStorage, limits: UploadLimits) -> None:
+    def __init__(
+        self, storage: PhotoStorage, limits: UploadLimits, fetch: Fetch = _safe_fetch
+    ) -> None:
         self._storage = storage
         self._limits = limits
+        self._fetch = fetch
 
     def limits(self) -> PhotoLimits:
         return PhotoLimits(
@@ -116,6 +138,31 @@ class PhotoService:
         self._storage.save(key, "thumb", _encode(thumb))
         return key
 
+    def store_from_url(self, url: str) -> str:
+        """Download a photo through safe fetch (AD-23) and store it like an upload.
+
+        What comes back gets the same checks as an upload: the type is read from the
+        bytes, and the size and pixel limits hold.
+        """
+        limits = FetchLimits(
+            max_bytes=self._limits.max_bytes,
+            timeout_seconds=self._limits.fetch_timeout_seconds,
+        )
+        try:
+            response = self._fetch(url, limits)
+            if response.status in (401, 403, 429):
+                raise FetchBlockedError(
+                    f"the site refused the photo ({response.status})"
+                )
+            if not 200 <= response.status < 300:
+                raise FetchFailedError(f"the site answered {response.status}")
+        except FetchError as error:
+            if error.code is ErrorCode.FETCH_TOO_LARGE:
+                raise _too_large(self._limits.max_bytes) from error
+            status = FETCH_HTTP_STATUS[error.code]
+            raise AppError(status, error.code, error.detail) from error
+        return self.store(response.body)
+
     def require(self, key: str) -> None:
         """Raise 404 unless this key was uploaded and is still stored."""
         if not self._storage.exists(key):
@@ -155,5 +202,9 @@ def get_photo_service() -> PhotoService:
     settings = get_settings()
     return PhotoService(
         LocalPhotoStorage(settings.data_dir / MEDIA_DIR / PHOTOS_DIR),
-        UploadLimits(settings.photo_max_bytes, settings.photo_max_pixels),
+        UploadLimits(
+            settings.photo_max_bytes,
+            settings.photo_max_pixels,
+            settings.page_fetch_timeout_seconds,
+        ),
     )

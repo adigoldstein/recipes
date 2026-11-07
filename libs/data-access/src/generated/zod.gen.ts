@@ -61,7 +61,11 @@ export const zErrorCode = z.enum([
     'llm_timeout',
     'llm_unavailable',
     'llm_quota',
-    'llm_invalid_output'
+    'llm_invalid_output',
+    'fetch_blocked',
+    'fetch_challenged',
+    'fetch_failed',
+    'fetch_too_large'
 ]);
 
 /**
@@ -91,6 +95,13 @@ export const zImportTextRequest = z.object({
 });
 
 /**
+ * ImportUrlRequest
+ */
+export const zImportUrlRequest = z.object({
+    url: z.string().min(1).max(2048)
+});
+
+/**
  * LoginRequest
  *
  * Plain strings on purpose: a malformed email is just wrong credentials.
@@ -98,6 +109,15 @@ export const zImportTextRequest = z.object({
 export const zLoginRequest = z.object({
     email: z.string().min(1).max(254),
     password: z.string().min(1).max(128)
+});
+
+/**
+ * PhotoFromUrl
+ *
+ * A photo to download from a page, such as an imported recipe's (AD-23, AD-27).
+ */
+export const zPhotoFromUrl = z.object({
+    source_url: z.string().min(1).max(2048)
 });
 
 /**
@@ -307,6 +327,7 @@ export const zDraftRecipe = z.object({
     missing_fields: z.array(z.string()).optional(),
     new_tags: z.array(z.string()).optional(),
     notes: z.string().max(5000).nullish(),
+    photo_source_url: z.string().max(2048).nullish(),
     prep_time_minutes: z.int().gte(0).nullish(),
     source_url: z.string().max(2048).nullish(),
     steps: z.array(zDraftStep).optional(),
@@ -520,6 +541,13 @@ export const zImportsImportTextBody = zImportTextRequest;
  */
 export const zImportsImportTextResponse = zDraftRecipe;
 
+export const zImportsImportUrlBody = zImportUrlRequest;
+
+/**
+ * Successful Response
+ */
+export const zImportsImportUrlResponse = zDraftRecipe;
+
 export const zPhotosUploadPhotoBody = zBodyPhotosUploadPhoto;
 
 /**
@@ -531,6 +559,13 @@ export const zPhotosUploadPhotoResponse = zPhotoUploaded;
  * Successful Response
  */
 export const zPhotosGetLimitsResponse = zPhotoLimits;
+
+export const zPhotosUploadPhotoFromUrlBody = zPhotoFromUrl;
+
+/**
+ * Successful Response
+ */
+export const zPhotosUploadPhotoFromUrlResponse = zPhotoUploaded;
 
 /**
  * Response Recipes List Recipes

@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, UploadFile
 
 from app.core.errors import ErrorResponse
 from app.core.security import CurrentUser, require_role
-from app.photos.schemas import PhotoLimits, PhotoUploaded
+from app.photos.schemas import PhotoFromUrl, PhotoLimits, PhotoUploaded
 from app.photos.service import PhotoService, get_photo_service
 
 router = APIRouter(prefix="/photos", tags=["photos"])
@@ -32,3 +32,22 @@ def upload_photo(file: UploadFile, service: ServiceDep, _: EditorDep) -> PhotoUp
     # One byte past the limit is enough to know the file is too big.
     data = file.file.read(service.limits().max_bytes + 1)
     return PhotoUploaded(photo_key=service.store(data))
+
+
+@router.post(
+    "/url",
+    status_code=201,
+    responses={
+        400: {"model": ErrorResponse},
+        401: {"model": ErrorResponse},
+        403: {"model": ErrorResponse},
+        413: {"model": ErrorResponse},
+        415: {"model": ErrorResponse},
+        502: {"model": ErrorResponse},
+    },
+)
+def upload_photo_from_url(
+    data: PhotoFromUrl, service: ServiceDep, _: EditorDep
+) -> PhotoUploaded:
+    """Download a photo from a link (an imported recipe's) and store it unattached."""
+    return PhotoUploaded(photo_key=service.store_from_url(data.source_url))

@@ -46,6 +46,10 @@ class Settings(BaseSettings):
     # The longest pasted text an import accepts, in characters.
     import_max_chars: PositiveInt = 20_000
     llm_max_tokens: PositiveInt = 4096
+    # URL imports (AD-13): the largest page body and the longest whole fetch,
+    # redirects included.
+    page_max_bytes: PositiveInt = 3 * 1024 * 1024
+    page_fetch_timeout_seconds: PositiveInt = 15
     # Photo uploads (AD-27): the largest file, and the largest picture (width x height)
     # a decoder is allowed to open, so a small file cannot expand into gigabytes.
     photo_max_bytes: PositiveInt = 10 * 1024 * 1024

@@ -894,4 +894,90 @@ describe('RecipeNewPage', () => {
       expect(screen.queryAllByText(/^השמירה לא הצליחה/)).toHaveLength(0);
     });
   });
+
+  describe('a photo from an imported page', () => {
+    const PHOTO = 'https://cdn.example.com/cookies.jpg';
+    const KEY = 'a'.repeat(32);
+    const DRAFT: DraftRecipe = {
+      title: 'עוגיות',
+      base_servings: 4,
+      ingredients: [{ name: 'קמח' }],
+      steps: [{ description: 'אופים.' }],
+      source_url: 'https://example.com/cookies',
+      photo_source_url: PHOTO,
+    };
+    const panel: NonNullable<RecipeNewPageProps['importPanel']> = (api) => (
+      <button type="button" onClick={() => api.onDraft(DRAFT)}>
+        fill
+      </button>
+    );
+
+    /** Answers POST /api/photos/url and returns the bodies it got. */
+    function serveDownload(answer: () => Response) {
+      const sent: unknown[] = [];
+      server.use(
+        http.post('*/api/photos/url', async ({ request }) => {
+          sent.push(await request.json());
+          return answer();
+        }),
+      );
+      return sent;
+    }
+
+    it('shows the photo, then downloads and attaches it on save', async () => {
+      const downloads = serveDownload(() =>
+        HttpResponse.json({ photo_key: KEY }, { status: 201 }),
+      );
+      const created = serveCreate();
+      const user = userEvent.setup();
+      renderNew(undefined, panel);
+      await user.click(screen.getByRole('button', { name: 'fill' }));
+      expect(
+        screen.getByRole('img', { name: 'התמונה שנבחרה למתכון' }),
+      ).toHaveProperty('src', PHOTO);
+      expect(downloads).toHaveLength(0);
+      await user.click(save());
+      await screen.findByText('recipe page stub');
+      expect(downloads).toEqual([{ source_url: PHOTO }]);
+      expect(created[0]).toMatchObject({
+        photo_key: KEY,
+        source_url: 'https://example.com/cookies',
+      });
+    });
+
+    it('does not save when the download fails, and says what to do', async () => {
+      serveDownload(() =>
+        HttpResponse.json(
+          { detail: 'x', code: 'fetch_blocked' },
+          { status: 400 },
+        ),
+      );
+      const created = serveCreate();
+      const user = userEvent.setup();
+      renderNew(undefined, panel);
+      await user.click(screen.getByRole('button', { name: 'fill' }));
+      await user.click(save());
+      expect(
+        await screen.findByText(
+          'לא הצלחנו לשמור את התמונה מהאתר. אפשר להסיר אותה או להחליף אותה, ולשמור שוב',
+        ),
+      ).toBeTruthy();
+      expect(created).toHaveLength(0);
+    });
+
+    it('saves without the photo once the editor removes it', async () => {
+      const downloads = serveDownload(() =>
+        HttpResponse.json({ photo_key: KEY }, { status: 201 }),
+      );
+      const created = serveCreate();
+      const user = userEvent.setup();
+      renderNew(undefined, panel);
+      await user.click(screen.getByRole('button', { name: 'fill' }));
+      await user.click(screen.getByRole('button', { name: 'הסרה' }));
+      await user.click(save());
+      await screen.findByText('recipe page stub');
+      expect(downloads).toHaveLength(0);
+      expect(created[0]).not.toHaveProperty('photo_key');
+    });
+  });
 });

@@ -23,6 +23,13 @@ class ImportTextRequest(BaseModel):
     text: str = Field(min_length=1)
 
 
+class ImportUrlRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    # Checked by the safe-fetch rules in the service (http/https, public address).
+    url: str = Field(min_length=1, max_length=2048)
+
+
 class DraftSource(BaseModel):
     """An imperial value found in the source; the code converts it to metric (FR-21)."""
 
@@ -73,3 +80,6 @@ class DraftRecipe(BaseModel):
     translated: bool = False
     # The page the draft came from; filled by the code for a URL import, null for text.
     source_url: str | None = Field(default=None, max_length=2048)
+    # The page's main photo (`Recipe.image`, else `og:image`) for a URL import; the
+    # form uploads it on save. Filled by the code, null for text.
+    photo_source_url: str | None = Field(default=None, max_length=2048)

@@ -45,6 +45,10 @@ def test_export_writes_stable_sorted_json(tmp_path: Path) -> None:
         "llm_unavailable",
         "llm_quota",
         "llm_invalid_output",
+        "fetch_blocked",
+        "fetch_challenged",
+        "fetch_failed",
+        "fetch_too_large",
     ]
 
 

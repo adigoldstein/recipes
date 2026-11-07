@@ -2,7 +2,7 @@
 
 import { client } from './client.gen.js';
 import { type Client, type ClientMeta, formDataBodySerializer, type Options as Options2, type RequestResult, type TDataShape } from './client/index.js';
-import type { AuthChangePasswordData, AuthChangePasswordErrors, AuthChangePasswordResponses, AuthLoginData, AuthLoginErrors, AuthLoginResponses, AuthLogoutData, AuthLogoutResponses, AuthSessionData, AuthSessionErrors, AuthSessionResponses, HealthGetHealthData, HealthGetHealthResponses, ImportsImportTextData, ImportsImportTextErrors, ImportsImportTextResponses, PhotosGetLimitsData, PhotosGetLimitsErrors, PhotosGetLimitsResponses, PhotosUploadPhotoData, PhotosUploadPhotoErrors, PhotosUploadPhotoResponses, RecipesCreateRecipeData, RecipesCreateRecipeErrors, RecipesCreateRecipeResponses, RecipesDeleteRecipeData, RecipesDeleteRecipeErrors, RecipesDeleteRecipeResponses, RecipesGetRecipeData, RecipesGetRecipeErrors, RecipesGetRecipeResponses, RecipesListRecipesData, RecipesListRecipesResponses, RecipesUpdateRecipeData, RecipesUpdateRecipeErrors, RecipesUpdateRecipeResponses, TagsCreateTagData, TagsCreateTagErrors, TagsCreateTagResponses, TagsDeleteTagData, TagsDeleteTagErrors, TagsDeleteTagResponses, TagsListTagsData, TagsListTagsResponses, TagsUpdateTagData, TagsUpdateTagErrors, TagsUpdateTagResponses, UsersCreateUserData, UsersCreateUserErrors, UsersCreateUserResponses, UsersListUsersData, UsersListUsersResponses, UsersUpdateUserData, UsersUpdateUserErrors, UsersUpdateUserResponses } from './types.gen.js';
+import type { AuthChangePasswordData, AuthChangePasswordErrors, AuthChangePasswordResponses, AuthLoginData, AuthLoginErrors, AuthLoginResponses, AuthLogoutData, AuthLogoutResponses, AuthSessionData, AuthSessionErrors, AuthSessionResponses, HealthGetHealthData, HealthGetHealthResponses, ImportsImportTextData, ImportsImportTextErrors, ImportsImportTextResponses, ImportsImportUrlData, ImportsImportUrlErrors, ImportsImportUrlResponses, PhotosGetLimitsData, PhotosGetLimitsErrors, PhotosGetLimitsResponses, PhotosUploadPhotoData, PhotosUploadPhotoErrors, PhotosUploadPhotoFromUrlData, PhotosUploadPhotoFromUrlErrors, PhotosUploadPhotoFromUrlResponses, PhotosUploadPhotoResponses, RecipesCreateRecipeData, RecipesCreateRecipeErrors, RecipesCreateRecipeResponses, RecipesDeleteRecipeData, RecipesDeleteRecipeErrors, RecipesDeleteRecipeResponses, RecipesGetRecipeData, RecipesGetRecipeErrors, RecipesGetRecipeResponses, RecipesListRecipesData, RecipesListRecipesResponses, RecipesUpdateRecipeData, RecipesUpdateRecipeErrors, RecipesUpdateRecipeResponses, TagsCreateTagData, TagsCreateTagErrors, TagsCreateTagResponses, TagsDeleteTagData, TagsDeleteTagErrors, TagsDeleteTagResponses, TagsListTagsData, TagsListTagsResponses, TagsUpdateTagData, TagsUpdateTagErrors, TagsUpdateTagResponses, UsersCreateUserData, UsersCreateUserErrors, UsersCreateUserResponses, UsersListUsersData, UsersListUsersResponses, UsersUpdateUserData, UsersUpdateUserErrors, UsersUpdateUserResponses } from './types.gen.js';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -81,6 +81,20 @@ export const importsImportText = <ThrowOnError extends boolean = false>(options:
 });
 
 /**
+ * Import Url
+ *
+ * Fetch a recipe page and turn it into a Hebrew draft. Nothing is saved.
+ */
+export const importsImportUrl = <ThrowOnError extends boolean = false>(options: Options<ImportsImportUrlData, ThrowOnError>): RequestResult<ImportsImportUrlResponses, ImportsImportUrlErrors, ThrowOnError> => (options.client ?? client).post<ImportsImportUrlResponses, ImportsImportUrlErrors, ThrowOnError>({
+    url: '/api/imports/url',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
  * Upload Photo
  */
 export const photosUploadPhoto = <ThrowOnError extends boolean = false>(options: Options<PhotosUploadPhotoData, ThrowOnError>): RequestResult<PhotosUploadPhotoResponses, PhotosUploadPhotoErrors, ThrowOnError> => (options.client ?? client).post<PhotosUploadPhotoResponses, PhotosUploadPhotoErrors, ThrowOnError>({
@@ -97,6 +111,20 @@ export const photosUploadPhoto = <ThrowOnError extends boolean = false>(options:
  * Get Limits
  */
 export const photosGetLimits = <ThrowOnError extends boolean = false>(options?: Options<PhotosGetLimitsData, ThrowOnError>): RequestResult<PhotosGetLimitsResponses, PhotosGetLimitsErrors, ThrowOnError> => (options?.client ?? client).get<PhotosGetLimitsResponses, PhotosGetLimitsErrors, ThrowOnError>({ url: '/api/photos/limits', ...options });
+
+/**
+ * Upload Photo From Url
+ *
+ * Download a photo from a link (an imported recipe's) and store it unattached.
+ */
+export const photosUploadPhotoFromUrl = <ThrowOnError extends boolean = false>(options: Options<PhotosUploadPhotoFromUrlData, ThrowOnError>): RequestResult<PhotosUploadPhotoFromUrlResponses, PhotosUploadPhotoFromUrlErrors, ThrowOnError> => (options.client ?? client).post<PhotosUploadPhotoFromUrlResponses, PhotosUploadPhotoFromUrlErrors, ThrowOnError>({
+    url: '/api/photos/url',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
  * List Recipes

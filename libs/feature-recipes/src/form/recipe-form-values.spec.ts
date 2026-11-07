@@ -22,6 +22,7 @@ const filled: RecipeFormValues = {
   ],
   steps: [{ description: ' מערבבים ' }],
   photoPreview: null,
+  photoSourceUrl: null,
 };
 
 describe('toWritePayload', () => {
@@ -128,6 +129,7 @@ describe('toFormValues', () => {
       ],
       steps: [{ description: 'מבשלים' }],
       photoPreview: null,
+      photoSourceUrl: null,
     });
   });
 

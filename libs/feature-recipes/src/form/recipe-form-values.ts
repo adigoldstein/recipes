@@ -51,6 +51,12 @@ export interface RecipeFormValues {
   photoKey?: string | null;
   /** The picture the form shows: the saved thumbnail or a preview of a chosen file. */
   photoPreview: string | null;
+  /**
+   * A photo an import found on the recipe's page (Story 5.4). It is only shown until
+   * the save, which downloads it on the server and attaches it; "הסרה" or "החלפה"
+   * drop it.
+   */
+  photoSourceUrl: string | null;
 }
 
 /** Matches the Pydantic limits, which the generated Zod repeats (AD-19). */
@@ -81,6 +87,7 @@ export function emptyFormValues(): RecipeFormValues {
     ingredients: [emptyIngredientRow()],
     steps: [emptyStepRow()],
     photoPreview: null,
+    photoSourceUrl: null,
   };
 }
 
@@ -108,6 +115,7 @@ export function toFormValues(recipe: RecipeRead): RecipeFormValues {
     })),
     steps: recipe.steps.map((step) => ({ description: step.description })),
     photoPreview: recipe.photo?.thumb_url ?? null,
+    photoSourceUrl: null,
   };
 }
 

@@ -4,7 +4,7 @@ from collections.abc import Sequence
 
 from app.core.units import Unit
 
-PROMPT_VERSION = "2026-11-05.3"
+PROMPT_VERSION = "2026-11-05.4"
 
 _UNITS = ", ".join(unit.value for unit in Unit)
 
@@ -31,7 +31,7 @@ Rules:
   list in `new_tags`. Use at most 4 tags in total.
 - Set `translated` to true only if you translated the source into Hebrew; false when
   it was already in Hebrew.
-- Leave `missing_fields` and `source_url` empty.
+- Leave `missing_fields`, `source_url` and `photo_source_url` empty.
 - If the text is not a recipe, return empty `ingredients` and `steps`."""
 
 

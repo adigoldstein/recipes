@@ -35,8 +35,15 @@ function serveError(status: number, code: string, params?: object) {
   );
 }
 
-const open = (user: ReturnType<typeof userEvent.setup>) =>
+type User = ReturnType<typeof userEvent.setup>;
+
+const openPanel = (user: User) =>
   user.click(screen.getByRole('button', { name: 'ייבוא עם בינה מלאכותית' }));
+/** Opens the panel on the "הדבקת טקסט" input (the link input is the default). */
+const open = async (user: User) => {
+  await openPanel(user);
+  await user.click(screen.getByRole('radio', { name: 'הדבקת טקסט' }));
+};
 const textbox = () => screen.getByRole('textbox', { name: /^טקסט המתכון/ });
 const submit = () => screen.getByRole('button', { name: 'יצירת טיוטה' });
 
@@ -142,7 +149,7 @@ describe('ImportPanel', () => {
   });
 
   it.each([
-    [400, 'no_recipe_found', undefined, 'לא נמצא מתכון בטקסט הזה'],
+    [400, 'no_recipe_found', undefined, 'לא נמצא כאן מתכון'],
     [
       413,
       'import_text_too_long',
@@ -184,4 +191,120 @@ describe('ImportPanel', () => {
       expect(onBusyChange.mock.calls).toEqual([[true], [false]]);
     },
   );
+});
+
+describe('ImportPanel link input', () => {
+  const linkbox = () => screen.getByRole('textbox', { name: /^קישור למתכון/ });
+  const submitLink = () =>
+    screen.getByRole('button', { name: 'ייבוא מהקישור' });
+  const DRAFT_FROM_URL: DraftRecipe = {
+    ...DRAFT,
+    source_url: 'https://example.com/cookies',
+    photo_source_url: 'https://example.com/cookies.jpg',
+  };
+
+  function serveUrl(response: () => Response) {
+    const sent: unknown[] = [];
+    server.use(
+      http.post('*/api/imports/url', async ({ request }) => {
+        sent.push(await request.json());
+        return response();
+      }),
+    );
+    return sent;
+  }
+
+  it('opens on the link input', async () => {
+    const user = userEvent.setup();
+    renderPanel();
+    await openPanel(user);
+    expect(
+      screen.getByRole('radio', { name: 'קישור' }).getAttribute('aria-checked'),
+    ).toBe('true');
+    expect(linkbox()).toBeTruthy();
+  });
+
+  it('sends the trimmed link and hands the draft to the page', async () => {
+    const sent = serveUrl(() => HttpResponse.json(DRAFT_FROM_URL));
+    const user = userEvent.setup();
+    const { onDraft } = renderPanel();
+    await openPanel(user);
+    await user.type(linkbox(), '  https://example.com/cookies ');
+    await user.click(submitLink());
+    await screen.findByText(/^המתכון יובא/);
+    expect(sent).toEqual([{ url: 'https://example.com/cookies' }]);
+    expect(onDraft).toHaveBeenCalledExactlyOnceWith(DRAFT_FROM_URL);
+  });
+
+  it.each([
+    ['', 'צריך להדביק קישור למתכון'],
+    ['example.com/cookies', 'הקישור צריך להתחיל ב-https:// או ב-http://'],
+    ['ftp://example.com/x', 'הקישור צריך להתחיל ב-https:// או ב-http://'],
+  ])('checks the link %j before sending', async (value, message) => {
+    const sent = serveUrl(() => HttpResponse.json(DRAFT));
+    const user = userEvent.setup();
+    renderPanel();
+    await openPanel(user);
+    if (value) await user.type(linkbox(), value);
+    await user.click(submitLink());
+    expect(await screen.findByText(message)).toBeTruthy();
+    expect(sent).toHaveLength(0);
+  });
+
+  it.each([
+    [
+      'fetch_challenged',
+      502,
+      'האתר חוסם ייבוא אוטומטי. אפשר להעתיק את המתכון מהדף ולהדביק אותו כטקסט',
+    ],
+    [
+      'fetch_blocked',
+      400,
+      'אי אפשר לייבא מהקישור הזה. אפשר להעתיק את המתכון מהדף ולהדביק אותו כטקסט',
+    ],
+    [
+      'fetch_failed',
+      502,
+      'לא הצלחנו לפתוח את הקישור. כדאי לבדוק אותו ולנסות שוב, או להדביק את המתכון כטקסט',
+    ],
+    [
+      'fetch_too_large',
+      413,
+      'הדף גדול מדי לייבוא. אפשר להעתיק את המתכון מהדף ולהדביק אותו כטקסט',
+    ],
+  ])(
+    'on %s offers one click to paste the text instead',
+    async (code, status, message) => {
+      serveUrl(() => HttpResponse.json({ detail: code, code }, { status }));
+      const user = userEvent.setup();
+      renderPanel();
+      await openPanel(user);
+      await user.type(linkbox(), 'https://example.com/cookies');
+      await user.click(submitLink());
+      expect(await screen.findByText(message)).toBeTruthy();
+      await user.click(
+        screen.getByRole('button', { name: 'להדביק את הטקסט במקום' }),
+      );
+      expect(textbox()).toBeTruthy();
+      expect(screen.queryByText(message)).toBeNull();
+    },
+  );
+
+  it('does not offer the text switch for other errors', async () => {
+    serveUrl(() =>
+      HttpResponse.json(
+        { detail: 'x', code: 'no_recipe_found' },
+        { status: 400 },
+      ),
+    );
+    const user = userEvent.setup();
+    renderPanel();
+    await openPanel(user);
+    await user.type(linkbox(), 'https://example.com/about');
+    await user.click(submitLink());
+    expect(await screen.findByText('לא נמצא כאן מתכון')).toBeTruthy();
+    expect(
+      screen.queryByRole('button', { name: 'להדביק את הטקסט במקום' }),
+    ).toBeNull();
+  });
 });
