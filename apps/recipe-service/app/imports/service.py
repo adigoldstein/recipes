@@ -1,5 +1,6 @@
 """Business rules for imports; other modules call this layer, never the repository."""
 
+import functools
 import logging
 import time
 import uuid
@@ -13,8 +14,12 @@ from sqlmodel import Session
 from app.core.config import Settings, get_settings
 from app.core.db import get_session
 from app.core.errors import AppError, ErrorCode
+from app.core.safe_fetch import FETCH_HTTP_STATUS, FetchError
 from app.imports.conversion import convert_ingredient, convert_step
+from app.imports.fetchers.base import PageFetcher
+from app.imports.fetchers.registry import FakeFetcherInProductionError, page_fetcher
 from app.imports.models import ImportAttempt, ImportRun
+from app.imports.page import ImportPath, read_page
 from app.imports.prompt import PROMPT_VERSION
 from app.imports.providers.base import LlmError, LlmProvider, LlmResult, Usage
 from app.imports.providers.registry import ProviderUnavailableError, default_provider
@@ -57,31 +62,66 @@ class ImportService:
                 {"max": self._settings.import_max_chars},
             )
         self._ensure_under_daily_cap()
+        return self._extract(text, user_id, source_kind="text", path="llm")
+
+    def import_url(self, url: str, user_id: uuid.UUID) -> DraftRecipe:
+        """Fetch a recipe page safely and turn it into a Hebrew draft (AD-13, AD-35).
+
+        JSON-LD is used when the page has it, otherwise the page's text; the LLM
+        runs either way. Nothing is saved; the photo is uploaded by the form on save.
+        """
+        self._ensure_under_daily_cap()
+        try:
+            page = read_page(self._fetcher().fetch(url))
+        except FetchError as error:
+            logger.info("URL import fetch refused: %s (%s)", error.code, error.detail)
+            raise AppError(
+                FETCH_HTTP_STATUS[error.code], error.code, error.detail
+            ) from error
+        if not page.text.strip():
+            raise AppError(
+                400, ErrorCode.NO_RECIPE_FOUND, "No recipe found on the page"
+            )
+        # A long page is cut, not refused: the recipe is usually near the top.
+        text = page.text[: self._settings.import_max_chars]
+        draft = self._extract(text, user_id, source_kind="url", path=page.path)
+        return draft.model_copy(
+            update={"source_url": url, "photo_source_url": page.photo_url}
+        )
+
+    def _extract(
+        self, text: str, user_id: uuid.UUID, source_kind: str, path: ImportPath
+    ) -> DraftRecipe:
         provider = self._provider()
         existing_tags = [tag.name for tag in self._tag_service.list_tags()]
+        record = functools.partial(
+            self._record, provider, user_id, source_kind=source_kind, path=path
+        )
 
         started = time.perf_counter()
         try:
             result = provider.extract(text, existing_tags)
         except LlmError as error:
-            self._record(
-                provider,
-                user_id,
-                started,
-                error.code,
-                None,
-                upstream_status=error.upstream_status,
-            )
+            record(started, error.code, None, upstream_status=error.upstream_status)
             raise AppError(_LLM_STATUS[error.code], error.code, error.detail) from error
 
         draft = _finish(result.draft, existing_tags)
         if not draft.ingredients and not draft.steps:
-            self._record(provider, user_id, started, ErrorCode.NO_RECIPE_FOUND, result)
+            record(started, ErrorCode.NO_RECIPE_FOUND, result)
             raise AppError(
                 400, ErrorCode.NO_RECIPE_FOUND, "No recipe found in the text"
             )
-        self._record(provider, user_id, started, "ok", result)
+        record(started, "ok", result)
         return draft
+
+    def _fetcher(self) -> PageFetcher:
+        try:
+            return page_fetcher(self._settings)
+        except FakeFetcherInProductionError as error:
+            logger.error("Page fetcher unavailable: %s", error)
+            raise AppError(
+                502, ErrorCode.PROVIDER_UNAVAILABLE, "No import engine is available"
+            ) from error
 
     def _provider(self) -> LlmProvider:
         try:
@@ -113,6 +153,9 @@ class ImportService:
         outcome: str,
         result: LlmResult | None,
         upstream_status: int | None = None,
+        *,
+        source_kind: str,
+        path: ImportPath,
     ) -> None:
         """One run row and its one attempt row (AD-38)."""
         latency_ms = round((time.perf_counter() - started) * 1000)
@@ -121,8 +164,8 @@ class ImportService:
             user_id=user_id,
             provider=provider.name,
             model=provider.model,
-            source_kind="text",
-            path="llm",
+            source_kind=source_kind,
+            path=path,
             prompt_version=PROMPT_VERSION,
             latency_ms=latency_ms,
             input_tokens=usage.input_tokens,
@@ -161,6 +204,9 @@ def _finish(draft: DraftRecipe, existing_tags: list[str]) -> DraftRecipe:
             "tags": tags,
             "new_tags": new_tags,
             "missing_fields": missing,
+            # Filled by the code only, whatever the model returned.
+            "source_url": None,
+            "photo_source_url": None,
         }
     )
 

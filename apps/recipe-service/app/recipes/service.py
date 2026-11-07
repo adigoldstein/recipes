@@ -2,6 +2,7 @@
 
 import uuid
 from typing import Annotated
+from urllib.parse import urlsplit
 
 from fastapi import Depends
 from fastapi.exceptions import RequestValidationError
@@ -99,7 +100,11 @@ class RecipeService:
             self._photos.require(data.photo_key)
         recipe = Recipe(
             photo_key=data.photo_key,
-            photo_credit_domain=photo_credit_domain if data.photo_key else None,
+            photo_credit_domain=(
+                (photo_credit_domain or _web_host(data.source_url))
+                if data.photo_key
+                else None
+            ),
             created_by=user_id,
             updated_by=user_id,
             title=data.title,
@@ -211,7 +216,9 @@ class RecipeService:
             self._photos.require(data.photo_key)
         previous = recipe.photo_key
         recipe.photo_key = data.photo_key
-        recipe.photo_credit_domain = None
+        recipe.photo_credit_domain = (
+            _web_host(recipe.source_url) if data.photo_key else None
+        )
         return previous
 
     def delete_recipe(self, recipe_id: uuid.UUID) -> None:
@@ -271,3 +278,20 @@ def get_recipe_service(
 ) -> RecipeService:
     """Provider, like a Nest injectable: `Depends(get_recipe_service)`."""
     return RecipeService(RecipeRepository(session), tags, photos)
+
+
+def _web_host(url: str | None) -> str | None:
+    """The site a recipe came from, credited on its photo (AD-27).
+
+    A recipe with a source link is taken to carry that site's photo, so a photo the
+    editor uploads to such a recipe gets the same credit (Story 5.4 decision).
+    """
+    if not url:
+        return None
+    try:
+        parts = urlsplit(url)
+    except ValueError:
+        return None
+    if parts.scheme not in ("http", "https") or not parts.hostname:
+        return None
+    return parts.hostname.removeprefix("www.")[:255]

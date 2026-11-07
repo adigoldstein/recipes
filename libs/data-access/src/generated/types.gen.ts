@@ -86,6 +86,10 @@ export type DraftRecipe = {
      */
     notes?: string | null;
     /**
+     * Photo Source Url
+     */
+    photo_source_url?: string | null;
+    /**
      * Prep Time Minutes
      */
     prep_time_minutes?: number | null;
@@ -143,7 +147,7 @@ export type DraftStep = {
  *
  * Stable error codes; the client shows `errors.<code>` from he.json.
  */
-export type ErrorCode = 'recipe_not_found' | 'tag_not_found' | 'tag_name_taken' | 'photo_not_found' | 'photo_too_large' | 'photo_dimensions_too_large' | 'photo_unsupported_type' | 'email_taken' | 'user_not_found' | 'password_too_short' | 'password_too_long' | 'invalid_credentials' | 'account_blocked' | 'last_admin' | 'rate_limited' | 'unauthorized' | 'forbidden' | 'csrf_header_missing' | 'no_recipe_found' | 'import_text_too_long' | 'import_cap_reached' | 'provider_unavailable' | 'llm_timeout' | 'llm_unavailable' | 'llm_quota' | 'llm_invalid_output';
+export type ErrorCode = 'recipe_not_found' | 'tag_not_found' | 'tag_name_taken' | 'photo_not_found' | 'photo_too_large' | 'photo_dimensions_too_large' | 'photo_unsupported_type' | 'email_taken' | 'user_not_found' | 'password_too_short' | 'password_too_long' | 'invalid_credentials' | 'account_blocked' | 'last_admin' | 'rate_limited' | 'unauthorized' | 'forbidden' | 'csrf_header_missing' | 'no_recipe_found' | 'import_text_too_long' | 'import_cap_reached' | 'provider_unavailable' | 'llm_timeout' | 'llm_unavailable' | 'llm_quota' | 'llm_invalid_output' | 'fetch_blocked' | 'fetch_challenged' | 'fetch_failed' | 'fetch_too_large';
 
 /**
  * ErrorResponse
@@ -190,6 +194,16 @@ export type ImportTextRequest = {
      * Text
      */
     text: string;
+};
+
+/**
+ * ImportUrlRequest
+ */
+export type ImportUrlRequest = {
+    /**
+     * Url
+     */
+    url: string;
 };
 
 /**
@@ -292,6 +306,18 @@ export type OriginalValue = {
      */
     amount: number | null;
     unit: Unit | null;
+};
+
+/**
+ * PhotoFromUrl
+ *
+ * A photo to download from a page, such as an imported recipe's (AD-23, AD-27).
+ */
+export type PhotoFromUrl = {
+    /**
+     * Source Url
+     */
+    source_url: string;
 };
 
 /**
@@ -965,6 +991,59 @@ export type ImportsImportTextResponses = {
 
 export type ImportsImportTextResponse = ImportsImportTextResponses[keyof ImportsImportTextResponses];
 
+export type ImportsImportUrlData = {
+    body: ImportUrlRequest;
+    path?: never;
+    query?: never;
+    url: '/api/imports/url';
+};
+
+export type ImportsImportUrlErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+    /**
+     * Bad Gateway
+     */
+    502: ErrorResponse;
+    /**
+     * Gateway Timeout
+     */
+    504: ErrorResponse;
+};
+
+export type ImportsImportUrlError = ImportsImportUrlErrors[keyof ImportsImportUrlErrors];
+
+export type ImportsImportUrlResponses = {
+    /**
+     * Successful Response
+     */
+    200: DraftRecipe;
+};
+
+export type ImportsImportUrlResponse = ImportsImportUrlResponses[keyof ImportsImportUrlResponses];
+
 export type PhotosUploadPhotoData = {
     body: BodyPhotosUploadPhoto;
     path?: never;
@@ -1030,6 +1109,55 @@ export type PhotosGetLimitsResponses = {
 };
 
 export type PhotosGetLimitsResponse = PhotosGetLimitsResponses[keyof PhotosGetLimitsResponses];
+
+export type PhotosUploadPhotoFromUrlData = {
+    body: PhotoFromUrl;
+    path?: never;
+    query?: never;
+    url: '/api/photos/url';
+};
+
+export type PhotosUploadPhotoFromUrlErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Content Too Large
+     */
+    413: ErrorResponse;
+    /**
+     * Unsupported Media Type
+     */
+    415: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Bad Gateway
+     */
+    502: ErrorResponse;
+};
+
+export type PhotosUploadPhotoFromUrlError = PhotosUploadPhotoFromUrlErrors[keyof PhotosUploadPhotoFromUrlErrors];
+
+export type PhotosUploadPhotoFromUrlResponses = {
+    /**
+     * Successful Response
+     */
+    201: PhotoUploaded;
+};
+
+export type PhotosUploadPhotoFromUrlResponse = PhotosUploadPhotoFromUrlResponses[keyof PhotosUploadPhotoFromUrlResponses];
 
 export type RecipesListRecipesData = {
     body?: never;

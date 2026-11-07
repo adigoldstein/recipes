@@ -68,6 +68,7 @@ describe('/recipes/new with the AI import', () => {
           { timeout: LAZY_TIMEOUT },
         ),
       );
+      await user.click(screen.getByRole('radio', { name: 'הדבקת טקסט' }));
       await user.type(
         screen.getByRole('textbox', { name: /^טקסט המתכון/ }),
         'לחם: 1 ליברה קמח',

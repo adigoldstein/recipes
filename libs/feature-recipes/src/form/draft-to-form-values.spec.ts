@@ -64,11 +64,23 @@ describe('draftToFormValues', () => {
     expect(values.steps).toEqual(emptyFormValues().steps);
   });
 
-  it('does not touch the photo or the source link', () => {
+  it('has no photo or source link when the draft has none', () => {
     const values = draftToFormValues(DRAFT);
     expect(values.photoPreview).toBeNull();
+    expect(values.photoSourceUrl).toBeNull();
     expect(values.photoKey).toBeUndefined();
     expect(values.source_url).toBe('');
+  });
+
+  it("shows the page's photo and keeps it for the save to download", () => {
+    const values = draftToFormValues({
+      title: 'x',
+      photo_source_url: 'https://cdn.example.com/a.jpg',
+    });
+    expect(values.photoPreview).toBe('https://cdn.example.com/a.jpg');
+    expect(values.photoSourceUrl).toBe('https://cdn.example.com/a.jpg');
+    // Nothing is uploaded until the save.
+    expect(values.photoKey).toBeUndefined();
   });
 
   it('carries the source link of the draft', () => {

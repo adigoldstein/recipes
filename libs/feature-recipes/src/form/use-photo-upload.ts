@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import type { UseFormGetValues, UseFormSetValue } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import {
   getErrorCode,
+  photosUploadPhotoFromUrlMutation,
   uploadPhoto,
   type PhotoLimits,
 } from '@bite-and-board/data-access';
@@ -25,6 +27,9 @@ const isAbort = (error: unknown) =>
  * The form's photo: picking a file uploads it at once and keeps its key in the form
  * (AD-27); the recipe save then attaches it. `photoKey` is only set when the photo
  * changed, so a form that never touched it leaves the saved photo alone.
+ *
+ * An imported recipe can bring its page's photo (`photoSourceUrl`); `download` has the
+ * server fetch it at save time (AD-23), and picking or removing a photo drops it.
  */
 export function usePhotoUpload({
   getValues,
@@ -36,6 +41,7 @@ export function usePhotoUpload({
   const errorMessage = useErrorMessage();
   const [progress, setProgress] = useState<number | undefined>();
   const [error, setError] = useState<string | undefined>();
+  const fromUrl = useMutation(photosUploadPhotoFromUrlMutation());
   const controller = useRef<AbortController | null>(null);
   const blobUrl = useRef<string | null>(null);
 
@@ -83,6 +89,7 @@ export function usePhotoUpload({
       forgetBlob();
       blobUrl.current = preview;
       setValue('photoKey', photo_key, { shouldDirty: true });
+      setValue('photoSourceUrl', null);
     } catch (caught) {
       URL.revokeObjectURL(preview);
       if (isAbort(caught)) return;
@@ -110,6 +117,31 @@ export function usePhotoUpload({
       shouldDirty: true,
     });
     setValue('photoPreview', null, { shouldDirty: true });
+    setValue('photoSourceUrl', null);
+  };
+
+  /**
+   * Has the server download the imported photo and returns its key, or `undefined`
+   * when that failed; a message under the photo says so, and "הסרה" lets the editor
+   * save without it.
+   */
+  const download = async (sourceUrl: string): Promise<string | undefined> => {
+    setError(undefined);
+    setProgress(0);
+    try {
+      const { photo_key } = await fromUrl.mutateAsync({
+        body: { source_url: sourceUrl },
+      });
+      setValue('photoKey', photo_key, { shouldDirty: true });
+      setValue('photoSourceUrl', null);
+      return photo_key;
+    } catch {
+      // The fetch codes speak of pasting text, which does not fit a photo.
+      setError(t('recipeForm.photo.downloadFailed'));
+      return undefined;
+    } finally {
+      setProgress(undefined);
+    }
   };
 
   // Back to the saved photo, as if it had never been touched (until the save).
@@ -128,5 +160,6 @@ export function usePhotoUpload({
     select,
     remove,
     restore,
+    download,
   };
 }

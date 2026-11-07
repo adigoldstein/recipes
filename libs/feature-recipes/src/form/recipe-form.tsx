@@ -463,7 +463,10 @@ export function RecipeForm({
     getValues,
     setValue,
     limits: limits.data,
-    savedPreview: defaultValues.photoPreview,
+    // An imported photo is not saved yet, so removing it needs nothing on save.
+    savedPreview: defaultValues.photoSourceUrl
+      ? null
+      : defaultValues.photoPreview,
   });
   const photoPreview = useWatch({ control, name: 'photoPreview' });
   const description = useWatch({ control, name: 'description' });
@@ -501,10 +504,16 @@ export function RecipeForm({
 
   const onSubmit: () => Promise<void> = handleSubmit(async (values) => {
     clearErrors('root.server');
+    // An imported photo is downloaded by the server first, so the save can attach it.
+    let photoKey = values.photoKey;
+    if (values.photoSourceUrl && photoKey === undefined) {
+      photoKey = await photo.download(values.photoSourceUrl);
+      if (photoKey === undefined) return;
+    }
     // A saved form navigates away from inside `onSave`; that must not ask.
     allowLeaving(true);
     try {
-      await onSave(toWritePayload(values));
+      await onSave(toWritePayload({ ...values, photoKey }));
     } catch (error) {
       allowLeaving(false);
       const issues = getValidationIssues(error);

@@ -38,7 +38,9 @@ export function draftToFormValues(draft: DraftRecipe): RecipeFormValues {
     })),
     ingredients: ingredients.length > 0 ? ingredients : [emptyIngredientRow()],
     steps: steps.length > 0 ? steps : [emptyStepRow()],
-    photoPreview: null,
+    // The page's photo is shown from its own site until the save downloads it.
+    photoPreview: draft.photo_source_url ?? null,
+    photoSourceUrl: draft.photo_source_url ?? null,
   };
 }
 

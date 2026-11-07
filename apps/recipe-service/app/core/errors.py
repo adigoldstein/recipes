@@ -35,6 +35,10 @@ class ErrorCode(StrEnum):
     LLM_UNAVAILABLE = "llm_unavailable"
     LLM_QUOTA = "llm_quota"
     LLM_INVALID_OUTPUT = "llm_invalid_output"
+    FETCH_BLOCKED = "fetch_blocked"
+    FETCH_CHALLENGED = "fetch_challenged"
+    FETCH_FAILED = "fetch_failed"
+    FETCH_TOO_LARGE = "fetch_too_large"
 
 
 class ErrorResponse(BaseModel):

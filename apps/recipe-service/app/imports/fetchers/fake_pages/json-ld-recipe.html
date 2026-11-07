@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Chocolate Chip Cookies | Example Kitchen</title>
+    <meta property="og:image" content="https://example.com/og-cookies.jpg" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          { "@type": "WebSite", "name": "Example Kitchen" },
+          {
+            "@type": ["Recipe"],
+            "name": "Chocolate Chip Cookies",
+            "description": "Soft cookies with chocolate &amp; a pinch of salt.",
+            "image": [
+              {
+                "@type": "ImageObject",
+                "url": "https://example.com/cookies.jpg"
+              }
+            ],
+            "recipeYield": ["24", "24 cookies"],
+            "prepTime": "PT15M",
+            "cookTime": "PT12M",
+            "recipeIngredient": [
+              "2 cups flour",
+              "200 g butter",
+              "2 eggs",
+              "Salt"
+            ],
+            "recipeInstructions": [
+              {
+                "@type": "HowToSection",
+                "name": "Dough",
+                "itemListElement": [
+                  {
+                    "@type": "HowToStep",
+                    "text": "Cream the butter with the sugar."
+                  },
+                  {
+                    "@type": "HowToStep",
+                    "text": "Add the flour and the chocolate."
+                  }
+                ]
+              },
+              { "@type": "HowToStep", "text": "Bake for 12 minutes." }
+            ]
+          }
+        ]
+      }
+    </script>
+  </head>
+  <body>
+    <nav>Home · Recipes · About</nav>
+    <article>
+      <h1>Chocolate Chip Cookies</h1>
+      <p>A long story about cookies.</p>
+    </article>
+  </body>
+</html>

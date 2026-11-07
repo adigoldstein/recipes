@@ -1,21 +1,46 @@
 import { useState } from 'react';
-import { Sparkles, X } from 'lucide-react';
+import { ClipboardPaste, Link, Sparkles, X } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
+  getErrorCode,
   importsImportTextMutation,
+  importsImportUrlMutation,
   type DraftRecipe,
 } from '@bite-and-board/data-access';
 import {
   Button,
   ConfirmDialog,
   FormField,
+  Input,
   PendingButton,
   SLOW_AFTER_LONG_MS,
   SlowNote,
   Textarea,
+  ToggleGroup,
+  ToggleGroupItem,
 } from '@bite-and-board/ui-components';
 import { useErrorMessage } from '../shared/use-error-message';
+
+type Mode = 'url' | 'text';
+
+/** Fetch failures where pasting the page's text is the way forward (AD-35). */
+const FETCH_ERRORS = new Set([
+  'fetch_blocked',
+  'fetch_challenged',
+  'fetch_failed',
+  'fetch_too_large',
+]);
+
+/** A link the server can try: http or https, nothing else. */
+function isWebLink(value: string) {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' || url.protocol === 'http:';
+  } catch {
+    return false;
+  }
+}
 
 /** What the page that hosts the panel gives it. The two libraries never import each other. */
 export interface ImportPanelProps {
@@ -29,10 +54,11 @@ export interface ImportPanelProps {
 
 /**
  * "ייבוא עם בינה מלאכותית" at the top of the new-recipe page (FR-17, FR-18): a button
- * that opens a panel where recipe text is pasted. While the import runs the page locks
- * its form; when it ends the form is filled with the draft and nothing is saved until
- * the editor presses "שמירה". A failure leaves the form and the pasted text as they were.
- * This story has the pasted-text input; the link input comes with Story 5.4.
+ * that opens a panel with two ways in, "קישור" (a recipe page's link, Story 5.4) and
+ * "הדבקת טקסט". While the import runs the page locks its form; when it ends the form
+ * is filled with the draft and nothing is saved until the editor presses "שמירה". A
+ * failure leaves the form and the input as they were. When a page cannot be fetched,
+ * one click switches to pasting its text.
  */
 export function ImportPanel({
   dirty,
@@ -42,37 +68,66 @@ export function ImportPanel({
   const { t } = useTranslation();
   const errorMessage = useErrorMessage();
   const importText = useMutation(importsImportTextMutation());
+  const importUrl = useMutation(importsImportUrlMutation());
   const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState<Mode>('url');
   const [text, setText] = useState('');
+  const [url, setUrl] = useState('');
   const [problem, setProblem] = useState<string>();
+  const [offerText, setOfferText] = useState(false);
   const [done, setDone] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const pending = importText.isPending || importUrl.isPending;
+
+  const callbacks = {
+    onSuccess: (draft: DraftRecipe) => {
+      onDraft(draft);
+      setText('');
+      setUrl('');
+      setOpen(false);
+      setDone(true);
+    },
+    onError: (error: unknown) => {
+      setProblem(errorMessage(error));
+      setOfferText(FETCH_ERRORS.has(getErrorCode(error) ?? ''));
+    },
+    onSettled: () => onBusyChange(false),
+  };
 
   const run = () => {
     setConfirming(false);
     setProblem(undefined);
+    setOfferText(false);
     setDone(false);
     onBusyChange(true);
-    importText.mutate(
-      { body: { text } },
-      {
-        onSuccess: (draft) => {
-          onDraft(draft);
-          setText('');
-          setOpen(false);
-          setDone(true);
-        },
-        onError: (error) => setProblem(errorMessage(error)),
-        onSettled: () => onBusyChange(false),
-      },
-    );
+    if (mode === 'url') {
+      importUrl.mutate({ body: { url: url.trim() } }, callbacks);
+    } else {
+      importText.mutate({ body: { text } }, callbacks);
+    }
+  };
+
+  const switchMode = (next: Mode) => {
+    setMode(next);
+    setProblem(undefined);
+    setOfferText(false);
+  };
+
+  const check = (): string | undefined => {
+    if (mode === 'text') {
+      return text.trim() ? undefined : t('import.text.required');
+    }
+    if (!url.trim()) return t('import.url.required');
+    return isWebLink(url.trim()) ? undefined : t('import.url.invalid');
   };
 
   const submit = (event: React.SyntheticEvent) => {
     event.preventDefault();
-    if (importText.isPending) return;
-    if (!text.trim()) {
-      setProblem(t('import.text.required'));
+    if (pending) return;
+    const invalid = check();
+    if (invalid) {
+      setProblem(invalid);
+      setOfferText(false);
       return;
     }
     // The import would replace what the editor typed, so ask first.
@@ -124,47 +179,104 @@ export function ImportPanel({
               type="button"
               variant="ghost"
               size="icon"
-              disabled={importText.isPending}
+              disabled={pending}
               onClick={() => setOpen(false)}
             >
               <X aria-hidden="true" />
               <span className="sr-only">{t('import.panel.close')}</span>
             </Button>
           </div>
-          <FormField
-            id="import-text"
-            label={t('import.text.label')}
-            hint={t('import.text.hint')}
-            required
-            error={problem}
+          <ToggleGroup
+            type="single"
+            aria-label={t('import.mode.label')}
+            value={mode}
+            onValueChange={(next) => {
+              if (next === 'url' || next === 'text') switchMode(next);
+            }}
+            disabled={pending}
           >
-            {(field) => (
-              <Textarea
-                {...field}
-                dir="auto"
-                value={text}
-                onChange={(event) => setText(event.target.value)}
-                disabled={importText.isPending}
-                rows={8}
-                className="min-h-40"
-              />
-            )}
-          </FormField>
+            <ToggleGroupItem value="url">
+              <Link aria-hidden="true" />
+              {t('import.mode.url')}
+            </ToggleGroupItem>
+            <ToggleGroupItem value="text">
+              <ClipboardPaste aria-hidden="true" />
+              {t('import.mode.text')}
+            </ToggleGroupItem>
+          </ToggleGroup>
+          {mode === 'url' ? (
+            <FormField
+              id="import-url"
+              label={t('import.url.label')}
+              hint={t('import.url.hint')}
+              required
+              error={problem}
+            >
+              {(field) => (
+                <Input
+                  {...field}
+                  type="url"
+                  dir="ltr"
+                  inputMode="url"
+                  autoComplete="url"
+                  value={url}
+                  onChange={(event) => setUrl(event.target.value)}
+                  disabled={pending}
+                />
+              )}
+            </FormField>
+          ) : (
+            <FormField
+              id="import-text"
+              label={t('import.text.label')}
+              hint={t('import.text.hint')}
+              required
+              error={problem}
+            >
+              {(field) => (
+                <Textarea
+                  {...field}
+                  dir="auto"
+                  value={text}
+                  onChange={(event) => setText(event.target.value)}
+                  disabled={pending}
+                  rows={8}
+                  className="min-h-40"
+                />
+              )}
+            </FormField>
+          )}
+          {offerText ? (
+            <div>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => switchMode('text')}
+              >
+                <ClipboardPaste aria-hidden="true" />
+                {t('import.url.useText')}
+              </Button>
+            </div>
+          ) : null}
           {/* Always rendered, so a screen reader announces the text when it appears. */}
           <p role="status" className="min-h-5 text-sm text-muted-foreground">
-            {importText.isPending ? t('import.pending') : null}
+            {pending ? t('import.pending') : null}
           </p>
-          <SlowNote pending={importText.isPending} afterMs={SLOW_AFTER_LONG_MS}>
+          <SlowNote pending={pending} afterMs={SLOW_AFTER_LONG_MS}>
             {t('pending.slow')}
           </SlowNote>
           <div className="flex justify-end">
             <PendingButton
               type="submit"
-              pending={importText.isPending}
-              pendingLabel={t('import.text.submitting')}
+              pending={pending}
+              pendingLabel={t(
+                mode === 'url'
+                  ? 'import.url.submitting'
+                  : 'import.text.submitting',
+              )}
             >
               <Sparkles aria-hidden="true" />
-              {t('import.text.submit')}
+              {t(mode === 'url' ? 'import.url.submit' : 'import.text.submit')}
             </PendingButton>
           </div>
         </form>
