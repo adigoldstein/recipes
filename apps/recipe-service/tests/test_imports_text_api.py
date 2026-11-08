@@ -253,7 +253,7 @@ def test_a_provider_without_a_key_is_provider_unavailable(
     monkeypatch.setenv("LLM_PROVIDERS", "gemini")
     get_settings.cache_clear()
     response = run_import(client, "a recipe")
-    assert response.status_code == 502
+    assert response.status_code == 400
     assert response.json()["code"] == "provider_unavailable"
     assert runs(session) == []
 
@@ -264,7 +264,7 @@ def test_an_unknown_provider_is_provider_unavailable(
     monkeypatch.setenv("LLM_PROVIDERS", "ollama")
     get_settings.cache_clear()
     response = run_import(client, "a recipe")
-    assert response.status_code == 502
+    assert response.status_code == 400
     assert response.json()["code"] == "provider_unavailable"
 
 

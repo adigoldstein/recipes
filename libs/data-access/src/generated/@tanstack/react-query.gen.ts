@@ -3,8 +3,8 @@
 import { type DefaultError, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen.js';
-import { authChangePassword, authLogin, authLogout, authSession, healthGetHealth, importsImportText, importsImportUrl, type Options, photosGetLimits, photosUploadPhoto, photosUploadPhotoFromUrl, recipesCreateRecipe, recipesDeleteRecipe, recipesGetRecipe, recipesListRecipes, recipesUpdateRecipe, tagsCreateTag, tagsDeleteTag, tagsListTags, tagsUpdateTag, usersCreateUser, usersListUsers, usersUpdateUser } from '../sdk.gen.js';
-import type { AuthChangePasswordData, AuthChangePasswordError, AuthChangePasswordResponse, AuthLoginData, AuthLoginError, AuthLoginResponse, AuthLogoutData, AuthLogoutResponse, AuthSessionData, AuthSessionError, AuthSessionResponse, HealthGetHealthData, HealthGetHealthResponse, ImportsImportTextData, ImportsImportTextError, ImportsImportTextResponse, ImportsImportUrlData, ImportsImportUrlError, ImportsImportUrlResponse, PhotosGetLimitsData, PhotosGetLimitsError, PhotosGetLimitsResponse, PhotosUploadPhotoData, PhotosUploadPhotoError, PhotosUploadPhotoFromUrlData, PhotosUploadPhotoFromUrlError, PhotosUploadPhotoFromUrlResponse, PhotosUploadPhotoResponse, RecipesCreateRecipeData, RecipesCreateRecipeError, RecipesCreateRecipeResponse, RecipesDeleteRecipeData, RecipesDeleteRecipeError, RecipesDeleteRecipeResponse, RecipesGetRecipeData, RecipesGetRecipeError, RecipesGetRecipeResponse, RecipesListRecipesData, RecipesListRecipesResponse, RecipesUpdateRecipeData, RecipesUpdateRecipeError, RecipesUpdateRecipeResponse, TagsCreateTagData, TagsCreateTagError, TagsCreateTagResponse, TagsDeleteTagData, TagsDeleteTagError, TagsDeleteTagResponse, TagsListTagsData, TagsListTagsResponse, TagsUpdateTagData, TagsUpdateTagError, TagsUpdateTagResponse, UsersCreateUserData, UsersCreateUserError, UsersCreateUserResponse, UsersListUsersData, UsersListUsersResponse, UsersUpdateUserData, UsersUpdateUserError, UsersUpdateUserResponse } from '../types.gen.js';
+import { authChangePassword, authLogin, authLogout, authSession, healthGetHealth, importsImportText, importsImportUrl, importsListProviders, type Options, photosGetLimits, photosUploadPhoto, photosUploadPhotoFromUrl, recipesCreateRecipe, recipesDeleteRecipe, recipesGetRecipe, recipesListRecipes, recipesUpdateRecipe, tagsCreateTag, tagsDeleteTag, tagsListTags, tagsUpdateTag, usersCreateUser, usersListUsers, usersUpdateUser } from '../sdk.gen.js';
+import type { AuthChangePasswordData, AuthChangePasswordError, AuthChangePasswordResponse, AuthLoginData, AuthLoginError, AuthLoginResponse, AuthLogoutData, AuthLogoutResponse, AuthSessionData, AuthSessionError, AuthSessionResponse, HealthGetHealthData, HealthGetHealthResponse, ImportsImportTextData, ImportsImportTextError, ImportsImportTextResponse, ImportsImportUrlData, ImportsImportUrlError, ImportsImportUrlResponse, ImportsListProvidersData, ImportsListProvidersError, ImportsListProvidersResponse, PhotosGetLimitsData, PhotosGetLimitsError, PhotosGetLimitsResponse, PhotosUploadPhotoData, PhotosUploadPhotoError, PhotosUploadPhotoFromUrlData, PhotosUploadPhotoFromUrlError, PhotosUploadPhotoFromUrlResponse, PhotosUploadPhotoResponse, RecipesCreateRecipeData, RecipesCreateRecipeError, RecipesCreateRecipeResponse, RecipesDeleteRecipeData, RecipesDeleteRecipeError, RecipesDeleteRecipeResponse, RecipesGetRecipeData, RecipesGetRecipeError, RecipesGetRecipeResponse, RecipesListRecipesData, RecipesListRecipesResponse, RecipesUpdateRecipeData, RecipesUpdateRecipeError, RecipesUpdateRecipeResponse, TagsCreateTagData, TagsCreateTagError, TagsCreateTagResponse, TagsDeleteTagData, TagsDeleteTagError, TagsDeleteTagResponse, TagsListTagsData, TagsListTagsResponse, TagsUpdateTagData, TagsUpdateTagError, TagsUpdateTagResponse, UsersCreateUserData, UsersCreateUserError, UsersCreateUserResponse, UsersListUsersData, UsersListUsersResponse, UsersUpdateUserData, UsersUpdateUserError, UsersUpdateUserResponse } from '../types.gen.js';
 
 /**
  * Login
@@ -133,6 +133,26 @@ export const healthGetHealthOptions = (options?: Options<HealthGetHealthData>) =
         return data;
     },
     queryKey: healthGetHealthQueryKey(options)
+});
+
+export const importsListProvidersQueryKey = (options?: Options<ImportsListProvidersData>) => createQueryKey('importsListProviders', options);
+
+/**
+ * List Providers
+ *
+ * The active import engine and its timeout (the client's limit follows it).
+ */
+export const importsListProvidersOptions = (options?: Options<ImportsListProvidersData>) => queryOptions<ImportsListProvidersResponse, ImportsListProvidersError, ImportsListProvidersResponse, ReturnType<typeof importsListProvidersQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await importsListProviders({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: importsListProvidersQueryKey(options)
 });
 
 /**

@@ -31,9 +31,10 @@ class Settings(BaseSettings):
     data_dir: Path = Path("./data")
     jwt_secret: SecretStr
     cookie_secure: bool = True
-    # Import engines to enable, in order; the first is the default (AD-12).
+    # The import engine (AD-12): the first name is the one used. Switching engines
+    # is changing this one setting; there is no automatic fallback.
     llm_providers: Annotated[list[str], NoDecode] = Field(
-        default_factory=lambda: ["gemini"]
+        default_factory=lambda: ["anthropic"]
     )
     gemini_api_key: SecretStr | None = None
     gemini_model: str = "gemini-3.5-flash-lite"

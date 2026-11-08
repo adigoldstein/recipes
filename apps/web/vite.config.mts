@@ -12,8 +12,14 @@ export default defineConfig(() => ({
     port: 4200,
     host: 'localhost',
     // Same origin in dev as in prod, so the auth cookie needs no CORS setup.
+    // An import waits on the AI engine for up to its timeout (30 s by default), so the
+    // proxy waits longer than the largest one (AD-43).
     proxy: {
-      '/api/': 'http://localhost:8000',
+      '/api/': {
+        target: 'http://localhost:8000',
+        timeout: 120_000,
+        proxyTimeout: 120_000,
+      },
       '/media/': 'http://localhost:8000',
     },
   },

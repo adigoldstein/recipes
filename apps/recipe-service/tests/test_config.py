@@ -19,7 +19,7 @@ def test_defaults(monkeypatch: pytest.MonkeyPatch) -> None:
     assert settings.env is Environment.PRODUCTION
     assert settings.data_dir == Path("./data")
     assert settings.cookie_secure is True
-    assert settings.llm_providers == ["gemini"]
+    assert settings.llm_providers == ["anthropic"]
     assert settings.gemini_api_key is None
     assert settings.gemini_model == "gemini-3.5-flash-lite"
     assert settings.gemini_timeout_seconds == 30

@@ -275,7 +275,7 @@ Editors manage tags (add, rename, delete, pin or unpin, with usage counts), and 
 
 ### Epic 5: AI import
 
-Editors import a recipe from a link or from pasted text with a free-tier chain of Gemini and Groq engines. They get a Hebrew draft with suggested tags and photo, review the flagged fields, and save. Live stage progress (SSE), cancel and per-engine timeouts make slow local runs usable. A URL that was already imported is caught before fetching. The admin sees import performance on an AI dashboard, and evals score providers on saved fixtures. Story 5.1 was the spike that compared the engines, chose the chain and measured the site blocking rate. (Updated 2026-11-04, AD-34 to AD-40.)
+Editors import a recipe from a link or from pasted text with one AI engine chosen by config (Haiku by default). They get a Hebrew draft with suggested tags and photo, review the flagged fields, and save. Live stage progress (SSE), cancel and per-engine timeouts make slow local runs usable. A URL that was already imported is caught before fetching. The admin sees import performance on an AI dashboard, and evals score providers on saved fixtures. Story 5.1 was the spike that compared the engines, chose the chain and measured the site blocking rate. (Updated 2026-11-04, AD-34 to AD-40.)
 **FRs covered:** FR17, FR18, FR19, FR20, FR21, FR24
 
 ### Epic 6: Ready to show
@@ -857,9 +857,9 @@ _Backend only; added 2026-11-04 after Adi approved Winston's proposal. It sits b
 
 ## Epic 5: AI import
 
-Editors import a recipe from a link or from pasted text, get a Hebrew draft from a free-tier engine chain (Gemini flash-lite, then Gemini flash, then Groq), review it, and save.
+Editors import a recipe from a link or from pasted text, get a Hebrew draft from one configured AI engine (Haiku by default), review it, and save.
 
-> Changed 2026-11-04 after the Story 5.1 spike (Adi): Ollama is dropped; the chain, timeouts and cool down are in AD-12, AD-38 and AD-42, and the results are in `tools/llm-spike/RESULTS.md`.
+> Changed 2026-11-04 after the Story 5.1 spike (Adi): Ollama is dropped; the engine choice and timeouts are in AD-12 and AD-43 (chain and cool down dropped 2026-11-08), and the results are in `tools/llm-spike/RESULTS.md`.
 
 > Updated 2026-11-04 with Adi's approved AI import decisions (ARCHITECTURE-SPINE AD-34 to AD-40). The rule is: a working mechanism first, edge cases later. Stories 5.1–5.5 are the core. 5.6–5.8 add progress, duplicate check and the dashboard. 5.9 (not-a-recipe pre-check) and 5.10 (evals) can come later.
 
@@ -935,25 +935,24 @@ So that importing from cooking sites takes seconds (FR17).
 **And** a bot-protection challenge or block page is detected (it is never bypassed) and returns `fetch_challenged`; blocked, failed or too-large fetches return `fetch_blocked`, `fetch_failed` or `fetch_too_large`. For all of them the UI offers a one-click switch to "הדבקת טקסט" (FR17, AD-35)
 **And** tests cover SSRF cases (localhost, private IPs, a redirect to a private IP) and a saved challenge page, with the fake fetcher and fixture pages (`fake://<fixture>`)
 
-### Story 5.5: Cancel, engine choice and errors
+### Story 5.5: Cancel and readable errors
 
 As an editor,
-I want to cancel an import, and have a failing engine replaced automatically by the next one,
-So that an import still works when one free-tier engine is down or out of quota (FR20, AD-12, AD-42).
+I want to cancel an import, and see a clear Hebrew message when the engine fails,
+So that I'm never stuck on a slow or failing import (FR20, AD-12, AD-43).
+
+> Reduced scope 2026-11-08 (Adi): no engine fallback chain, no cool down; Haiku (`anthropic`) is the default engine and switching is a one-line `.env` change.
 
 **Acceptance Criteria:**
 
-**Given** an import is running
+**Given** an import (text or URL) is running
 **When** I tap "ביטול"
-**Then** the request is aborted, and the server stops waiting on the provider where possible
-**And** `GET /api/imports/providers` returns `[{name, timeout_s}]`, and the client aborts at `timeout_s + 5`. The Vite proxy and uvicorn timeouts exceed the largest provider timeout
-**And** the `groq` adapter (`openai/gpt-oss-120b` from config, `GROQ_API_KEY`, structured output validated by the same `DraftRecipe` with the same one retry, AD-34) is added to the registry, and the chain `gemini-3.5-flash-lite`, then `gemini-3.5-flash`, then `groq` runs in that order, each step enabled when its key is set (model names come from config, never code)
-**And** the chain moves to the next engine on a 429/503/quota error, a timeout, invalid JSON after the one retry, or an empty ingredient list (AD-12)
-**And** the in-memory cool down skips an engine for 5 minutes after 3 consecutive failures, and skips it until the reset time when a quota error says when it resets (AD-42), with unit tests for both rules using a fake clock
-**And** the dialog shows which engine produced the draft, and the manual engine choice is only a dev option behind config
-**And** when every engine fails, `llm_timeout`, `llm_unavailable`, `llm_quota` or `llm_invalid_output` show a readable Hebrew message with "לנסות שוב" and an offer to use the "הדבקת טקסט" tab. Nothing is saved
+**Then** the request is aborted (AbortController), the dialog returns to the form with my input kept, no error toast appears, and nothing is saved. The server stops waiting on the provider where possible
+**And** the dialog shows an indeterminate spinner with "ביטול" (no percentage, no fake phase text) until Story 5.6
+**And** `GET /api/imports/providers` (editor) returns the active engine as `[{name, timeout_s}]`, and the client aborts at `timeout_s + 5`. The Vite proxy and uvicorn timeouts exceed the largest provider timeout
+**And** the default engine is `anthropic` (Haiku, model name from config); `gemini` and `fake` keep working
+**And** `llm_timeout`, `llm_unavailable`, `llm_quota` and `llm_invalid_output` show a readable Hebrew message (for example "יש בעיה זמנית בשירות ה־AI. אפשר לנסות שוב בעוד כמה דקות.") with "לנסות שוב" and, for a URL import, an offer to use the "הדבקת טקסט" tab. Nothing is saved
 **And** an unknown or disabled provider returns 400 `provider_unavailable`
-**And** until Story 5.6, the dialog shows an indeterminate spinner with "ביטול" (no percentage, no fake phase text)
 
 ### Story 5.6: Live import progress (SSE)
 
@@ -999,7 +998,7 @@ So that I choose engines and prompts on real numbers (AD-38).
 **Given** I'm signed in as an admin
 **When** I open the "AI dashboard" page (admin-only route in `libs/feature-import`, lazy loaded)
 **Then** `GET /api/admin/import-stats` (admin; 403 for editors) returns aggregates computed on request with SQL `GROUP BY` over `import_runs`: per provider/model the run count, success rate, first-try validation rate, retry rate, average and p95 latency, average tokens, the JSON-LD vs LLM split, and the outcome breakdown; plus runs per day for the last 30 days
-**And** the same endpoint returns, per provider/model, the failure rate over the last 20 attempts and the current consecutive-failure streak, computed from `import_attempts` (AD-38); the page flags a model with a streak of 3 or more or a failure rate above 30%, and shows which engines are in a cool down now (AD-42)
+**And** the same endpoint returns, per provider/model, the failure rate over the last 20 attempts and the current consecutive-failure streak, computed from `import_attempts` (AD-38); the page flags a model with a streak of 3 or more or a failure rate above 30% (AD-42, the cool down, was dropped 2026-11-08)
 **And** an optional `?days=` filter and a `prompt_version` breakdown are supported
 **And** the page shows these as charts and a table, using design tokens only, in RTL and both themes. The chart library is agreed with Adi before the story starts
 **And** there is no background job and no stored aggregate table

@@ -45,7 +45,7 @@ class AnthropicProvider:
     ) -> None:
         self.model = model
         self._api_key = api_key
-        self._timeout = timeout_seconds
+        self.timeout_seconds = timeout_seconds
         self._max_output_tokens = max_output_tokens
         self._client = client or httpx.Client()
         self._schema = DraftRecipe.model_json_schema()
@@ -80,7 +80,7 @@ class AnthropicProvider:
                     "content-type": "application/json",
                 },
                 json=body,
-                timeout=self._timeout,
+                timeout=self.timeout_seconds,
             )
         except httpx.TimeoutException as error:
             raise LlmTimeoutError("Claude did not answer in time") from error

@@ -25,14 +25,37 @@ export const OUTCOME_UNKNOWN_EVENT = 'bite-and-board:outcome-unknown';
  */
 export const SAFETY_NET_MS = {
   default: 30_000,
-  /** The slowest LLM provider's 90 s, plus 5 s. */
+  /** The default until the engine's own timeout is known: 90 s, plus 5 s. */
   import: 95_000,
   upload: 120_000,
 } as const;
 
+/** The slack on top of the engine's own timeout, so the server's answer arrives first. */
+const IMPORT_SLACK_MS = 5_000;
+
+let importNetMs: number = SAFETY_NET_MS.import;
+
+/**
+ * Follows the engine's own timeout (AD-43): the import safety net becomes the longest
+ * `timeout_s` from `GET /api/imports/providers`, plus 5 seconds. Until the engines are
+ * known, the default above stays.
+ */
+export function setImportTimeouts(timeoutsSeconds: readonly number[]) {
+  importNetMs =
+    timeoutsSeconds.length > 0
+      ? Math.max(...timeoutsSeconds) * 1000 + IMPORT_SLACK_MS
+      : SAFETY_NET_MS.import;
+}
+
 /** The safety net for a path. */
 export function safetyNetMs(pathname: string): number {
-  if (pathname.startsWith('/api/imports/')) return SAFETY_NET_MS.import;
+  // Listing the engines is an ordinary read; only the imports themselves are slow.
+  if (
+    pathname.startsWith('/api/imports/') &&
+    pathname !== '/api/imports/providers'
+  ) {
+    return importNetMs;
+  }
   if (pathname === '/api/photos') return SAFETY_NET_MS.upload;
   return SAFETY_NET_MS.default;
 }

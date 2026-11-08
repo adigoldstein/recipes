@@ -1,11 +1,12 @@
-import { useState } from 'react';
-import { ClipboardPaste, Link, Sparkles, X } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { ClipboardPaste, Link, RotateCw, Sparkles, X } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
   getErrorCode,
   importsImportTextMutation,
   importsImportUrlMutation,
+  useImportEngines,
   type DraftRecipe,
 } from '@bite-and-board/data-access';
 import {
@@ -30,6 +31,16 @@ const FETCH_ERRORS = new Set([
   'fetch_challenged',
   'fetch_failed',
   'fetch_too_large',
+]);
+
+/** Failures where the engine (or the wait for it) failed and trying again is the way. */
+const ENGINE_ERRORS = new Set([
+  'llm_timeout',
+  'llm_unavailable',
+  'llm_quota',
+  'llm_invalid_output',
+  'provider_unavailable',
+  'request_timeout',
 ]);
 
 /** A link the server can try: http or https, nothing else. */
@@ -77,10 +88,16 @@ export function ImportPanel({
   const [offerText, setOfferText] = useState(false);
   const [done, setDone] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const [canRetry, setCanRetry] = useState(false);
+  // The request that is running; aborting it is how "ביטול" works.
+  const running = useRef<AbortController>(undefined);
+  // Learns the engine's timeout so the client's own limit follows it (AD-43).
+  useImportEngines();
   const pending = importText.isPending || importUrl.isPending;
 
   const callbacks = {
     onSuccess: (draft: DraftRecipe) => {
+      if (running.current?.signal.aborted) return;
       onDraft(draft);
       setText('');
       setUrl('');
@@ -88,22 +105,41 @@ export function ImportPanel({
       setDone(true);
     },
     onError: (error: unknown) => {
+      // A cancel is not a failure: no message, the form stays as it was.
+      if (running.current?.signal.aborted) return;
+      const code = getErrorCode(error) ?? '';
       setProblem(errorMessage(error));
-      setOfferText(FETCH_ERRORS.has(getErrorCode(error) ?? ''));
+      setCanRetry(ENGINE_ERRORS.has(code));
+      setOfferText(
+        FETCH_ERRORS.has(code) || (mode === 'url' && ENGINE_ERRORS.has(code)),
+      );
     },
-    onSettled: () => onBusyChange(false),
+    onSettled: () => {
+      if (!running.current?.signal.aborted) onBusyChange(false);
+    },
+  };
+
+  const cancel = () => {
+    running.current?.abort();
+    importText.reset();
+    importUrl.reset();
+    onBusyChange(false);
   };
 
   const run = () => {
     setConfirming(false);
     setProblem(undefined);
     setOfferText(false);
+    setCanRetry(false);
     setDone(false);
     onBusyChange(true);
+    const controller = new AbortController();
+    running.current = controller;
+    const signal = controller.signal;
     if (mode === 'url') {
-      importUrl.mutate({ body: { url: url.trim() } }, callbacks);
+      importUrl.mutate({ body: { url: url.trim() }, signal }, callbacks);
     } else {
-      importText.mutate({ body: { text } }, callbacks);
+      importText.mutate({ body: { text }, signal }, callbacks);
     }
   };
 
@@ -111,6 +147,7 @@ export function ImportPanel({
     setMode(next);
     setProblem(undefined);
     setOfferText(false);
+    setCanRetry(false);
   };
 
   const check = (): string | undefined => {
@@ -128,6 +165,7 @@ export function ImportPanel({
     if (invalid) {
       setProblem(invalid);
       setOfferText(false);
+      setCanRetry(false);
       return;
     }
     // The import would replace what the editor typed, so ask first.
@@ -246,16 +284,24 @@ export function ImportPanel({
               )}
             </FormField>
           )}
-          {offerText ? (
-            <div>
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => switchMode('text')}
-              >
-                <ClipboardPaste aria-hidden="true" />
-                {t('import.url.useText')}
-              </Button>
+          {canRetry || offerText ? (
+            <div className="flex flex-wrap gap-2">
+              {canRetry ? (
+                <Button type="button" variant="secondary" onClick={run}>
+                  <RotateCw aria-hidden="true" />
+                  {t('import.retry')}
+                </Button>
+              ) : null}
+              {offerText ? (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => switchMode('text')}
+                >
+                  <ClipboardPaste aria-hidden="true" />
+                  {t('import.url.useText')}
+                </Button>
+              ) : null}
             </div>
           ) : null}
           {/* Always rendered, so a screen reader announces the text when it appears. */}
@@ -265,7 +311,12 @@ export function ImportPanel({
           <SlowNote pending={pending} afterMs={SLOW_AFTER_LONG_MS}>
             {t('pending.slow')}
           </SlowNote>
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-2">
+            {pending ? (
+              <Button type="button" variant="ghost" onClick={cancel}>
+                {t('import.cancel')}
+              </Button>
+            ) : null}
             <PendingButton
               type="submit"
               pending={pending}
