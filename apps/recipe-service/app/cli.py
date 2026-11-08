@@ -45,7 +45,17 @@ def _ask_password() -> str | None:
     return password
 
 
-def _create_admin(email: str, name: str | None, *, reset_password: bool) -> int:
+def _read_password_from_stdin() -> str | None:
+    """One line from stdin, for scripts (CI, the e2e setup). Never from argv or env."""
+    line = sys.stdin.readline()
+    if not line:
+        return None
+    return line.rstrip("\r\n")
+
+
+def _create_admin(
+    email: str, name: str | None, *, reset_password: bool, password_stdin: bool
+) -> int:
     new_user: UserCreate | None = None
     if not reset_password:
         if name is None:
@@ -60,12 +70,17 @@ def _create_admin(email: str, name: str | None, *, reset_password: bool) -> int:
             )
             return _fail(problems)
 
-    try:
-        password = _ask_password()
-    except (EOFError, KeyboardInterrupt):
-        return _fail("cancelled")
-    if password is None:
-        return _fail("the passwords do not match")
+    if password_stdin:
+        password = _read_password_from_stdin()
+        if password is None:
+            return _fail("no password on stdin")
+    else:
+        try:
+            password = _ask_password()
+        except (EOFError, KeyboardInterrupt):
+            return _fail("cancelled")
+        if password is None:
+            return _fail("the passwords do not match")
 
     data_dir = get_settings().data_dir
     run_migrations(data_dir)
@@ -100,6 +115,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="The user already exists: change only their password",
     )
+    create_admin.add_argument(
+        "--password-stdin",
+        action="store_true",
+        help="Read the password from one line of stdin (no prompt, no echo)",
+    )
     return parser
 
 
@@ -108,7 +128,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.command == "seed":
         return _seed()
     if args.command == "create-admin":
-        return _create_admin(args.email, args.name, reset_password=args.reset_password)
+        return _create_admin(
+            args.email,
+            args.name,
+            reset_password=args.reset_password,
+            password_stdin=args.password_stdin,
+        )
     raise AssertionError(args.command)  # pragma: no cover
 
 

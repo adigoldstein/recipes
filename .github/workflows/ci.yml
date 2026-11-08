@@ -55,4 +55,6 @@ jobs:
       - run: git diff --exit-code
 
       - run: npx nx format:check
-      - run: npx nx affected -t lint typecheck test build build-storybook
+      # The end-to-end tests drive a real browser; this installs Chromium and its system libraries.
+      - run: npx playwright install --with-deps chromium
+      - run: npx nx affected -t lint typecheck test build build-storybook e2e

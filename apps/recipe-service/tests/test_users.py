@@ -1,3 +1,4 @@
+import io
 import logging
 from collections.abc import Callable, Iterator
 
@@ -448,6 +449,58 @@ def test_cli_rejects_a_bad_email_or_name_before_asking_for_a_password(
     type_passwords()  # Any prompt would raise StopIteration.
     assert main(["create-admin", "--email", email, "--name", name]) == 1
     assert "Error:" in capsys.readouterr().err
+    assert _users(session) == []
+
+
+def test_cli_password_stdin_creates_an_admin_without_prompting(
+    client: TestClient,
+    session: Session,
+    type_passwords: Typed,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    type_passwords()  # Any prompt would raise StopIteration.
+    monkeypatch.setattr("sys.stdin", io.StringIO(f"{PASSWORD}\n"))
+    assert main([*CREATE, "--password-stdin"]) == 0
+    (stored,) = _users(session)
+    assert stored.role is Role.ADMIN
+    assert verify_password(PASSWORD, stored.password_hash)
+    captured = capsys.readouterr()
+    assert PASSWORD not in captured.out + captured.err
+
+
+def test_cli_password_stdin_resets_a_password(
+    client: TestClient,
+    session: Session,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    add_user(session, name="Adi", password="the old password")
+    monkeypatch.setattr("sys.stdin", io.StringIO(f"{PASSWORD}\n"))
+    assert main([*RESET, "--password-stdin"]) == 0
+    assert verify_password(PASSWORD, _users(session)[0].password_hash)
+
+
+def test_cli_password_stdin_fails_on_empty_input(
+    client: TestClient,
+    session: Session,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    monkeypatch.setattr("sys.stdin", io.StringIO(""))
+    assert main([*CREATE, "--password-stdin"]) == 1
+    assert "no password on stdin" in capsys.readouterr().err
+    assert _users(session) == []
+
+
+def test_cli_password_stdin_still_enforces_the_length(
+    client: TestClient,
+    session: Session,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    monkeypatch.setattr("sys.stdin", io.StringIO("short\n"))
+    assert main([*CREATE, "--password-stdin"]) == 1
+    assert "at least 8" in capsys.readouterr().err
     assert _users(session) == []
 
 

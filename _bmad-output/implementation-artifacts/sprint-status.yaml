@@ -91,9 +91,9 @@ development_status:
   epic-5-retrospective: optional
 
   epic-6: in-progress
-  6-1-one-production-container: review # V1
+  6-1-one-production-container: done # V1
   6-2-logging-and-backups: backlog # V3 / nice to have
-  6-3-end-to-end-tests-in-ci: backlog # V1
+  6-3-end-to-end-tests-in-ci: review # V1
   6-4-performance-budgets: backlog # V2
   6-5-readme-for-recruiters: backlog # V1
   epic-6-retrospective: optional
