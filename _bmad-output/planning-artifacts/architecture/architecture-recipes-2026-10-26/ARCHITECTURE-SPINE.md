@@ -145,14 +145,14 @@ flowchart LR
 - **Rule:**
   - `imports` depends only on the `LlmProvider` Protocol: `extract(source) -> DraftRecipe`.
   - Adapters are registered **by name** in a provider registry, enabled from config:
-    - `gemini`: free tier, model names from config (`gemini-3.5-flash-lite` first, then `gemini-3.5-flash`).
-    - `groq`: free tier, `openai/gpt-oss-120b`, the last engine in the chain.
+    - `anthropic`: Claude Haiku, model name from config. **The default engine** (decided 2026-11-08).
+    - `gemini`: free tier, model name from config. An option, switched on by config.
     - `fake`: used by tests and CI, which never call a real model.
   - Changed 2026-11-04 after the Story 5.1 spike (Adi): the default order is `gemini-3.5-flash-lite`, then `gemini-3.5-flash`, then Groq `gpt-oss-120b`, then a clear "paste the text" message. Ollama and Groq's qwen model are dropped (too slow on the dev PC, and empty drafts). Results: `tools/llm-spike/RESULTS.md`.
-  - The chain moves to the next engine on a 429/503/quota error, on invalid JSON after the one retry, or on an empty ingredient list. A daily-quota 429 is never waited out.
+  - _(Changed 2026-11-08, Adi.)_ **One active engine, chosen by config** (`LLM_PROVIDERS`; the first name is used). There is **no automatic fallback chain**: if the engine fails, the import fails with a clear temporary-problem message and the user can retry or paste the text. Reason: over-engineering for a small app, and on 2026-11-05 both `gemini-3.5-flash-lite` and `gemini-3.5-flash` answered 503 at the same time, so a same-vendor fallback does not help. Groq is not added. Switching engines is a one-line `.env` change.
   - The import dialog shows which engine produced the draft.
   - Every provider returns schema-constrained JSON, validated against the shared Pydantic `DraftRecipe`, with one retry on a validation failure (AD-34). The draft is Hebrew-translated, has units mapped to the app list, and suggests tags from the existing list (new tag names are proposed in the draft).
-  - An import is **one request that streams its progress as SSE** (AD-40), with a per-provider timeout (`gemini-3.5-flash-lite` 30s, `gemini-3.5-flash` 90s, `groq` 90s; set from the Story 5.1 spike), and the client aborts it on cancel. _(Changed 2026-11-04: was "one synchronous request".)_
+  - An import is **one request that streams its progress as SSE** (AD-40), with a per-provider timeout (30 s each, from config), and the client aborts it on cancel. _(Changed 2026-11-04: was "one synchronous request".)_
   - Drafts are **never persisted** (FR-19). A new provider means one adapter plus one config entry.
 
 ### AD-13 — Safe import pipeline [ADOPTED]
@@ -423,7 +423,7 @@ flowchart LR
 - **Prevents:** guessing which provider is slow, costly or unreliable, and a second log table drifting from the daily cap.
 - **Rule:**
   - One `import_runs` table (via Alembic) replaces `import_log`. Each import writes one row: `user_id`, `provider`, `model`, `source_kind` (url/text), `path` (`json_ld` or `llm`), `prompt_version`, `latency_ms`, `input_tokens`, `output_tokens`, `first_try_valid` (bool), `retried` (bool), `outcome` (`ok` or an error code), `created_at`. It also counts the daily cap.
-  - _(Added 2026-11-04, Adi.)_ Each engine tried in the chain also writes one `import_attempts` row (`run_id`, `provider`, `model`, `attempt_no`, `outcome` of `ok` or an error code, `latency_ms`, `input_tokens`, `output_tokens`, `created_at`), so a run that fell back from one engine to the next shows every step. Failure rates and **consecutive-failure streaks per provider/model** are computed from `import_attempts` on request, and the dashboard flags a model with a failure streak or a high recent failure rate (the thresholds are set in Story 5.8).
+  - _(Added 2026-11-04, Adi.)_ Each engine call also writes one `import_attempts` row (`run_id`, `provider`, `model`, `attempt_no`, `outcome` of `ok` or an error code, `latency_ms`, `input_tokens`, `output_tokens`, `created_at`), so every call is visible. Failure rates and **consecutive-failure streaks per provider/model** are computed from `import_attempts` on request, and the dashboard flags a model with a failure streak or a high recent failure rate (the thresholds are set in Story 5.8).
   - An admin-only "AI dashboard" page in `libs/feature-import` reads `GET /api/admin/import-stats` (admin). The server computes the aggregates **on request** with SQL `GROUP BY` (by provider/model and by day). There is no background job and no pre-aggregated table.
   - The charting library for the dashboard is still open (see Open).
 
@@ -463,11 +463,12 @@ flowchart LR
   - **Migration 0005 (AD-29):** backs up `app.db` first (never overwriting an earlier backup), copies every row into the JSON in `position` order, verifies the item counts and that every recipe still has an ingredient and a step before it drops the old tables, and rolls back on any mismatch. The downgrade rebuilds both tables from the JSON, and a round-trip test covers it.
   - **Later:** searching by ingredient can use SQLite `json_each(...)`. AI import (AD-34) and embeddings read and write the same item shapes.
 
-### AD-42 — Provider cool down (circuit breaker) [ADOPTED]
+### AD-42 — Provider cool down (circuit breaker) [DROPPED 2026-11-08]
 
 - **Binds:** AD-12, AD-22, AD-38
 - **Prevents:** every import waiting on an engine that is down, wasted quota on retry storms, and waiting hours for a daily quota to return.
-- **Rule:** _(Approved by Adi 2026-11-04.)_
+- **Dropped 2026-11-08 (Adi):** there is no fallback chain (AD-12), so there is nothing to skip to; a cool down alone would only turn a temporary failure into five minutes of refusals. Over-engineering for a small app. The text below is kept for history only.
+- **Rule (not in force):** _(Approved by Adi 2026-11-04.)_
   - The provider chain (AD-12) keeps a small **in-memory** state per provider/model: the count of consecutive failures. A failure is a 429, 503, timeout, invalid JSON after the AD-34 retry, or an empty ingredient list.
   - After **3 consecutive failures**, the engine is skipped for **5 minutes** and the chain moves straight to the next one. One success resets the count.
   - A quota error that says when it resets (for example "retry in 13h") skips the engine until then, and it is never waited out or retried.
@@ -476,14 +477,15 @@ flowchart LR
 
 ### AD-43 — Timeouts and a write whose outcome is unknown [ADOPTED]
 
-- **Binds:** AD-4, AD-12, AD-19, AD-25, AD-40, AD-42
+- **Binds:** AD-4, AD-12, AD-19, AD-25, AD-40
 - **Prevents:** a half-saved recipe, a client that reports "failed" for a write that went through, and a proxy that cuts a slow import.
 - **Rule:** _(Approved by Adi 2026-11-05, after Winston checked the code.)_
   - **The server transaction is the boundary of a write.** `create_recipe` and `update_recipe` add the recipe, link its tags (`assign_to_recipe` only flushes) and commit once; any error rolls back. Endpoints are sync functions run in a thread pool, so a client that disconnects does **not** stop a running write: it finishes and commits. No change to the server is needed for this.
   - **A hard timeout lives on the server only where the server calls out:** the LLM providers (AD-12: `gemini-3.5-flash-lite` 30 s, `gemini-3.5-flash` 90 s, Groq 90 s). On a timeout the import answers 504 `llm_timeout` and logs the run; nothing else is written. Ordinary endpoints have no deadline. SQLite waits for a lock for its driver default of 5 s, then the write fails and rolls back; the value is set explicitly (`busy_timeout` 5000 ms) so it is documented.
   - **The client has a safety net that is always longer than the server's own deadline,** so a definite server answer can arrive first: an import 95 s (90 s + 5), a photo upload 120 s, everything else 30 s. It is set in one place, the client's `fetch` (`libs/data-access`).
   - **When the safety net fires**, the client answers with the error code `request_timeout` for a read or an import (the user may retry), and `outcome_unknown` for a write (save, delete, tag and user changes): the message says it is not clear whether the action completed, and the app refetches from the server before anything is offered again. Creating a recipe can duplicate on a blind retry; with one user that is accepted, and the message sends the editor to check the library first. Delete (a 404 counts as done), full replace on update, and unique tag names are safe to repeat.
-  - **No cancel or retry button appears while a request is running.** "Retry" shows only after a request has actually failed. While waiting, the UI follows Story 2.7: nothing for 0.3 s, then a spinner kept for at least 0.5 s, and a "taking longer than usual" note after 10 s (30 s for an import or a photo upload).
+  - _(Changed 2026-11-08, Story 5.5: an import shows a "ביטול" button while it runs; it aborts the request with `AbortController` and shows no error. The server cannot stop a provider call that is already running in its thread, so the call finishes and is logged; true server-side cancel comes with SSE, Story 5.6.)_
+  - **No cancel or retry button appears while any other request is running.** "Retry" shows only after a request has actually failed. While waiting, the UI follows Story 2.7: nothing for 0.3 s, then a spinner kept for at least 0.5 s, and a "taking longer than usual" note after 10 s (30 s for an import or a photo upload).
   - **A reverse proxy in production must wait at least 120 s** (checked in Story 6.1); the deployment host is still open.
 
 ## Brownfield ratification

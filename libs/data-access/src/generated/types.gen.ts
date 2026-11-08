@@ -369,6 +369,22 @@ export type PhotoUploaded = {
 };
 
 /**
+ * ProviderInfo
+ *
+ * An enabled import engine and how long the server waits for it (AD-43).
+ */
+export type ProviderInfo = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Timeout S
+     */
+    timeout_s: number;
+};
+
+/**
  * RecipeCreate
  *
  * Everything needed to create a recipe.
@@ -937,6 +953,41 @@ export type HealthGetHealthResponses = {
 };
 
 export type HealthGetHealthResponse = HealthGetHealthResponses[keyof HealthGetHealthResponses];
+
+export type ImportsListProvidersData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/imports/providers';
+};
+
+export type ImportsListProvidersErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+};
+
+export type ImportsListProvidersError = ImportsListProvidersErrors[keyof ImportsListProvidersErrors];
+
+export type ImportsListProvidersResponses = {
+    /**
+     * Response Imports List Providers
+     *
+     * Successful Response
+     */
+    200: Array<ProviderInfo>;
+};
+
+export type ImportsListProvidersResponse = ImportsListProvidersResponses[keyof ImportsListProvidersResponses];
 
 export type ImportsImportTextData = {
     body: ImportTextRequest;

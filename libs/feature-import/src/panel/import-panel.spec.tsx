@@ -1,7 +1,7 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { HttpResponse, delay, http } from 'msw';
-import type { DraftRecipe } from '@bite-and-board/data-access';
+import { safetyNetMs, type DraftRecipe } from '@bite-and-board/data-access';
 import { renderPanel } from '../testing/render-import';
 import { server } from '../testing/server';
 
@@ -162,7 +162,12 @@ describe('ImportPanel', () => {
       { cap: 50 },
       'מכסת הייבוא היומית נוצלה. אפשר לנסות שוב מחר',
     ],
-    [504, 'llm_timeout', undefined, 'הייבוא לקח יותר מדי זמן. אפשר לנסות שוב'],
+    [
+      504,
+      'llm_timeout',
+      undefined,
+      'יש בעיה זמנית בשירות ה־AI. אפשר לנסות שוב בעוד כמה דקות.',
+    ],
     [
       502,
       'llm_invalid_output',
@@ -306,5 +311,196 @@ describe('ImportPanel link input', () => {
     expect(
       screen.queryByRole('button', { name: 'להדביק את הטקסט במקום' }),
     ).toBeNull();
+  });
+});
+
+describe('ImportPanel cancel', () => {
+  /** A server that never answers; it records when the browser drops the request. */
+  function serveForever() {
+    const state = { received: 0, aborted: false };
+    server.use(
+      http.post('*/api/imports/text', async ({ request }) => {
+        state.received += 1;
+        request.signal.addEventListener('abort', () => {
+          state.aborted = true;
+        });
+        await delay('infinite');
+        return HttpResponse.json(DRAFT);
+      }),
+    );
+    return state;
+  }
+
+  it('aborts the request and returns to the form with the input kept', async () => {
+    const state = serveForever();
+    const user = userEvent.setup();
+    const { onDraft, onBusyChange } = renderPanel();
+    await open(user);
+    await user.type(textbox(), 'עוגיות: 2 כוסות קמח');
+    await user.click(submit());
+    await user.click(await screen.findByRole('button', { name: 'ביטול' }));
+
+    expect(textbox()).toHaveProperty('disabled', false);
+    expect((textbox() as HTMLTextAreaElement).value).toBe(
+      'עוגיות: 2 כוסות קמח',
+    );
+    expect(screen.queryByRole('button', { name: 'ביטול' })).toBeNull();
+    expect(onBusyChange.mock.calls).toEqual([[true], [false]]);
+    await vi.waitFor(() => expect(state.aborted).toBe(true));
+    expect(onDraft).not.toHaveBeenCalled();
+  });
+
+  it('shows no error after a cancel', async () => {
+    serveForever();
+    const user = userEvent.setup();
+    renderPanel();
+    await open(user);
+    await user.type(textbox(), 'מתכון');
+    await user.click(submit());
+    await user.click(await screen.findByRole('button', { name: 'ביטול' }));
+    // Give the aborted request time to reject; nothing may be shown.
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(screen.queryByText(/שגיאה|בעיה/)).toBeNull();
+    expect(submit()).toHaveProperty('disabled', false);
+  });
+
+  it('can import again after a cancel', async () => {
+    serveForever();
+    const user = userEvent.setup();
+    const { onDraft } = renderPanel();
+    await open(user);
+    await user.type(textbox(), 'מתכון');
+    await user.click(submit());
+    await user.click(await screen.findByRole('button', { name: 'ביטול' }));
+    serveDraft();
+    await user.click(submit());
+    await screen.findByText(/^המתכון יובא/);
+    expect(onDraft).toHaveBeenCalledExactlyOnceWith(DRAFT);
+  });
+
+  it('cancels a link import too', async () => {
+    let aborted = false;
+    server.use(
+      http.post('*/api/imports/url', async ({ request }) => {
+        request.signal.addEventListener('abort', () => {
+          aborted = true;
+        });
+        await delay('infinite');
+        return HttpResponse.json(DRAFT);
+      }),
+    );
+    const user = userEvent.setup();
+    renderPanel();
+    await openPanel(user);
+    const link = () =>
+      screen.getByRole<HTMLInputElement>('textbox', { name: /^קישור למתכון/ });
+    await user.type(link(), 'https://example.com/cookies');
+    await user.click(screen.getByRole('button', { name: 'ייבוא מהקישור' }));
+    await user.click(await screen.findByRole('button', { name: 'ביטול' }));
+    expect(link().value).toBe('https://example.com/cookies');
+    await vi.waitFor(() => expect(aborted).toBe(true));
+  });
+});
+
+describe('ImportPanel engine errors', () => {
+  const TEMPORARY = 'יש בעיה זמנית בשירות ה־AI. אפשר לנסות שוב בעוד כמה דקות.';
+
+  it.each([
+    ['llm_timeout', 504, TEMPORARY],
+    ['llm_unavailable', 502, TEMPORARY],
+    ['llm_quota', 502, TEMPORARY],
+    [
+      'llm_invalid_output',
+      502,
+      'לא הצלחנו להפוך את הטקסט למתכון. אפשר לנסות שוב או לערוך את הטקסט',
+    ],
+    [
+      'provider_unavailable',
+      400,
+      'שירות הייבוא לא זמין כרגע. אפשר לנסות שוב מאוחר יותר',
+    ],
+  ])('on %s shows Hebrew copy and retries', async (code, status, message) => {
+    serveError(status, code);
+    const user = userEvent.setup();
+    const { onDraft, onBusyChange } = renderPanel();
+    await open(user);
+    await user.type(textbox(), 'מתכון');
+    await user.click(submit());
+    expect(await screen.findByText(message)).toBeTruthy();
+    expect(onDraft).not.toHaveBeenCalled();
+    expect(onBusyChange).toHaveBeenLastCalledWith(false);
+    expect((textbox() as HTMLTextAreaElement).value).toBe('מתכון');
+
+    const sent = serveDraft();
+    await user.click(screen.getByRole('button', { name: 'לנסות שוב' }));
+    await screen.findByText(/^המתכון יובא/);
+    expect(sent).toEqual([{ text: 'מתכון' }]);
+    expect(onDraft).toHaveBeenCalledExactlyOnceWith(DRAFT);
+  });
+
+  it('does not offer the text tab when the user is already pasting text', async () => {
+    serveError(502, 'llm_unavailable');
+    const user = userEvent.setup();
+    renderPanel();
+    await open(user);
+    await user.type(textbox(), 'מתכון');
+    await user.click(submit());
+    await screen.findByText(TEMPORARY);
+    expect(
+      screen.queryByRole('button', { name: 'להדביק את הטקסט במקום' }),
+    ).toBeNull();
+  });
+
+  it('for a link import offers retry and the paste tab', async () => {
+    server.use(
+      http.post('*/api/imports/url', () =>
+        HttpResponse.json(
+          { detail: 'x', code: 'llm_unavailable' },
+          { status: 502 },
+        ),
+      ),
+    );
+    const user = userEvent.setup();
+    renderPanel();
+    await openPanel(user);
+    await user.type(
+      screen.getByRole('textbox', { name: /^קישור למתכון/ }),
+      'https://example.com/cookies',
+    );
+    await user.click(screen.getByRole('button', { name: 'ייבוא מהקישור' }));
+    expect(await screen.findByText(TEMPORARY)).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'לנסות שוב' })).toBeTruthy();
+    await user.click(
+      screen.getByRole('button', { name: 'להדביק את הטקסט במקום' }),
+    );
+    expect(textbox()).toBeTruthy();
+    expect(screen.queryByText(TEMPORARY)).toBeNull();
+    expect(screen.queryByRole('button', { name: 'לנסות שוב' })).toBeNull();
+  });
+
+  it('shows the timeout message when the client gave up waiting', async () => {
+    serveError(504, 'request_timeout');
+    const user = userEvent.setup();
+    renderPanel();
+    await open(user);
+    await user.type(textbox(), 'מתכון');
+    await user.click(submit());
+    expect(
+      await screen.findByText('הבקשה לקחה יותר מדי זמן. אפשר לנסות שוב'),
+    ).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'לנסות שוב' })).toBeTruthy();
+  });
+
+  it('learns the engine timeout from the server', async () => {
+    server.use(
+      http.get('*/api/imports/providers', () =>
+        HttpResponse.json([{ name: 'anthropic', timeout_s: 45 }]),
+      ),
+    );
+    renderPanel();
+    await vi.waitFor(() =>
+      expect(safetyNetMs('/api/imports/text')).toBe(50_000),
+    );
   });
 });

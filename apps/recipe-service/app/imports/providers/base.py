@@ -78,6 +78,8 @@ class LlmProvider(Protocol):
 
     name: str
     model: str
+    # How long a call may take before it fails with `llm_timeout` (AD-43).
+    timeout_seconds: float
 
     def extract(self, text: str, existing_tags: Sequence[str]) -> LlmResult: ...
 

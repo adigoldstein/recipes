@@ -94,6 +94,7 @@ SCENARIOS: dict[str, Callable[[int], RawReply]] = {
 class FakeProvider:
     name = "fake"
     model = "fake-1"
+    timeout_seconds = 30.0
 
     def extract(self, text: str, existing_tags: Sequence[str]) -> LlmResult:
         stripped = text.strip()

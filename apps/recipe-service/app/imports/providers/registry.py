@@ -43,7 +43,7 @@ _BUILDERS: dict[str, Callable[[Settings], LlmProvider]] = {
 
 
 def default_provider(settings: Settings) -> LlmProvider:
-    """The first enabled provider, built from settings."""
+    """The one engine in use: the first name in `LLM_PROVIDERS`, built from settings."""
     if not settings.llm_providers:
         raise ProviderUnavailableError("no import provider is enabled")
     name = settings.llm_providers[0]

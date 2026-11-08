@@ -743,6 +743,25 @@
         "title": "PhotoUploaded",
         "type": "object"
       },
+      "ProviderInfo": {
+        "description": "An enabled import engine and how long the server waits for it (AD-43).",
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "timeout_s": {
+            "title": "Timeout S",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name",
+          "timeout_s"
+        ],
+        "title": "ProviderInfo",
+        "type": "object"
+      },
       "RecipeCreate": {
         "additionalProperties": false,
         "description": "Everything needed to create a recipe.",
@@ -1770,6 +1789,62 @@
         "summary": "Get Health",
         "tags": [
           "health"
+        ]
+      }
+    },
+    "/api/imports/providers": {
+      "get": {
+        "description": "The active import engine and its timeout, which the client's own limit follows.",
+        "operationId": "imports_list_providers",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ProviderInfo"
+                  },
+                  "title": "Response Imports List Providers",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          }
+        },
+        "summary": "List Providers",
+        "tags": [
+          "imports"
         ]
       }
     },

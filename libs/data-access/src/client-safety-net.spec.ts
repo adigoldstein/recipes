@@ -3,6 +3,7 @@ import {
   SAFETY_NET_MS,
   fetchWithSafetyNet,
   safetyNetMs,
+  setImportTimeouts,
 } from './client';
 
 const advance = (ms: number) => vi.advanceTimersByTimeAsync(ms);
@@ -40,6 +41,39 @@ const call = (method: string, path: string) =>
       ...(method === 'GET' ? {} : { body: '{}' }),
     }),
   );
+
+describe('setImportTimeouts', () => {
+  afterEach(() => setImportTimeouts([]));
+
+  it('follows the longest engine timeout plus 5 s', () => {
+    setImportTimeouts([30, 90]);
+    expect(safetyNetMs('/api/imports/text')).toBe(95_000);
+    setImportTimeouts([30]);
+    expect(safetyNetMs('/api/imports/url')).toBe(35_000);
+  });
+
+  it('keeps the default until the engines are known, and never touches other calls', () => {
+    expect(safetyNetMs('/api/imports/text')).toBe(SAFETY_NET_MS.import);
+    setImportTimeouts([30]);
+    expect(safetyNetMs('/api/imports/providers')).toBe(30_000);
+    expect(safetyNetMs('/api/recipes')).toBe(30_000);
+  });
+
+  it('gives up on a 30 s engine after 35 s', async () => {
+    setImportTimeouts([30]);
+    vi.stubGlobal('fetch', hangingFetch());
+    const pending = call('POST', '/api/imports/text');
+    await advance(34_000);
+    let settled = false;
+    void pending.then(() => (settled = true));
+    await advance(0);
+    expect(settled).toBe(false);
+    await advance(1_500);
+    expect(await (await pending).json()).toMatchObject({
+      code: 'request_timeout',
+    });
+  });
+});
 
 describe('safetyNetMs', () => {
   it('is longer than the server deadline for the same call (AD-43)', () => {

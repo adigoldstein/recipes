@@ -30,6 +30,13 @@ class ImportUrlRequest(BaseModel):
     url: str = Field(min_length=1, max_length=2048)
 
 
+class ProviderInfo(BaseModel):
+    """An enabled import engine and how long the server waits for it (AD-43)."""
+
+    name: str
+    timeout_s: int
+
+
 class DraftSource(BaseModel):
     """An imperial value found in the source; the code converts it to metric (FR-21)."""
 

@@ -3,6 +3,10 @@
 - NEVER run `git commit` or `git push` until Adi has reviewed the changes and explicitly approved them. Adi reviews everything first.
 - When work is ready, stop and summarize the changes (e.g. `git status` / `git diff`) for review instead of committing.
 
+# Sprint status
+
+- At the end of every story, update `_bmad-output/implementation-artifacts/sprint-status.yaml` (story -> done, and the epic status if all its stories are done) in the story's branch, before opening the PR. At the start of a story, mark it in-progress in the new branch. When the story's work is finished and handed over for review, set it to `review`; it becomes `done` when merged.
+
 # Architecture decisions
 
 - Never make architecture decisions on your own (libraries, folder structure, patterns, service boundaries, state management, DB/schema design, APIs, LLM provider, etc.). Propose options with a recommendation and discuss them with Adi first; implement only after Adi agrees.

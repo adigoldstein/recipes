@@ -151,6 +151,16 @@ export const zPhotoUploaded = z.object({
 });
 
 /**
+ * ProviderInfo
+ *
+ * An enabled import engine and how long the server waits for it (AD-43).
+ */
+export const zProviderInfo = z.object({
+    name: z.string(),
+    timeout_s: z.int()
+});
+
+/**
  * Role
  *
  * A visitor has no session, so there is no viewer role (AD-30).
@@ -533,6 +543,13 @@ export const zAuthSessionResponse = zSessionResponse;
  * Successful Response
  */
 export const zHealthGetHealthResponse = zHealthRead;
+
+/**
+ * Response Imports List Providers
+ *
+ * Successful Response
+ */
+export const zImportsListProvidersResponse = z.array(zProviderInfo);
 
 export const zImportsImportTextBody = zImportTextRequest;
 

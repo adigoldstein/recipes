@@ -2,6 +2,7 @@
 
 import functools
 import logging
+import math
 import time
 import uuid
 from datetime import UTC, datetime
@@ -24,7 +25,7 @@ from app.imports.prompt import PROMPT_VERSION
 from app.imports.providers.base import LlmError, LlmProvider, LlmResult, Usage
 from app.imports.providers.registry import ProviderUnavailableError, default_provider
 from app.imports.repository import ImportRepository
-from app.imports.schemas import DraftRecipe
+from app.imports.schemas import DraftRecipe, ProviderInfo
 from app.tags.service import TagService, get_tag_service
 
 logger = logging.getLogger(__name__)
@@ -51,6 +52,15 @@ class ImportService:
         self._repository = repository
         self._tag_service = tag_service
         self._settings = settings
+
+    def providers(self) -> list[ProviderInfo]:
+        """The active engine and its timeout, so the client can set its own (AD-43)."""
+        provider = self._provider()
+        return [
+            ProviderInfo(
+                name=provider.name, timeout_s=math.ceil(provider.timeout_seconds)
+            )
+        ]
 
     def import_text(self, text: str, user_id: uuid.UUID) -> DraftRecipe:
         """Turn pasted recipe text into a Hebrew draft. Nothing is saved (AD-22)."""
@@ -120,7 +130,7 @@ class ImportService:
         except FakeFetcherInProductionError as error:
             logger.error("Page fetcher unavailable: %s", error)
             raise AppError(
-                502, ErrorCode.PROVIDER_UNAVAILABLE, "No import engine is available"
+                400, ErrorCode.PROVIDER_UNAVAILABLE, "No import engine is available"
             ) from error
 
     def _provider(self) -> LlmProvider:
@@ -129,7 +139,7 @@ class ImportService:
         except ProviderUnavailableError as error:
             logger.error("Import provider unavailable: %s", error)
             raise AppError(
-                502, ErrorCode.PROVIDER_UNAVAILABLE, "No import engine is available"
+                400, ErrorCode.PROVIDER_UNAVAILABLE, "No import engine is available"
             ) from error
 
     def _ensure_under_daily_cap(self) -> None:

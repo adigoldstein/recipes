@@ -38,7 +38,7 @@ class GeminiProvider:
     ) -> None:
         self.model = model
         self._api_key = api_key
-        self._timeout = timeout_seconds
+        self.timeout_seconds = timeout_seconds
         self._max_output_tokens = max_output_tokens
         self._client = client or httpx.Client()
         self._schema = DraftRecipe.model_json_schema()
@@ -68,7 +68,7 @@ class GeminiProvider:
                 _URL.format(model=self.model),
                 headers={"x-goog-api-key": self._api_key},
                 json=body,
-                timeout=self._timeout,
+                timeout=self.timeout_seconds,
             )
         except httpx.TimeoutException as error:
             raise LlmTimeoutError("Gemini did not answer in time") from error

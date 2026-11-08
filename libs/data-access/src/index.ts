@@ -16,7 +16,9 @@ export {
   configureClient,
   fetchWithSafetyNet,
   safetyNetMs,
+  setImportTimeouts,
 } from './client';
+export { useImportEngines } from './import-engines';
 export { getErrorCode, getErrorParams } from './errors';
 export { uploadPhoto, type UploadPhotoOptions } from './upload-photo';
 export { requireRole } from './guards';

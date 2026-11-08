@@ -4,13 +4,31 @@ from fastapi import APIRouter, Depends
 
 from app.core.errors import ErrorResponse
 from app.core.security import CurrentUser, require_role
-from app.imports.schemas import DraftRecipe, ImportTextRequest, ImportUrlRequest
+from app.imports.schemas import (
+    DraftRecipe,
+    ImportTextRequest,
+    ImportUrlRequest,
+    ProviderInfo,
+)
 from app.imports.service import ImportService, get_import_service
 
 router = APIRouter(prefix="/imports", tags=["imports"])
 
 ServiceDep = Annotated[ImportService, Depends(get_import_service)]
 EditorDep = Annotated[CurrentUser, Depends(require_role("editor"))]
+
+
+@router.get(
+    "/providers",
+    responses={
+        400: {"model": ErrorResponse},
+        401: {"model": ErrorResponse},
+        403: {"model": ErrorResponse},
+    },
+)
+def list_providers(service: ServiceDep, user: EditorDep) -> list[ProviderInfo]:
+    """The active import engine and its timeout (the client's limit follows it)."""
+    return service.providers()
 
 
 @router.post(

@@ -2,7 +2,7 @@
 
 import { client } from './client.gen.js';
 import { type Client, type ClientMeta, formDataBodySerializer, type Options as Options2, type RequestResult, type TDataShape } from './client/index.js';
-import type { AuthChangePasswordData, AuthChangePasswordErrors, AuthChangePasswordResponses, AuthLoginData, AuthLoginErrors, AuthLoginResponses, AuthLogoutData, AuthLogoutResponses, AuthSessionData, AuthSessionErrors, AuthSessionResponses, HealthGetHealthData, HealthGetHealthResponses, ImportsImportTextData, ImportsImportTextErrors, ImportsImportTextResponses, ImportsImportUrlData, ImportsImportUrlErrors, ImportsImportUrlResponses, PhotosGetLimitsData, PhotosGetLimitsErrors, PhotosGetLimitsResponses, PhotosUploadPhotoData, PhotosUploadPhotoErrors, PhotosUploadPhotoFromUrlData, PhotosUploadPhotoFromUrlErrors, PhotosUploadPhotoFromUrlResponses, PhotosUploadPhotoResponses, RecipesCreateRecipeData, RecipesCreateRecipeErrors, RecipesCreateRecipeResponses, RecipesDeleteRecipeData, RecipesDeleteRecipeErrors, RecipesDeleteRecipeResponses, RecipesGetRecipeData, RecipesGetRecipeErrors, RecipesGetRecipeResponses, RecipesListRecipesData, RecipesListRecipesResponses, RecipesUpdateRecipeData, RecipesUpdateRecipeErrors, RecipesUpdateRecipeResponses, TagsCreateTagData, TagsCreateTagErrors, TagsCreateTagResponses, TagsDeleteTagData, TagsDeleteTagErrors, TagsDeleteTagResponses, TagsListTagsData, TagsListTagsResponses, TagsUpdateTagData, TagsUpdateTagErrors, TagsUpdateTagResponses, UsersCreateUserData, UsersCreateUserErrors, UsersCreateUserResponses, UsersListUsersData, UsersListUsersResponses, UsersUpdateUserData, UsersUpdateUserErrors, UsersUpdateUserResponses } from './types.gen.js';
+import type { AuthChangePasswordData, AuthChangePasswordErrors, AuthChangePasswordResponses, AuthLoginData, AuthLoginErrors, AuthLoginResponses, AuthLogoutData, AuthLogoutResponses, AuthSessionData, AuthSessionErrors, AuthSessionResponses, HealthGetHealthData, HealthGetHealthResponses, ImportsImportTextData, ImportsImportTextErrors, ImportsImportTextResponses, ImportsImportUrlData, ImportsImportUrlErrors, ImportsImportUrlResponses, ImportsListProvidersData, ImportsListProvidersErrors, ImportsListProvidersResponses, PhotosGetLimitsData, PhotosGetLimitsErrors, PhotosGetLimitsResponses, PhotosUploadPhotoData, PhotosUploadPhotoErrors, PhotosUploadPhotoFromUrlData, PhotosUploadPhotoFromUrlErrors, PhotosUploadPhotoFromUrlResponses, PhotosUploadPhotoResponses, RecipesCreateRecipeData, RecipesCreateRecipeErrors, RecipesCreateRecipeResponses, RecipesDeleteRecipeData, RecipesDeleteRecipeErrors, RecipesDeleteRecipeResponses, RecipesGetRecipeData, RecipesGetRecipeErrors, RecipesGetRecipeResponses, RecipesListRecipesData, RecipesListRecipesResponses, RecipesUpdateRecipeData, RecipesUpdateRecipeErrors, RecipesUpdateRecipeResponses, TagsCreateTagData, TagsCreateTagErrors, TagsCreateTagResponses, TagsDeleteTagData, TagsDeleteTagErrors, TagsDeleteTagResponses, TagsListTagsData, TagsListTagsResponses, TagsUpdateTagData, TagsUpdateTagErrors, TagsUpdateTagResponses, UsersCreateUserData, UsersCreateUserErrors, UsersCreateUserResponses, UsersListUsersData, UsersListUsersResponses, UsersUpdateUserData, UsersUpdateUserErrors, UsersUpdateUserResponses } from './types.gen.js';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -65,6 +65,13 @@ export const authSession = <ThrowOnError extends boolean = false>(options?: Opti
  * Get Health
  */
 export const healthGetHealth = <ThrowOnError extends boolean = false>(options?: Options<HealthGetHealthData, ThrowOnError>): RequestResult<HealthGetHealthResponses, unknown, ThrowOnError> => (options?.client ?? client).get<HealthGetHealthResponses, unknown, ThrowOnError>({ url: '/api/health', ...options });
+
+/**
+ * List Providers
+ *
+ * The active import engine and its timeout, which the client's own limit follows.
+ */
+export const importsListProviders = <ThrowOnError extends boolean = false>(options?: Options<ImportsListProvidersData, ThrowOnError>): RequestResult<ImportsListProvidersResponses, ImportsListProvidersErrors, ThrowOnError> => (options?.client ?? client).get<ImportsListProvidersResponses, ImportsListProvidersErrors, ThrowOnError>({ url: '/api/imports/providers', ...options });
 
 /**
  * Import Text
