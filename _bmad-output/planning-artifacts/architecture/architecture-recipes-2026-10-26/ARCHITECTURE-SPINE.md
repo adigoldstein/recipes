@@ -443,11 +443,11 @@ flowchart LR
 - **Prevents:** a fake percentage bar, and a slow local import that looks frozen.
 - **Rule:**
   - `POST /api/imports/url` and `POST /api/imports/text` answer with `text/event-stream` (FastAPI `StreamingResponse`; no extra library). The client reads it with `fetch` and a stream reader (not `EventSource`, which can't POST or send the CSRF header).
-  - Events: `stage` `{name, status}` with `name` in `fetch | extract | validate | convert_units | translate` and `status` in `started | done | skipped`; `ingredient` `{index, partial}` while the model is still generating; `draft` `{DraftRecipe}` at the end; `error` `{code, params?}` per AD-28.
+  - Events: `stage` `{name, status}` with `name` in `fetch | extract | translate | validate | convert_units` and `status` in `started | done | skipped`; `draft` `{DraftRecipe}` at the end; `error` `{code, detail, params?}` per AD-28. _(Changed 2026-11-08, Adi: no `ingredient` events and no partial-JSON parsing; the dialog shows stages only.)_ `fetch` is `skipped` for a text import; `translate` is `done` when the model translated the text and `skipped` otherwise (the model translates inside the `extract` call).
   - Only real stages are reported. There is **no percentage bar**.
-  - Ingredients stream live when the provider streams JSON that can be parsed incrementally. The spike proved this only for Ollama, which is no longer in the chain; Gemini and Groq streaming is **not yet verified**. A provider that can't stream sends stage events only, and live ingredients are an extra, not a requirement.
   - Errors found before the stream starts (auth, CSRF, cap, duplicate, unknown provider) use normal HTTP status codes. After the stream starts, errors are `error` events.
-  - Cancel = the client aborts the request; the server notices the disconnect and cancels the provider call. Per-provider timeouts (AD-22) still apply.
+  - Cancel = the client aborts the request; the server notices the disconnect and cancels the provider call. Per-provider timeouts (AD-22) still apply. _(Built 2026-11-08, Story 5.6: providers are async (`httpx.AsyncClient`); the import runs as an asyncio task that a stream generator cancels when `request.is_disconnected()` turns true, polled every 0.25 s, because uvicorn does not interrupt a response that is waiting without sending. A cancelled run is logged with outcome `cancelled`, the column is free text so there is no migration. The page fetch is blocking code and runs in a thread: it stops being awaited on cancel but finishes by itself, within its own 15 s limit.)_
+  - The client's idle limit: if the stream is silent for longer than the import safety net (`timeout_s + 5`, AD-43) the call fails with `request_timeout`.
 
 ### AD-41 — Ingredients and steps live inside the recipe as JSON [ADOPTED]
 

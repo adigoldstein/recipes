@@ -966,10 +966,10 @@ So that a slow local import never looks frozen (FR20, AD-40).
 **When** it runs
 **Then** `POST /api/imports/url` and `POST /api/imports/text` answer with `text/event-stream` (FastAPI `StreamingResponse`), and the client reads it with `fetch` and a stream reader in `libs/data-access`
 **And** the server sends `stage` events for the real pipeline stages (`fetch`, `extract`, `validate`, `convert_units`, `translate`, each `started`/`done`/`skipped`), then a `draft` event; the dialog shows them as a Hebrew checklist. There is no percentage bar
-**And** when the provider streams its JSON (not yet verified for Gemini or Groq; the spike only proved it for Ollama, which is no longer in the chain), `ingredient` events stream each ingredient as the model generates it and the dialog lists them live; a provider that can't stream sends stage events only, and the story is complete without live ingredients
+**And** live ingredients are not part of this story: dropped by Adi on 2026-11-08, so the stream carries `stage`, `draft` and `error` events only
 **And** errors before the stream starts (auth, CSRF, cap, duplicate, unknown provider) keep their HTTP status; errors after it starts arrive as an `error` event with the AD-28 code
 **And** "ביטול" aborts the stream, and the server detects the disconnect and cancels the provider call
-**And** tests cover the event order with the `fake` provider (including a streamed-ingredients scenario) and a client test with a mocked stream
+**And** tests cover the event order with the `fake` provider, an error after the stream starts, a client disconnect that cancels the provider call, and a client test with a mocked stream
 
 ### Story 5.7: Duplicate check before a URL import
 

@@ -3,8 +3,8 @@
 import { type DefaultError, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen.js';
-import { authChangePassword, authLogin, authLogout, authSession, healthGetHealth, importsImportText, importsImportUrl, importsListProviders, type Options, photosGetLimits, photosUploadPhoto, photosUploadPhotoFromUrl, recipesCreateRecipe, recipesDeleteRecipe, recipesGetRecipe, recipesListRecipes, recipesUpdateRecipe, tagsCreateTag, tagsDeleteTag, tagsListTags, tagsUpdateTag, usersCreateUser, usersListUsers, usersUpdateUser } from '../sdk.gen.js';
-import type { AuthChangePasswordData, AuthChangePasswordError, AuthChangePasswordResponse, AuthLoginData, AuthLoginError, AuthLoginResponse, AuthLogoutData, AuthLogoutResponse, AuthSessionData, AuthSessionError, AuthSessionResponse, HealthGetHealthData, HealthGetHealthResponse, ImportsImportTextData, ImportsImportTextError, ImportsImportTextResponse, ImportsImportUrlData, ImportsImportUrlError, ImportsImportUrlResponse, ImportsListProvidersData, ImportsListProvidersError, ImportsListProvidersResponse, PhotosGetLimitsData, PhotosGetLimitsError, PhotosGetLimitsResponse, PhotosUploadPhotoData, PhotosUploadPhotoError, PhotosUploadPhotoFromUrlData, PhotosUploadPhotoFromUrlError, PhotosUploadPhotoFromUrlResponse, PhotosUploadPhotoResponse, RecipesCreateRecipeData, RecipesCreateRecipeError, RecipesCreateRecipeResponse, RecipesDeleteRecipeData, RecipesDeleteRecipeError, RecipesDeleteRecipeResponse, RecipesGetRecipeData, RecipesGetRecipeError, RecipesGetRecipeResponse, RecipesListRecipesData, RecipesListRecipesResponse, RecipesUpdateRecipeData, RecipesUpdateRecipeError, RecipesUpdateRecipeResponse, TagsCreateTagData, TagsCreateTagError, TagsCreateTagResponse, TagsDeleteTagData, TagsDeleteTagError, TagsDeleteTagResponse, TagsListTagsData, TagsListTagsResponse, TagsUpdateTagData, TagsUpdateTagError, TagsUpdateTagResponse, UsersCreateUserData, UsersCreateUserError, UsersCreateUserResponse, UsersListUsersData, UsersListUsersResponse, UsersUpdateUserData, UsersUpdateUserError, UsersUpdateUserResponse } from '../types.gen.js';
+import { authChangePassword, authLogin, authLogout, authSession, healthGetHealth, importsListProviders, type Options, photosGetLimits, photosUploadPhoto, photosUploadPhotoFromUrl, recipesCreateRecipe, recipesDeleteRecipe, recipesGetRecipe, recipesListRecipes, recipesUpdateRecipe, tagsCreateTag, tagsDeleteTag, tagsListTags, tagsUpdateTag, usersCreateUser, usersListUsers, usersUpdateUser } from '../sdk.gen.js';
+import type { AuthChangePasswordData, AuthChangePasswordError, AuthChangePasswordResponse, AuthLoginData, AuthLoginError, AuthLoginResponse, AuthLogoutData, AuthLogoutResponse, AuthSessionData, AuthSessionError, AuthSessionResponse, HealthGetHealthData, HealthGetHealthResponse, ImportsListProvidersData, ImportsListProvidersError, ImportsListProvidersResponse, PhotosGetLimitsData, PhotosGetLimitsError, PhotosGetLimitsResponse, PhotosUploadPhotoData, PhotosUploadPhotoError, PhotosUploadPhotoFromUrlData, PhotosUploadPhotoFromUrlError, PhotosUploadPhotoFromUrlResponse, PhotosUploadPhotoResponse, RecipesCreateRecipeData, RecipesCreateRecipeError, RecipesCreateRecipeResponse, RecipesDeleteRecipeData, RecipesDeleteRecipeError, RecipesDeleteRecipeResponse, RecipesGetRecipeData, RecipesGetRecipeError, RecipesGetRecipeResponse, RecipesListRecipesData, RecipesListRecipesResponse, RecipesUpdateRecipeData, RecipesUpdateRecipeError, RecipesUpdateRecipeResponse, TagsCreateTagData, TagsCreateTagError, TagsCreateTagResponse, TagsDeleteTagData, TagsDeleteTagError, TagsDeleteTagResponse, TagsListTagsData, TagsListTagsResponse, TagsUpdateTagData, TagsUpdateTagError, TagsUpdateTagResponse, UsersCreateUserData, UsersCreateUserError, UsersCreateUserResponse, UsersListUsersData, UsersListUsersResponse, UsersUpdateUserData, UsersUpdateUserError, UsersUpdateUserResponse } from '../types.gen.js';
 
 /**
  * Login
@@ -154,44 +154,6 @@ export const importsListProvidersOptions = (options?: Options<ImportsListProvide
     },
     queryKey: importsListProvidersQueryKey(options)
 });
-
-/**
- * Import Text
- *
- * Turn pasted recipe text into a Hebrew draft. Nothing is saved.
- */
-export const importsImportTextMutation = (options?: Partial<Options<ImportsImportTextData>>): UseMutationOptions<ImportsImportTextResponse, ImportsImportTextError, Options<ImportsImportTextData>> => {
-    const mutationOptions: UseMutationOptions<ImportsImportTextResponse, ImportsImportTextError, Options<ImportsImportTextData>> = {
-        mutationFn: async (fnOptions) => {
-            const { data } = await importsImportText({
-                ...options,
-                ...fnOptions,
-                throwOnError: true
-            });
-            return data;
-        }
-    };
-    return mutationOptions;
-};
-
-/**
- * Import Url
- *
- * Fetch a recipe page and turn it into a Hebrew draft. Nothing is saved.
- */
-export const importsImportUrlMutation = (options?: Partial<Options<ImportsImportUrlData>>): UseMutationOptions<ImportsImportUrlResponse, ImportsImportUrlError, Options<ImportsImportUrlData>> => {
-    const mutationOptions: UseMutationOptions<ImportsImportUrlResponse, ImportsImportUrlError, Options<ImportsImportUrlData>> = {
-        mutationFn: async (fnOptions) => {
-            const { data } = await importsImportUrl({
-                ...options,
-                ...fnOptions,
-                throwOnError: true
-            });
-            return data;
-        }
-    };
-    return mutationOptions;
-};
 
 /**
  * Upload Photo

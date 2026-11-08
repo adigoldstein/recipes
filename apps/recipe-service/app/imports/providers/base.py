@@ -1,6 +1,6 @@
 """The `LlmProvider` port and the shared validate-and-retry step (AD-12, AD-34)."""
 
-from collections.abc import Callable, Sequence
+from collections.abc import Awaitable, Callable, Sequence
 from dataclasses import dataclass
 from typing import Protocol
 
@@ -81,19 +81,23 @@ class LlmProvider(Protocol):
     # How long a call may take before it fails with `llm_timeout` (AD-43).
     timeout_seconds: float
 
-    def extract(self, text: str, existing_tags: Sequence[str]) -> LlmResult: ...
+    async def extract(self, text: str, existing_tags: Sequence[str]) -> LlmResult:
+        """Awaiting it can be cancelled, which stops the call to the engine."""
+        ...
 
 
-Transport = Callable[[Sequence[Message]], RawReply]
+Transport = Callable[[Sequence[Message]], Awaitable[RawReply]]
 
 
-def extract_with_retry(transport: Transport, messages: Sequence[Message]) -> LlmResult:
+async def extract_with_retry(
+    transport: Transport, messages: Sequence[Message]
+) -> LlmResult:
     """Validate the reply against `DraftRecipe`; on failure retry once with the error.
 
     A second failure raises `LlmInvalidOutputError` (AD-34). Transport errors
     (`LlmError`) pass through untouched.
     """
-    first = transport(messages)
+    first = await transport(messages)
     try:
         draft = DraftRecipe.model_validate_json(first.text)
     except ValidationError as error:
@@ -102,7 +106,9 @@ def extract_with_retry(transport: Transport, messages: Sequence[Message]) -> Llm
             f"{_describe(error)}\n"
             "Return the corrected JSON only."
         )
-        second = transport([*messages, ("assistant", first.text), ("user", feedback)])
+        second = await transport(
+            [*messages, ("assistant", first.text), ("user", feedback)]
+        )
         usage = first.usage.plus(second.usage)
         try:
             draft = DraftRecipe.model_validate_json(second.text)

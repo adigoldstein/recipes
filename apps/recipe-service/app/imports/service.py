@@ -1,10 +1,14 @@
 """Business rules for imports; other modules call this layer, never the repository."""
 
+import asyncio
+import contextlib
 import functools
 import logging
 import math
 import time
 import uuid
+from collections.abc import AsyncGenerator, Awaitable, Callable
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Annotated
 from zoneinfo import ZoneInfo
@@ -20,12 +24,20 @@ from app.imports.conversion import convert_ingredient, convert_step
 from app.imports.fetchers.base import PageFetcher
 from app.imports.fetchers.registry import FakeFetcherInProductionError, page_fetcher
 from app.imports.models import ImportAttempt, ImportRun
-from app.imports.page import ImportPath, read_page
+from app.imports.page import ImportPath, ParsedPage, read_page
 from app.imports.prompt import PROMPT_VERSION
 from app.imports.providers.base import LlmError, LlmProvider, LlmResult, Usage
 from app.imports.providers.registry import ProviderUnavailableError, default_provider
 from app.imports.repository import ImportRepository
-from app.imports.schemas import DraftRecipe, ProviderInfo
+from app.imports.schemas import (
+    DraftRecipe,
+    ErrorEvent,
+    ImportEvent,
+    ProviderInfo,
+    StageEvent,
+    StageName,
+    StageStatus,
+)
 from app.tags.service import TagService, get_tag_service
 
 logger = logging.getLogger(__name__)
@@ -40,6 +52,24 @@ _LLM_STATUS = {
     ErrorCode.LLM_QUOTA: 502,
     ErrorCode.LLM_INVALID_OUTPUT: 502,
 }
+
+
+# How often a waiting stream checks that the client is still there.
+_POLL_SECONDS = 0.25
+# The outcome logged when the client cancelled (the column is free text).
+CANCELLED = "cancelled"
+
+
+@dataclass(frozen=True)
+class ImportJob:
+    """An import that passed the checks which answer with a plain HTTP status."""
+
+    provider: LlmProvider
+    user_id: uuid.UUID
+    source_kind: str
+    text: str | None = None
+    url: str | None = None
+    fetcher: PageFetcher | None = None
 
 
 class ImportService:
@@ -62,8 +92,8 @@ class ImportService:
             )
         ]
 
-    def import_text(self, text: str, user_id: uuid.UUID) -> DraftRecipe:
-        """Turn pasted recipe text into a Hebrew draft. Nothing is saved (AD-22)."""
+    def prepare_text(self, text: str, user_id: uuid.UUID) -> ImportJob:
+        """Checks that can still answer with a plain HTTP status, before the stream."""
         if len(text) > self._settings.import_max_chars:
             raise AppError(
                 413,
@@ -72,57 +102,134 @@ class ImportService:
                 {"max": self._settings.import_max_chars},
             )
         self._ensure_under_daily_cap()
-        return self._extract(text, user_id, source_kind="text", path="llm")
+        return ImportJob(self._provider(), user_id, "text", text=text)
 
-    def import_url(self, url: str, user_id: uuid.UUID) -> DraftRecipe:
-        """Fetch a recipe page safely and turn it into a Hebrew draft (AD-13, AD-35).
-
-        JSON-LD is used when the page has it, otherwise the page's text; the LLM
-        runs either way. Nothing is saved; the photo is uploaded by the form on save.
-        """
+    def prepare_url(self, url: str, user_id: uuid.UUID) -> ImportJob:
+        """Same for a link; the fetch itself is a stage of the stream (AD-40)."""
         self._ensure_under_daily_cap()
-        try:
-            page = read_page(self._fetcher().fetch(url))
-        except FetchError as error:
-            logger.info("URL import fetch refused: %s (%s)", error.code, error.detail)
-            raise AppError(
-                FETCH_HTTP_STATUS[error.code], error.code, error.detail
-            ) from error
-        if not page.text.strip():
-            raise AppError(
-                400, ErrorCode.NO_RECIPE_FOUND, "No recipe found on the page"
-            )
-        # A long page is cut, not refused: the recipe is usually near the top.
-        text = page.text[: self._settings.import_max_chars]
-        draft = self._extract(text, user_id, source_kind="url", path=page.path)
-        return draft.model_copy(
-            update={"source_url": url, "photo_source_url": page.photo_url}
+        return ImportJob(
+            self._provider(), user_id, "url", url=url, fetcher=self._fetcher()
         )
 
-    def _extract(
-        self, text: str, user_id: uuid.UUID, source_kind: str, path: ImportPath
-    ) -> DraftRecipe:
-        provider = self._provider()
+    async def stream(
+        self, job: ImportJob, is_disconnected: Callable[[], Awaitable[bool]]
+    ) -> AsyncGenerator[ImportEvent]:
+        """The import as events: `stage`..., then `draft` or `error` (AD-40).
+
+        The work runs as a task. When the client goes away (or this generator is
+        cancelled) the task is cancelled, which drops the call to the engine; the run
+        is then logged as `cancelled` and nothing else is written (AD-22).
+        """
+        queue: asyncio.Queue[ImportEvent | None] = asyncio.Queue()
+        task = asyncio.create_task(self._produce(job, queue))
+        try:
+            while True:
+                try:
+                    event = await asyncio.wait_for(queue.get(), _POLL_SECONDS)
+                except TimeoutError:
+                    if await is_disconnected():
+                        return
+                    continue
+                if event is None:
+                    return
+                yield event
+        finally:
+            task.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await task
+
+    async def _produce(
+        self, job: ImportJob, queue: asyncio.Queue[ImportEvent | None]
+    ) -> None:
+        try:
+            await self._pipeline(job, queue.put_nowait)
+        except AppError as error:
+            body = error.body
+            failure = ErrorEvent(code=body.code, detail=body.detail, params=body.params)
+            queue.put_nowait(("error", failure))
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            logger.exception("Import failed unexpectedly")
+            failure = ErrorEvent(code="internal_error", detail="Import failed")
+            queue.put_nowait(("error", failure))
+        finally:
+            queue.put_nowait(None)
+
+    async def _pipeline(
+        self, job: ImportJob, emit: Callable[[ImportEvent], None]
+    ) -> None:
+        def stage(name: StageName, status: StageStatus) -> None:
+            emit(("stage", StageEvent(name=name, status=status)))
+
+        path: ImportPath = "llm"
+        photo_url: str | None = None
+        if job.fetcher is not None and job.url is not None:
+            stage("fetch", "started")
+            try:
+                # The fetch and the parsing are blocking code: off the event loop.
+                page = await asyncio.to_thread(self._fetch_page, job.fetcher, job.url)
+            except FetchError as error:
+                logger.info(
+                    "URL import fetch refused: %s (%s)", error.code, error.detail
+                )
+                raise AppError(
+                    FETCH_HTTP_STATUS[error.code], error.code, error.detail
+                ) from error
+            if not page.text.strip():
+                raise AppError(
+                    400, ErrorCode.NO_RECIPE_FOUND, "No recipe found on the page"
+                )
+            # A long page is cut, not refused: the recipe is usually near the top.
+            text = page.text[: self._settings.import_max_chars]
+            path, photo_url = page.path, page.photo_url
+            stage("fetch", "done")
+        else:
+            text = job.text or ""
+            stage("fetch", "skipped")
+
+        provider = job.provider
         existing_tags = [tag.name for tag in self._tag_service.list_tags()]
         record = functools.partial(
-            self._record, provider, user_id, source_kind=source_kind, path=path
+            self._record, provider, job.user_id, source_kind=job.source_kind, path=path
         )
 
+        stage("extract", "started")
         started = time.perf_counter()
         try:
-            result = provider.extract(text, existing_tags)
+            result = await provider.extract(text, existing_tags)
         except LlmError as error:
             record(started, error.code, None, upstream_status=error.upstream_status)
             raise AppError(_LLM_STATUS[error.code], error.code, error.detail) from error
+        except asyncio.CancelledError:
+            record(started, CANCELLED, None)
+            raise
+        stage("extract", "done")
+        # The model translates inside the same call; the draft says whether it did.
+        stage("translate", "done" if result.draft.translated else "skipped")
 
-        draft = _finish(result.draft, existing_tags)
+        stage("validate", "started")
+        draft = _validate(result.draft, existing_tags)
         if not draft.ingredients and not draft.steps:
             record(started, ErrorCode.NO_RECIPE_FOUND, result)
             raise AppError(
                 400, ErrorCode.NO_RECIPE_FOUND, "No recipe found in the text"
             )
+        stage("validate", "done")
+
+        stage("convert_units", "started")
+        draft = _convert(draft)
+        if job.url is not None:
+            draft = draft.model_copy(
+                update={"source_url": job.url, "photo_source_url": photo_url}
+            )
+        stage("convert_units", "done")
         record(started, "ok", result)
-        return draft
+        emit(("draft", draft))
+
+    @staticmethod
+    def _fetch_page(fetcher: PageFetcher, url: str) -> ParsedPage:
+        return read_page(fetcher.fetch(url))
 
     def _fetcher(self) -> PageFetcher:
         try:
@@ -199,8 +306,8 @@ class ImportService:
         self._repository.commit()
 
 
-def _finish(draft: DraftRecipe, existing_tags: list[str]) -> DraftRecipe:
-    """The deterministic part of an import: units, °C, tags, missing fields."""
+def _validate(draft: DraftRecipe, existing_tags: list[str]) -> DraftRecipe:
+    """Tags matched to the existing list, and the fields the source did not give."""
     tags, new_tags = _split_tags(draft, existing_tags)
     missing = [
         field
@@ -209,14 +316,22 @@ def _finish(draft: DraftRecipe, existing_tags: list[str]) -> DraftRecipe:
     ]
     return draft.model_copy(
         update={
-            "ingredients": [convert_ingredient(item) for item in draft.ingredients],
-            "steps": [convert_step(step) for step in draft.steps],
             "tags": tags,
             "new_tags": new_tags,
             "missing_fields": missing,
             # Filled by the code only, whatever the model returned.
             "source_url": None,
             "photo_source_url": None,
+        }
+    )
+
+
+def _convert(draft: DraftRecipe) -> DraftRecipe:
+    """The deterministic unit and temperature conversion."""
+    return draft.model_copy(
+        update={
+            "ingredients": [convert_ingredient(item) for item in draft.ingredients],
+            "steps": [convert_step(step) for step in draft.steps],
         }
     )
 

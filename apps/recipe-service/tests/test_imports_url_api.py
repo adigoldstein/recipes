@@ -4,8 +4,6 @@ The fake provider goes with the fake page fetcher, so `fake://<fixture>` serves 
 saved pages in `app/imports/fetchers/fake_pages` and nothing touches the network.
 """
 
-from typing import Any
-
 import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, select
@@ -17,6 +15,7 @@ from app.imports.fetchers.registry import FakeFetcherInProductionError, page_fet
 from app.imports.models import ImportRun
 from app.users.models import User
 from tests.factories import add_user
+from tests.sse import ImportResult
 
 LOGIN = "/api/auth/login"
 PASSWORD = "correct horse"
@@ -36,8 +35,8 @@ def editor(client: TestClient, session: Session) -> User:
     return user
 
 
-def run_import(client: TestClient, url: str) -> Any:
-    return client.post(URL, json={"url": url})
+def run_import(client: TestClient, url: str) -> ImportResult:
+    return ImportResult(client.post(URL, json={"url": url}))
 
 
 def runs(session: Session) -> list[ImportRun]:
@@ -82,7 +81,7 @@ def test_a_page_that_is_not_a_recipe_is_no_recipe_found(
     client: TestClient, editor: User, session: Session
 ) -> None:
     response = run_import(client, "fake://not-a-recipe")
-    assert response.status_code == 400
+    assert response.failed
     assert response.json()["code"] == "no_recipe_found"
     [run] = runs(session)
     assert run.outcome == "no_recipe_found"
@@ -97,30 +96,29 @@ def test_a_page_with_no_text_is_no_recipe_found_without_a_model_call(
 
 
 @pytest.mark.parametrize(
-    ("url", "status", "code"),
+    ("url", "code"),
     [
-        ("fake://cloudflare-challenge", 502, "fetch_challenged"),
-        ("fake://forbidden", 400, "fetch_blocked"),
-        ("fake://server-error", 502, "fetch_failed"),
-        ("fake://no-such-page", 502, "fetch_failed"),
-        ("fake://too-large", 413, "fetch_too_large"),
-        ("http://localhost/recipe", 400, "fetch_blocked"),
-        ("http://127.0.0.1:8000/api/users", 400, "fetch_blocked"),
-        ("http://169.254.169.254/latest/meta-data/", 400, "fetch_blocked"),
-        ("http://10.1.2.3/", 400, "fetch_blocked"),
-        ("file:///etc/passwd", 400, "fetch_blocked"),
+        ("fake://cloudflare-challenge", "fetch_challenged"),
+        ("fake://forbidden", "fetch_blocked"),
+        ("fake://server-error", "fetch_failed"),
+        ("fake://no-such-page", "fetch_failed"),
+        ("fake://too-large", "fetch_too_large"),
+        ("http://localhost/recipe", "fetch_blocked"),
+        ("http://127.0.0.1:8000/api/users", "fetch_blocked"),
+        ("http://169.254.169.254/latest/meta-data/", "fetch_blocked"),
+        ("http://10.1.2.3/", "fetch_blocked"),
+        ("file:///etc/passwd", "fetch_blocked"),
     ],
 )
 def test_fetch_failures_have_stable_codes_and_are_not_logged(
     url: str,
-    status: int,
     code: str,
     client: TestClient,
     editor: User,
     session: Session,
 ) -> None:
     response = run_import(client, url)
-    assert response.status_code == status
+    assert response.failed  # the fetch is a stage, so it fails inside the stream
     assert response.json()["code"] == code
     assert runs(session) == []
 

@@ -1,13 +1,23 @@
 import { useRef, useState } from 'react';
-import { ClipboardPaste, Link, RotateCw, Sparkles, X } from 'lucide-react';
+import {
+  Check,
+  ClipboardPaste,
+  Link,
+  LoaderCircle,
+  RotateCw,
+  Sparkles,
+  X,
+} from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
   getErrorCode,
-  importsImportTextMutation,
-  importsImportUrlMutation,
+  streamImport,
   useImportEngines,
   type DraftRecipe,
+  type ImportStage,
+  type ImportStageName,
+  type ImportStageStatus,
 } from '@bite-and-board/data-access';
 import {
   Button,
@@ -25,6 +35,17 @@ import { useErrorMessage } from '../shared/use-error-message';
 
 type Mode = 'url' | 'text';
 
+/** The pipeline stages in the order the checklist shows them (AD-40). */
+const STAGES: ImportStageName[] = [
+  'fetch',
+  'extract',
+  'translate',
+  'validate',
+  'convert_units',
+];
+
+type Progress = Partial<Record<ImportStageName, ImportStageStatus>>;
+
 /** Fetch failures where pasting the page's text is the way forward (AD-35). */
 const FETCH_ERRORS = new Set([
   'fetch_blocked',
@@ -41,6 +62,8 @@ const ENGINE_ERRORS = new Set([
   'llm_invalid_output',
   'provider_unavailable',
   'request_timeout',
+  'request_failed',
+  'internal_error',
 ]);
 
 /** A link the server can try: http or https, nothing else. */
@@ -78,8 +101,19 @@ export function ImportPanel({
 }: ImportPanelProps) {
   const { t } = useTranslation();
   const errorMessage = useErrorMessage();
-  const importText = useMutation(importsImportTextMutation());
-  const importUrl = useMutation(importsImportUrlMutation());
+  const importDraft = useMutation({
+    mutationFn: (request: {
+      kind: Mode;
+      body: { text: string } | { url: string };
+      signal: AbortSignal;
+      onStage: (stage: ImportStage) => void;
+    }) =>
+      streamImport(request.kind, request.body, {
+        signal: request.signal,
+        onStage: request.onStage,
+      }),
+  });
+  const [progress, setProgress] = useState<Progress>({});
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<Mode>('url');
   const [text, setText] = useState('');
@@ -93,7 +127,7 @@ export function ImportPanel({
   const running = useRef<AbortController>(undefined);
   // Learns the engine's timeout so the client's own limit follows it (AD-43).
   useImportEngines();
-  const pending = importText.isPending || importUrl.isPending;
+  const pending = importDraft.isPending;
 
   const callbacks = {
     onSuccess: (draft: DraftRecipe) => {
@@ -121,8 +155,8 @@ export function ImportPanel({
 
   const cancel = () => {
     running.current?.abort();
-    importText.reset();
-    importUrl.reset();
+    importDraft.reset();
+    setProgress({});
     onBusyChange(false);
   };
 
@@ -132,15 +166,23 @@ export function ImportPanel({
     setOfferText(false);
     setCanRetry(false);
     setDone(false);
+    setProgress({});
     onBusyChange(true);
     const controller = new AbortController();
     running.current = controller;
     const signal = controller.signal;
-    if (mode === 'url') {
-      importUrl.mutate({ body: { url: url.trim() }, signal }, callbacks);
-    } else {
-      importText.mutate({ body: { text }, signal }, callbacks);
-    }
+    const onStage = ({ name, status }: ImportStage) => {
+      if (!signal.aborted) setProgress((now) => ({ ...now, [name]: status }));
+    };
+    importDraft.mutate(
+      {
+        kind: mode,
+        body: mode === 'url' ? { url: url.trim() } : { text },
+        signal,
+        onStage,
+      },
+      callbacks,
+    );
   };
 
   const switchMode = (next: Mode) => {
@@ -308,6 +350,7 @@ export function ImportPanel({
           <p role="status" className="min-h-5 text-sm text-muted-foreground">
             {pending ? t('import.pending') : null}
           </p>
+          {pending ? <StageChecklist progress={progress} /> : null}
           <SlowNote pending={pending} afterMs={SLOW_AFTER_LONG_MS}>
             {t('pending.slow')}
           </SlowNote>
@@ -342,5 +385,43 @@ export function ImportPanel({
         onConfirm={run}
       />
     </section>
+  );
+}
+
+/**
+ * What the import is really doing, one line per pipeline stage as the server reports
+ * it (AD-40). Stages that do not apply ("skipped") are left out. No percentage.
+ */
+function StageChecklist({ progress }: { progress: Progress }) {
+  const { t } = useTranslation();
+  const shown = STAGES.filter(
+    (name) => progress[name] === 'started' || progress[name] === 'done',
+  );
+  if (shown.length === 0) return null;
+  return (
+    <ul aria-label={t('import.stages.label')} className="flex flex-col gap-1">
+      {shown.map((name) => {
+        const done = progress[name] === 'done';
+        return (
+          <li
+            key={name}
+            className="flex items-center gap-2 text-sm text-muted-foreground"
+          >
+            {done ? (
+              <Check aria-hidden="true" className="size-4 text-primary" />
+            ) : (
+              <LoaderCircle
+                aria-hidden="true"
+                className="size-4 animate-spin"
+              />
+            )}
+            <span>{t(`import.stages.${name}`)}</span>
+            <span className="sr-only">
+              {done ? t('import.stages.done') : t('import.stages.started')}
+            </span>
+          </li>
+        );
+      })}
+    </ul>
   );
 }

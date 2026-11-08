@@ -3,6 +3,7 @@
 The scenario is chosen by the pasted text: `FAKE:<scenario>` (see `SCENARIOS`).
 """
 
+import asyncio
 import json
 from collections.abc import Callable, Sequence
 from typing import Any
@@ -88,7 +89,11 @@ SCENARIOS: dict[str, Callable[[int], RawReply]] = {
     "timeout": _raise(LlmTimeoutError, "fake timeout"),
     "quota": _raise(LlmQuotaError, "fake quota"),
     "unavailable": _raise(LlmUnavailableError, "fake unavailable"),
+    "slow": lambda _call: _reply(_COOKIES),
 }
+
+# How long `FAKE:slow` takes to answer.
+SLOW_SECONDS = 20.0
 
 
 class FakeProvider:
@@ -96,7 +101,7 @@ class FakeProvider:
     model = "fake-1"
     timeout_seconds = 30.0
 
-    def extract(self, text: str, existing_tags: Sequence[str]) -> LlmResult:
+    async def extract(self, text: str, existing_tags: Sequence[str]) -> LlmResult:
         stripped = text.strip()
         scenario = (
             stripped.removeprefix("FAKE:").strip()
@@ -106,9 +111,12 @@ class FakeProvider:
         respond = SCENARIOS.get(scenario, SCENARIOS["ok"])
         calls = 0
 
-        def transport(_messages: Sequence[Message]) -> RawReply:
+        async def transport(_messages: Sequence[Message]) -> RawReply:
             nonlocal calls
             calls += 1
+            if scenario == "slow":
+                # A slow engine, for trying "ביטול" by hand and for the cancel tests.
+                await asyncio.sleep(SLOW_SECONDS)
             return respond(calls)
 
-        return extract_with_retry(transport, [("user", text)])
+        return await extract_with_retry(transport, [("user", text)])

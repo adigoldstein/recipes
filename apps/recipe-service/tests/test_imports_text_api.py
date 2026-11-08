@@ -1,7 +1,5 @@
 """`POST /api/imports/text`: pasted text becomes a Hebrew draft (Story 5.2)."""
 
-from typing import Any
-
 import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, select
@@ -12,6 +10,7 @@ from app.imports.schemas import DraftRecipe
 from app.imports.service import _split_tags
 from app.users.models import User
 from tests.factories import add_tag, add_user
+from tests.sse import ImportResult
 
 LOGIN = "/api/auth/login"
 PASSWORD = "correct horse"
@@ -32,8 +31,8 @@ def editor(client: TestClient, session: Session) -> User:
     return user
 
 
-def run_import(client: TestClient, text: str) -> Any:
-    return client.post(URL, json={"text": text})
+def run_import(client: TestClient, text: str) -> ImportResult:
+    return ImportResult(client.post(URL, json={"text": text}))
 
 
 def runs(session: Session) -> list[ImportRun]:
@@ -186,30 +185,29 @@ def test_a_second_invalid_reply_is_llm_invalid_output(
     scenario: str, client: TestClient, editor: User, session: Session
 ) -> None:
     response = run_import(client, f"FAKE:{scenario}")
-    assert response.status_code == 502
+    assert response.failed
     assert response.json()["code"] == "llm_invalid_output"
     [run] = runs(session)
     assert run.outcome == "llm_invalid_output"
 
 
 @pytest.mark.parametrize(
-    ("scenario", "status", "code"),
+    ("scenario", "code"),
     [
-        ("timeout", 504, "llm_timeout"),
-        ("quota", 502, "llm_quota"),
-        ("unavailable", 502, "llm_unavailable"),
+        ("timeout", "llm_timeout"),
+        ("quota", "llm_quota"),
+        ("unavailable", "llm_unavailable"),
     ],
 )
 def test_provider_failures_have_stable_codes_and_are_logged(
     scenario: str,
-    status: int,
     code: str,
     client: TestClient,
     editor: User,
     session: Session,
 ) -> None:
     response = run_import(client, f"FAKE:{scenario}")
-    assert response.status_code == status
+    assert response.failed
     assert response.json()["code"] == code
     [run] = runs(session)
     assert run.outcome == code
@@ -220,7 +218,7 @@ def test_text_without_a_recipe_is_no_recipe_found(
     client: TestClient, editor: User, session: Session
 ) -> None:
     response = run_import(client, "FAKE:empty")
-    assert response.status_code == 400
+    assert response.failed
     assert response.json()["code"] == "no_recipe_found"
     [run] = runs(session)
     assert run.outcome == "no_recipe_found"
@@ -237,7 +235,7 @@ def test_the_daily_cap_is_global_and_returns_429(
     monkeypatch.setenv("IMPORT_DAILY_CAP", "2")
     get_settings.cache_clear()
     assert run_import(client, "FAKE:ok").status_code == 200
-    assert run_import(client, "FAKE:empty").status_code == 400  # failures count too
+    assert run_import(client, "FAKE:empty").failed  # failures count too
     response = run_import(client, "FAKE:ok")
     assert response.status_code == 429
     assert response.json()["code"] == "import_cap_reached"

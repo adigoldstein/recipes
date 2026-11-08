@@ -4,6 +4,7 @@ import { HttpResponse, delay, http } from 'msw';
 import { safetyNetMs, type DraftRecipe } from '@bite-and-board/data-access';
 import { renderPanel } from '../testing/render-import';
 import { server } from '../testing/server';
+import { draftResponse, errorResponse, sse, streamOf } from '../testing/stream';
 
 const DRAFT: DraftRecipe = {
   title: 'עוגיות שוקולד',
@@ -21,17 +22,19 @@ function serveDraft(wait = 0) {
     http.post('*/api/imports/text', async ({ request }) => {
       sent.push(await request.json());
       if (wait) await delay(wait);
-      return HttpResponse.json(DRAFT);
+      return draftResponse(DRAFT);
     }),
   );
   return sent;
 }
 
-function serveError(status: number, code: string, params?: object) {
+function serveError(
+  status: number,
+  code: string,
+  params?: Record<string, string | number>,
+) {
   server.use(
-    http.post('*/api/imports/text', () =>
-      HttpResponse.json({ detail: code, code, params }, { status }),
-    ),
+    http.post('*/api/imports/text', () => errorResponse(status, code, params)),
   );
 }
 
@@ -230,7 +233,7 @@ describe('ImportPanel link input', () => {
   });
 
   it('sends the trimmed link and hands the draft to the page', async () => {
-    const sent = serveUrl(() => HttpResponse.json(DRAFT_FROM_URL));
+    const sent = serveUrl(() => draftResponse(DRAFT_FROM_URL));
     const user = userEvent.setup();
     const { onDraft } = renderPanel();
     await openPanel(user);
@@ -246,7 +249,7 @@ describe('ImportPanel link input', () => {
     ['example.com/cookies', 'הקישור צריך להתחיל ב-https:// או ב-http://'],
     ['ftp://example.com/x', 'הקישור צריך להתחיל ב-https:// או ב-http://'],
   ])('checks the link %j before sending', async (value, message) => {
-    const sent = serveUrl(() => HttpResponse.json(DRAFT));
+    const sent = serveUrl(() => draftResponse(DRAFT));
     const user = userEvent.setup();
     renderPanel();
     await openPanel(user);
@@ -280,7 +283,7 @@ describe('ImportPanel link input', () => {
   ])(
     'on %s offers one click to paste the text instead',
     async (code, status, message) => {
-      serveUrl(() => HttpResponse.json({ detail: code, code }, { status }));
+      serveUrl(() => errorResponse(status, code));
       const user = userEvent.setup();
       renderPanel();
       await openPanel(user);
@@ -296,12 +299,7 @@ describe('ImportPanel link input', () => {
   );
 
   it('does not offer the text switch for other errors', async () => {
-    serveUrl(() =>
-      HttpResponse.json(
-        { detail: 'x', code: 'no_recipe_found' },
-        { status: 400 },
-      ),
-    );
+    serveUrl(() => errorResponse(400, 'no_recipe_found'));
     const user = userEvent.setup();
     renderPanel();
     await openPanel(user);
@@ -325,7 +323,7 @@ describe('ImportPanel cancel', () => {
           state.aborted = true;
         });
         await delay('infinite');
-        return HttpResponse.json(DRAFT);
+        return draftResponse(DRAFT);
       }),
     );
     return state;
@@ -387,7 +385,7 @@ describe('ImportPanel cancel', () => {
           aborted = true;
         });
         await delay('infinite');
-        return HttpResponse.json(DRAFT);
+        return draftResponse(DRAFT);
       }),
     );
     const user = userEvent.setup();
@@ -455,10 +453,7 @@ describe('ImportPanel engine errors', () => {
   it('for a link import offers retry and the paste tab', async () => {
     server.use(
       http.post('*/api/imports/url', () =>
-        HttpResponse.json(
-          { detail: 'x', code: 'llm_unavailable' },
-          { status: 502 },
-        ),
+        errorResponse(502, 'llm_unavailable'),
       ),
     );
     const user = userEvent.setup();
@@ -502,5 +497,138 @@ describe('ImportPanel engine errors', () => {
     await vi.waitFor(() =>
       expect(safetyNetMs('/api/imports/text')).toBe(50_000),
     );
+  });
+});
+
+describe('ImportPanel progress stream', () => {
+  const stageLines = () =>
+    screen.queryAllByRole('listitem').map((item) => item.textContent ?? '');
+
+  /** A stream that sends these blocks and then waits, so the dialog stays busy. */
+  function serveOpenStream(blocks: string[]) {
+    server.use(
+      http.post('*/api/imports/text', () => {
+        const encoder = new TextEncoder();
+        return new HttpResponse(
+          new ReadableStream<Uint8Array>({
+            start(controller) {
+              for (const block of blocks) {
+                controller.enqueue(encoder.encode(block));
+              }
+            },
+          }),
+          { headers: { 'Content-Type': 'text/event-stream' } },
+        );
+      }),
+    );
+  }
+
+  it('shows the real stages as a Hebrew checklist while the import runs', async () => {
+    serveOpenStream([
+      sse('stage', { name: 'fetch', status: 'skipped' }),
+      sse('stage', { name: 'extract', status: 'started' }),
+      sse('stage', { name: 'extract', status: 'done' }),
+      sse('stage', { name: 'translate', status: 'skipped' }),
+      sse('stage', { name: 'validate', status: 'started' }),
+    ]);
+    const user = userEvent.setup();
+    renderPanel();
+    await open(user);
+    await user.type(textbox(), 'מתכון');
+    await user.click(submit());
+    const list = await screen.findByRole('list', { name: 'שלבי הייבוא' });
+    await vi.waitFor(() => expect(stageLines()).toHaveLength(2));
+    // Skipped stages are left out; finished and running ones carry a status.
+    expect(stageLines()).toEqual([
+      'קוראים את המתכוןהושלם',
+      'בודקים את הטיוטהבעבודה',
+    ]);
+    expect(list).toBeTruthy();
+    // No percentage bar.
+    expect(screen.queryByRole('progressbar')).toBeNull();
+    await user.click(screen.getByRole('button', { name: 'ביטול' }));
+    expect(screen.queryByRole('list', { name: 'שלבי הייבוא' })).toBeNull();
+  });
+
+  it('lists a fetch stage for a link import', async () => {
+    server.use(
+      http.post('*/api/imports/url', () => {
+        const encoder = new TextEncoder();
+        return new HttpResponse(
+          new ReadableStream<Uint8Array>({
+            start(controller) {
+              controller.enqueue(
+                encoder.encode(
+                  sse('stage', { name: 'fetch', status: 'started' }),
+                ),
+              );
+            },
+          }),
+          { headers: { 'Content-Type': 'text/event-stream' } },
+        );
+      }),
+    );
+    const user = userEvent.setup();
+    renderPanel();
+    await openPanel(user);
+    await user.type(
+      screen.getByRole('textbox', { name: /^קישור למתכון/ }),
+      'https://example.com/cookies',
+    );
+    await user.click(screen.getByRole('button', { name: 'ייבוא מהקישור' }));
+    await screen.findByText('פותחים את הדף');
+    await user.click(screen.getByRole('button', { name: 'ביטול' }));
+  });
+
+  it('shows an error event as the same Hebrew message, with retry', async () => {
+    server.use(
+      http.post('*/api/imports/text', () =>
+        streamOf([
+          sse('stage', { name: 'extract', status: 'started' }),
+          sse('error', { code: 'llm_quota', detail: 'quota' }),
+        ]),
+      ),
+    );
+    const user = userEvent.setup();
+    const { onDraft } = renderPanel();
+    await open(user);
+    await user.type(textbox(), 'מתכון');
+    await user.click(submit());
+    expect(
+      await screen.findByText(
+        'יש בעיה זמנית בשירות ה־AI. אפשר לנסות שוב בעוד כמה דקות.',
+      ),
+    ).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'לנסות שוב' })).toBeTruthy();
+    expect(onDraft).not.toHaveBeenCalled();
+    expect(screen.queryByRole('list', { name: 'שלבי הייבוא' })).toBeNull();
+  });
+
+  it('treats a stream that ends without a draft as a failure to retry', async () => {
+    server.use(
+      http.post('*/api/imports/text', () =>
+        streamOf([sse('stage', { name: 'extract', status: 'started' })]),
+      ),
+    );
+    const user = userEvent.setup();
+    renderPanel();
+    await open(user);
+    await user.type(textbox(), 'מתכון');
+    await user.click(submit());
+    expect(await screen.findByText('משהו השתבש, אפשר לנסות שוב')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'לנסות שוב' })).toBeTruthy();
+  });
+
+  it('keeps a refusal before the stream as a plain HTTP error', async () => {
+    serveError(429, 'import_cap_reached', { cap: 50 });
+    const user = userEvent.setup();
+    renderPanel();
+    await open(user);
+    await user.type(textbox(), 'מתכון');
+    await user.click(submit());
+    expect(
+      await screen.findByText('מכסת הייבוא היומית נוצלה. אפשר לנסות שוב מחר'),
+    ).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'לנסות שוב' })).toBeNull();
   });
 });

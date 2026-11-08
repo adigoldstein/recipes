@@ -4,6 +4,8 @@
 provider, the reply is validated against it, and the same model is the API response.
 """
 
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.core.units import SourceUnit, Unit
@@ -90,3 +92,35 @@ class DraftRecipe(BaseModel):
     # The page's main photo (`Recipe.image`, else `og:image`) for a URL import; the
     # form uploads it on save. Filled by the code, null for text.
     photo_source_url: str | None = Field(default=None, max_length=2048)
+
+
+# --- The progress stream (AD-40) -------------------------------------------------
+
+StageName = Literal["fetch", "extract", "translate", "validate", "convert_units"]
+StageStatus = Literal["started", "done", "skipped"]
+
+
+class StageEvent(BaseModel):
+    """`event: stage`. Only real pipeline stages are reported, no percentage."""
+
+    name: StageName
+    status: StageStatus
+
+
+class ErrorEvent(BaseModel):
+    """`event: error`. A failure after the stream started; `code` is an AD-28 code."""
+
+    code: str
+    detail: str
+    params: dict[str, str | int] | None = None
+
+
+# `event: draft` carries a `DraftRecipe` and ends a good stream.
+# What an event's data can be, for the OpenAPI document and so for the client's types.
+EVENTS_SCHEMA = {
+    "oneOf": [
+        {"$ref": f"#/components/schemas/{name}"}
+        for name in ("StageEvent", "DraftRecipe", "ErrorEvent")
+    ]
+}
+ImportEvent = tuple[Literal["stage", "draft", "error"], BaseModel]
