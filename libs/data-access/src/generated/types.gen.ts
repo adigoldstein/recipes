@@ -150,6 +150,28 @@ export type DraftStep = {
 export type ErrorCode = 'recipe_not_found' | 'tag_not_found' | 'tag_name_taken' | 'photo_not_found' | 'photo_too_large' | 'photo_dimensions_too_large' | 'photo_unsupported_type' | 'email_taken' | 'user_not_found' | 'password_too_short' | 'password_too_long' | 'invalid_credentials' | 'account_blocked' | 'last_admin' | 'rate_limited' | 'unauthorized' | 'forbidden' | 'csrf_header_missing' | 'no_recipe_found' | 'import_text_too_long' | 'import_cap_reached' | 'provider_unavailable' | 'llm_timeout' | 'llm_unavailable' | 'llm_quota' | 'llm_invalid_output' | 'fetch_blocked' | 'fetch_challenged' | 'fetch_failed' | 'fetch_too_large';
 
 /**
+ * ErrorEvent
+ *
+ * `event: error`. A failure after the stream started; `code` is an AD-28 code.
+ */
+export type ErrorEvent = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Detail
+     */
+    detail: string;
+    /**
+     * Params
+     */
+    params?: {
+        [key: string]: string | number;
+    } | null;
+};
+
+/**
  * ErrorResponse
  */
 export type ErrorResponse = {
@@ -632,6 +654,22 @@ export type SourceValue = {
 };
 
 /**
+ * StageEvent
+ *
+ * `event: stage`. Only real pipeline stages are reported, no percentage.
+ */
+export type StageEvent = {
+    /**
+     * Name
+     */
+    name: 'fetch' | 'extract' | 'translate' | 'validate' | 'convert_units';
+    /**
+     * Status
+     */
+    status: 'started' | 'done' | 'skipped';
+};
+
+/**
  * StepCreate
  */
 export type StepCreate = {
@@ -1021,23 +1059,15 @@ export type ImportsImportTextErrors = {
      * Too Many Requests
      */
     429: ErrorResponse;
-    /**
-     * Bad Gateway
-     */
-    502: ErrorResponse;
-    /**
-     * Gateway Timeout
-     */
-    504: ErrorResponse;
 };
 
 export type ImportsImportTextError = ImportsImportTextErrors[keyof ImportsImportTextErrors];
 
 export type ImportsImportTextResponses = {
     /**
-     * Successful Response
+     * A `text/event-stream` (AD-40): `stage` events `{name, status}`, then one `draft` event (a DraftRecipe) or one `error` event `{code, detail, params}`.
      */
-    200: DraftRecipe;
+    200: StageEvent | DraftRecipe | ErrorEvent;
 };
 
 export type ImportsImportTextResponse = ImportsImportTextResponses[keyof ImportsImportTextResponses];
@@ -1074,23 +1104,15 @@ export type ImportsImportUrlErrors = {
      * Too Many Requests
      */
     429: ErrorResponse;
-    /**
-     * Bad Gateway
-     */
-    502: ErrorResponse;
-    /**
-     * Gateway Timeout
-     */
-    504: ErrorResponse;
 };
 
 export type ImportsImportUrlError = ImportsImportUrlErrors[keyof ImportsImportUrlErrors];
 
 export type ImportsImportUrlResponses = {
     /**
-     * Successful Response
+     * A `text/event-stream` (AD-40): `stage` events `{name, status}`, then one `draft` event (a DraftRecipe) or one `error` event `{code, detail, params}`.
      */
-    200: DraftRecipe;
+    200: StageEvent | DraftRecipe | ErrorEvent;
 };
 
 export type ImportsImportUrlResponse = ImportsImportUrlResponses[keyof ImportsImportUrlResponses];

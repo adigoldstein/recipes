@@ -1,5 +1,6 @@
 """The Claude adapter against a fake HTTP server (no network, no key)."""
 
+import asyncio
 import json
 from typing import Any
 
@@ -46,7 +47,7 @@ def provider(handler: Any) -> AnthropicProvider:
         model="claude-test",
         timeout_seconds=5,
         max_output_tokens=1000,
-        client=httpx.Client(transport=httpx.MockTransport(handler)),
+        client=httpx.AsyncClient(transport=httpx.MockTransport(handler)),
     )
 
 
@@ -57,7 +58,7 @@ def test_a_valid_tool_reply_is_returned_with_its_cost() -> None:
         seen.append(request)
         return reply(GOOD, input_tokens=120, output_tokens=40)
 
-    result = provider(handler).extract("a cake recipe", ["קינוח"])
+    result = asyncio.run(provider(handler).extract("a cake recipe", ["קינוח"]))
     assert result.draft.title == "עוגה"
     assert (result.first_try_valid, result.retried) == (True, False)
     assert (result.usage.input_tokens, result.usage.output_tokens) == (120, 40)
@@ -81,7 +82,7 @@ def test_an_invalid_tool_reply_is_retried_once() -> None:
         reply(GOOD, input_tokens=150, output_tokens=20),
     ]
 
-    result = provider(lambda _request: replies.pop(0)).extract("text", [])
+    result = asyncio.run(provider(lambda _request: replies.pop(0)).extract("text", []))
     assert (result.first_try_valid, result.retried) == (False, True)
     assert (result.usage.input_tokens, result.usage.output_tokens) == (250, 30)
 
@@ -91,7 +92,7 @@ def test_a_reply_without_the_tool_is_treated_as_invalid() -> None:
     from app.imports.providers.base import LlmInvalidOutputError
 
     with pytest.raises(LlmInvalidOutputError):
-        provider(lambda _request: replies.pop(0)).extract("text", [])
+        asyncio.run(provider(lambda _request: replies.pop(0)).extract("text", []))
 
 
 def test_overload_is_unavailable_and_the_status_is_in_the_message() -> None:
@@ -99,7 +100,7 @@ def test_overload_is_unavailable_and_the_status_is_in_the_message() -> None:
         return httpx.Response(529, json={"error": {"type": "overloaded_error"}})
 
     with pytest.raises(LlmUnavailableError, match="HTTP 529") as caught:
-        provider(handler).extract("text", [])
+        asyncio.run(provider(handler).extract("text", []))
     assert caught.value.upstream_status == 529
 
 
@@ -108,7 +109,7 @@ def test_rate_limit_is_a_quota_error() -> None:
         return httpx.Response(429, json={"error": {"type": "rate_limit_error"}})
 
     with pytest.raises(LlmQuotaError) as caught:
-        provider(handler).extract("text", [])
+        asyncio.run(provider(handler).extract("text", []))
     assert caught.value.upstream_status == 429
 
 
@@ -117,4 +118,4 @@ def test_a_timeout_is_a_timeout_error() -> None:
         raise httpx.ReadTimeout("slow", request=request)
 
     with pytest.raises(LlmTimeoutError):
-        provider(handler).extract("text", [])
+        asyncio.run(provider(handler).extract("text", []))

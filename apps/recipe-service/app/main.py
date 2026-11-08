@@ -17,6 +17,7 @@ from app.core.health import router as health_router
 from app.core.migrate import run_migrations
 from app.core.rate_limit import limiter
 from app.core.security import get_session_user, require_csrf_header
+from app.imports.router import publish_stream_events
 from app.imports.router import router as imports_router
 from app.photos.router import router as photos_router
 from app.photos.service import MEDIA_DIR
@@ -84,6 +85,7 @@ def create_app() -> FastAPI:
     app.dependency_overrides[get_session_user] = get_current_user
     app.state.limiter = limiter
     register_error_handlers(app)
+    publish_stream_events(app)
 
     api = APIRouter(prefix=API_PREFIX)
     for router in ROUTERS:

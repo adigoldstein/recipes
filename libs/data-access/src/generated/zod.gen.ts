@@ -27,7 +27,7 @@ export const zChangePasswordRequest = z.object({
  */
 export const zDraftStep = z.object({
     description: z.string().min(1),
-    source_text: z.string().nullish()
+    source_text: z.string().nullish().default(null)
 });
 
 /**
@@ -67,6 +67,20 @@ export const zErrorCode = z.enum([
     'fetch_failed',
     'fetch_too_large'
 ]);
+
+/**
+ * ErrorEvent
+ *
+ * `event: error`. A failure after the stream started; `code` is an AD-28 code.
+ */
+export const zErrorEvent = z.object({
+    code: z.string(),
+    detail: z.string(),
+    params: z.record(z.string(), z.union([
+        z.string(),
+        z.int()
+    ])).nullish().default(null)
+});
 
 /**
  * ErrorResponse
@@ -220,6 +234,26 @@ export const zSourceValue = z.object({
 });
 
 /**
+ * StageEvent
+ *
+ * `event: stage`. Only real pipeline stages are reported, no percentage.
+ */
+export const zStageEvent = z.object({
+    name: z.enum([
+        'fetch',
+        'extract',
+        'translate',
+        'validate',
+        'convert_units'
+    ]),
+    status: z.enum([
+        'started',
+        'done',
+        'skipped'
+    ])
+});
+
+/**
  * StepCreate
  */
 export const zStepCreate = z.object({
@@ -319,27 +353,27 @@ export const zUnit = z.enum([
  * DraftIngredient
  */
 export const zDraftIngredient = z.object({
-    amount: z.number().gt(0).nullish(),
+    amount: z.number().gt(0).nullish().default(null),
     name: z.string().min(1),
-    note: z.string().nullish(),
-    source: zDraftSource.nullish(),
-    unit: zUnit.nullish()
+    note: z.string().nullish().default(null),
+    source: zDraftSource.nullish().default(null),
+    unit: zUnit.nullish().default(null)
 });
 
 /**
  * DraftRecipe
  */
 export const zDraftRecipe = z.object({
-    base_servings: z.int().gte(1).lte(100).nullish(),
-    cook_time_minutes: z.int().gte(0).nullish(),
-    description: z.string().max(500).nullish(),
+    base_servings: z.int().gte(1).lte(100).nullish().default(null),
+    cook_time_minutes: z.int().gte(0).nullish().default(null),
+    description: z.string().max(500).nullish().default(null),
     ingredients: z.array(zDraftIngredient).optional(),
     missing_fields: z.array(z.string()).optional(),
     new_tags: z.array(z.string()).optional(),
-    notes: z.string().max(5000).nullish(),
-    photo_source_url: z.string().max(2048).nullish(),
-    prep_time_minutes: z.int().gte(0).nullish(),
-    source_url: z.string().max(2048).nullish(),
+    notes: z.string().max(5000).nullish().default(null),
+    photo_source_url: z.string().max(2048).nullish().default(null),
+    prep_time_minutes: z.int().gte(0).nullish().default(null),
+    source_url: z.string().max(2048).nullish().default(null),
     steps: z.array(zDraftStep).optional(),
     tags: z.array(z.string()).optional(),
     title: z.string().min(1).max(120),
@@ -554,16 +588,24 @@ export const zImportsListProvidersResponse = z.array(zProviderInfo);
 export const zImportsImportTextBody = zImportTextRequest;
 
 /**
- * Successful Response
+ * A `text/event-stream` (AD-40): `stage` events `{name, status}`, then one `draft` event (a DraftRecipe) or one `error` event `{code, detail, params}`.
  */
-export const zImportsImportTextResponse = zDraftRecipe;
+export const zImportsImportTextResponse = z.union([
+    zStageEvent,
+    zDraftRecipe,
+    zErrorEvent
+]);
 
 export const zImportsImportUrlBody = zImportUrlRequest;
 
 /**
- * Successful Response
+ * A `text/event-stream` (AD-40): `stage` events `{name, status}`, then one `draft` event (a DraftRecipe) or one `error` event `{code, detail, params}`.
  */
-export const zImportsImportUrlResponse = zDraftRecipe;
+export const zImportsImportUrlResponse = z.union([
+    zStageEvent,
+    zDraftRecipe,
+    zErrorEvent
+]);
 
 export const zPhotosUploadPhotoBody = zBodyPhotosUploadPhoto;
 

@@ -47,6 +47,11 @@ export function setImportTimeouts(timeoutsSeconds: readonly number[]) {
       : SAFETY_NET_MS.import;
 }
 
+/** How long an import may stay silent before the client gives up (AD-43). */
+export function importSafetyNetMs(): number {
+  return importNetMs;
+}
+
 /** The safety net for a path. */
 export function safetyNetMs(pathname: string): number {
   // Listing the engines is an ordinary read; only the imports themselves are slow.

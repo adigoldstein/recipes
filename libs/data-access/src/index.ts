@@ -15,9 +15,17 @@ export {
   SESSION_EXPIRED_EVENT,
   configureClient,
   fetchWithSafetyNet,
+  importSafetyNetMs,
   safetyNetMs,
   setImportTimeouts,
 } from './client';
+export {
+  streamImport,
+  type ImportStage,
+  type ImportStageName,
+  type ImportStageStatus,
+  type StreamImportOptions,
+} from './import-stream';
 export { useImportEngines } from './import-engines';
 export { getErrorCode, getErrorParams } from './errors';
 export { uploadPhoto, type UploadPhotoOptions } from './upload-photo';

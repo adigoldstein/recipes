@@ -48,15 +48,24 @@ describe('/recipes/new with the AI import', () => {
     'imports pasted text into the form on the same page',
     async () => {
       server.use(
-        http.post('*/api/imports/text', () =>
-          HttpResponse.json({
-            title: 'לחם בית',
-            ingredients: [{ name: 'קמח', amount: 455, unit: 'g' }],
-            steps: [{ description: 'אופים ב-175°C.' }],
-            tags: [],
-            new_tags: [],
-            missing_fields: ['base_servings'],
-          }),
+        http.post(
+          '*/api/imports/text',
+          () =>
+            // The import answers with an event stream (AD-40): the draft is its last event.
+            new HttpResponse(
+              `event: draft
+data: ${JSON.stringify({
+                title: 'לחם בית',
+                ingredients: [{ name: 'קמח', amount: 455, unit: 'g' }],
+                steps: [{ description: 'אופים ב-175°C.' }],
+                tags: [],
+                new_tags: [],
+                missing_fields: ['base_servings'],
+              })}
+
+`,
+              { headers: { 'Content-Type': 'text/event-stream' } },
+            ),
         ),
       );
       const user = userEvent.setup();

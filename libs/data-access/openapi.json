@@ -44,13 +44,14 @@
           "amount": {
             "anyOf": [
               {
-                "exclusiveMinimum": 0.0,
+                "exclusiveMinimum": 0,
                 "type": "number"
               },
               {
                 "type": "null"
               }
             ],
+            "default": null,
             "title": "Amount"
           },
           "name": {
@@ -67,6 +68,7 @@
                 "type": "null"
               }
             ],
+            "default": null,
             "title": "Note"
           },
           "source": {
@@ -77,7 +79,8 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "default": null
           },
           "unit": {
             "anyOf": [
@@ -87,7 +90,8 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "default": null
           }
         },
         "required": [
@@ -102,26 +106,28 @@
           "base_servings": {
             "anyOf": [
               {
-                "maximum": 100.0,
-                "minimum": 1.0,
+                "maximum": 100,
+                "minimum": 1,
                 "type": "integer"
               },
               {
                 "type": "null"
               }
             ],
+            "default": null,
             "title": "Base Servings"
           },
           "cook_time_minutes": {
             "anyOf": [
               {
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               },
               {
                 "type": "null"
               }
             ],
+            "default": null,
             "title": "Cook Time Minutes"
           },
           "description": {
@@ -134,6 +140,7 @@
                 "type": "null"
               }
             ],
+            "default": null,
             "title": "Description"
           },
           "ingredients": {
@@ -167,6 +174,7 @@
                 "type": "null"
               }
             ],
+            "default": null,
             "title": "Notes"
           },
           "photo_source_url": {
@@ -179,18 +187,20 @@
                 "type": "null"
               }
             ],
+            "default": null,
             "title": "Photo Source Url"
           },
           "prep_time_minutes": {
             "anyOf": [
               {
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               },
               {
                 "type": "null"
               }
             ],
+            "default": null,
             "title": "Prep Time Minutes"
           },
           "source_url": {
@@ -203,6 +213,7 @@
                 "type": "null"
               }
             ],
+            "default": null,
             "title": "Source Url"
           },
           "steps": {
@@ -242,7 +253,7 @@
         "description": "An imperial value found in the source; the code converts it to metric (FR-21).",
         "properties": {
           "amount": {
-            "exclusiveMinimum": 0.0,
+            "exclusiveMinimum": 0,
             "title": "Amount",
             "type": "number"
           },
@@ -274,6 +285,7 @@
                 "type": "null"
               }
             ],
+            "default": null,
             "title": "Source Text"
           }
         },
@@ -319,6 +331,47 @@
         ],
         "title": "ErrorCode",
         "type": "string"
+      },
+      "ErrorEvent": {
+        "description": "`event: error`. A failure after the stream started; `code` is an AD-28 code.",
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          },
+          "params": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "integer"
+                    }
+                  ]
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Params"
+          }
+        },
+        "required": [
+          "code",
+          "detail"
+        ],
+        "title": "ErrorEvent",
+        "type": "object"
       },
       "ErrorResponse": {
         "properties": {
@@ -1279,6 +1332,37 @@
         "title": "SourceValue",
         "type": "object"
       },
+      "StageEvent": {
+        "description": "`event: stage`. Only real pipeline stages are reported, no percentage.",
+        "properties": {
+          "name": {
+            "enum": [
+              "fetch",
+              "extract",
+              "translate",
+              "validate",
+              "convert_units"
+            ],
+            "title": "Name",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "started",
+              "done",
+              "skipped"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "status"
+        ],
+        "title": "StageEvent",
+        "type": "object"
+      },
       "StepCreate": {
         "additionalProperties": false,
         "properties": {
@@ -1850,7 +1934,7 @@
     },
     "/api/imports/text": {
       "post": {
-        "description": "Turn pasted recipe text into a Hebrew draft. Nothing is saved.",
+        "description": "Turn pasted recipe text into a Hebrew draft, as a progress stream.",
         "operationId": "imports_import_text",
         "requestBody": {
           "content": {
@@ -1865,13 +1949,23 @@
         "responses": {
           "200": {
             "content": {
-              "application/json": {
+              "text/event-stream": {
                 "schema": {
-                  "$ref": "#/components/schemas/DraftRecipe"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/StageEvent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DraftRecipe"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ErrorEvent"
+                    }
+                  ]
                 }
               }
             },
-            "description": "Successful Response"
+            "description": "A `text/event-stream` (AD-40): `stage` events `{name, status}`, then one `draft` event (a DraftRecipe) or one `error` event `{code, detail, params}`."
           },
           "400": {
             "content": {
@@ -1932,26 +2026,6 @@
               }
             },
             "description": "Too Many Requests"
-          },
-          "502": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Gateway"
-          },
-          "504": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Gateway Timeout"
           }
         },
         "summary": "Import Text",
@@ -1962,7 +2036,7 @@
     },
     "/api/imports/url": {
       "post": {
-        "description": "Fetch a recipe page and turn it into a Hebrew draft. Nothing is saved.",
+        "description": "Fetch a recipe page and turn it into a Hebrew draft, as a progress stream.",
         "operationId": "imports_import_url",
         "requestBody": {
           "content": {
@@ -1977,13 +2051,23 @@
         "responses": {
           "200": {
             "content": {
-              "application/json": {
+              "text/event-stream": {
                 "schema": {
-                  "$ref": "#/components/schemas/DraftRecipe"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/StageEvent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DraftRecipe"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ErrorEvent"
+                    }
+                  ]
                 }
               }
             },
-            "description": "Successful Response"
+            "description": "A `text/event-stream` (AD-40): `stage` events `{name, status}`, then one `draft` event (a DraftRecipe) or one `error` event `{code, detail, params}`."
           },
           "400": {
             "content": {
@@ -2044,26 +2128,6 @@
               }
             },
             "description": "Too Many Requests"
-          },
-          "502": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Gateway"
-          },
-          "504": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Gateway Timeout"
           }
         },
         "summary": "Import Url",
