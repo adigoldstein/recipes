@@ -101,7 +101,7 @@ development_status:
   epic-7: backlog # V3 / nice to have | optional / nice to have: can be cut
   7-1-kitchen-mode-extras: backlog # optional: wake lock, pretty fractions, share as text (split out of 1.11)
   7-2-edit-user-details: backlog # optional: admin edits a user's name and email, and users edit their own (nice to have)
-  7-3-data-caching-tuning: backlog # V1 (front-end state tuning) | REQUIRED (not optional): per-query staleTime for reference data like tags, invalidate on edits
+  7-3-data-caching-tuning: review # V1 (front-end state tuning) | REQUIRED (not optional): per-query staleTime for reference data like tags, invalidate on edits
   7-4-quick-pick-chips-for-pinned-tags-in-the-recipe-form: backlog # optional: toggle chips for pinned tags above the tag field (split out of 3.3)
   7-5-reset-ingredient-to-original: backlog # optional: "חזרה למקור" button in the edit form (moved from 3.5; the 3.4 hint stays meanwhile)
   7-6-admin-merges-duplicate-tags: backlog # optional: admin merges two tags in one transaction (no fuzzy/LLM tag mapping, Adi 2026-11-04)

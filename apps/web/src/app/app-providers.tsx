@@ -23,6 +23,10 @@ export function createAppQueryClient() {
   return new QueryClient({
     defaultOptions: {
       queries: {
+        // Data stays fresh until a write in this app invalidates it
+        // (invalidationMap, AD-19). Changes by other users show after a page
+        // reload, which is accepted for this app (Story 7.3).
+        staleTime: Infinity,
         // An API error body with a `code` is a final answer ("recipe not
         // found"); only network and server failures are worth retrying. This
         // reads the code by hand: importing data-access here would pull the
