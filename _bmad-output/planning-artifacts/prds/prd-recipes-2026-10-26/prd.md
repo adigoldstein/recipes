@@ -2,7 +2,7 @@
 title: "Bite & Board PRD"
 status: final
 created: 2026-10-26
-updated: 2026-10-26
+updated: 2026-11-08
 source: docs/prd.md
 ---
 
@@ -55,6 +55,13 @@ source: docs/prd.md
 - Runs locally with one command (NFR-6)
 
 **Post-MVP candidates** (not committed; see §8): event menus, shopping list, further AI features such as smart ingredient substitution, public deployment.
+
+**Release plan (Adi, 2026-11-08).** The MVP above is a good proof of concept. The project's goal is a working demo that Adi can explain in job interviews, so the remaining work is split into releases (details in `epics.md`, "Release plan"):
+
+- **V1 (now):** one production container, front-end state tuning, end-to-end tests (two flows), README for recruiters with screenshots and a "how this was built with AI" section.
+- **V2:** import evals (small), bundle-size budget in CI, AI dashboard for the admin.
+- **V3 / nice to have:** kitchen mode extras, duplicate check before import, logging and backups, semantic search, other optional stories.
+- **Out of scope for this project:** event menus, shopping list, smart substitution, the "not a recipe" pre-check.
 
 ## 5. User Journeys
 
@@ -222,6 +229,8 @@ Owner-only for changes (FR-16 applies); everyone can filter by them.
 - **NFR-12 — Hebrew, right-to-left.** The whole UI is in Hebrew and laid out right-to-left (`lang="he" dir="rtl"`); layout mirrors correctly, numbers and units inside Hebrew text display in the right order, and fonts support Hebrew. User content in another language still displays correctly. How UI strings are stored (translation files vs. inline) is decided in the architecture step.
 
 ## 8. Post-MVP Candidates (not committed)
+
+> 2026-11-08 (Adi): event menus, shopping list and smart substitution are out of scope for this project (see §4, release plan). Public deployment is open; V1 shows the app with `docker compose up` and README screenshots.
 
 These are kept so the architecture does not rule them out. None has a committed design; each needs Adi's decisions before work starts (§9).
 

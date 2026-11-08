@@ -29,11 +29,12 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-26-2026 13:09
-last_updated: 11-08-2026 11:15
+last_updated: 11-08-2026 12:00
 project: recipes
 project_key: NOKEY
 tracking_system: file-system
 story_location: _bmad-output/implementation-artifacts
+# Release plan 2026-11-08 (Adi): V1 / V2 / V3 tags in the comments below; details in epics.md "Release plan".
 development_status:
   epic-1: in-progress
   1-1-adapt-the-backend-scaffold: done
@@ -68,7 +69,7 @@ development_status:
   3-6-delete-a-recipe: done
   3-7a-recipe-photos-storage-upload-api-and-display: done
   3-7b-recipe-photos-the-forms-upload-replace-remove: done
-  3-8-duplicate-a-recipe: backlog # stretch / optional: can be cut without affecting any other story
+  3-8-duplicate-a-recipe: backlog # V3 / nice to have | stretch / optional: can be cut without affecting any other story
   epic-3-retrospective: optional
 
   epic-4: done
@@ -83,30 +84,30 @@ development_status:
   5-4-import-from-a-url: done
   5-5-cancel-engine-choice-and-errors: done # reduced scope 2026-11-08 (Adi): cancel + client timeout + Hebrew errors; no engine chain, no cool down; Haiku default
   5-6-live-import-progress-sse: done # AD-40
-  5-7-duplicate-check-before-a-url-import: backlog # AD-39
-  5-8-ai-dashboard-for-the-admin: backlog # AD-38; chart library to agree with Adi first
-  5-9-not-a-recipe-pre-check: backlog # later (AD-36): working mechanism first, edge cases later
-  5-10-import-evals-fixtures-scores-and-ci: backlog # AD-37
+  5-7-duplicate-check-before-a-url-import: backlog # V3 / nice to have | AD-39
+  5-8-ai-dashboard-for-the-admin: backlog # V2 | AD-38; chart library to agree with Adi first
+  5-9-not-a-recipe-pre-check: optional # DROPPED 2026-11-08 (Adi, release plan): 5.2 already returns no_recipe_found
+  5-10-import-evals-fixtures-scores-and-ci: backlog # V2 | AD-37
   epic-5-retrospective: optional
 
   epic-6: backlog
-  6-1-one-production-container: backlog
-  6-2-logging-and-backups: backlog
-  6-3-end-to-end-tests-in-ci: backlog
-  6-4-performance-budgets: backlog
-  6-5-readme-for-recruiters: backlog
+  6-1-one-production-container: backlog # V1
+  6-2-logging-and-backups: backlog # V3 / nice to have
+  6-3-end-to-end-tests-in-ci: backlog # V1
+  6-4-performance-budgets: backlog # V2
+  6-5-readme-for-recruiters: backlog # V1
   epic-6-retrospective: optional
 
-  epic-7: backlog # optional / nice to have: can be cut
+  epic-7: backlog # V3 / nice to have | optional / nice to have: can be cut
   7-1-kitchen-mode-extras: backlog # optional: wake lock, pretty fractions, share as text (split out of 1.11)
   7-2-edit-user-details: backlog # optional: admin edits a user's name and email, and users edit their own (nice to have)
-  7-3-data-caching-tuning: backlog # REQUIRED (not optional): per-query staleTime for reference data like tags, invalidate on edits
+  7-3-data-caching-tuning: backlog # V1 (front-end state tuning) | REQUIRED (not optional): per-query staleTime for reference data like tags, invalidate on edits
   7-4-quick-pick-chips-for-pinned-tags-in-the-recipe-form: backlog # optional: toggle chips for pinned tags above the tag field (split out of 3.3)
   7-5-reset-ingredient-to-original: backlog # optional: "חזרה למקור" button in the edit form (moved from 3.5; the 3.4 hint stays meanwhile)
   7-6-admin-merges-duplicate-tags: backlog # optional: admin merges two tags in one transaction (no fuzzy/LLM tag mapping, Adi 2026-11-04)
   epic-7-retrospective: optional
 
-  epic-8: backlog # planned 2026-11-04: semantic search, starts after Epic 5
+  epic-8: backlog # V3 / nice to have | planned 2026-11-04: semantic search, starts after Epic 5
   8-1-recipe-embeddings: backlog
   8-2-semantic-search-in-the-library: backlog
   epic-8-retrospective: optional
