@@ -214,6 +214,15 @@ FR27: Epic 2 - Change your own password
 
 > Approved by Adi 2026-10-26: Q1 A (auth before editing), Q2 A (tags as their own epic), Q3 A (the LLM spike opens Epic 5; all AI work stays together), Q4 A (final "ready to show" epic).
 
+### Release plan: V1, V2, V3 (Adi, 2026-11-08)
+
+> The app is a good proof of concept. The goal is a working, explainable demo for job interviews, so the remaining work is cut down and split into releases. Adi must be able to explain every item. The split between V2 and V3 can change as work goes on.
+
+- **V1 (now, a working demo):** 6.1 one production container, 7.3 front-end state tuning (TanStack Query), 6.3 end-to-end tests (two flows), 6.5 README for recruiters with screenshots and a "how this was built with AI" section.
+- **V2:** 5.10 import evals (a small version, about 8 fixtures), 6.4 performance budgets (size-limit in CI only; Lighthouse stays manual), 5.8 AI dashboard for the admin.
+- **V3 / nice to have:** 7.1 kitchen mode extras, 5.7 duplicate check, 6.2 logging and backups, Epic 8 semantic search, and the optional stories 3.8, 7.2, 7.4, 7.5 and 7.6.
+- **Dropped:** 5.9 "not a recipe" pre-check (a draft with no recipe already returns `no_recipe_found`), and the PRD's post-MVP ideas (event menus, shopping list, substitution).
+
 ### Epic 1: Browse and cook from the phone
 
 Anyone can open ביס & סיר on a phone or desktop (Hebrew, RTL, light or dark), browse the seeded recipes, search them, filter by tag, open a recipe and scale it live. The groundwork comes first: adapting the scaffold, the shared libs, the OpenAPI pipeline, the database with its migrations and pinned Hebrew tags, the theme, the app shell, seed data and CI.
@@ -1004,7 +1013,9 @@ So that I choose engines and prompts on real numbers (AD-38).
 **And** there is no background job and no stored aggregate table
 **And** API tests cover the aggregates on a seeded set of runs, and the page has a component test with MSW
 
-### Story 5.9: "Not a recipe" pre-check (later)
+### Story 5.9: "Not a recipe" pre-check (dropped)
+
+> Dropped 2026-11-08 (Adi, release plan). A draft with no ingredients and no steps already returns `no_recipe_found` (Story 5.2). Kept here for the record only.
 
 As an editor,
 I want a quick, clear answer when a page or text has no recipe,
@@ -1051,7 +1062,7 @@ So that it works like production on any machine (NFR6).
 **And** SQLite and the photos live on a `/data` volume and survive restarts, and migrations run on start
 **And** the container `HEALTHCHECK` calls `/api/health`
 **And** any reverse proxy in front of the app has a read timeout of at least 120 s, so a slow import is never cut off (AD-43)
-**And** `GEMINI_API_KEY` and `GROQ_API_KEY` are read from the environment (never baked into the image), and the compose file passes them through from `.env`
+**And** `ANTHROPIC_API_KEY` (and `GEMINI_API_KEY` when Gemini is configured) is read from the environment (never baked into the image), and the compose file passes them through from `.env`
 **And** static assets get immutable cache headers, and `/media` gets long-lived caching
 
 ### Story 6.2: Logging and backups
@@ -1080,7 +1091,7 @@ So that a regression never reaches the demo (NFR2).
 **Given** an `apps/web-e2e` Playwright project
 **When** CI runs `e2e`
 **Then** it boots the API with `LLM_PROVIDERS=fake` on a temporary `DATA_DIR`, migrated and seeded, plus a test editor account
-**And** three flows pass: (1) open a recipe and scale it to 10, checking the amounts; (2) log in, edit an amount, see the hint, reset to original, and see the hint gone; (3) import from fake text, complete the flagged fields, save, and see the recipe in the library
+**And** two flows pass (V1, 2026-11-08; the reset-to-original flow waits for Story 7.5): (1) open a recipe and scale it to 10, checking the amounts; (2) log in, import from fake text, complete the flagged fields, save, and see the recipe in the library
 **And** an axe accessibility check runs on the library, detail and form pages with no serious violations (NFR5)
 **And** the flows run at 375 px and at desktop width
 
@@ -1149,7 +1160,9 @@ So that a typo or a changed address doesn't mean deleting and re-creating an acc
 **And** any signed-in user can edit their own name and email in a "פרטים אישיים" section added to the "החשבון שלי" page (Story 2.6, which stays password-only and is laid out so a second section fits); changing one's own email requires the current password (wrong password returns 400 `invalid_credentials`, shown on that field), follows the same rules and the same 409 `email_taken`, and keeps the session valid
 **And** API tests cover the name change, the email change, the 409, and invalid values, including the self-edit with and without the right password; the dialog and the section work at 375 px
 
-### Story 7.3: Data caching tuning (REQUIRED)
+### Story 7.3: Data caching tuning (REQUIRED, V1)
+
+> In V1 (Adi, 2026-11-08), called "front-end state tuning": the server state that TanStack Query keeps in the client.
 
 > Not optional, unlike the rest of Epic 7. Added 2026-10-28; details to be agreed with Adi when the app is further along.
 
@@ -1216,6 +1229,8 @@ So that the tag list stays clean without editing each recipe.
 **And** API tests cover overlap (a recipe with both tags), the rollback on failure, and the role check
 
 ## Epic 8: Semantic search over our recipes
+
+> V3 / nice to have (Adi, 2026-11-08 release plan). Ollama was dropped on 2026-11-05, so the embedding model is chosen when the epic starts.
 
 > Planned 2026-11-04 (approved by Adi). Starts after Epic 5. SQLite stays; no PostgreSQL. The architecture details (ADs) are written when the epic starts.
 
