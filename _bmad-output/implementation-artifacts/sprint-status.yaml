@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-26-2026 13:09
-last_updated: 11-08-2026 12:00
+last_updated: 11-08-2026 13:20
 project: recipes
 project_key: NOKEY
 tracking_system: file-system
@@ -90,8 +90,8 @@ development_status:
   5-10-import-evals-fixtures-scores-and-ci: backlog # V2 | AD-37
   epic-5-retrospective: optional
 
-  epic-6: backlog
-  6-1-one-production-container: backlog # V1
+  epic-6: in-progress
+  6-1-one-production-container: review # V1
   6-2-logging-and-backups: backlog # V3 / nice to have
   6-3-end-to-end-tests-in-ci: backlog # V1
   6-4-performance-budgets: backlog # V2
@@ -101,7 +101,7 @@ development_status:
   epic-7: backlog # V3 / nice to have | optional / nice to have: can be cut
   7-1-kitchen-mode-extras: backlog # optional: wake lock, pretty fractions, share as text (split out of 1.11)
   7-2-edit-user-details: backlog # optional: admin edits a user's name and email, and users edit their own (nice to have)
-  7-3-data-caching-tuning: review # V1 (front-end state tuning) | REQUIRED (not optional): per-query staleTime for reference data like tags, invalidate on edits
+  7-3-data-caching-tuning: done # V1 (PR #37 merged 2026-11-08) (front-end state tuning) | REQUIRED (not optional): per-query staleTime for reference data like tags, invalidate on edits
   7-4-quick-pick-chips-for-pinned-tags-in-the-recipe-form: backlog # optional: toggle chips for pinned tags above the tag field (split out of 3.3)
   7-5-reset-ingredient-to-original: backlog # optional: "חזרה למקור" button in the edit form (moved from 3.5; the 3.4 hint stays meanwhile)
   7-6-admin-merges-duplicate-tags: backlog # optional: admin merges two tags in one transaction (no fuzzy/LLM tag mapping, Adi 2026-11-04)

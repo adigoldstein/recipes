@@ -1,0 +1,35 @@
+# Only what the Dockerfile copies matters; everything else stays out of the build
+# context, above all secrets (.env) and local data.
+**/node_modules
+**/.venv
+**/dist
+**/out-tsc
+**/__pycache__
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+**/.import_linter_cache
+**/.coverage
+**/.env
+**/.env.*
+!**/.env.example
+**/*.db
+**/*.db-*
+apps/recipe-service/data
+.git
+.nx
+coverage
+reports
+test-output
+storybook-static
+_bmad
+_bmad-output
+docs
+tools/llm-spike
+.agents
+.claude
+.codex
+.cursor
+.gemini
+.opencode
+.vscode
