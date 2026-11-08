@@ -1794,7 +1794,7 @@
     },
     "/api/imports/providers": {
       "get": {
-        "description": "The active import engine and its timeout, which the client's own limit follows.",
+        "description": "The active import engine and its timeout (the client's limit follows it).",
         "operationId": "imports_list_providers",
         "responses": {
           "200": {

@@ -69,7 +69,7 @@ export const healthGetHealth = <ThrowOnError extends boolean = false>(options?: 
 /**
  * List Providers
  *
- * The active import engine and its timeout, which the client's own limit follows.
+ * The active import engine and its timeout (the client's limit follows it).
  */
 export const importsListProviders = <ThrowOnError extends boolean = false>(options?: Options<ImportsListProvidersData, ThrowOnError>): RequestResult<ImportsListProvidersResponses, ImportsListProvidersErrors, ThrowOnError> => (options?.client ?? client).get<ImportsListProvidersResponses, ImportsListProvidersErrors, ThrowOnError>({ url: '/api/imports/providers', ...options });
 

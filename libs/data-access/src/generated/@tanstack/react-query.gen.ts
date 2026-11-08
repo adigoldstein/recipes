@@ -140,7 +140,7 @@ export const importsListProvidersQueryKey = (options?: Options<ImportsListProvid
 /**
  * List Providers
  *
- * The active import engine and its timeout, which the client's own limit follows.
+ * The active import engine and its timeout (the client's limit follows it).
  */
 export const importsListProvidersOptions = (options?: Options<ImportsListProvidersData>) => queryOptions<ImportsListProvidersResponse, ImportsListProvidersError, ImportsListProvidersResponse, ReturnType<typeof importsListProvidersQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
