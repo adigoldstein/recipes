@@ -35,6 +35,9 @@
     },
     {
       "path": "./libs/feature-import"
+    },
+    {
+      "path": "./apps/web-e2e"
     }
   ],
   "compilerOptions": {}
