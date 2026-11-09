@@ -104,7 +104,7 @@ From ARCHITECTURE-SPINE.md (AD-1 to AD-33). There is **no starter template**: th
 - Frontend shape: "thin app, thick libs". `apps/web` is only the shell (router, providers, top bar). Pages and containers live in feature libs `libs/feature-{recipes,auth,users,tags,import}` (tag `type:feature`, never importing each other), and each feature lib is created by the first story that needs it (AD-2).
 - Frontend stack: React Router 8 lazy routes, TanStack Query, React Hook Form + Zod with `RecipeFormValues` and two mapping functions, i18next (`he.json`), and the React Compiler through the Babel plugin (AD-8 to AD-11, AD-22, AD-33).
 - Enforcement: mypy strict, import-linter, ESLint rules (no physical-direction utilities, arbitrary values, hex colours or the `style` prop in ui-components; jsx-a11y), and size-limit as the `web:size` target (AD-33).
-- Packaging: one container serves the SPA, `/api` and `/media` with a `/data` volume. `docker compose up` runs it locally. The SPA fallback excludes `/api` and `/media`, and there's a HEALTHCHECK (AD-15, AD-29).
+- Packaging: FastAPI serves `/api` and `/media` only; Vite serves the app and proxies `/api` and `/media` to it, so there is one origin (AD-15, AD-29). Docker was dropped on 2026-11-09.
 - Tests (AD-16, AD-23):
   - Backend: pytest with TestClient and a temporary DB per test.
   - Frontend: Vitest, React Testing Library with MSW, and Playwright e2e (`apps/web-e2e`) for scaling, editing with the hint, and import with the fake provider.
@@ -218,7 +218,7 @@ FR27: Epic 2 - Change your own password
 
 > The app is a good proof of concept. The goal is a working, explainable demo for job interviews, so the remaining work is cut down and split into releases. Adi must be able to explain every item. The split between V2 and V3 can change as work goes on.
 
-- **V1 (now, a working demo):** 6.1 one production container, 7.3 front-end state tuning (TanStack Query), 6.3 end-to-end tests (two flows), 6.5 README for recruiters with screenshots and a "how this was built with AI" section.
+- **V1 (now, a working demo):** ~~6.1 one production container~~ (cancelled 2026-11-09), 7.3 front-end state tuning (TanStack Query), 6.3 end-to-end tests (two flows), 6.5 README for recruiters with screenshots and a "how this was built with AI" section.
 - **V2:** 5.10 import evals (a small version, about 8 fixtures), 6.4 performance budgets (size-limit in CI only; Lighthouse stays manual), 5.8 AI dashboard for the admin.
 - **V3 / nice to have:** 7.1 kitchen mode extras, 5.7 duplicate check, 6.2 logging and backups, Epic 8 semantic search, and the optional stories 3.8, 7.2, 7.4, 7.5 and 7.6.
 - **Dropped:** 5.9 "not a recipe" pre-check (a draft with no recipe already returns `no_recipe_found`), and the PRD's post-MVP ideas (event menus, shopping list, substitution).
@@ -289,7 +289,7 @@ Editors import a recipe from a link or from pasted text with one AI engine chose
 
 ### Epic 6: Ready to show
 
-The app runs as one production container (`docker compose up`) with backups, structured logging and an env template. Performance budgets (bundle size, Lighthouse) and the Playwright e2e flows run in CI. A README explains the app and its architecture for recruiters.
+The app runs with `npm run dev`, with backups, structured logging and an env template. Performance budgets (bundle size, Lighthouse) and the Playwright e2e flows run in CI. A README explains the app and its architecture for recruiters.
 **NFRs completed:** NFR3, NFR6, NFR9, NFR11 (NFR1, 2, 4, 5, 7, 8, 10 and 12 are met inside every epic's stories)
 
 ### Epic 7 (optional, nice to have): Kitchen mode extras
@@ -1046,9 +1046,11 @@ So that a prompt or model change never makes drafts worse unnoticed (AD-37).
 
 ## Epic 6: Ready to show
 
-The app runs as one production container with backups and logs, passes its performance budgets and end-to-end tests in CI, and has a README that tells its story.
+The app runs from one server with backups and logs, passes its performance budgets and end-to-end tests in CI, and has a README that tells its story.
 
-### Story 6.1: One production container
+### Story 6.1: One production container [CANCELLED 2026-11-09]
+
+> **Cancelled 2026-11-09 (Adi):** needless complexity for a demo project that never goes to production. The Dockerfile, `docker-compose.yml` and `.dockerignore` were removed. FastAPI serves only the API and the photos; Vite serves the app through its proxy (AD-15, amended).
 
 As Adi,
 I want to run the whole app with `docker compose up`,
@@ -1120,7 +1122,7 @@ So that a reviewer can follow the project quickly (NFR9).
 
 **Given** a reviewer opens the repository
 **When** they read the README
-**Then** it explains what ביס & סיר is (with screenshots), how to run it (`npm run dev` and `docker compose up`), the env settings, and how to create the admin and seed the data
+**Then** it explains what ביס & סיר is (with screenshots), how to run it (`npm run dev`), the env settings, and how to create the admin and seed the data
 **And** it shows the architecture at a glance (a diagram plus the key decisions) and links to `ARCHITECTURE-SPINE.md`, the PRD and the UX docs
 **And** it lists the quality gates (CI, tests, budgets) and the tech stack with the reasons behind each choice
 **And** the built Storybook of `libs/ui-components` is published (e.g. GitHub Pages) and the README links to it

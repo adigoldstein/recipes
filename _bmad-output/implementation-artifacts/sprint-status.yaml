@@ -91,7 +91,7 @@ development_status:
   epic-5-retrospective: optional
 
   epic-6: in-progress
-  6-1-one-production-container: done # V1
+  6-1-one-production-container: optional # DROPPED 2026-11-09 (Adi): Docker removed, needless complexity for a demo; FastAPI is API only, Vite serves the app
   6-2-logging-and-backups: backlog # V3 / nice to have
   6-3-end-to-end-tests-in-ci: done # V1 (PR #39 merged 2026-11-09)
   6-4-performance-budgets: backlog # V2
