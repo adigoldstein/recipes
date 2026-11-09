@@ -1,6 +1,7 @@
 """Business rules for recipes; other modules call this layer, never the repository."""
 
 import uuid
+from collections.abc import Sequence
 from typing import Annotated
 from urllib.parse import urlsplit
 
@@ -96,6 +97,32 @@ class RecipeService:
         `user_id` is the author; the seed has none. `photo_credit_domain` names the
         site an imported or sample photo came from.
         """
+        try:
+            recipe = self._stage(data, user_id, photo_credit_domain)
+            self._repository.commit()
+        except Exception:
+            self._repository.rollback()
+            raise
+        return self.get_recipe(recipe.id)
+
+    def create_recipes(self, items: Sequence[RecipeCreate]) -> int:
+        """Create several recipes with no author in one transaction: all or none."""
+        try:
+            for data in items:
+                self._stage(data, None, None)
+            self._repository.commit()
+        except Exception:
+            self._repository.rollback()
+            raise
+        return len(items)
+
+    def _stage(
+        self,
+        data: RecipeCreate,
+        user_id: uuid.UUID | None,
+        photo_credit_domain: str | None,
+    ) -> Recipe:
+        """Add the recipe and link its tags (new names become tags); never commits."""
         if data.photo_key is not None:
             self._photos.require(data.photo_key)
         recipe = Recipe(
@@ -122,14 +149,9 @@ class RecipeService:
             ],
             steps=[StepItem(description=item.description) for item in data.steps],
         )
-        try:
-            self._repository.add(recipe)
-            self._tags.assign_to_recipe(recipe.id, data.tags)
-            self._repository.commit()
-        except Exception:
-            self._repository.rollback()
-            raise
-        return self.get_recipe(recipe.id)
+        self._repository.add(recipe)
+        self._tags.assign_to_recipe(recipe.id, data.tags)
+        return recipe
 
     def update_recipe(
         self,

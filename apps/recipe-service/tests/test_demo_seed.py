@@ -9,14 +9,16 @@ from sqlmodel import Session, col, func, select
 
 from app.core.config import get_settings, load_settings
 from app.core.db import get_engine
+from app.core.errors import AppError
 from app.core.security import CSRF_HEADER, CSRF_VALUE
-from app.demo_seed import DEMO_FILE, load_demo_data
+from app.demo_seed import DEMO_FILE, load_demo_data, run_demo_seed
 from app.main import create_app
 from app.photos.service import get_photo_service
 from app.recipes.models import Recipe
 from app.recipes.service import get_recipe_service
 from app.seed import SEED_TOTAL, run_seed
-from app.tags.models import Tag
+from app.tags.models import RecipeTag, Tag
+from app.tags.schemas import TagInput
 from app.tags.service import get_tag_service
 
 DEMO_TOTAL = 14
@@ -118,3 +120,29 @@ def test_seed_demo_is_on_by_default(monkeypatch: pytest.MonkeyPatch) -> None:
     assert load_settings().seed_demo is True
     monkeypatch.setenv("SEED_DEMO", "false")
     assert load_settings().seed_demo is False
+
+
+def test_a_failure_mid_load_leaves_nothing_behind(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _start(monkeypatch, "false")
+    data = load_demo_data()
+    first = data.recipes[0]
+    # The first recipe brings a brand-new tag; a later one points at a photo that
+    # was never uploaded, so saving it fails after several recipes were staged.
+    data.recipes[0] = first.model_copy(
+        update={"tags": [*first.tags, TagInput(name="תגית שלא תישאר")]}
+    )
+    data.recipes[5] = data.recipes[5].model_copy(update={"photo_key": "0" * 32})
+
+    with Session(get_engine(get_settings().data_dir)) as session:
+        tags_before = session.exec(select(func.count()).select_from(Tag)).one()
+        tags = get_tag_service(session)
+        service = get_recipe_service(session, tags, get_photo_service())
+        with pytest.raises(AppError):
+            run_demo_seed(service, data)
+
+    with Session(get_engine(get_settings().data_dir)) as session:
+        assert _count(session) == 0
+        assert session.exec(select(func.count()).select_from(Tag)).one() == tags_before
+        assert session.exec(select(func.count()).select_from(RecipeTag)).one() == 0
