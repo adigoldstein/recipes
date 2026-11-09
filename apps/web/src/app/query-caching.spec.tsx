@@ -18,7 +18,7 @@ const EDITOR: SessionUser = {
   role: 'editor',
 };
 
-// The first import of a lazy page transforms its whole module graph.
+// Time limit for loading a lazy page. The first load builds all the code it imports.
 const LAZY_TIMEOUT = 30_000;
 
 let tagRequests = 0;
@@ -42,7 +42,7 @@ afterEach(() => {
 });
 afterAll(() => server.close());
 
-// Story 7.3: server data loads once, and only an edit in this app refreshes it.
+// Story 7.3: server data is loaded once, and only a change in this app reloads it.
 describe('the tag list cache', () => {
   it(
     'fetches tags once across several screens and a window refocus, and again after an edit',

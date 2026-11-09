@@ -1,4 +1,4 @@
-"""SQLModel tables owned by users."""
+"""The database tables of the users module."""
 
 import uuid
 from datetime import datetime
@@ -14,7 +14,7 @@ NAME_MAX_LENGTH = 80
 
 
 class User(SQLModel, table=True):
-    """An account that can sign in. A visitor has no row (AD-30)."""
+    """A user account that can log in. Visitors are not stored (AD-30)."""
 
     __tablename__ = "user"
 
@@ -22,20 +22,20 @@ class User(SQLModel, table=True):
     email: str = Field(max_length=EMAIL_MAX_LENGTH)
     name: str = Field(max_length=NAME_MAX_LENGTH)
     role: Role = Field(sa_column=enum_column(Role, "role"))
-    # Argon2id hash only; the plain password is never stored.
+    # The Argon2id hash of the password. The plain password is never stored.
     password_hash: str
     is_blocked: bool = Field(
         default=False, sa_column_kwargs={"server_default": false()}
     )
-    # Every session token carries the value it was issued with; bumping it signs the
-    # user out everywhere (password reset, block).
+    # Each session token holds the version it was created with. Increasing this
+    # number logs the user out on all devices (used on password reset and block).
     session_version: int = Field(
         default=0, sa_column_kwargs={"server_default": text("0")}
     )
     created_at: datetime = Field(default_factory=utcnow, sa_type=UtcDateTime)
 
 
-# lower(email) makes emails unique case-insensitively (AD-30).
+# Emails must be unique, ignoring upper and lower case (AD-30).
 Index(
     "uq_user_lower_email",
     func.lower(User.__table__.c.email),  # type: ignore[attr-defined]

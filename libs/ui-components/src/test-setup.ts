@@ -1,4 +1,5 @@
-// jsdom gaps that Radix (Select, menus) and Sonner rely on.
+// Browser features that jsdom does not have, but Radix (Select, menus) and Sonner
+// need.
 window.matchMedia ??= (query: string) =>
   ({
     media: query,

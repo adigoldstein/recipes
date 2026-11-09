@@ -12,7 +12,8 @@ const valid = (): RecipeFormValues => ({
   steps: [{ description: 'מערבבים' }],
 });
 
-// Sorted: the order of the issues is the schema's business, not the form's.
+// Sorted, because the order of the issues comes from the schema and does not
+// matter to the form.
 const paths = (values: RecipeFormValues) =>
   validateRecipeForm(values)
     .map((issue) => `${issue.path}:${issue.type}`)

@@ -1,4 +1,5 @@
-"""The Gemini adapter against a fake HTTP server, and the shared retry step (AD-34)."""
+"""Tests the Gemini provider with a fake HTTP server, and the shared retry step
+(AD-34)."""
 
 import asyncio
 import json
@@ -58,7 +59,7 @@ def test_a_valid_reply_is_returned_with_its_cost() -> None:
     assert (result.usage.input_tokens, result.usage.output_tokens) == (120, 50)
     [request] = seen
     assert request.url.path.endswith("/models/gemini-test:generateContent")
-    # The key travels in a header, never in the URL or the body.
+    # The API key is sent in a header, never in the URL or the body.
     assert request.headers["x-goog-api-key"] == API_KEY
     assert API_KEY not in str(request.url)
     assert API_KEY not in request.content.decode()

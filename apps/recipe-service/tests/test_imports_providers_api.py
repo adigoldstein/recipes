@@ -1,4 +1,5 @@
-"""`GET /api/imports/providers`: the active engine and its timeout (Story 5.5)."""
+"""`GET /api/imports/providers`: returns the active engine and its timeout
+(Story 5.5)."""
 
 import pytest
 from fastapi.testclient import TestClient

@@ -18,7 +18,7 @@ def test_every_connection_enforces_foreign_keys(session: Session) -> None:
 
 
 def test_every_connection_waits_five_seconds_for_a_lock(session: Session) -> None:
-    """Written out, not a driver default (AD-43)."""
+    """We set it ourselves; it is not the driver's default (AD-43)."""
     assert session.exec(text("PRAGMA busy_timeout")).scalar() == 5000  # type: ignore[call-overload]
 
 
@@ -100,7 +100,7 @@ def test_an_unknown_unit_in_the_stored_json_fails_when_read(session: Session) ->
 def test_an_invalid_item_is_rejected_on_write(session: Session) -> None:
     bad = IngredientItem.model_construct(name="קמח", unit="bogus")  # type: ignore[arg-type]
     session.add(Recipe(title="x", base_servings=1, ingredients=[bad]))
-    # SQLAlchemy wraps what a type raises while binding a parameter.
+    # SQLAlchemy wraps the column type's error in a StatementError.
     with pytest.raises(StatementError, match="Input should be"):
         session.commit()
 

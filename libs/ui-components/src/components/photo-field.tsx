@@ -7,40 +7,46 @@ import { FormField } from './form-field';
 export interface PhotoFieldProps {
   id: string;
   label: string;
-  /** The limits, shown under the field (e.g. "JPEG, PNG או WebP, עד 10 מ״ב"). */
+  /** The limits, shown under the field (for example "JPEG, PNG או WebP, עד 10 מ״ב"). */
   hint: string;
-  /** The picture to show: a saved photo's thumbnail or a preview of the chosen file. */
+  /**
+   * The picture to show: the saved photo's thumbnail, or a preview of the chosen
+   * file.
+   */
   previewUrl?: string;
   previewAlt: string;
-  /** The share uploaded so far (0 to 1) while a file is uploading; undefined otherwise. */
+  /** How much was uploaded so far (0 to 1) while a file uploads. Otherwise undefined. */
   progress?: number;
-  /** Why the last pick or upload failed. */
+  /** Why the last choice or upload failed. */
   error?: string;
-  /** The `accept` list of the file picker. */
+  /** The file types the file picker accepts (`accept`). */
   accept: string;
   labels: {
     add: string;
     replace: string;
     remove: string;
-    /** Names the progress bar; it is followed by the percentage. */
+    /** The progress bar's name. The percentage is shown after it. */
     uploading: string;
-    /** Brings a removed saved photo back; needed only with `onRestore`. */
+    /**
+     * The text of the button that brings back a removed saved photo. Needed only
+     * with `onRestore`.
+     */
     restore?: string;
   };
   onSelect: (file: File) => void;
   onRemove: () => void;
-  /** Given while a saved photo is removed but not yet saved: offers to keep it after all. */
+  /**
+   * Passed when a saved photo was removed but the recipe was not saved yet. Shows a
+   * button to bring the photo back.
+   */
   onRestore?: () => void;
   className?: string;
 }
 
 /**
- * The recipe form's photo (UX-DR12): "הוספת תמונה" before there is one, then the
- * thumbnail with "החלפה" and "הסרה". A chosen file is handed to `onSelect` straight
- * away; the owner uploads it and reports `progress`. Props in, callbacks out.
- *
- * The real file input is out of the tab order and hidden from screen readers: the
- * buttons are the control, and one click on them opens the picker.
+ * The photo field of the recipe form (UX-DR12): "הוספת תמונה" when there is no photo,
+ * and then the thumbnail with "החלפה" and "הסרה". A chosen file is passed to
+ * `onSelect` right away. The parent uploads it and passes `progress`.
  */
 export function PhotoField({
   id,
@@ -75,6 +81,8 @@ export function PhotoField({
           aria-describedby={control['aria-describedby']}
           className="flex flex-col gap-3"
         >
+          {/* The real file input is hidden from the keyboard and screen readers. The
+              buttons are the control, and clicking them opens the file picker. */}
           <input
             ref={input}
             id={id}
@@ -85,7 +93,8 @@ export function PhotoField({
             className="sr-only"
             onChange={(event) => {
               const file = event.target.files?.[0];
-              // Cleared, so picking the same file again still counts as a change.
+              // Clear the input, so choosing the same file again still counts as a
+              // change.
               event.target.value = '';
               if (file) onSelect(file);
             }}

@@ -1,8 +1,8 @@
-"""Deterministic conversions for imported drafts (FR-21).
+"""Converts units and temperatures in imported drafts to metric (FR-21).
 
-These live in code, not in the model's output: the model only reports what the
-source says (`source`), and this module turns it into metric. Cups and spoons are
-left alone.
+The conversion is done here in code, not by the AI model. The model only reports what
+the source says (`source`), and this module converts it to metric. Cups and spoons
+are not converted.
 """
 
 import math
@@ -23,18 +23,18 @@ _FACTORS: dict[SourceUnit, tuple[float, Unit]] = {
 
 
 def friendly_round(value: float) -> float:
-    """Round a converted metric amount (Adi's rule, Story 5.2).
-
-    From 10 up, to the nearest 5 (half rounds up). Below 10, to the nearest 0.1 and
-    never below 0.1, so a pinch of yeast stays 0.6 g instead of becoming 1 g or 0.
-    """
+    """Rounds a converted metric amount to a friendly number (Adi's rule, Story 5.2)."""
+    # From 10 and up: round to the nearest 5 (a half rounds up).
     if value >= 10:
         return float(math.floor(value / 5 + 0.5) * 5)
+    # Below 10: round to the nearest 0.1, but never below 0.1. So a little yeast
+    # stays 0.6 g instead of becoming 1 g or 0.
     return max(0.1, math.floor(value * 10 + 0.5) / 10)
 
 
 def convert_ingredient(ingredient: DraftIngredient) -> DraftIngredient:
-    """Fill amount and unit from `source` (oz, lb, fl oz); keep `source` too."""
+    """Fills the metric amount and unit from `source` (oz, lb, fl oz), and keeps
+    `source` too."""
     if ingredient.source is None:
         return ingredient
     factor, unit = _FACTORS[ingredient.source.unit]
@@ -46,6 +46,7 @@ def convert_ingredient(ingredient: DraftIngredient) -> DraftIngredient:
     )
 
 
+# Finds Fahrenheit temperatures written in any of these ways:
 # 350°F, 350 °F, 350ºF, 350-375°F, 350 degrees F, 350 מעלות פרנהייט, 350° פרנהייט.
 _FAHRENHEIT = re.compile(
     r"(?P<low>\d{2,3})"
@@ -56,13 +57,17 @@ _FAHRENHEIT = re.compile(
 
 
 def _to_celsius(fahrenheit: int) -> int:
-    """°C rounded to the nearest 5 (half rounds up): 350°F is 176.7°C, so 175°C."""
+    """Converts °F to °C, rounded to the nearest 5 (a half rounds up).
+
+    For example, 350°F is 176.7°C, which becomes 175°C.
+    """
     celsius = (fahrenheit - 32) * 5 / 9
     return int(math.floor(celsius / 5 + 0.5) * 5)
 
 
 def fahrenheit_to_celsius(text: str) -> str:
-    """Rewrite every °F temperature in a step as °C (rounding: see `_to_celsius`)."""
+    """Replaces every °F temperature in the text with °C (rounded, see
+    `_to_celsius`)."""
 
     def replace(match: re.Match[str]) -> str:
         low = _to_celsius(int(match["low"]))
@@ -74,7 +79,8 @@ def fahrenheit_to_celsius(text: str) -> str:
 
 
 def convert_step(step: DraftStep) -> DraftStep:
-    """Convert °F in a step, keeping the unconverted text as `source_text`."""
+    """Converts °F in a step to °C, and keeps the text before conversion in
+    `source_text`."""
     converted = fahrenheit_to_celsius(step.description)
     if converted == step.description:
         return step

@@ -9,37 +9,38 @@ export interface TagFilterOption {
 }
 
 export interface TagFilterProps {
-  /** Accessible name of the chip group. */
+  /** The accessible name of the chip group. */
   label: string;
-  /** Label of the chip that clears the tag selection. */
+  /** The text of the chip that clears the selected tags. */
   allLabel: string;
   options: readonly TagFilterOption[];
   selectedIds: readonly string[];
   onSelectedIdsChange: (ids: string[]) => void;
-  /** The independent "quick recipes" chip. */
+  /** The "quick recipes" chip. It works apart from the tags. */
   fast: {
     label: string;
     pressed: boolean;
     onPressedChange: (pressed: boolean) => void;
   };
   /**
-   * Every tag, pinned or not. On desktop the row shows them all (pinned first) and
-   * scrolls sideways. On a phone the whole row gives way to one button that opens a
+   * All the tags, pinned or not. On desktop the row shows all of them (pinned first)
+   * and scrolls sideways. On a phone the row is replaced by one button, which opens a
    * sheet with a checkbox for each tag and for the quick filter.
    */
   more?: {
     label: string;
     title: string;
     closeLabel: string;
-    /** Every tag, pinned or not. */
+    /** All the tags, pinned or not. */
     options: readonly TagFilterOption[];
   };
-  /** "הכל" on a phone: clears the tags and the quick chip in one step. */
+  /** "הכל" on a phone: clears the tags and the quick filter together. */
   onClearAll?: () => void;
   className?: string;
 }
 
-// Item values that are not tag ids; tag ids are UUIDs, so they cannot collide.
+// Values of chips that are not tags. Tag ids are UUIDs, so they can never be the
+// same as these.
 const ALL = 'all';
 const FAST = 'fast';
 
@@ -47,8 +48,8 @@ const CHIP =
   'bg-secondary text-secondary-foreground hover:bg-secondary/80 data-[state=on]:hover:bg-primary/80';
 
 /**
- * The library's chip row: "הכל" clears the tags, the other chips are
- * multi-select (UX-DR11). It scrolls sideways inside its own row.
+ * The library's chip row (UX-DR11). "הכל" clears the tags, and you can select many
+ * of the other chips. The row scrolls sideways.
  */
 export function TagFilter({
   label,

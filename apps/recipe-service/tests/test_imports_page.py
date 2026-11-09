@@ -1,4 +1,5 @@
-"""Reading a fetched page: JSON-LD first, readable text second, challenges refused."""
+"""Reading a downloaded page: JSON-LD first, then the readable text. Anti-bot pages
+are reported as errors."""
 
 import pytest
 
@@ -40,7 +41,7 @@ def test_a_json_ld_recipe_in_a_graph_is_used_first() -> None:
         "1. Dough:\n2. Cream the butter with the sugar.\n"
         "3. Add the flour and the chocolate.\n4. Bake for 12 minutes."
     ) in page.text
-    # The page's story and menu are not sent.
+    # The page's story and menu are not sent to the AI.
     assert "long story" not in page.text
 
 
@@ -114,7 +115,7 @@ def test_without_json_ld_the_readable_text_and_og_image_are_used() -> None:
     assert "מוסיפים עגבניות וביצים." in page.text
     for noise in ("הבלוג של דנה", "מתכונים נוספים", "כל הזכויות", "tracking"):
         assert noise not in page.text
-    # A relative og:image resolves against the page.
+    # A relative og:image becomes a full URL, based on the page URL.
     assert page.photo_url == "https://example.com/images/shakshuka.jpg"
 
 

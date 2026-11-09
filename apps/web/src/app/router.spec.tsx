@@ -38,7 +38,7 @@ describe('routes', () => {
         .getAttribute('href'),
     ).toBe('/');
     expect(document.title).toBe('ביס & סיר');
-    // The first load does not move focus.
+    // The first load does not move the focus.
     expect(document.activeElement).not.toBe(heading);
   });
 
@@ -85,7 +85,7 @@ describe('RouteError', () => {
   }
 
   it('renders a Hebrew message when a loader throws', async () => {
-    // The router logs the thrown error; keep the test output clean.
+    // The router logs the error. Hide it to keep the test output clean.
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
     renderApp('/', throwingRoutes(new Error('boom')));
     expect(

@@ -14,9 +14,8 @@ import { Button, ConfirmDialog, toast } from '@bite-and-board/ui-components';
 import { useErrorMessage } from '../shared/use-error-message';
 
 /**
- * "מחיקה" on the detail page and its confirmation (FR-10). Deleting leaves the page:
- * one step back when the visitor came from inside the app, so the library keeps its
- * filters, otherwise to the library. A recipe that is already gone counts as deleted.
+ * The "מחיקה" button on the recipe page, with its confirmation (FR-10). A recipe that
+ * was already deleted counts as deleted.
  */
 export function DeleteRecipe({
   recipe,
@@ -34,8 +33,11 @@ export function DeleteRecipe({
   const leave = async (message: string) => {
     toast.success(message);
     setOpen(false);
+    // Leave the page. If the user came from inside the app, go one step back, so the
+    // library keeps its filters. Otherwise go to the library.
     await (cameFromApp ? navigate(-1) : navigate('/', { replace: true }));
-    // Only now that the page is gone, so it does not refetch a recipe that is not there.
+    // Remove the recipe from the cache only now that the page is closed, so the page
+    // does not try to reload a recipe that no longer exists.
     queryClient.removeQueries({
       queryKey: recipesGetRecipeQueryKey({ path: { recipe_id: recipe.id } }),
     });

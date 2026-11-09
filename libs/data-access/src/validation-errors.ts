@@ -1,10 +1,10 @@
 import type { z } from 'zod';
 
 /**
- * One problem with one form field, in FastAPI's vocabulary (AD-9, AD-28): the
+ * One problem in one form field, using FastAPI's error names (AD-9, AD-28): the
  * `type` of the 422 error (`string_too_short`, `less_than_equal`, ...) and the
  * numbers its message needs. `path` is the React Hook Form field path
- * (`ingredients.0.name`), so the form's field names match the payload's.
+ * (`ingredients.0.name`), which matches the field names in the request body.
  */
 export interface FieldIssue {
   path: string;
@@ -25,8 +25,8 @@ function primitives(source: unknown): Params {
 }
 
 /**
- * The per-field problems of a 422 response (`detail[].loc/type/ctx`), or an
- * empty list for any other error. The leading `body` of `loc` is dropped.
+ * Returns the field problems of a 422 response (`detail[].loc/type/ctx`), or an
+ * empty list for any other error. The first `body` part of `loc` is removed.
  */
 export function getValidationIssues(error: unknown): FieldIssue[] {
   if (typeof error !== 'object' || error === null) return [];
@@ -45,14 +45,14 @@ export function getValidationIssues(error: unknown): FieldIssue[] {
   });
 }
 
-/** Whether this error is a 422 with field problems the form can show. */
+/** Checks whether this error is a 422 with field problems that the form can show. */
 export function isValidationError(error: unknown) {
   return getValidationIssues(error).length > 0;
 }
 
 /**
- * Zod issues in the same vocabulary, so a client-side check and the server's 422
- * share one set of Hebrew messages (AD-28).
+ * Converts Zod issues to the same format, so client checks and the server's 422
+ * use the same Hebrew messages (AD-28).
  */
 export function fromZodIssues(
   issues: readonly z.core.$ZodIssue[],

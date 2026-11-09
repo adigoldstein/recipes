@@ -7,7 +7,8 @@ test('a guest scales shakshuka from 4 to 10 servings', async ({ page }) => {
 
   const servings = page.getByLabel('מספר מנות');
   await expect(servings).toHaveValue('4');
-  // The ingredients come before the steps, which can name them too ("בצל ושום").
+  // Find the ingredient row. Steps can also mention ingredients ("בצל ושום"), but the
+  // ingredients come first.
   const ingredient = (name: string) =>
     page
       .getByRole('listitem')

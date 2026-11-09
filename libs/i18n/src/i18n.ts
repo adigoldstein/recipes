@@ -13,7 +13,7 @@ declare module 'i18next' {
   }
 }
 
-/** Starts i18next with the bundled Hebrew strings; safe to call more than once. */
+/** Starts i18next with the Hebrew texts. Calling it more than once is safe. */
 export function initI18n() {
   if (!i18next.isInitialized) {
     void i18next.use(initReactI18next).init({
@@ -21,9 +21,9 @@ export function initI18n() {
       fallbackLng: 'he',
       defaultNS,
       resources,
-      // Resources are bundled, so init finishes synchronously.
+      // The texts are part of the bundle, so init finishes right away (not async).
       initAsync: false,
-      // React escapes on render; escaping here would print `&amp;`.
+      // React already escapes text. Escaping here too would show `&amp;`.
       interpolation: { escapeValue: false },
     });
   }

@@ -1,13 +1,22 @@
 import { useState } from 'react';
 
 export interface StoredStateOptions<T> {
-  /** Where to keep the value: this device (`local`, default) or this tab (`session`). */
+  /**
+   * Where to keep the value: on this device (`local`, the default) or in this tab
+   * (`session`).
+   */
   storage?: 'local' | 'session';
-  /** Turns whatever JSON was stored into a `T`, or `undefined` if it is not valid. */
+  /** Turns the stored JSON into a `T`. Returns `undefined` if it is not valid. */
   parse?: (stored: unknown) => T | undefined;
-  /** Turns the value into JSON-safe data; the value itself by default. */
+  /**
+   * Turns the value into data that can be saved as JSON. By default, the value
+   * itself.
+   */
   serialize?: (value: T) => unknown;
-  /** A value that need not be stored; saving it removes the key. By default `=== fallback`. */
+  /**
+   * Checks if a value is the default. A default value is not stored, and saving it
+   * removes the key. By default `=== fallback`.
+   */
   isDefault?: (value: T) => boolean;
 }
 
@@ -16,10 +25,11 @@ function area(kind: 'local' | 'session') {
 }
 
 /**
- * State kept in the browser under `key`. A missing, unreadable or invalid stored
- * value gives `fallback`, and every storage failure (private mode, full disk) is
- * ignored: the state then just lasts for this page view. Saving a default value
- * clears the key. Mount with `key={...}` when `key` can change.
+ * A state that is saved in the browser under `key`.
+ *
+ * If the stored value is missing, cannot be read, or is invalid, it returns
+ * `fallback`. Storage errors (private mode, full disk) are ignored, and the value is
+ * then kept only until the page closes. Use it with `key={...}` if `key` can change.
  */
 export function useStoredState<T>(
   key: string,
@@ -46,7 +56,7 @@ export function useStoredState<T>(
       if (isDefault(next)) area(storage).removeItem(key);
       else area(storage).setItem(key, JSON.stringify(serialize(next)));
     } catch {
-      // Not saved; the value still holds for this page view.
+      // Not saved. The value is still kept until the page closes.
     }
   };
 

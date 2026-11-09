@@ -10,13 +10,13 @@ export interface SearchFieldProps extends Omit<
 > {
   value: string;
   onValueChange: (value: string) => void;
-  /** Accessible name of the field. */
+  /** The accessible name of the field. */
   label: string;
-  /** Accessible name of the clear (x) button. */
+  /** The accessible name of the clear (x) button. */
   clearLabel: string;
 }
 
-/** A pill search field with a clear button that appears once there is text. */
+/** A rounded search field, with a clear button that appears when there is text. */
 export function SearchField({
   value,
   onValueChange,

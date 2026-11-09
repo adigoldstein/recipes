@@ -5,22 +5,24 @@ import type { Role } from './generated/types.gen';
 import { roleAtLeast } from './session';
 
 /**
- * A route loader that guards a signed-in area, like a Nest `@Roles()` guard.
- * A visitor is sent to `/login?next=…`; a signed-in user without `role` gets a
- * 404, so an editor never learns that an admin screen exists. Without `role` any
- * signed-in user passes. It reads the session from the cache the page already
- * shares, so a guarded click costs no extra request after the first.
+ * A route loader that protects pages for logged-in users, like a Nest `@Roles()`
+ * guard. If `role` is not given, any logged-in user can enter.
  */
 export function requireRole(queryClient: QueryClient, role?: Role) {
   return async ({ request }: { request: Request }) => {
+    // Read the session from the shared cache, so only the first check sends a
+    // request.
     const { user } = await queryClient.ensureQueryData({
       ...authSessionOptions(),
       staleTime: Infinity,
     });
+    // A visitor is sent to the login page, and comes back here after logging in.
     if (!user) {
       const { pathname, search } = new URL(request.url);
       throw redirect(`/login?next=${encodeURIComponent(pathname + search)}`);
     }
+    // A user without the role gets 404, so an editor does not even learn that an
+    // admin page exists.
     if (role && !roleAtLeast(user.role, role)) {
       throw data(null, { status: 404 });
     }

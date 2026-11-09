@@ -1,4 +1,4 @@
-"""Pydantic request and response schemas for recipes."""
+"""The request and response shapes (Pydantic) of recipes."""
 
 import uuid
 from datetime import datetime
@@ -24,7 +24,8 @@ NOTES_MAX_LENGTH = 5000
 TITLE_MAX_LENGTH = 120
 MAX_SERVINGS = 100
 
-# AD-31: an exact Decimal inside, a plain JSON number on the wire.
+# An amount in a response: an exact Decimal in Python, a regular number in the JSON
+# (AD-31).
 Amount = Annotated[Decimal, PlainSerializer(float, return_type=float, when_used="json")]
 
 
@@ -32,8 +33,8 @@ def _quantize(value: Decimal) -> Decimal:
     return value.quantize(AMOUNT_QUANTUM)
 
 
-# A written amount is a positive number that fits NUMERIC(12, 3), stored exact to 3
-# decimals; null means "to taste" (AD-31). The client only ever sends a JSON number.
+# An amount in a request: a positive number that fits NUMERIC(12, 3), saved with 3
+# exact decimals. Null means "to taste" (AD-31). The client always sends a number.
 MAX_AMOUNT = 10**9
 WriteAmount = Annotated[
     Decimal,
@@ -47,7 +48,7 @@ WriteAmount = Annotated[
 
 
 class IngredientCreate(BaseModel):
-    """An ingredient in a recipe write; its position is its place in the list."""
+    """An ingredient sent when saving a recipe. Its order is its place in the list."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -58,7 +59,8 @@ class IngredientCreate(BaseModel):
 
 
 class IngredientUpdate(IngredientCreate):
-    """An ingredient in a recipe replace: with an `id` it is an existing one (AD-20)."""
+    """An ingredient sent when updating a recipe. If it has an `id`, it is an
+    existing ingredient (AD-20)."""
 
     id: uuid.UUID | None = None
 
@@ -70,7 +72,7 @@ class StepCreate(BaseModel):
 
 
 class _RecipeFields(BaseModel):
-    """What a recipe write shares; tags are ids or names (AD-25)."""
+    """The fields shared by create and update. Tags are ids or names (AD-25)."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -82,22 +84,24 @@ class _RecipeFields(BaseModel):
     cook_time_minutes: int | None = Field(default=None, ge=0)
     source_url: str | None = Field(default=None, max_length=2048)
     tags: list[TagInput] = Field(default_factory=list)
-    # The key of a photo uploaded with `POST /api/photos` (AD-27). On a create, none
-    # means no photo. On an update it has three states: left out keeps the photo,
-    # `null` removes it and a key sets it, so a client that knows nothing of photos
-    # cannot erase one.
+    # The key of a photo uploaded with `POST /api/photos` (AD-27).
+    # On create: no key means no photo.
+    # On update there are three options: not sent keeps the photo, `null` removes it,
+    # and a key replaces it. So a client that does not know about photos cannot
+    # delete one by mistake.
     photo_key: str | None = Field(default=None, pattern=PHOTO_KEY_PATTERN)
 
 
 class RecipeCreate(_RecipeFields):
-    """Everything needed to create a recipe."""
+    """All the data needed to create a recipe."""
 
     ingredients: list[IngredientCreate] = Field(min_length=1)
     steps: list[StepCreate] = Field(min_length=1)
 
 
 class RecipeUpdate(_RecipeFields):
-    """The whole recipe, replacing the saved one (AD-4); never carries originals."""
+    """The full recipe, which replaces the saved one (AD-4). It never includes the
+    original values."""
 
     ingredients: list[IngredientUpdate] = Field(min_length=1)
     steps: list[StepCreate] = Field(min_length=1)
@@ -106,7 +110,7 @@ class RecipeUpdate(_RecipeFields):
 class OriginalValue(BaseModel):
     """The ingredient's amount and unit before its first edit (FR-7).
 
-    Both fields null means it was originally "to taste".
+    If both fields are null, it was "to taste" before the edit.
     """
 
     amount: Amount | None
@@ -114,7 +118,7 @@ class OriginalValue(BaseModel):
 
 
 class SourceValue(BaseModel):
-    """An imperial value an import converted to metric (FR-21)."""
+    """The imperial value that an import converted to metric (FR-21)."""
 
     amount: Amount
     unit: SourceUnit

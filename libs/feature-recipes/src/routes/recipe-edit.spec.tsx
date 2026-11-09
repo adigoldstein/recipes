@@ -10,7 +10,7 @@ import { toast } from '@bite-and-board/ui-components';
 import { renderEdit } from '../testing/render-edit';
 import { server } from '../testing/server';
 
-// Real UUIDs: the write schema rejects any other id.
+// Real UUIDs, because the write schema rejects any other id.
 const TAG = '5d0f7f6e-1d6c-4a52-9a0c-0b1c3f5e0a01';
 const ING1 = '5d0f7f6e-1d6c-4a52-9a0c-0b1c3f5e0b01';
 const ING2 = '5d0f7f6e-1d6c-4a52-9a0c-0b1c3f5e0b02';
@@ -65,7 +65,7 @@ function serveRecipe(recipe: RecipeRead = SAVED) {
   server.use(http.get('*/api/recipes/:id', () => HttpResponse.json(recipe)));
 }
 
-/** Answers PUT /api/recipes/r1 with the recipe and returns what the page sent. */
+/** Answers PUT /api/recipes/r1 with the recipe. Returns what the page sent. */
 function serveUpdate() {
   const sent: unknown[] = [];
   server.use(
@@ -165,7 +165,7 @@ describe('RecipeEditPage', () => {
     expect(
       queryClient.getQueryState(recipesListRecipesQueryKey())?.isInvalidated,
     ).toBe(true);
-    // "Back" from the saved recipe does not return to the form.
+    // "Back" from the saved recipe does not go back to the form.
     expect(router.state.historyAction).toBe('REPLACE');
   });
 

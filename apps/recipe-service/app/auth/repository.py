@@ -1,1 +1,1 @@
-"""Database access for auth; used only by this module's service."""
+"""Database queries for auth. Only this module's service uses them."""

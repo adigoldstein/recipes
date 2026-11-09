@@ -6,8 +6,8 @@ import {
 } from './generated/@tanstack/react-query.gen';
 
 /**
- * The one place that decides which cached queries a write refreshes (AD-19).
- * Entries use the generated `*QueryKey()` helpers.
+ * The one place that decides which cached data to reload after a change (AD-19).
+ * It uses the generated `*QueryKey()` helpers.
  */
 export type Invalidator = (
   queryClient: QueryClient,
@@ -16,8 +16,8 @@ export type Invalidator = (
 
 export const invalidationMap = {
   /**
-   * A recipe write refreshes the library list, the tag list (a save can create tags),
-   * and, given its id, that recipe's page.
+   * After a recipe change, reload the library, the tag list (saving can create new
+   * tags), and the recipe's page if its id is given.
    */
   recipeWrite: (queryClient: QueryClient, recipeId?: string) =>
     Promise.all([
@@ -32,8 +32,8 @@ export const invalidationMap = {
         : undefined,
     ]),
   /**
-   * A tag write (add, rename, pin, delete) refreshes the tag list, the library list
-   * and every recipe page, since a rename or delete shows in all of them.
+   * After a tag change (add, rename, pin, delete), reload the tag list, the library
+   * and every recipe page, because a rename or delete shows in all of them.
    */
   tagWrite: (queryClient: QueryClient) =>
     Promise.all([

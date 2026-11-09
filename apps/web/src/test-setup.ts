@@ -1,6 +1,6 @@
 import { configure } from '@testing-library/react';
 
-// The first render loads the lazy page chunk, which is slow on a cold test run.
+// The first render loads a lazy page, which is slow on the first test run.
 configure({ asyncUtilTimeout: 5000 });
 
 type Listener = (event: MediaQueryListEvent) => void;
@@ -8,7 +8,7 @@ type Listener = (event: MediaQueryListEvent) => void;
 const listeners = new Set<Listener>();
 let systemDark = false;
 
-/** Sets the OS colour scheme jsdom reports, notifying live listeners. */
+/** Sets the OS dark/light mode that jsdom reports, and tells the listeners. */
 export function setSystemDark(dark: boolean) {
   systemDark = dark;
   for (const listener of listeners) {
@@ -16,7 +16,7 @@ export function setSystemDark(dark: boolean) {
   }
 }
 
-// jsdom has no matchMedia; this fake answers the dark-scheme query only.
+// jsdom has no matchMedia. This fake version answers only the dark mode query.
 window.matchMedia = (query: string) =>
   ({
     media: query,

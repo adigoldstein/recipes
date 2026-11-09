@@ -1,4 +1,5 @@
-"""SQLModel tables owned by recipes, and the items stored inside a recipe (AD-41)."""
+"""The database tables of the recipes module, and the items saved inside a recipe
+(AD-41)."""
 
 import uuid
 from datetime import datetime
@@ -18,8 +19,9 @@ def _quantize(value: Decimal) -> Decimal:
     return value.quantize(AMOUNT_QUANTUM)
 
 
-# AD-31 / AD-41: an exact `Decimal` in Python, a string with 3 decimals in the JSON
-# (`"250.000"`), because a JSON number would be a float.
+# An ingredient amount. In Python it is an exact `Decimal`. In the JSON column it is
+# saved as a string with 3 decimals (`"250.000"`), because a JSON number would become
+# an inexact float (AD-31, AD-41).
 StoredAmount = Annotated[
     Decimal,
     AfterValidator(_quantize),
@@ -28,11 +30,12 @@ StoredAmount = Annotated[
 
 
 class _Item(BaseModel):
-    """What the stored items share.
+    """The base class of the items saved inside a recipe.
 
-    Frozen on purpose: SQLAlchemy cannot see an item edited in place, so a change
-    must build a new item (`model_copy`) and assign a new list. Instances are checked
-    again on write, so a bad value never reaches the database.
+    The items cannot be changed (frozen) on purpose. SQLAlchemy does not notice a
+    change inside an item, so to change one, create a new item (`model_copy`) and
+    assign a new list. Items are validated again when saved, so bad data never
+    reaches the database.
     """
 
     model_config = ConfigDict(
@@ -41,14 +44,16 @@ class _Item(BaseModel):
 
 
 class OriginalItem(_Item):
-    """The amount and unit before the first edit (FR-7); both null is "to taste"."""
+    """The amount and unit before the first edit (FR-7). If both are null, the
+    original was "to taste"."""
 
     amount: StoredAmount | None
     unit: Unit | None
 
 
 class SourceItem(_Item):
-    """An imperial value an import converted to metric (FR-21), not the original."""
+    """The imperial value that an import converted to metric (FR-21). This is not
+    the same as the "original" value."""
 
     amount: StoredAmount
     unit: SourceUnit
@@ -60,8 +65,8 @@ class IngredientItem(_Item):
     note: str | None = None
     amount: StoredAmount | None = None
     unit: Unit | None = None
-    # `None` is no original; `OriginalItem(amount=None, unit=None)` is "originally to
-    # taste". There is no separate flag.
+    # `None` means the ingredient was never edited.
+    # `OriginalItem(amount=None, unit=None)` means it was "to taste" before the edit.
     original: OriginalItem | None = None
     source: SourceItem | None = None
 
@@ -69,7 +74,8 @@ class IngredientItem(_Item):
 class StepItem(_Item):
     id: uuid.UUID = PydanticField(default_factory=uuid.uuid4)
     description: str
-    # The pre-conversion text, set only when an import converted a temperature.
+    # The step text before conversion. Set only when an import converted a
+    # temperature.
     source_text: str | None = None
 
 
@@ -84,12 +90,13 @@ class Recipe(SQLModel, table=True):
     prep_time_minutes: int | None = None
     cook_time_minutes: int | None = None
     source_url: str | None = Field(default=None, max_length=2048)
-    # The stored photo's key (AD-27), set only by a recipe save; the files live behind
-    # `photos.service`. The credit domain is the source site of an imported photo.
+    # The key of the recipe's photo (AD-27). Only saving a recipe sets it. The files
+    # themselves are managed by `photos.service`.
     photo_key: str | None = Field(default=None, max_length=32)
+    # The site an imported photo came from, shown as the photo credit.
     photo_credit_domain: str | None = Field(default=None, max_length=255)
-    # String reference: recipes must not import the users module. A removed user
-    # leaves their recipes behind with no author.
+    # The foreign key is a string because recipes may not import the users module.
+    # When a user is deleted, their recipes stay, without an author.
     created_by: uuid.UUID | None = Field(
         default=None, foreign_key="user.id", ondelete="SET NULL"
     )
@@ -99,7 +106,7 @@ class Recipe(SQLModel, table=True):
     created_at: datetime = Field(default_factory=utcnow, sa_type=UtcDateTime)
     updated_at: datetime = Field(default_factory=utcnow, sa_type=UtcDateTime)
 
-    # Array order is display order (AD-41). Always assign a new list when changing them.
+    # The list order is the display order (AD-41). To change it, assign a new list.
     ingredients: list[IngredientItem] = Field(
         default_factory=list,
         sa_column=Column(

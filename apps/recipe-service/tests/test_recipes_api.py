@@ -37,7 +37,7 @@ def test_list_breaks_ties_by_id(client: TestClient, session: Session) -> None:
         add_recipe(session, title=f"מתכון {n}", created_at=at(1)) for n in range(4)
     ]
     ids = [item["id"] for item in client.get("/api/recipes").json()]
-    # SQLite stores UUIDs as 32 hex characters, so that is the order it sorts by.
+    # SQLite stores UUIDs as 32 hex characters, so it sorts them in that order.
     assert ids == [str(r.id) for r in sorted(recipes, key=lambda r: r.id.hex)]
 
 
@@ -135,7 +135,7 @@ def test_detail_returns_the_full_recipe(client: TestClient, session: Session) ->
     assert body["photo"] is None
     assert body["created_at"] == "2026-10-05T12:00:00Z"
     assert body["updated_at"] == "2026-10-06T12:00:00Z"
-    # Array order is display order (AD-41).
+    # The list order is the display order (AD-41).
     assert [item["name"] for item in body["ingredients"]] == ["שמן", "עגבניות"]
     assert [item["description"] for item in body["steps"]] == ["לבשל", "לחתוך"]
 
@@ -203,7 +203,8 @@ def test_original_is_null_unless_the_ingredient_was_edited(
     )
     cumin, pepper, salt = client.get(f"/api/recipes/{recipe.id}").json()["ingredients"]
     assert cumin["original"] == {"amount": 1.0, "unit": "tsp"}
-    # Originally "to taste": an original exists, and both of its parts are null.
+    # Was "to taste" before the edit: the original exists, and both its fields are
+    # null.
     assert pepper["original"] == {"amount": None, "unit": None}
     assert salt["original"] is None
 

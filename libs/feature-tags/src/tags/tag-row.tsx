@@ -12,7 +12,10 @@ import {
 import { useErrorMessage } from '../shared/use-error-message';
 import { useDeleteTag, useUpdateTag } from './use-tag-mutations';
 
-/** The name field: saves on Enter or when focus leaves, Escape puts the old name back. */
+/**
+ * The name field. Saves on Enter or when focus leaves. Escape brings back the old
+ * name.
+ */
 function NameField({ tag }: { tag: TagRead }) {
   const { t } = useTranslation();
   const errorMessage = useErrorMessage();
@@ -71,7 +74,10 @@ function NameField({ tag }: { tag: TagRead }) {
   );
 }
 
-/** The delete button and its confirm, which says how many recipes lose the tag. */
+/**
+ * The delete button and its confirmation, which says how many recipes will lose
+ * the tag.
+ */
 function DeleteTag({ tag }: { tag: TagRead }) {
   const { t } = useTranslation();
   const errorMessage = useErrorMessage();
@@ -121,13 +127,13 @@ function DeleteTag({ tag }: { tag: TagRead }) {
   );
 }
 
-/** One tag: rename in place, pin toggle, delete. */
+/** One tag row: rename, pin and delete. */
 export function TagRow({ tag }: { tag: TagRead }) {
   const { t } = useTranslation();
   const update = useUpdateTag();
   return (
     <li className="flex items-start gap-2 rounded-xl border bg-card p-3 text-card-foreground">
-      {/* Keyed by the saved name, so a refresh from the server resets the draft. */}
+      {/* The key is the saved name, so new data from the server resets the field. */}
       <NameField key={tag.name} tag={tag} />
       <Toggle
         variant="outline"

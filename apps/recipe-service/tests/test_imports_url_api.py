@@ -1,7 +1,7 @@
 """`POST /api/imports/url`: a recipe page becomes a Hebrew draft (Story 5.4).
 
-The fake provider goes with the fake page fetcher, so `fake://<fixture>` serves the
-saved pages in `app/imports/fetchers/fake_pages` and nothing touches the network.
+The fake AI provider comes with the fake page fetcher, so `fake://<fixture>` returns
+the saved pages in `app/imports/fetchers/fake_pages`, without using the network.
 """
 
 import pytest
@@ -71,7 +71,8 @@ def test_a_page_without_json_ld_goes_through_the_text_path(
     client: TestClient, editor: User, session: Session
 ) -> None:
     draft = run_import(client, "fake://no-json-ld").json()
-    # The fixture's og:image is relative, and a fake:// base cannot resolve it.
+    # The test page's og:image is relative, and it cannot become a full URL with a
+    # fake:// page address.
     assert draft["photo_source_url"] is None
     [run] = runs(session)
     assert (run.source_kind, run.path) == ("url", "llm")
@@ -118,7 +119,8 @@ def test_fetch_failures_have_stable_codes_and_are_not_logged(
     session: Session,
 ) -> None:
     response = run_import(client, url)
-    assert response.failed  # the fetch is a stage, so it fails inside the stream
+    # The download is a step in the stream, so it fails inside the stream.
+    assert response.failed
     assert response.json()["code"] == code
     assert runs(session) == []
 

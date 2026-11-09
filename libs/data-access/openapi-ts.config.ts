@@ -1,6 +1,6 @@
 import { defineConfig } from '@hey-api/openapi-ts';
 
-// Generated output is never hand-edited; `nx run data-access:generate` rewrites it.
+// Never edit the generated files by hand. `nx run data-access:generate` rewrites them.
 export default defineConfig({
   input: './openapi.json',
   output: { path: './src/generated', clean: true },

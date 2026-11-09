@@ -1,8 +1,8 @@
-"""The deterministic fake `PageFetcher`, for tests and CI, which never use the network.
+"""A fake `PageFetcher` for tests and CI, which never use the network.
 
-`fake://<fixture>` answers with `fake_pages/<fixture>.html`. Any other URL is still
-checked by the safe-fetch rules (so a private address is refused as in production),
-and then fails, because the fake has no network (AD-23).
+`fake://<fixture>` returns the file `fake_pages/<fixture>.html`. Any other URL is
+still checked by the safe-fetch rules (so a private address is blocked, like in
+production), and then fails, because the fake has no network (AD-23).
 """
 
 from pathlib import Path
@@ -19,7 +19,7 @@ from app.imports.fetchers.base import FetchedPage
 FAKE_SCHEME = "fake://"
 PAGES_DIR = Path(__file__).parent / "fake_pages"
 
-# Fixtures served with a status other than 200, as the real site would.
+# Test pages that return a status other than 200, like the real site would.
 _STATUS = {"cloudflare-challenge": 403, "forbidden": 403, "server-error": 500}
 
 

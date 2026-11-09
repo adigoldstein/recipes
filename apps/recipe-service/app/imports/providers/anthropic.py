@@ -1,7 +1,7 @@
-"""The Claude adapter: plain `httpx` against the Messages API, no SDK.
+"""The Claude provider: calls the Messages API with plain `httpx`, without the SDK.
 
-The draft is requested as a forced tool call whose input schema is `DraftRecipe`,
-so the reply arrives as a JSON object instead of free text.
+We force Claude to call a tool whose input schema is `DraftRecipe`, so the answer
+comes back as a JSON object and not as free text.
 """
 
 import asyncio
@@ -91,7 +91,8 @@ class AnthropicProvider:
         return _read_reply(response.json())
 
     async def _post(self, url: str, **kwargs: Any) -> httpx.Response:
-        """One call, bounded by the timeout; cancelling the caller drops the request."""
+        """Sends one request, with a time limit. If the caller is cancelled, the
+        request is cancelled too."""
         async with asyncio.timeout(self.timeout_seconds):
             if self._client is not None:
                 return await self._client.post(url, **kwargs)
@@ -103,8 +104,8 @@ def _raise_for_status(response: httpx.Response) -> None:
     status = response.status_code
     if status < 400:
         return
-    # Never log the request: it carries the key. The status and the API's own message
-    # are enough to tell an overload from a bad key or an exhausted quota.
+    # Never log the request, because it contains the API key. The status and the
+    # API's message are enough to tell an overload from a bad key or a used-up quota.
     logger.warning("Claude returned HTTP %s: %s", status, response.text[:300])
     if status == 429:
         raise LlmQuotaError("Claude quota exhausted", status)

@@ -26,19 +26,19 @@ export function recipe(
   };
 }
 
-/** Serves these recipes (newest first, as the API does) at GET /api/recipes. */
+/** Returns these recipes from GET /api/recipes (newest first, like the API). */
 export function serveRecipes(recipes: RecipeSummary[]) {
   server.use(http.get('*/api/recipes', () => HttpResponse.json(recipes)));
 }
 
-/** Serves these tags (pinned first, as the API does) at GET /api/tags. */
+/** Returns these tags from GET /api/tags (pinned first, like the API). */
 export function serveTags(tags: TagRead[]) {
   server.use(http.get('*/api/tags', () => HttpResponse.json(tags)));
 }
 
 /**
- * Renders the library at `path`, with a stub detail route to navigate to.
- * `tags` are served unless it is null (the test registers its own handler).
+ * Renders the library at `path`, with a fake recipe route to navigate to.
+ * `tags` are served, unless it is null (then the test adds its own handler).
  */
 export function renderLibrary(path = '/', tags: TagRead[] | null = []) {
   if (tags) serveTags(tags);

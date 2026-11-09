@@ -2,7 +2,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { E2E_AUTH_FILE } from './test-account';
 
-// Only the violations that block people (serious and critical) fail the build.
+// Only problems that block people (serious and critical) fail the test.
 async function expectNoBlockingViolations(page: Page) {
   const { violations } = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])

@@ -8,8 +8,8 @@ import {
 import type { Role } from '@bite-and-board/data-access';
 import { NotFound } from './not-found';
 
-// The guard is imported when it first runs, so the API client stays out of the
-// first load (AD-11); by the time someone opens a guarded page it is needed anyway.
+// Import the guard only when it first runs, so the API client is not part of the
+// first load (AD-11). A protected page needs the API client anyway.
 function guard(queryClient: QueryClient, role?: Role) {
   return async (args: LoaderFunctionArgs) => {
     const { requireRole } = await import('./session-api');
@@ -17,7 +17,7 @@ function guard(queryClient: QueryClient, role?: Role) {
   };
 }
 
-/** Shows the not-found page inside the shell; any other error goes up to the root. */
+/** Shows the not-found page inside the layout. Any other error goes up to the root. */
 function ProtectedError() {
   const error = useRouteError();
   if (isRouteErrorResponse(error) && error.status === 404) return <NotFound />;
@@ -25,9 +25,9 @@ function ProtectedError() {
 }
 
 /**
- * A group of pages for signed-in users (FR-16): visitors go to `/login?next=…`,
- * and with `role` set, anyone below it sees the not-found page. The routes are
- * only reachable after the guard runs, so their own loaders can trust the session.
+ * A group of pages for logged-in users (FR-16). Visitors are sent to
+ * `/login?next=…`. If `role` is set, users with a lower role see the not-found page.
+ * The pages open only after the guard runs, so their loaders can rely on the session.
  */
 export function protectedRoute(
   queryClient: QueryClient,

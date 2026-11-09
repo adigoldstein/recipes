@@ -79,7 +79,7 @@ describe('draftToFormValues', () => {
     });
     expect(values.photoPreview).toBe('https://cdn.example.com/a.jpg');
     expect(values.photoSourceUrl).toBe('https://cdn.example.com/a.jpg');
-    // Nothing is uploaded until the save.
+    // Nothing is uploaded until the recipe is saved.
     expect(values.photoKey).toBeUndefined();
   });
 

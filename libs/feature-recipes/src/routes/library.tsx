@@ -33,7 +33,7 @@ function isTypingTarget(target: EventTarget | null) {
   );
 }
 
-/** The recipe library at `/`: cards, search and tag filters (FR-1 to FR-3). */
+/** The recipe library at `/`: recipe cards, search and tag filters (FR-1 to FR-3). */
 export function LibraryPage() {
   const { t } = useTranslation();
   const errorMessage = useErrorMessage();
@@ -43,15 +43,16 @@ export function LibraryPage() {
 
   const recipes = useQuery(recipesListRecipesOptions());
   const tags = useQuery(tagsListTagsOptions());
-  // Without tags (still loading, or failed) the library works as a plain list.
+  // If the tags did not load (still loading, or failed), the library is a plain list.
   const knownTagIds = new Set(tags.data?.map((tag) => tag.id));
   const pinnedTags = (tags.data ?? []).filter((tag) => tag.pinned);
   const { filters, update, clear } = useLibraryFilters(knownTagIds);
   const query = useDeferredValue(filters.query);
-  // On a phone one button holds the tags and the quick chip; it counts both.
+  // On a phone, one button holds the tags and the quick filter, so count both.
   const activeCount = filters.tagIds.length + (filters.fastOnly ? 1 : 0);
 
-  // "/" jumps to the search field, unless the user is already typing somewhere.
+  // Pressing "/" moves to the search field, unless the user is already typing
+  // somewhere.
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (
@@ -71,7 +72,8 @@ export function LibraryPage() {
   }, []);
 
   const renderBody = () => {
-    // Waiting for the tags too, so a tag filter in the URL never flashes the full list.
+    // Wait for the tags too, so a tag filter in the URL does not show the full list
+    // for a moment.
     if (recipes.isPending || tags.isPending) {
       return (
         <div role="status" aria-label={t('library.loading')} className={GRID}>

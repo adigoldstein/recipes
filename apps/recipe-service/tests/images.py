@@ -1,4 +1,5 @@
-"""Pictures made in memory for the photo tests, so no binary fixtures are checked in."""
+"""Creates pictures in memory for the photo tests, so we do not need to commit image
+files."""
 
 import os
 from io import BytesIO
@@ -29,7 +30,7 @@ def png(width: int = 80, height: int = 60, *, alpha: bool = False) -> bytes:
 
 
 def noisy_png(width: int = 100, height: int = 100) -> bytes:
-    """A picture that does not compress, so its file is big for its size."""
+    """A picture of random noise. It does not compress, so the file is large."""
     noise = Image.frombytes("RGB", (width, height), os.urandom(width * height * 3))
     return encode(noise, "PNG")
 
@@ -39,7 +40,8 @@ def webp(width: int = 80, height: int = 60) -> bytes:
 
 
 def exif_with(orientation: int | None = None, *, gps: bool = False) -> Image.Exif:
-    """An EXIF block: a camera make, an orientation and, if asked, a GPS position."""
+    """Creates EXIF data: a camera make, an orientation and, if asked, a GPS
+    location."""
     exif = Image.Exif()
     exif[MAKE] = "TestCam"
     if orientation is not None:

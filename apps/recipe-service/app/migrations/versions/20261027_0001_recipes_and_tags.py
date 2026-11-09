@@ -16,8 +16,8 @@ down_revision: str | None = None
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
-# Fixed ids, written out here on purpose: later code and data may refer to them.
-# The order here is the display order of the pinned quick-filter chips.
+# The default pinned tags. Their ids are fixed on purpose, because later code and
+# data may use them. The order here is the order of the quick filter chips on screen.
 DEFAULT_PINNED_TAGS = (
     ("64e93de0-47ad-4b2a-b757-d0c2405d8126", "בוקר"),
     ("8bbb49dd-fd17-4cc9-81ce-c4ad66596822", "בראנץ'"),
@@ -60,7 +60,7 @@ def upgrade() -> None:
         sa.Column("sort_order", sa.Integer(), nullable=True),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_tag")),
     )
-    # lower(name) makes tag names unique case-insensitively (AD-7).
+    # Tag names must be unique, ignoring upper and lower case (AD-7).
     op.create_index("uq_tag_lower_name", "tag", [sa.text("lower(name)")], unique=True)
     op.bulk_insert(
         sa.table(

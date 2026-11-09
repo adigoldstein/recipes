@@ -1,7 +1,7 @@
-/** "עד 30 דקות": the quick-recipe cutoff in minutes (inclusive). */
+/** "עד 30 דקות": the maximum minutes of a quick recipe (30 itself counts). */
 export const FAST_MINUTES = 30;
 
-/** The fields the library filter reads; the API summary satisfies it structurally. */
+/** The fields the library filter uses. The API's recipe summary has all of them. */
 export interface FilterableRecipe {
   title: string;
   tags: readonly { id: string }[];
@@ -9,17 +9,17 @@ export interface FilterableRecipe {
 }
 
 export interface RecipeFilter {
-  /** Case-insensitive substring of the title; blank matches everything. */
+  /** Text to find in the title, ignoring case. Empty text matches every recipe. */
   query: string;
-  /** A recipe must have every one of these tags (AND). */
+  /** A recipe must have all of these tags (AND). */
   tagIds: readonly string[];
-  /** Keep only recipes whose total time is known and at most FAST_MINUTES. */
+  /** Keep only recipes with a known total time of FAST_MINUTES or less. */
   fastOnly: boolean;
 }
 
 /**
- * The library filter (AD-26): search, tags and the quick chip combine with AND.
- * Pure, and keeps the input order.
+ * Filters the library (AD-26). A recipe must match the search, the tags and the
+ * quick filter (AND). It keeps the original order and changes nothing else.
  */
 export function filterRecipes<T extends FilterableRecipe>(
   recipes: readonly T[],

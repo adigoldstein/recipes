@@ -170,7 +170,8 @@ def test_new_tags_are_not_pinned_by_default(session: Session) -> None:
 
 def test_models_and_migrations_agree(connection: Connection) -> None:
     with warnings.catch_warnings():
-        # Alembic cannot reflect SQLite expression indexes, so it skips (and says so).
+        # Alembic cannot read SQLite indexes on expressions, so it skips them with a
+        # warning.
         warnings.filterwarnings("ignore", message=".*expression-based index.*")
         diff = compare_metadata(
             MigrationContext.configure(connection, opts={"compare_type": True}),
@@ -305,7 +306,8 @@ def _insert_recipe_with_children(connection: Connection) -> None:
 def test_upgrading_keeps_recipes_and_all_their_children(
     connection: Connection,
 ) -> None:
-    """Rebuilding `recipe` for its new foreign keys must not cascade-delete rows."""
+    """Rebuilding the `recipe` table for its new foreign keys must not delete the
+    child rows."""
     config = _alembic_config(connection)
     command.downgrade(config, "0001")
     connection.commit()
@@ -380,7 +382,8 @@ def test_upgrading_keeps_users_and_starts_them_at_session_version_0(
 def test_the_case_insensitive_email_index_survives_both_directions(
     connection: Connection,
 ) -> None:
-    """Rebuilding `user` through reflection would silently lose this index."""
+    """Rebuilding the `user` table in batch mode would lose this index without a
+    warning."""
     config = _alembic_config(connection)
     index = text(
         "SELECT count(*) FROM sqlite_master WHERE name = 'uq_user_lower_email'"

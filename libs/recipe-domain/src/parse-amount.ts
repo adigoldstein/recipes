@@ -14,14 +14,15 @@ const DECIMAL = /^(\d+[.,]\d+|\d+|[.,]\d+)$/;
 const VULGAR = /^(\d+)?\s*([¼½¾⅓⅔⅛⅜⅝⅞])$/;
 const FRACTION = /^(?:(\d+)\s+)?(\d+)\s*\/\s*(\d+)$/;
 
-/** The server stores 3 decimals, so 1/3 is 0.333 on both sides. */
+/** Rounds to 3 decimals, like the server, so 1/3 is 0.333 on both sides. */
 const round = (value: number) => Math.round(value * 1000) / 1000;
 
 /**
- * The number in what a cook typed as an amount (FR-4): "1.5", "1,5", "½", "⅓",
- * "1 ½", "1/3" and "1 1/2". Null when the text is none of those, or has a zero
- * denominator. A zero amount does parse; the write schema rejects it with its own
- * message. Blank text is the caller's to handle (it means "to taste").
+ * Reads the number from a typed amount (FR-4): "1.5", "1,5", "½", "⅓", "1 ½", "1/3"
+ * and "1 1/2". Returns null if the text is none of these, or divides by zero.
+ *
+ * Zero is read as 0; the write schema rejects it with its own message. Empty text is
+ * handled by the caller (it means "to taste").
  */
 export function parseAmount(text: string): number | null {
   const value = text.trim();

@@ -17,7 +17,7 @@ import { TagRow } from '../tags/tag-row';
 
 const SKELETON_COUNT = 4;
 
-/** The editor's Tags screen at `/tags` (FR23): add, rename, pin and delete tags. */
+/** The editor's tags page at `/tags` (FR23): add, rename, pin and delete tags. */
 export function TagsPage() {
   const { t } = useTranslation();
   const errorMessage = useErrorMessage();
@@ -53,7 +53,7 @@ export function TagsPage() {
     if (tags.data.length === 0) {
       return <EmptyState title={t('tags.empty')} />;
     }
-    // The server sends them pinned first, in the order of the chip row (UX-DR18).
+    // The server sends the pinned tags first, in the order of the chip row (UX-DR18).
     return (
       <ul aria-label={t('tags.list')} className="grid gap-3">
         {tags.data.map((tag) => (

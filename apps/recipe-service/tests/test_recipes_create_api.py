@@ -83,7 +83,8 @@ def test_an_admin_can_create(client: TestClient, session: Session) -> None:
 
 
 def test_the_role_guard_answers_before_validation(client: TestClient) -> None:
-    # A visitor learns nothing about the schema from the errors.
+    # The role check runs first, so a visitor learns nothing about the schema from
+    # validation errors.
     assert client.post(RECIPES, json={}).status_code == 401
 
 

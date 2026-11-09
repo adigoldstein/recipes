@@ -1,4 +1,4 @@
-"""The import progress stream (Story 5.6, AD-40): event order, errors, cancel."""
+"""The import progress stream (Story 5.6, AD-40): event order, errors, and cancel."""
 
 import asyncio
 import time
@@ -194,7 +194,8 @@ def test_closing_the_stream_early_cancels_the_work_too(
     asyncio.run(consume())
     assert time.perf_counter() - started < 5
     outcomes = [run.outcome for run in runs(session)]
-    # Stopped before the engine call began: nothing to log; after: `cancelled`.
+    # If it stopped before the AI call started, nothing is saved. If it stopped
+    # after, the import is saved as `cancelled`.
     assert outcomes in ([], ["cancelled"])
 
 

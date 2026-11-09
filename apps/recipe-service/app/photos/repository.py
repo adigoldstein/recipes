@@ -1,1 +1,1 @@
-"""Database access for photos; used only by this module's service."""
+"""Database queries for photos. Only this module's service uses them."""

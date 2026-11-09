@@ -1,1 +1,1 @@
-"""SQLModel tables owned by photos."""
+"""The database tables of the photos module."""

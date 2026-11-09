@@ -12,7 +12,7 @@ const server = setupServer(
 );
 
 beforeAll(() => {
-  // Node's fetch rejects the client's relative `/api` URLs.
+  // Node's fetch does not accept relative URLs like `/api`, so set a full base URL.
   client.setConfig({ baseUrl: window.location.origin });
   server.listen({ onUnhandledFrame: 'error' });
 });
@@ -68,7 +68,7 @@ describe('the top bar account slot', () => {
       await screen.findByRole('heading', { level: 1, name: 'כניסה' }),
     ).toBeTruthy();
     expect(screen.getByLabelText(/^אימייל( \*)?$/)).toBeTruthy();
-    // The page has its own sign-in form, so the bar does not offer a second way in.
+    // The page already has a login form, so the top bar does not show a login link.
     expect(
       within(await screen.findByRole('banner')).queryByRole('link', {
         name: 'כניסה',

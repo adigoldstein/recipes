@@ -287,7 +287,7 @@ describe('RecipeDetailPage', () => {
     );
     expect(screen.getByText('במקור: לפי הטעם')).toBeTruthy();
     expect(screen.getByText('במקור 2')).toBeTruthy();
-    // The hint is separate from the converted-values toggle.
+    // The hint is not the same as the "show original recipe" toggle.
     expect(
       screen.queryByRole('button', { name: 'הצג מתכון מקורי' }),
     ).toBeNull();
@@ -412,7 +412,7 @@ describe('RecipeDetailPage', () => {
       expect(
         screen.getByRole('checkbox', { name: '5 כוסות קמח' }),
       ).toBeTruthy();
-      // 1 × 10/4 = 2.5, a countable unit in halves
+      // 1 × 10/4 = 2.5. Counted units are rounded to halves.
       expect(
         screen.getByRole('checkbox', { name: '2.5 שיניים שום' }),
       ).toBeTruthy();

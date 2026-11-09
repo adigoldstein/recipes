@@ -8,7 +8,7 @@ describe('RecipePhoto', () => {
     expect(photo.getAttribute('src')).toBe('/media/photos/a.webp');
     expect(photo.getAttribute('width')).toBe('1600');
     expect(photo.getAttribute('height')).toBe('1200');
-    // The page's top image is not lazy-loaded.
+    // The image at the top of the page is not lazy loaded.
     expect(photo.getAttribute('loading')).toBeNull();
     expect(photo.getAttribute('fetchpriority')).toBe('high');
     expect(photo.className).toContain('aspect-4/3');

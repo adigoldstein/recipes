@@ -11,7 +11,8 @@ function uv(args: string[], cwd: string) {
     encoding: 'utf-8',
     env: { ...process.env, PYTHONUTF8: '1' },
   });
-  // A missing uv must fail loudly, not pass every "exits non-zero" check.
+  // If uv is missing, fail with an error. Otherwise every "exits with an error"
+  // check would pass by mistake.
   if (result.error) throw result.error;
   return { status: result.status, output: result.stdout + result.stderr };
 }
@@ -19,7 +20,7 @@ function uv(args: string[], cwd: string) {
 let workdir: string;
 
 beforeEach(() => {
-  // A scratch copy of the real `app` package, so fixtures never touch the source.
+  // A temporary copy of the real `app` package, so the tests never change the source.
   workdir = mkdtempSync(join(tmpdir(), 'lint-checks-'));
   cpSync(join(SERVICE, 'app'), join(workdir, 'app'), {
     recursive: true,

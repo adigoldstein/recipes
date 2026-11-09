@@ -4,7 +4,7 @@ export default [
   ...baseConfig,
   {
     files: ['src/**/*.spec.ts'],
-    // The specs hold forbidden classes and colours as fixture strings on purpose.
+    // The tests contain forbidden classes and colors as test strings, on purpose.
     rules: {
       'no-restricted-syntax': 'off',
       'better-tailwindcss/no-restricted-classes': 'off',

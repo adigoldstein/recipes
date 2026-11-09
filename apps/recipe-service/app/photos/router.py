@@ -29,7 +29,8 @@ def get_limits(service: ServiceDep, _: EditorDep) -> PhotoLimits:
     },
 )
 def upload_photo(file: UploadFile, service: ServiceDep, _: EditorDep) -> PhotoUploaded:
-    # One byte past the limit is enough to know the file is too big.
+    # Read at most one byte more than the limit. That is enough to know the file is
+    # too big, without reading all of it.
     data = file.file.read(service.limits().max_bytes + 1)
     return PhotoUploaded(photo_key=service.store(data))
 
@@ -49,5 +50,6 @@ def upload_photo(file: UploadFile, service: ServiceDep, _: EditorDep) -> PhotoUp
 def upload_photo_from_url(
     data: PhotoFromUrl, service: ServiceDep, _: EditorDep
 ) -> PhotoUploaded:
-    """Download a photo from a link (an imported recipe's) and store it unattached."""
+    """Downloads a photo from a link (for example, of an imported recipe) and saves
+    it. No recipe uses it yet."""
     return PhotoUploaded(photo_key=service.store_from_url(data.source_url))

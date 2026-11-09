@@ -1,10 +1,10 @@
-/** The library's filter state, as it lives in the URL (AD-8, AD-26). */
+/** The library's filters, as they are kept in the URL (AD-8, AD-26). */
 export interface LibraryFilters {
   /** `?q=`: the title search text. */
   query: string;
-  /** `?tags=<uuid>,<uuid>`: tag ids in URL order, without duplicates. */
+  /** `?tags=<uuid>,<uuid>`: tag ids in the URL's order, without duplicates. */
   tagIds: string[];
-  /** `?fast=1`: only recipes of at most 30 minutes. */
+  /** `?fast=1`: only recipes that take 30 minutes or less. */
   fastOnly: boolean;
 }
 
@@ -12,7 +12,7 @@ export const QUERY_PARAM = 'q';
 export const TAGS_PARAM = 'tags';
 export const FAST_PARAM = 'fast';
 
-/** Reads the filters from the URL; tag ids are not checked against real tags here. */
+/** Reads the filters from the URL. It does not check that the tag ids exist. */
 export function parseLibraryFilters(params: URLSearchParams): LibraryFilters {
   const tagIds = (params.get(TAGS_PARAM) ?? '').split(',').filter(Boolean);
   return {
@@ -24,7 +24,7 @@ export function parseLibraryFilters(params: URLSearchParams): LibraryFilters {
 
 /**
  * Returns a copy of `params` with the given filters changed. Empty values are
- * removed, so a cleared library has a clean URL, and other params are kept.
+ * removed, so a library without filters has a clean URL. Other params are kept.
  */
 export function withLibraryFilters(
   params: URLSearchParams,

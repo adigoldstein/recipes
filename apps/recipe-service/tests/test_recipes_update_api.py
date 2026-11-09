@@ -48,7 +48,7 @@ def saved(session: Session) -> Recipe:
 
 
 def body(recipe: dict[str, Any], **changes: Any) -> dict[str, Any]:
-    """The PUT body that re-sends a read recipe unchanged, then applies `changes`."""
+    """Builds a PUT body from a recipe read from the API, then applies `changes`."""
     base = {
         "title": recipe["title"],
         "description": recipe["description"],
@@ -284,7 +284,7 @@ def test_new_ingredients_never_get_an_original(
     payload["ingredients"].append({"name": "פפריקה", "amount": 1, "unit": "tsp"})
     added = client.put(url(saved.id), json=payload).json()["ingredients"][3]
     assert added["original"] is None
-    # Editing it afterwards is an edit of an existing ingredient and does store one.
+    # Editing it later is an edit of an existing ingredient, so an original is saved.
     again = body(current(client, saved))
     again["ingredients"][3]["amount"] = 5
     edited = client.put(url(saved.id), json=again).json()["ingredients"][3]

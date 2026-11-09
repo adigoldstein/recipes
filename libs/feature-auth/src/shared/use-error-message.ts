@@ -2,12 +2,15 @@ import type { ParseKeys } from 'i18next';
 import { useTranslation } from 'react-i18next';
 import { getErrorCode } from '@bite-and-board/data-access';
 
-/** An API error as Hebrew copy (AD-28): `errors.<code>`, or the generic message. */
+/**
+ * Turns an API error into a Hebrew message (AD-28): `errors.<code>`, or a general
+ * message.
+ */
 export function useErrorMessage() {
   const { t, i18n } = useTranslation();
   return (error: unknown) => {
     const code = getErrorCode(error);
-    // The code comes from the server, so the key is checked at runtime.
+    // The code comes from the server, so we check that the key exists at runtime.
     const key = code ? (`errors.${code}` as ParseKeys) : undefined;
     const message: string =
       key && i18n.exists(key) ? t(key) : t('errors.unknown');

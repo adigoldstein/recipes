@@ -40,7 +40,10 @@ const MAX_SERVINGS = 100;
 
 const TAG = 'rounded-full bg-secondary px-3 py-1 text-label';
 
-/** The hostname of a recipe's source link, or undefined if it is not a web URL. */
+/**
+ * Returns the host name of a recipe's source link, or undefined if it is not a web
+ * URL.
+ */
 function webHost(url: string) {
   try {
     const parsed = new URL(url);
@@ -52,7 +55,7 @@ function webHost(url: string) {
   }
 }
 
-/** The recipe at `/recipes/:id`: ingredient board, steps and cooking aids (FR-5). */
+/** The recipe page at `/recipes/:id`: ingredients, steps and cooking helpers (FR-5). */
 export function RecipeDetailPage() {
   const { t } = useTranslation();
   const errorMessage = useErrorMessage();
@@ -90,21 +93,22 @@ export function RecipeDetailPage() {
       />
     );
   }
-  // Keyed by id so a different recipe starts with its own ticks and toggle.
+  // The key is the id, so another recipe starts with its own checks and toggle.
   return <RecipeDetail key={recipe.data.id} recipe={recipe.data} />;
 }
 
 function RecipeDetail({ recipe }: { recipe: RecipeRead }) {
   const { t } = useTranslation();
   const formatTime = useFormatTime();
-  // Arriving by navigating inside the app means going back lands on the library
-  // with its filters.
+  // If the user came from inside the app, "back" returns to the library with its
+  // filters.
   const { cameFromApp, onBack } = useBackNavigation();
   const title = useRef<HTMLHeadingElement>(null);
   const canEdit = useCan('editor');
   const checks = useCookingChecks(recipe.id);
   const [showOriginal, setShowOriginal] = useState(false);
-  // View-only: kept for this tab's session, never saved to the recipe.
+  // Only changes the view. It is remembered on this device, never saved to the
+  // recipe.
   const [servings, setServings] = useServings(
     recipe.id,
     recipe.base_servings,
@@ -112,14 +116,15 @@ function RecipeDetail({ recipe }: { recipe: RecipeRead }) {
     MAX_SERVINGS,
   );
 
-  // The app shell moves focus to the h1 on navigation, but the recipe loads after
-  // that, so the title takes focus itself once it exists (not on a first load).
+  // The app layout moves focus to the h1 on navigation, but the recipe loads after
+  // that. So the title takes the focus itself when it appears (not on a first load).
   useEffect(() => {
     if (cameFromApp) title.current?.focus();
   }, [cameFromApp]);
 
-  // Hebrew has a singular only for exactly 1 ("1 כוס", "2 כוסות", "0.5 כוסות");
-  // i18next would also look for `_two` and `_many` forms, which we do not write.
+  // In Hebrew the singular is used only for exactly 1 ("1 כוס", "2 כוסות",
+  // "0.5 כוסות"). We pass count 0 for "not 1", because i18next would otherwise
+  // look for `_two` and `_many` forms, which we do not have.
   const unitLabel = (unit: Unit | null, amount: number) =>
     unit
       ? t(`units.${unit}` as ParseKeys, { count: amount === 1 ? 1 : 0 })

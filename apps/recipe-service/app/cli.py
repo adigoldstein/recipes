@@ -1,4 +1,4 @@
-"""Command line entry point: `python -m app.cli seed|create-admin` (AD-24, AD-30)."""
+"""The command line tool: `python -m app.cli seed|create-admin` (AD-24, AD-30)."""
 
 import argparse
 import sys
@@ -38,7 +38,10 @@ def _fail(message: str) -> int:
 
 
 def _ask_password() -> str | None:
-    """Read the password twice without echo. It never touches argv, env or output."""
+    """Asks for the password twice, without showing it on screen.
+
+    The password is never passed as an argument, an env var, or printed.
+    """
     password = getpass("Password: ")
     if getpass("Repeat password: ") != password:
         return None
@@ -46,7 +49,10 @@ def _ask_password() -> str | None:
 
 
 def _read_password_from_stdin() -> str | None:
-    """One line from stdin, for scripts (CI, the e2e setup). Never from argv or env."""
+    """Reads the password as one line from stdin, for scripts (CI, the e2e setup).
+
+    It is never read from arguments or env vars.
+    """
     line = sys.stdin.readline()
     if not line:
         return None
@@ -63,7 +69,7 @@ def _create_admin(
         try:
             new_user = UserCreate(email=email, name=name, role=Role.ADMIN)
         except ValidationError as error:
-            # Messages only: the raw input is never echoed back.
+            # Print only the error messages, never the input itself.
             problems = "; ".join(
                 f"{'.'.join(str(part) for part in item['loc'])}: {item['msg']}"
                 for item in error.errors(include_input=False, include_url=False)

@@ -1,4 +1,4 @@
-"""Business rules for recipes; other modules call this layer, never the repository."""
+"""The business logic of recipes. Other modules call this layer, not the repository."""
 
 import uuid
 from collections.abc import Sequence
@@ -29,7 +29,8 @@ from app.tags.service import TagService, get_tag_service
 
 
 def total_minutes(prep: int | None, cook: int | None) -> int | None:
-    """Prep plus cook; a missing one counts as 0, and none known means unknown."""
+    """Returns prep time plus cook time. A missing time counts as 0. If both are
+    missing, returns None."""
     if prep is None and cook is None:
         return None
     return (prep or 0) + (cook or 0)
@@ -92,10 +93,10 @@ class RecipeService:
         *,
         photo_credit_domain: str | None = None,
     ) -> RecipeRead:
-        """Create a recipe, its ingredients, steps and tags in one transaction.
+        """Creates a recipe with its ingredients, steps and tags, in one transaction.
 
-        `user_id` is the author; the seed has none. `photo_credit_domain` names the
-        site an imported or sample photo came from.
+        `user_id` is the author (the seed has none). `photo_credit_domain` is the site
+        that an imported or sample photo came from.
         """
         try:
             recipe = self._stage(data, user_id, photo_credit_domain)
@@ -106,7 +107,8 @@ class RecipeService:
         return self.get_recipe(recipe.id)
 
     def create_recipes(self, items: Sequence[RecipeCreate]) -> int:
-        """Create several recipes with no author in one transaction: all or none."""
+        """Creates seed recipes without an author, in one transaction. Either all
+        are saved, or none."""
         try:
             for data in items:
                 self._stage(data, None, None)
@@ -122,7 +124,8 @@ class RecipeService:
         user_id: uuid.UUID | None,
         photo_credit_domain: str | None,
     ) -> Recipe:
-        """Add the recipe and link its tags (new names become tags); never commits."""
+        """Adds the recipe and links its tags (new names become new tags). Does not
+        commit."""
         if data.photo_key is not None:
             self._photos.require(data.photo_key)
         recipe = Recipe(
@@ -159,16 +162,16 @@ class RecipeService:
         data: RecipeUpdate,
         user_id: uuid.UUID | None = None,
     ) -> RecipeRead:
-        """Replace the whole recipe in one transaction (AD-4, AD-20).
+        """Replaces the whole recipe, in one transaction (AD-4, AD-20).
 
-        Ingredients are matched by `id` and keep their originals; omitted ones are
-        dropped and ones without an `id` are added.
-        `user_id` is the editor; the seed has none.
+        Ingredients that are not sent are deleted. `user_id` is the editor (the seed
+        has none).
         """
         recipe = self._repository.get(recipe_id)
         if recipe is None:
             raise AppError(404, ErrorCode.RECIPE_NOT_FOUND, "Recipe not found")
         existing = {item.id: item for item in recipe.ingredients}
+        # Every sent ingredient `id` must belong to this recipe.
         unknown = [
             index
             for index, item in enumerate(data.ingredients)
@@ -200,6 +203,8 @@ class RecipeService:
 
         ingredients: list[IngredientItem] = []
         for item in data.ingredients:
+            # No `id` means a new ingredient. With an `id`, update the existing one
+            # and keep its original value.
             if item.id is None:
                 ingredient = IngredientItem(
                     name=item.name,
@@ -213,7 +218,8 @@ class RecipeService:
                     update={"name": item.name, "note": item.note}
                 )
             ingredients.append(ingredient)
-        # New lists, never edits in place: SQLAlchemy does not see those (AD-41).
+        # Assign new lists instead of changing the old ones, because SQLAlchemy does
+        # not notice changes inside a list (AD-41).
         recipe.ingredients = ingredients
         recipe.steps = [StepItem(description=item.description) for item in data.steps]
         try:
@@ -228,7 +234,8 @@ class RecipeService:
         return self.get_recipe(recipe.id)
 
     def _change_photo(self, recipe: Recipe, data: RecipeUpdate) -> str | None:
-        """Apply the update's photo key; return the key whose files are now unused."""
+        """Updates the recipe's photo key. Returns the old key if its photo is no
+        longer used."""
         if (
             "photo_key" not in data.model_fields_set
             or data.photo_key == recipe.photo_key
@@ -244,7 +251,8 @@ class RecipeService:
         return previous
 
     def delete_recipe(self, recipe_id: uuid.UUID) -> None:
-        """Delete the recipe with its tag links (FR-10); its items go with the row."""
+        """Deletes the recipe and its tag links (FR-10). Its ingredients and steps are
+        in the same row, so they are deleted too."""
         recipe = self._repository.get(recipe_id)
         if recipe is None:
             raise AppError(404, ErrorCode.RECIPE_NOT_FOUND, "Recipe not found")
@@ -289,7 +297,8 @@ class RecipeService:
 
 
 def sweep_unattached_photos(session: Session) -> int:
-    """Delete uploaded photos no recipe holds that are over a day old (AD-27)."""
+    """Deletes uploaded photos that no recipe uses and that are over a day old
+    (AD-27)."""
     return get_photo_service().sweep(RecipeRepository(session).photo_keys())
 
 
@@ -298,15 +307,16 @@ def get_recipe_service(
     tags: Annotated[TagService, Depends(get_tag_service)],
     photos: Annotated[PhotoService, Depends(get_photo_service)],
 ) -> RecipeService:
-    """Provider, like a Nest injectable: `Depends(get_recipe_service)`."""
+    """Creates the recipe service for a route, like a Nest provider:
+    `Depends(get_recipe_service)`."""
     return RecipeService(RecipeRepository(session), tags, photos)
 
 
 def _web_host(url: str | None) -> str | None:
-    """The site a recipe came from, credited on its photo (AD-27).
+    """Returns the site a recipe came from, shown as the photo credit (AD-27).
 
-    A recipe with a source link is taken to carry that site's photo, so a photo the
-    editor uploads to such a recipe gets the same credit (Story 5.4 decision).
+    If a recipe has a source link, we assume its photo is from that site. So a photo
+    the editor uploads to that recipe gets the same credit (Story 5.4 decision).
     """
     if not url:
         return None

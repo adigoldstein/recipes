@@ -34,7 +34,8 @@ EditorDep = Annotated[CurrentUser, Depends(require_role("editor"))]
     },
 )
 def list_providers(service: ServiceDep, user: EditorDep) -> list[ProviderInfo]:
-    """The active import engine and its timeout (the client's limit follows it)."""
+    """Returns the active import engine and its timeout. The client sets its own
+    time limit from it."""
     return service.providers()
 
 
@@ -70,7 +71,8 @@ def _stream(
     return StreamingResponse(
         body(),
         media_type="text/event-stream",
-        # No caching, and no buffering by a proxy in front (nginx honours this).
+        # Do not cache, and tell a proxy in front (like nginx) not to hold back the
+        # events.
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
 
@@ -79,7 +81,7 @@ def _stream(
 def import_text(
     data: ImportTextRequest, service: ServiceDep, user: EditorDep, request: Request
 ) -> StreamingResponse:
-    """Turn pasted recipe text into a Hebrew draft, as a progress stream."""
+    """Turns pasted recipe text into a Hebrew draft, and streams the progress."""
     return _stream(service, service.prepare_text(data.text, user.id), request)
 
 
@@ -87,14 +89,16 @@ def import_text(
 def import_url(
     data: ImportUrlRequest, service: ServiceDep, user: EditorDep, request: Request
 ) -> StreamingResponse:
-    """Fetch a recipe page and turn it into a Hebrew draft, as a progress stream."""
+    """Downloads a recipe page, turns it into a Hebrew draft, and streams the
+    progress."""
     return _stream(service, service.prepare_url(data.url, user.id), request)
 
 
 def publish_stream_events(app: FastAPI) -> None:
-    """Put the import stream's event models in the OpenAPI document (AD-40).
+    """Adds the import stream's event models to the OpenAPI document (AD-40).
 
-    A stream's body has no `response_model`, so FastAPI would not list them.
+    A streaming response has no `response_model`, so FastAPI does not add them
+    by itself.
     """
     original = app.openapi
 

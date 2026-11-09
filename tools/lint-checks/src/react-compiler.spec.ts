@@ -3,7 +3,7 @@ import { createServer } from 'vite';
 
 const WORKSPACE = join(import.meta.dirname, '../../..');
 
-// Only components the React Compiler rewrote import its memo-cache runtime.
+// Only components that the React Compiler rewrote import its memo-cache runtime.
 const COMPILED = /react[/_]compiler-runtime/;
 
 it('compiles app components with the React Compiler', async () => {

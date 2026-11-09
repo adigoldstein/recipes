@@ -4,22 +4,22 @@ import { cn } from '../lib/utils';
 import { Board } from './board';
 import { Skeleton } from './ui/skeleton';
 
-/** Tags shown on a card; the rest collapse into a "+N" pill. */
+/** How many tags a card shows. The rest are shown as one "+N" pill. */
 export const CARD_TAG_LIMIT = 2;
 
 export interface RecipeCardProps {
   title: string;
   /** Tag names in display order. */
   tags: readonly string[];
-  /** Accessible name for the "+N" pill, e.g. "ועוד 3 תגיות". */
+  /** The accessible name of the "+N" pill, for example "ועוד 3 תגיות". */
   overflowLabel?: (hidden: number) => string;
-  /** Total time, already formatted; leave out when unknown. */
+  /** The total time, already formatted. Leave it out if unknown. */
   time?: string;
-  /** Photo URL; without one there is no placeholder and the title is larger. */
+  /** The photo URL. Without it, there is no placeholder and the title is bigger. */
   photoUrl?: string;
   /**
-   * Renders the card's one link around the content. The app passes a router
-   * link; this lib imports no router.
+   * Renders the card's link around the content. The app passes a router link,
+   * because this lib does not import a router.
    */
   renderLink: (props: {
     className: string;
@@ -28,7 +28,10 @@ export interface RecipeCardProps {
   className?: string;
 }
 
-/** A library card: a small board whose whole surface is one link (UX-DR7). */
+/**
+ * A recipe card in the library: a small board, and the whole card is one link
+ * (UX-DR7).
+ */
 export function RecipeCard({
   title,
   tags,
@@ -47,7 +50,7 @@ export function RecipeCard({
     ),
     children: (
       <Board data-slot="recipe-card" className="flex h-full flex-col gap-3">
-        {/* The title comes first, with the photo below it (Adi's call, 2026-10-30). */}
+        {/* The title comes first, with the photo below it (Adi's decision, 2026-10-30). */}
         <h2
           dir="auto"
           className={cn(
@@ -99,7 +102,7 @@ export function RecipeCard({
   });
 }
 
-/** Placeholder with the card's footprint while recipes load. */
+/** A placeholder in the shape of a card, shown while the recipes load. */
 export function RecipeCardSkeleton({ className }: { className?: string }) {
   return (
     <Board

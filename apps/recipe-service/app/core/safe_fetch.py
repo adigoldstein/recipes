@@ -1,9 +1,12 @@
-"""Every server-side fetch of a user- or page-supplied URL goes through here (AD-23).
+"""Safely downloads a URL that came from a user or from a web page (AD-23).
 
-The rules (AD-13): http and https only; the host must resolve to public addresses
-only, checked again on every redirect; the connection goes to the address that was
-checked (so a second DNS answer cannot point it somewhere else); the body and the
-total time are capped.
+Every such download on the server goes through this module. The rules (AD-13):
+- Only http and https.
+- The host must point only to public IP addresses. This is checked again on every
+  redirect.
+- We connect to the exact address we checked, so a second DNS lookup cannot send us
+  somewhere else.
+- The page size and the total time are limited.
 """
 
 import ipaddress
@@ -17,7 +20,7 @@ import httpx
 
 from app.core.errors import ErrorCode
 
-# (host, port) -> the addresses the host resolves to.
+# A function that takes (host, port) and returns the IP addresses of the host.
 Resolver = Callable[[str, int], Sequence[str]]
 
 MAX_REDIRECTS = 5
@@ -28,7 +31,7 @@ _USER_AGENT = (
 
 
 class FetchError(Exception):
-    """A fetch failed; `code` is the stable error code the client shows."""
+    """A download failed. `code` is the error code the client shows."""
 
     code: ErrorCode
 
@@ -37,8 +40,8 @@ class FetchError(Exception):
         self.detail = detail
 
 
-# Where each fetch failure goes on the wire: a refused link is the caller's mistake
-# (400), a too-large body is 413, and the site's own answer is upstream (502).
+# The HTTP status for each download error: a blocked link is the caller's mistake
+# (400), a page that is too large is 413, and a problem with the other site is 502.
 FETCH_HTTP_STATUS = {
     ErrorCode.FETCH_BLOCKED: 400,
     ErrorCode.FETCH_CHALLENGED: 502,
@@ -48,7 +51,8 @@ FETCH_HTTP_STATUS = {
 
 
 class FetchBlockedError(FetchError):
-    """The URL is not allowed (scheme, private address) or the site refused us."""
+    """The URL is not allowed (wrong scheme or private address), or the site
+    refused us."""
 
     code = ErrorCode.FETCH_BLOCKED
 
@@ -62,7 +66,8 @@ class FetchTooLargeError(FetchError):
 
 
 class FetchChallengedError(FetchError):
-    """A bot-protection challenge page; it is reported, never bypassed (AD-35)."""
+    """The site answered with an anti-bot check page. We report it and never try to
+    get around it (AD-35)."""
 
     code = ErrorCode.FETCH_CHALLENGED
 
@@ -75,7 +80,7 @@ class FetchLimits:
 
 @dataclass(frozen=True)
 class FetchedResponse:
-    """The last response of the redirect chain, whatever its status."""
+    """The last response after all redirects, whatever its status."""
 
     url: str
     status: int
@@ -102,12 +107,13 @@ def _is_public(address: str) -> bool:
 class _Target:
     url: str
     host: str
-    # The URL with the host replaced by the checked address.
+    # The same URL, with the host name replaced by the IP address we checked.
     pinned_url: str
 
 
 def check_url(url: str, resolver: Resolver = system_resolver) -> _Target:
-    """Refuse anything but http(s) to public addresses; return where to connect."""
+    """Allows only http(s) URLs that point to public addresses. Returns where to
+    connect."""
     try:
         parts = urlsplit(url)
         port = parts.port
@@ -142,7 +148,8 @@ def safe_get(
     resolver: Resolver = system_resolver,
     transport: httpx.BaseTransport | None = None,
 ) -> FetchedResponse:
-    """GET a URL under the AD-23 rules, following at most `MAX_REDIRECTS` redirects."""
+    """Downloads a URL under the AD-23 rules, following at most `MAX_REDIRECTS`
+    redirects."""
     deadline = time.monotonic() + limits.timeout_seconds
     current = url
     with httpx.Client(

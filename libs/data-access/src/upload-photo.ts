@@ -8,13 +8,13 @@ import {
 } from './client';
 
 export interface UploadPhotoOptions {
-  /** Called with the share of the file sent so far, from 0 to 1. */
+  /** Called with how much of the file was sent so far, from 0 to 1. */
   onProgress?: (fraction: number) => void;
-  /** Aborts the upload; the returned promise then rejects with an `AbortError`. */
+  /** Cancels the upload. The promise then rejects with an `AbortError`. */
   signal?: AbortSignal;
 }
 
-/** What a failed upload rejects with: the API's error body, or just a message. */
+/** Returns the error for a failed upload: the API's error body, or just a message. */
 function apiError(request: XMLHttpRequest): unknown {
   try {
     return JSON.parse(request.responseText) as unknown;
@@ -24,12 +24,13 @@ function apiError(request: XMLHttpRequest): unknown {
 }
 
 /**
- * Sends one image to `POST /api/photos` (AD-27) and resolves with its unattached
- * `photo_key`. It uses `XMLHttpRequest`, not the generated client: `fetch` cannot
- * report how much of an upload has been sent. It still goes through the same rules as
- * every other call: the same origin and base URL, the CSRF header (AD-6) and the one
- * 401 event (AD-21). A failure rejects with the API error body, so `getErrorCode`
- * reads it like any other.
+ * Uploads one image to `POST /api/photos` (AD-27) and returns its `photo_key`. No
+ * recipe uses the photo yet.
+ *
+ * It uses `XMLHttpRequest` and not the generated client, because `fetch` cannot
+ * report upload progress. It follows the same rules as every other request: same
+ * base URL, the CSRF header (AD-6) and the 401 event (AD-21). On failure it rejects
+ * with the API error body, so `getErrorCode` can read it.
  */
 export function uploadPhoto(
   file: File,
@@ -63,8 +64,8 @@ export function uploadPhoto(
     request.addEventListener('error', () =>
       reject(new Error('Network error during upload')),
     );
-    // The same safety net as every other call (AD-43). The server may still have kept
-    // the photo, but an unattached photo is harmless: it is cleaned up later.
+    // A time limit, like every other request (AD-43). The server may still have saved
+    // the photo, but that is fine: unused photos are deleted later.
     request.timeout = SAFETY_NET_MS.upload;
     request.addEventListener('timeout', () =>
       reject({ detail: 'The upload took too long', code: 'request_timeout' }),

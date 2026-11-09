@@ -12,29 +12,35 @@ import { PendingButton, SlowNote } from './pending-button';
 export interface ConfirmDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** The question, naming what it is about (UX: a confirm always names its subject). */
+  /** The question. It always names what it is about (a UX rule). */
   title: string;
   description: string;
   confirmLabel: string;
   cancelLabel: string;
-  /** Runs the action. The dialog stays open until the owner closes it, so a failure can show. */
+  /**
+   * Runs the action. The dialog stays open until the parent closes it, so an error
+   * can be shown.
+   */
   onConfirm: () => void;
-  /** The action is running: both buttons are disabled and the dialog cannot be dismissed. */
+  /**
+   * True while the action runs. Both buttons are disabled, and the dialog cannot be
+   * closed.
+   */
   pending?: boolean;
-  /** What the confirm button says while it works ("מוחקים"); defaults to `confirmLabel`. */
+  /** The confirm button's text while it works ("מוחקים"). Defaults to `confirmLabel`. */
   pendingLabel?: string;
-  /** Shown under the text when the action takes longer than usual ("זה לוקח יותר זמן"). */
+  /** Shown under the text if the action takes longer than usual ("זה לוקח יותר זמן"). */
   slowNote?: string;
-  /** Styles the confirm button as a destructive action. */
+  /** Shows the confirm button as a dangerous action (for example, delete). */
   destructive?: boolean;
-  /** Why the action failed. It sits under the text and is announced when it appears. */
+  /** Why the action failed. Shown under the text, and read aloud when it appears. */
   error?: string;
 }
 
 /**
- * A "are you sure?" step. Props in, callbacks out: it knows nothing about what it
- * confirms. Unlike the bare `AlertDialogAction` it does not close itself on confirm,
- * so a rejected request can be shown here instead of vanishing.
+ * An "are you sure?" dialog. It gets props and calls callbacks, and knows nothing
+ * about what it confirms. Unlike the plain `AlertDialogAction`, it does not close by
+ * itself on confirm, so a failed request can be shown here instead of disappearing.
  */
 export function ConfirmDialog({
   open,
@@ -53,7 +59,7 @@ export function ConfirmDialog({
   return (
     <AlertDialog
       open={open}
-      // Escape and outside clicks must not close it mid-request.
+      // Escape and clicks outside must not close it while the request runs.
       onOpenChange={(next) => {
         if (!pending) onOpenChange(next);
       }}
@@ -63,7 +69,7 @@ export function ConfirmDialog({
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
-        {/* Always rendered, so a screen reader announces the text when it appears. */}
+        {/* Always in the page, so a screen reader reads the text when it appears. */}
         <p role="alert" className="text-sm text-destructive">
           {error}
         </p>

@@ -13,15 +13,15 @@ MIGRATIONS_DIR = Path(__file__).resolve().parents[1] / "migrations"
 
 @contextmanager
 def migration_transaction(connection: Connection) -> Iterator[None]:
-    """One transaction for a migration run, with foreign keys switched off.
+    """Runs the migrations in one transaction, with foreign keys turned off.
 
-    SQLite changes a table by copying it and dropping the old one (Alembic batch
-    mode). While foreign keys are enforced, dropping a parent table such as `recipe`
-    cascade-deletes its children. SQLite's documented procedure is to turn
-    enforcement off first (a no-op inside a transaction, hence before it), then run
-    `foreign_key_check` before committing, and always turn enforcement back on: the
-    connection returns to the pool.
+    To change a table, SQLite copies it to a new table and drops the old one (Alembic
+    batch mode). If foreign keys are on, dropping a parent table such as `recipe`
+    also deletes all its child rows. SQLite's docs say to turn foreign keys off,
+    check them before committing, and turn them back on at the end.
     """
+    # Turn foreign keys off before the transaction starts. Inside a transaction
+    # SQLite ignores this setting.
     connection.exec_driver_sql("PRAGMA foreign_keys=OFF")
     connection.commit()
     try:
@@ -38,9 +38,9 @@ def migration_transaction(connection: Connection) -> Iterator[None]:
 
 
 def run_migrations(data_dir: Path) -> None:
-    """Apply every pending migration (`alembic upgrade head`) to the app database.
+    """Applies all the pending migrations to the app database (`alembic upgrade head`).
 
-    Errors propagate, so a failed migration stops the app from starting (AD-29).
+    Errors are not caught, so a failed migration stops the app from starting (AD-29).
     """
     config = Config()
     config.set_main_option("script_location", str(MIGRATIONS_DIR))

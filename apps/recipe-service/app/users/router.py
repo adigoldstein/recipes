@@ -8,7 +8,7 @@ from app.core.security import Role, require_role
 from app.users.schemas import UserCreate, UserCreateRequest, UserRead, UserUpdate
 from app.users.service import UserService, get_user_service
 
-# Every route here is admin only (AD-30); the dependency also yields the caller.
+# Only admins can use these routes (AD-30).
 router = APIRouter(
     prefix="/users",
     tags=["users"],

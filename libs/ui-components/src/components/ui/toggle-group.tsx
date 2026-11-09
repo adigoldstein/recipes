@@ -4,8 +4,8 @@ import { ToggleGroup as ToggleGroupPrimitive } from 'radix-ui';
 import { cn } from '../../lib/utils';
 import { toggleVariants } from './toggle';
 
-// shadcn ToggleGroup, trimmed to the chip row we need: separate pills with a
-// fixed gap (shadcn's `spacing` prop and its inline `--gap` style are dropped).
+// The shadcn ToggleGroup, reduced to the chip row we need: separate rounded chips
+// with a fixed gap (we removed shadcn's `spacing` prop and its `--gap` style).
 const ToggleGroupContext = React.createContext<
   VariantProps<typeof toggleVariants>
 >({

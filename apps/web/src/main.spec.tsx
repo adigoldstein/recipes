@@ -1,9 +1,10 @@
 import { screen } from '@testing-library/react';
 
-// Loads the real entry point the way index.html does, so a broken provider
-// tree or route table in main.tsx fails here.
-// The first import of the entry point transforms the whole app's module graph, which
-// takes longer than the default 5 s when the machine is busy running other projects.
+// Loads the real entry point like index.html does, so a broken provider or route
+// in main.tsx fails this test.
+
+// Time limit for the first import. It builds the code of the whole app, which takes
+// longer than the default 5 seconds when the computer is busy running other tests.
 const LAZY_TIMEOUT = 30_000;
 
 describe('main.tsx bootstrap', () => {

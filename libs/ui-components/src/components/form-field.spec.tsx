@@ -56,7 +56,7 @@ describe('FormField required', () => {
     expect(star.getAttribute('aria-hidden')).toBe('true');
     expect(star.className).toContain('text-destructive');
     expect(star.parentElement?.tagName).toBe('LABEL');
-    // The star is not part of the control's name.
+    // The star is not part of the control's accessible name.
     expect(screen.getByRole('textbox', { name: 'שם המתכון' })).toBe(input);
   });
 

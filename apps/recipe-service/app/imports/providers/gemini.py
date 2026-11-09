@@ -1,4 +1,5 @@
-"""The Gemini adapter: plain `httpx` against the REST API (no SDK), free tier."""
+"""The Gemini provider: calls the REST API with plain `httpx`, without the SDK
+(free tier)."""
 
 import asyncio
 import logging
@@ -79,7 +80,8 @@ class GeminiProvider:
         return _read_reply(response.json())
 
     async def _post(self, url: str, **kwargs: Any) -> httpx.Response:
-        """One call, bounded by the timeout; cancelling the caller drops the request."""
+        """Sends one request, with a time limit. If the caller is cancelled, the
+        request is cancelled too."""
         async with asyncio.timeout(self.timeout_seconds):
             if self._client is not None:
                 return await self._client.post(url, **kwargs)
@@ -91,8 +93,8 @@ def _raise_for_status(response: httpx.Response) -> None:
     status = response.status_code
     if status < 400:
         return
-    # Never log the request: it carries the key. The status and Google's own message
-    # are enough to tell a retired model from an overload.
+    # Never log the request, because it contains the API key. The status and
+    # Google's message are enough to tell a retired model from an overload.
     logger.warning("Gemini returned HTTP %s: %s", status, response.text[:300])
     if status == 429:
         raise LlmQuotaError("Gemini quota exhausted", status)

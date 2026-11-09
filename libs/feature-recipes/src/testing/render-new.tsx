@@ -8,7 +8,7 @@ import { RecipeNewPage, type RecipeNewPageProps } from '../routes/recipe-new';
 initI18n();
 
 /**
- * Renders the new-recipe form with stub routes for the library and a saved recipe.
+ * Renders the new recipe page, with fake routes for the library and a saved recipe.
  * `importPanel` fills the page's import slot, like the app does with the AI import.
  */
 export function renderNew(

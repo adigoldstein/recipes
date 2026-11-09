@@ -1,4 +1,4 @@
-"""Pydantic request and response schemas for users."""
+"""The request and response shapes (Pydantic) of users."""
 
 import unicodedata
 import uuid
@@ -11,12 +11,13 @@ from app.users.models import NAME_MAX_LENGTH
 
 
 def normalize_name(name: str) -> str:
-    """NFC, trimmed, inner whitespace collapsed to single spaces (AD-24)."""
+    """Cleans up a name: Unicode NFC form, no spaces at the ends, and single spaces
+    between words (AD-24)."""
     return " ".join(unicodedata.normalize("NFC", name).split())
 
 
 class UserCreate(BaseModel):
-    """What it takes to make an account. The password travels separately."""
+    """The details needed to create an account. The password is passed separately."""
 
     email: EmailStr
     name: str
@@ -37,20 +38,20 @@ class UserCreate(BaseModel):
 
 
 class UserCreateRequest(UserCreate):
-    """The body of `POST /api/users`: an account plus its starting password.
+    """The body of `POST /api/users`: the new account and its first password.
 
-    The confirmation field of the form is checked in the browser only; the server
-    just enforces the password policy (FR-13).
+    The form's "confirm password" field is checked only in the browser. The server
+    only checks the password policy (FR-13).
     """
 
     password: str
 
 
 class UserUpdate(BaseModel):
-    """The body of `PATCH /api/users/{id}`: any of these, at least one.
+    """The body of `PATCH /api/users/{id}`. Send at least one field.
 
-    A field that is left out stays as it is. `password` is a reset: it replaces the
-    current one and ends every session the user has.
+    A field that is not sent does not change. Sending `password` resets it: the new
+    password replaces the old one and the user is logged out on all devices.
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -69,7 +70,7 @@ class UserUpdate(BaseModel):
 
 
 class UserRead(BaseModel):
-    """A user as returned to callers. There is deliberately no password field."""
+    """A user as the API returns it. On purpose, it has no password field."""
 
     id: uuid.UUID
     email: str

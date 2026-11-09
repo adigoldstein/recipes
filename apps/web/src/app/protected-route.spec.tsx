@@ -23,7 +23,8 @@ const EDITOR: SessionUser = {
 };
 const ADMIN: SessionUser = { ...EDITOR, name: 'Boss', role: 'admin' };
 
-// What `GET /api/auth/session` answers; a blocked user is a visitor to it.
+// What `GET /api/auth/session` returns. For a blocked user it returns no user, like
+// for a visitor.
 let sessionUser: SessionUser | null = null;
 const server = setupServer(
   http.get('*/api/auth/session', () =>
@@ -43,7 +44,8 @@ afterEach(() => {
 });
 afterAll(() => server.close());
 
-// A page whose controls depend on the role: absent, not disabled.
+// A page with controls that depend on the role. Controls without permission are
+// hidden, not disabled.
 function Area({ title }: { title: string }) {
   const canEdit = useCan('editor');
   const canManage = useCan('admin');
@@ -56,7 +58,7 @@ function Area({ title }: { title: string }) {
   );
 }
 
-// Stands in for a real protected call, such as saving a recipe.
+// Acts like a real protected request, such as saving a recipe.
 function SaveButton() {
   return (
     <button onClick={() => void client.post({ url: '/api/recipes' })}>
@@ -164,7 +166,7 @@ describe('an expired session', () => {
 
   it('goes to /login?next=… with a message, without leaving the app', async () => {
     sessionUser = EDITOR;
-    // The server has blocked the account since the page loaded.
+    // The server blocked the account after the page loaded.
     server.use(
       http.post('*/api/recipes', () =>
         HttpResponse.json(
@@ -174,7 +176,7 @@ describe('an expired session', () => {
       ),
     );
     const { router, queryClient } = renderTestApp('/area');
-    // What the cache says about the user when the router first reaches /login.
+    // The user in the cache at the moment the router first reaches /login.
     let seenAtLogin: unknown = 'not reached';
     router.subscribe((state) => {
       if (
@@ -195,11 +197,11 @@ describe('an expired session', () => {
     expect(router.state.location.search).toBe(
       `?next=${encodeURIComponent('/area')}`,
     );
-    // The login page sends a signed-in user straight on, so the cache must already
-    // say "visitor" when it appears, or it would bounce back to the page.
+    // The login page sends a logged-in user away right away, so the cache must
+    // already say "visitor" when it opens. Otherwise it would send us back.
     expect(seenAtLogin).toBeNull();
     expect(await screen.findByText('פג תוקף החיבור')).toBeTruthy();
-    // The shell now shows a visitor.
+    // The top bar now shows a visitor.
     await waitFor(() =>
       expect(screen.queryByRole('button', { name: 'Ed' })).toBeNull(),
     );

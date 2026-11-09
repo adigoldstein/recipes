@@ -5,8 +5,8 @@ import { useCan } from '@bite-and-board/data-access';
 import { Button } from '@bite-and-board/ui-components';
 
 /**
- * "מתכון חדש" in the top bar, for editors and admins only (FR-16): the visitor sees
- * nothing. On a phone it is a "+" of 44px; from `sm` it also shows the text.
+ * The "מתכון חדש" button in the top bar, only for editors and admins (FR-16). A
+ * visitor sees nothing. On a phone it is a 44px "+". From `sm` it also shows the text.
  */
 export function NewRecipeButton() {
   const { t } = useTranslation();

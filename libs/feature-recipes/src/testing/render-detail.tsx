@@ -12,8 +12,8 @@ function LibraryStub() {
 }
 
 /**
- * Renders the detail page at `/recipes/:id`, with a stub list route to go back
- * to. With `from`, that library URL is the page before it (in-app history).
+ * Renders the recipe page at `/recipes/:id`, with a fake library route to go back
+ * to. If `from` is given, that library URL is the previous page in the history.
  */
 export function renderDetail(id: string, from?: string) {
   const router = createMemoryRouter(

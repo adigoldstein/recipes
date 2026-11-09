@@ -20,43 +20,47 @@ class Environment(StrEnum):
 
 
 class Settings(BaseSettings):
-    """Every runtime setting, read once from env vars (and `.env` in the cwd)."""
+    """All the app settings. They are read once from env vars and from the `.env`
+    file in the current folder."""
 
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", extra="ignore"
     )
 
-    # Defaults to production so a forgotten ENV fails safe (e.g. secure cookies).
+    # The default is production, so if ENV is missing we get the safe settings
+    # (for example, secure cookies).
     env: Environment = Environment.PRODUCTION
     data_dir: Path = Path("./data")
-    # The app is a demo: a start that finds no recipes loads the demo recipes
-    # (`app/seed_data/demo_recipes.json`). Not a user setting; only the tests and the
-    # e2e server set SEED_DEMO=false, so they start from an empty database.
+    # When the app starts with no recipes, it adds the demo recipes from
+    # `app/seed_data/demo_recipes.json`. Users do not change this. Only the tests and
+    # the e2e server set SEED_DEMO=false, so they start with an empty database.
     seed_demo: bool = True
     jwt_secret: SecretStr
     cookie_secure: bool = True
-    # The import engine (AD-12): the first name is the one used. Switching engines
-    # is changing this one setting; there is no automatic fallback.
+    # Which AI engine imports recipes (AD-12). The app uses the first name in the
+    # list. To switch engines, change this setting. If the engine fails, the app does
+    # not try another one.
     llm_providers: Annotated[list[str], NoDecode] = Field(
         default_factory=lambda: ["anthropic"]
     )
     gemini_api_key: SecretStr | None = None
     gemini_model: str = "gemini-3.5-flash-lite"
-    # Seconds to wait for Gemini before the import fails (Story 5.1 spike).
+    # How many seconds to wait for Gemini before the import fails (Story 5.1 spike).
     gemini_timeout_seconds: PositiveInt = 30
     anthropic_api_key: SecretStr | None = None
     anthropic_model: str = "claude-haiku-5-5"
     anthropic_timeout_seconds: PositiveInt = 30
     import_daily_cap: PositiveInt = 50
-    # The longest pasted text an import accepts, in characters.
+    # The maximum length, in characters, of text pasted into an import.
     import_max_chars: PositiveInt = 20_000
     llm_max_tokens: PositiveInt = 4096
-    # URL imports (AD-13): the largest page body and the longest whole fetch,
-    # redirects included.
+    # Importing from a URL (AD-13): the maximum page size, and the maximum time for
+    # the whole download, including redirects.
     page_max_bytes: PositiveInt = 3 * 1024 * 1024
     page_fetch_timeout_seconds: PositiveInt = 15
-    # Photo uploads (AD-27): the largest file, and the largest picture (width x height)
-    # a decoder is allowed to open, so a small file cannot expand into gigabytes.
+    # Photo uploads (AD-27): the maximum file size, and the maximum picture size
+    # (width x height) we agree to open. The second limit stops a small file from
+    # turning into gigabytes in memory.
     photo_max_bytes: PositiveInt = 10 * 1024 * 1024
     photo_max_pixels: PositiveInt = 40_000_000
     app_timezone: str = "Asia/Jerusalem"
@@ -99,7 +103,7 @@ def _describe(error: ValidationError) -> str:
 
 
 def load_settings() -> Settings:
-    """Build Settings, turning validation errors into a readable startup failure."""
+    """Creates the settings. If a setting is invalid, stops with a readable error."""
     try:
         return Settings()
     except ValidationError as error:
@@ -108,5 +112,8 @@ def load_settings() -> Settings:
 
 @lru_cache
 def get_settings() -> Settings:
-    """Cached settings, injectable with `Depends(get_settings)`."""
+    """Returns the settings, created once and then reused.
+
+    Routes get them with `Depends(get_settings)`.
+    """
     return load_settings()

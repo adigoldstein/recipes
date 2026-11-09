@@ -17,12 +17,12 @@ export const ADI: SessionUser = {
   role: 'admin',
 };
 
-/** Serves GET /api/auth/session: the user, or null for a visitor. */
+/** Makes GET /api/auth/session return this user, or null for a visitor. */
 export function serveSession(user: SessionUser | null) {
   server.use(http.get('*/api/auth/session', () => HttpResponse.json({ user })));
 }
 
-/** Renders these routes at `path`, with the providers the app gives them. */
+/** Renders these routes at `path`, with the same providers as the app. */
 export function renderAt(
   path: string,
   routes: { path: string; element: ReactNode }[],

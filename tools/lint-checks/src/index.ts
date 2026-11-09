@@ -1,2 +1,2 @@
-// Test-only project: the specs prove each workspace lint rule rejects a bad line.
+// A project only for tests. They prove that each workspace lint rule rejects bad code.
 export {};

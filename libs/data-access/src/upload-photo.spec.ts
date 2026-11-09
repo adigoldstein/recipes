@@ -5,7 +5,7 @@ import { uploadPhoto } from './upload-photo';
 
 type Listener = (event: unknown) => void;
 
-/** A stand-in for XMLHttpRequest that the test drives by hand. */
+/** A fake XMLHttpRequest that the test controls by hand. */
 class FakeRequest {
   static last: FakeRequest;
   method = '';

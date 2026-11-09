@@ -122,7 +122,7 @@ def test_a_blocked_user_with_the_right_password_is_told_the_account_is_blocked(
 def test_a_blocked_user_with_a_wrong_password_gets_the_generic_400(
     client: TestClient, session: Session
 ) -> None:
-    """The blocked state is only revealed to someone who knows the password."""
+    """Only someone who knows the password learns that the account is blocked."""
     add_user(session, is_blocked=True)
     response = _login(client, password="not the password")
     assert response.status_code == 400

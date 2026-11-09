@@ -120,7 +120,8 @@ describe('LoginPage', () => {
     await user.click(submit());
     const alert = await screen.findByText('אימייל או סיסמה שגויים');
     expect(alert.getAttribute('role')).toBe('alert');
-    // It names no field, and the visitor stays on the page with the email kept.
+    // No field is marked, and the visitor stays on the page with the email still
+    // filled in.
     expect(email().getAttribute('aria-invalid')).toBeNull();
     expect(password().getAttribute('aria-invalid')).toBeNull();
     expect((email() as HTMLInputElement).value).toBe('adi@example.com');
@@ -204,9 +205,10 @@ describe('LoginPage', () => {
     renderLogin();
     await fill(user);
     await user.click(submit());
-    // At once: disabled, still saying "כניסה", so a fast answer never flickers.
+    // Right away: disabled, and still says "כניסה", so a fast answer does not
+    // flicker.
     expect((submit() as HTMLButtonElement).disabled).toBe(true);
-    // After the short delay: the spinner and the present-tense label.
+    // After the short delay: the spinner and the "working" label.
     const busy = await screen.findByRole('button', { name: 'נכנסים' });
     expect((busy as HTMLButtonElement).disabled).toBe(true);
   });

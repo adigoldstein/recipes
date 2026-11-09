@@ -1,4 +1,4 @@
-"""SQLModel tables owned by imports (AD-38)."""
+"""The database tables of the imports module (AD-38)."""
 
 import uuid
 from datetime import datetime
@@ -10,19 +10,24 @@ from app.core.db import UtcDateTime, utcnow
 
 
 class ImportRun(SQLModel, table=True):
-    """One row per import: what ran, how long, how it ended. Counts the daily cap."""
+    """One row per import: what ran, how long it took, and how it ended.
+
+    The daily import limit is counted from these rows.
+    """
 
     __tablename__ = "import_runs"
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    # String reference: imports must not import the users module's models.
+    # The foreign key is a string because imports may not import the users module.
     user_id: uuid.UUID | None = Field(
         default=None, foreign_key="user.id", ondelete="SET NULL"
     )
     provider: str = Field(max_length=40)
     model: str = Field(max_length=100)
-    source_kind: str = Field(max_length=10)  # "text" or "url"
-    path: str = Field(max_length=10)  # "llm" or "json_ld"
+    # "text" or "url".
+    source_kind: str = Field(max_length=10)
+    # "llm" or "json_ld".
+    path: str = Field(max_length=10)
     prompt_version: str = Field(max_length=40)
     latency_ms: int
     input_tokens: int | None = None
@@ -31,7 +36,7 @@ class ImportRun(SQLModel, table=True):
         default=False, sa_column_kwargs={"server_default": false()}
     )
     retried: bool = Field(default=False, sa_column_kwargs={"server_default": false()})
-    # "ok" or an error code.
+    # "ok", or an error code.
     outcome: str = Field(max_length=40)
     created_at: datetime = Field(default_factory=utcnow, sa_type=UtcDateTime)
 
@@ -40,7 +45,8 @@ Index("ix_import_runs_created_at", ImportRun.__table__.c.created_at)  # type: ig
 
 
 class ImportAttempt(SQLModel, table=True):
-    """One row per engine tried inside a run, so a fallback shows every step."""
+    """One row for each AI engine tried during an import, so every attempt is
+    recorded."""
 
     __tablename__ = "import_attempts"
 
@@ -53,7 +59,7 @@ class ImportAttempt(SQLModel, table=True):
     latency_ms: int
     input_tokens: int | None = None
     output_tokens: int | None = None
-    # The HTTP status the provider returned on a failed call (None on success).
+    # The HTTP status the AI provider returned when the call failed. None on success.
     upstream_status: int | None = None
     created_at: datetime = Field(default_factory=utcnow, sa_type=UtcDateTime)
 

@@ -28,7 +28,7 @@ export const DANA: UserRead = {
   created_at: '2026-10-02T08:00:00Z',
 };
 
-/** Serves GET /api/auth/session as this user (the signed-in admin by default). */
+/** Makes GET /api/auth/session return this user (by default, the logged-in admin). */
 export function serveSession(me: UserRead | null = ADI) {
   server.use(
     http.get('*/api/auth/session', () =>
@@ -44,7 +44,7 @@ export function serveSession(me: UserRead | null = ADI) {
   );
 }
 
-/** Serves GET /api/users with these users. */
+/** Makes GET /api/users return these users. */
 export function serveUsers(users: UserRead[]) {
   server.use(http.get('*/api/users', () => HttpResponse.json(users)));
 }

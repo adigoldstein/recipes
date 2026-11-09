@@ -3,10 +3,11 @@ import { isRouteErrorResponse, Link, useRouteError } from 'react-router';
 import { BackLink, Button } from '@bite-and-board/ui-components';
 
 /**
- * Root error element: replaces the whole shell when a route throws. The back link
- * goes to the home page, not one step back in history, because the page before
- * this one is the page that just failed. It uses no data-access hook, which would
- * pull the API client into the first load (AD-11) and could itself fail here.
+ * The main error page. It replaces the whole layout when a route throws an error.
+ *
+ * The back link goes to the home page, not one step back, because the previous page
+ * is the one that just failed. It does not use data-access hooks, because they would
+ * add the API client to the first load (AD-11) and could fail here too.
  */
 export function RouteError() {
   const { t } = useTranslation();

@@ -16,11 +16,13 @@ from sqlmodel import Session, SQLModel, create_engine
 from app.core.config import Settings, get_settings
 
 DB_FILENAME = "app.db"
-# Written out, so the wait is documented rather than a driver default (AD-43).
+# How long a write waits for the database lock, in milliseconds. We set it
+# ourselves instead of relying on the driver's default (AD-43).
 BUSY_TIMEOUT_MS = 5000
 
-# Stable constraint names, so Alembic batch mode can recreate SQLite tables.
-# Set before any model is defined: models import this module.
+# Fixed names for constraints, so Alembic can rebuild SQLite tables in migrations.
+# This must be set before any model is defined, which is why it lives here: every
+# model imports this module.
 NAMING_CONVENTION = {
     "ix": "ix_%(column_0_label)s",
     "uq": "uq_%(table_name)s_%(column_0_name)s",
@@ -30,7 +32,7 @@ NAMING_CONVENTION = {
 }
 SQLModel.metadata.naming_convention = NAMING_CONVENTION
 
-# AD-31: amounts keep 3 decimal places.
+# Ingredient amounts are stored with 3 decimal places (AD-31).
 AMOUNT_QUANTUM = Decimal("0.001")
 
 
@@ -39,7 +41,8 @@ def utcnow() -> datetime:
 
 
 class UtcDateTime(TypeDecorator[datetime]):
-    """Stores naive UTC in SQLite and always hands back timezone-aware UTC (AD-24)."""
+    """A date-time column. SQLite stores it as UTC without a timezone, and reading
+    it always returns a UTC date-time with the timezone set (AD-24)."""
 
     impl = DateTime
     cache_ok = True
@@ -60,7 +63,8 @@ class UtcDateTime(TypeDecorator[datetime]):
 
 
 class Quantity(TypeDecorator[Decimal]):
-    """`NUMERIC(12, 3)`: quantized on the way in, so comparisons are exact (AD-31)."""
+    """An amount column, `NUMERIC(12, 3)`. Values are rounded to 3 decimal places
+    before saving, so comparing two amounts is exact (AD-31)."""
 
     impl = Numeric(12, 3, asdecimal=True)
     cache_ok = True
@@ -72,11 +76,12 @@ class Quantity(TypeDecorator[Decimal]):
 
 
 class PydanticJson[Item: BaseModel](TypeDecorator[list[Item]]):
-    """A `JSON` column holding a list of Pydantic items (AD-41).
+    """A `JSON` column that holds a list of Pydantic items (AD-41).
 
-    Like TypeORM's `simple-json`, but typed: it validates on the way in and builds
-    `Item` objects on the way out, so a bad stored value fails loudly at read time.
-    SQLAlchemy cannot see an item edited in place, so assign a new list instead.
+    Like TypeORM's `simple-json`, but typed. Each item is validated when saved and
+    turned back into an `Item` object when read, so bad stored data raises an error
+    when it is read. SQLAlchemy does not notice when you change an item inside the
+    list, so to update the column, assign a new list.
     """
 
     impl = JSON
@@ -106,7 +111,8 @@ class PydanticJson[Item: BaseModel](TypeDecorator[list[Item]]):
 def enum_column(
     enum: type[StrEnum], name: str, *, nullable: bool = False
 ) -> "Column[Any]":
-    """A `VARCHAR` column with a named `CHECK` over the enum's values."""
+    """A text column for an enum, with a named `CHECK` that allows only the enum's
+    values."""
     return Column(
         Enum(
             enum,
@@ -124,20 +130,24 @@ def _set_sqlite_pragmas(dbapi_connection: Any, _record: Any) -> None:
     cursor = dbapi_connection.cursor()
     cursor.execute("PRAGMA foreign_keys=ON")
     cursor.execute("PRAGMA journal_mode=WAL")
-    # How long a write waits for the lock before it fails and rolls back (AD-43).
+    # How long a write waits for the lock before it gives up and rolls back (AD-43).
     cursor.execute(f"PRAGMA busy_timeout={BUSY_TIMEOUT_MS}")
     cursor.close()
 
 
 @lru_cache
 def get_engine(data_dir: Path) -> Engine:
-    """One engine per data dir, so overridden settings get their own database."""
+    """Returns the database engine for a data folder (one engine per folder).
+
+    Tests that use a different data folder get their own database.
+    """
     data_dir.mkdir(parents=True, exist_ok=True)
-    # FastAPI runs sync endpoints in a thread pool, so one connection may hop threads.
+    # FastAPI runs sync endpoints on several threads, so the same connection may be
+    # used from different threads. `check_same_thread=False` allows that.
     engine = create_engine(
         f"sqlite:///{data_dir / DB_FILENAME}",
         connect_args={"check_same_thread": False},
-        # Hebrew stays readable in the stored JSON (AD-41), not `ק` escapes.
+        # Save Hebrew as real letters in the JSON, not as `\u05e7` codes (AD-41).
         json_serializer=lambda value: json.dumps(value, ensure_ascii=False),
     )
     event.listen(engine, "connect", _set_sqlite_pragmas)
@@ -147,6 +157,9 @@ def get_engine(data_dir: Path) -> Engine:
 def get_session(
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> Generator[Session]:
-    """One session per request, injectable with `Depends(get_session)`."""
+    """Opens one database session per request and closes it at the end.
+
+    Routes get it with `Depends(get_session)`.
+    """
     with Session(get_engine(settings.data_dir)) as session:
         yield session

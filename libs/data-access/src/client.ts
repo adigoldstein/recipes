@@ -4,41 +4,42 @@ export const CSRF_HEADER = 'X-Requested-With';
 export const CSRF_VALUE = 'bite-and-board';
 
 /**
- * Fired on `window` when a call that needs a session gets a 401 (AD-21). The app
- * shell listens for it and sends the user to `/login`. An event keeps this lib free
- * of the router, and keeps the shell from importing the API client (AD-11).
+ * Sent on `window` when a request that needs a login gets a 401 (AD-21). The app
+ * listens for it and sends the user to `/login`. We use an event so this lib does
+ * not need the router, and the app does not need to import the API client (AD-11).
  */
 export const SESSION_EXPIRED_EVENT = 'bite-and-board:session-expired';
 
-// A login attempt is never an expired session: the login screen shows its own errors.
+// A 401 from the login request is not an expired session. The login screen shows
+// its own errors.
 const LOGIN_PATH = '/api/auth/login';
 
 /**
- * Fired on `window` when a write ran past the client's time limit (AD-43). The server
- * may still have finished it, so the app shell refetches everything from the server.
+ * Sent on `window` when a write took longer than the client's time limit (AD-43). The
+ * server may still have finished it, so the app reloads all data from the server.
  */
 export const OUTCOME_UNKNOWN_EVENT = 'bite-and-board:outcome-unknown';
 
 /**
- * How long the client waits before it gives up on a call (AD-43). Always longer than
- * the server's own deadline for the same call, so a definite answer can arrive first.
+ * How long the client waits for a request before it gives up (AD-43). It is always
+ * longer than the server's own time limit, so the server's answer can arrive first.
  */
 export const SAFETY_NET_MS = {
   default: 30_000,
-  /** The default until the engine's own timeout is known: 90 s, plus 5 s. */
+  /** Used until we know the AI engine's timeout: 90 seconds plus 5. */
   import: 95_000,
   upload: 120_000,
 } as const;
 
-/** The slack on top of the engine's own timeout, so the server's answer arrives first. */
+/** Extra time on top of the engine's timeout, so the server's answer arrives first. */
 const IMPORT_SLACK_MS = 5_000;
 
 let importNetMs: number = SAFETY_NET_MS.import;
 
 /**
- * Follows the engine's own timeout (AD-43): the import safety net becomes the longest
- * `timeout_s` from `GET /api/imports/providers`, plus 5 seconds. Until the engines are
- * known, the default above stays.
+ * Sets the import time limit from the AI engines' timeouts (AD-43): the longest
+ * `timeout_s` from `GET /api/imports/providers`, plus 5 seconds. Until then, the
+ * default above is used.
  */
 export function setImportTimeouts(timeoutsSeconds: readonly number[]) {
   importNetMs =
@@ -47,14 +48,14 @@ export function setImportTimeouts(timeoutsSeconds: readonly number[]) {
       : SAFETY_NET_MS.import;
 }
 
-/** How long an import may stay silent before the client gives up (AD-43). */
+/** How long an import may go without any event before the client gives up (AD-43). */
 export function importSafetyNetMs(): number {
   return importNetMs;
 }
 
-/** The safety net for a path. */
+/** Returns the time limit for a request path. */
 export function safetyNetMs(pathname: string): number {
-  // Listing the engines is an ordinary read; only the imports themselves are slow.
+  // Only the imports are slow. Listing the engines is a regular request.
   if (
     pathname.startsWith('/api/imports/') &&
     pathname !== '/api/imports/providers'
@@ -73,11 +74,8 @@ function timeoutResponse(code: string, detail: string): Response {
 }
 
 /**
- * `fetch` with the safety net (AD-43). Past the limit it answers 504 with an API-shaped
- * body, so the rest of the app reads it like any other error (`errors.<code>`):
- * `request_timeout` for a read or an import, which can simply be tried again, and
- * `outcome_unknown` for a write, which the server may have completed. A write also
- * fires `OUTCOME_UNKNOWN_EVENT`.
+ * `fetch` with a time limit (AD-43). If the time runs out, it returns a 504 with an
+ * API error body, so the app handles it like any other error (`errors.<code>`).
  */
 export async function fetchWithSafetyNet(
   input: Request | string | URL,
@@ -103,7 +101,9 @@ export async function fetchWithSafetyNet(
     // An import saves nothing, so it counts as a read.
     const isWrite =
       request.method !== 'GET' && !pathname.startsWith('/api/imports/');
+    // The server may have finished the write, so tell the app to reload the data.
     if (isWrite) globalThis.dispatchEvent(new Event(OUTCOME_UNKNOWN_EVENT));
+    // A read can simply be tried again. For a write we do not know what happened.
     return isWrite
       ? timeoutResponse(
           'outcome_unknown',
@@ -118,9 +118,9 @@ export async function fetchWithSafetyNet(
 let configured = false;
 
 /**
- * Configures the one generated client (AD-19): same-origin cookies, the CSRF
- * header on every non-GET request, and the single 401 interceptor (AD-21).
- * Safe to call more than once.
+ * Sets up the generated API client (AD-19): send cookies to the same origin, add the
+ * CSRF header to every non-GET request, and handle 401 in one place (AD-21).
+ * Calling it more than once is safe.
  */
 export function configureClient() {
   if (configured) return;
@@ -132,8 +132,8 @@ export function configureClient() {
     }
     return request;
   });
-  // Only calls that require a session ever answer 401: `/auth/session` is public
-  // (always 200) and a bad login is a 400, so any other 401 means "sign in again".
+  // A 401 means "log in again". `/auth/session` always returns 200, and a wrong
+  // login returns 400, so only requests that need a login can return 401.
   client.interceptors.response.use((response, request) => {
     if (
       response.status === 401 &&

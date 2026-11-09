@@ -1,4 +1,5 @@
-"""Single metadata object for Alembic; importing it registers every module's tables."""
+"""The one metadata object Alembic uses. Importing this file registers the tables of
+every module."""
 
 from sqlmodel import SQLModel
 

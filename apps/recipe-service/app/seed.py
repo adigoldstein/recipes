@@ -1,7 +1,8 @@
-"""Demo recipes (FR-12), created through `recipes.service` and idempotent by title.
+"""Sample recipes for tests and e2e (FR-12), created through `recipes.service`.
 
-The default pinned tags come from the migrations: the seed refers to them by name and
-never creates them. Free tags are created on first use by the tag resolver (AD-25).
+Running it twice is safe: a recipe whose title already exists is skipped.
+The default pinned tags are created by the migrations, so the seed only uses them by
+name. Other tags are created the first time a recipe uses them (AD-25).
 Amounts are exact decimals: ½ is 0.5 and ⅓ is 0.333 (AD-31).
 """
 
@@ -22,8 +23,10 @@ from app.recipes.schemas import (
 from app.recipes.service import RecipeService
 from app.tags.schemas import TagInput
 
-HALF = Decimal("0.5")  # ½
-THIRD = Decimal(1) / 3  # ⅓, stored as 0.333
+# ½
+HALF = Decimal("0.5")
+# ⅓, saved as 0.333
+THIRD = Decimal(1) / 3
 
 
 def _recipe(
@@ -254,7 +257,7 @@ SEED_RECIPES: tuple[RecipeCreate, ...] = (
 )
 
 
-# Openly licensed sample photos for the recipes they match (`seed_photos/CREDITS.md`).
+# Free-license sample photos, by recipe title (see `seed_photos/CREDITS.md`).
 SEED_PHOTO_DIR = Path(__file__).parent / "seed_photos"
 SEED_PHOTOS = {
     "שקשוקה": "shakshuka.jpg",
@@ -263,8 +266,8 @@ SEED_PHOTOS = {
 }
 PHOTO_CREDIT_DOMAIN = "commons.wikimedia.org"
 
-# A recipe that was tuned after it was created, so one ingredient shows its original
-# (FR-7): the sugar went from 1 cup to ½ cup. Made by create, then update.
+# A recipe that is edited after it is created, so one ingredient shows its original
+# value (FR-7): the sugar changes from 1 cup to ½ cup. We create it, then update it.
 TUNED_RECIPE = _recipe(
     "עוגיות חמאה",
     tags=("קינוח", "מאפה"),
@@ -284,7 +287,7 @@ SEED_TOTAL = len(SEED_RECIPES) + 1
 
 
 def _tuned(service: RecipeService, recipe_id: uuid.UUID) -> None:
-    """Halve the sugar in the tuned recipe, as an editor would."""
+    """Cuts the sugar in the edited recipe by half, like an editor would."""
     saved = service.get_recipe(recipe_id)
     changes = RecipeUpdate.model_validate(
         {
@@ -312,7 +315,8 @@ class SeedResult:
 
 
 def _with_photo(recipe: RecipeCreate, photos: PhotoService | None) -> RecipeCreate:
-    """The recipe with its sample photo stored and attached, when it has one."""
+    """If the recipe has a sample photo, saves the photo and attaches it to the
+    recipe."""
     name = SEED_PHOTOS.get(recipe.title)
     if photos is None or name is None:
         return recipe
@@ -321,9 +325,9 @@ def _with_photo(recipe: RecipeCreate, photos: PhotoService | None) -> RecipeCrea
 
 
 def run_seed(service: RecipeService, photos: PhotoService | None = None) -> SeedResult:
-    """Create each demo recipe whose title does not exist yet.
+    """Creates each sample recipe whose title does not exist yet.
 
-    With `photos`, the recipes that have a sample photo get it, with its credit.
+    If `photos` is given, recipes that have a sample photo get it, with its credit.
     """
     existing = {summary.title for summary in service.list_recipes()}
     created = 0

@@ -10,10 +10,10 @@ import {
 import { useErrorMessage } from '../shared/use-error-message';
 import { useCreateTag } from './use-tag-mutations';
 
-// Matches the server (AD-24); the server stays the authority.
+// The same limit as the server (AD-24). The server still makes the real check.
 const TAG_NAME_MAX_LENGTH = 40;
 
-/** The add field at the top of the Tags screen. */
+/** The "add tag" field at the top of the tags page. */
 export function AddTagForm() {
   const { t } = useTranslation();
   const errorMessage = useErrorMessage();

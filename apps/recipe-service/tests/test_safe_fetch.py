@@ -1,4 +1,4 @@
-"""`app/core/safe_fetch.py`: SSRF rules, redirects and caps (AD-13, AD-23)."""
+"""`app/core/safe_fetch.py`: SSRF rules, redirects and limits (AD-13, AD-23)."""
 
 from collections.abc import Callable, Sequence
 
@@ -17,7 +17,7 @@ from app.core.safe_fetch import (
 
 LIMITS = FetchLimits(max_bytes=1000, timeout_seconds=5)
 
-# A pretend DNS: public names and one that resolves to a private address.
+# A fake DNS: public host names, and one name that points to a private address.
 DNS = {
     "example.com": ["93.184.216.34"],
     "cdn.example.com": ["151.101.1.1"],

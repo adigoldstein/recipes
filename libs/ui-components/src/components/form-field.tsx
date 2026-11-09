@@ -3,7 +3,7 @@ import { cn } from '../lib/utils';
 import { Label } from './ui/label';
 import { RequiredMark } from './required-mark';
 
-/** What a control inside a `FormField` spreads on itself. */
+/** The props that a control inside a `FormField` puts on itself. */
 export interface FormFieldControlProps {
   id: string;
   'aria-invalid'?: true;
@@ -14,30 +14,34 @@ export interface FormFieldControlProps {
 export interface FormFieldProps {
   id: string;
   label: string;
-  /** Marks the field as required: a star after the label, and `aria-required` on the control. */
+  /**
+   * Marks the field as required: a star after the label, and `aria-required` on
+   * the control.
+   */
   required?: boolean;
-  /** The message under the control; also marks the control invalid. */
+  /** The error message under the control. It also marks the control as invalid. */
   error?: string;
   /** A line of help under the control. */
   hint?: string;
   /**
-   * Marks the field as still to be completed (an imported draft left it empty): a 2 px
-   * `flag` border around the control and this text under it (the text steps aside for
-   * an error). Gone when the caller stops passing it.
+   * Marks the field as "needs to be filled" (an imported draft left it empty). Shows
+   * a 2 px `flag` border around the control and this text under it. If there is an
+   * error, the error is shown instead of the text. Removed when it is no longer
+   * passed.
    */
   flag?: string;
   /** A character counter, shown at the end of the line under the control. */
   counter?: ReactNode;
   className?: string;
-  /** Renders the control with the ids that tie label, hint and error to it. */
+  /** Renders the control, with the ids that connect it to the label, hint and error. */
   children: (control: FormFieldControlProps) => ReactNode;
 }
 
 /**
- * A label, a control and the lines under it (hint, error, counter). The control
- * gets `aria-invalid`, `aria-required` and `aria-describedby` from here, so every
- * form reads its errors and its required fields to screen readers the same way.
- * Forms stay `noValidate`; the checks are React Hook Form's and Zod's.
+ * A label, a control, and the lines under it (hint, error, counter). The control
+ * gets `aria-invalid`, `aria-required` and `aria-describedby` from here, so screen
+ * readers read the errors and required fields of every form the same way. Forms use
+ * `noValidate`, because React Hook Form and Zod do the checks.
  */
 export function FormField({
   id,
@@ -64,8 +68,9 @@ export function FormField({
     <div
       className={cn(
         'flex flex-col gap-2',
-        // The control is the label's next sibling; flagging it adds no wrapper, so
-        // the control keeps its place in the tree (and its focus) when the flag clears.
+        // Put the flag border on the control (the element after the label) with CSS,
+        // without adding a wrapper. So the control keeps its place in the tree, and
+        // its focus, when the flag is removed.
         flag &&
           '[&>:nth-child(2)]:rounded-md [&>:nth-child(2)]:outline-2 [&>:nth-child(2)]:outline-offset-2 [&>:nth-child(2)]:outline-flag',
         className,

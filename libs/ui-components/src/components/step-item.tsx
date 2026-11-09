@@ -1,17 +1,17 @@
 import { cn } from '../lib/utils';
 
 export interface StepItemProps {
-  /** The step's position, starting at 1. */
+  /** The step number, starting at 1. */
   number: number;
   text: string;
-  /** The step's text before an import converted it, shown under the text. */
+  /** The step's text before an import converted it. Shown under the text. */
   originalText?: string;
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
   className?: string;
 }
 
-/** One numbered method step with a tick-off checkbox. */
+/** One numbered step of the recipe, with a checkbox to mark it done. */
 export function StepItem({
   number,
   text,

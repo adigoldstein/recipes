@@ -7,13 +7,7 @@ import {
   usersUpdateUserMutation,
 } from '@bite-and-board/data-access';
 
-/**
- * `PATCH /api/users/{id}` for the Users screen. On success the list is refreshed.
- *
- * If the admin changed their own account (stepped down, or blocked themselves),
- * they just lost this screen: the session is re-read and they are sent home
- * instead of watching the list fail with a 403 or 401.
- */
+/** Updates a user (`PATCH /api/users/{id}`) from the users page. */
 export function useUpdateUser() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -22,6 +16,9 @@ export function useUpdateUser() {
   return useMutation({
     ...usersUpdateUserMutation(),
     onSuccess: async (updated) => {
+      // If the admin changed their own account (became an editor, or blocked
+      // themselves), they can no longer see this page. Reload the session and go to
+      // the home page, instead of showing the list fail with a 403 or 401.
       if (updated.id === selfId) {
         queryClient.removeQueries({ queryKey: usersListUsersQueryKey() });
         await queryClient.invalidateQueries({
@@ -30,6 +27,7 @@ export function useUpdateUser() {
         await navigate('/', { replace: true });
         return;
       }
+      // Otherwise, reload the user list.
       await queryClient.invalidateQueries({
         queryKey: usersListUsersQueryKey(),
       });

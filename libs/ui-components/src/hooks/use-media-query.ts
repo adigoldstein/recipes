@@ -1,6 +1,9 @@
 import { useSyncExternalStore } from 'react';
 
-/** Follows a CSS media query live; false where `matchMedia` does not exist. */
+/**
+ * Returns whether a CSS media query matches, and updates when it changes. Returns
+ * false where `matchMedia` does not exist.
+ */
 export function useMediaQuery(query: string): boolean {
   const subscribe = (onChange: () => void) => {
     if (typeof window.matchMedia !== 'function') return () => undefined;
@@ -13,5 +16,5 @@ export function useMediaQuery(query: string): boolean {
   return useSyncExternalStore(subscribe, getSnapshot, () => false);
 }
 
-/** Tailwind's `sm` and up: the chip row has room for every tag. */
+/** True from Tailwind's `sm` size and up, where the chip row has room for all tags. */
 export const useIsDesktop = () => useMediaQuery('(min-width: 40rem)');

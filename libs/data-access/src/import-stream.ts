@@ -7,7 +7,7 @@ import {
   importSafetyNetMs,
 } from './client';
 
-/** The real pipeline stages the server reports (AD-40). */
+/** The import steps that the server reports (AD-40). */
 export type ImportStageName =
   'fetch' | 'extract' | 'translate' | 'validate' | 'convert_units';
 export type ImportStageStatus = 'started' | 'done' | 'skipped';
@@ -17,7 +17,7 @@ export interface ImportStage {
 }
 
 export interface StreamImportOptions {
-  /** Aborting it is "ביטול": the request is dropped and the server cancels the engine. */
+  /** Abort it to cancel ("ביטול"): the request stops and the server stops the AI. */
   signal?: AbortSignal;
   onStage?: (stage: ImportStage) => void;
 }
@@ -27,12 +27,18 @@ interface ServerEvent {
   data: string;
 }
 
-/** The API's error body shape, so the UI reads it like any other error (AD-28). */
+/**
+ * Builds an error in the API's error shape, so the UI handles it like any other
+ * error (AD-28).
+ */
 function apiError(code: string, detail: string, params?: unknown) {
   return { code, detail, ...(params ? { params } : {}) };
 }
 
-/** Splits an SSE text buffer into whole events; the rest stays in the buffer. */
+/**
+ * Takes the complete events out of the SSE text. An incomplete event stays in
+ * `rest`.
+ */
 function takeEvents(buffer: string): { events: ServerEvent[]; rest: string } {
   const blocks = buffer.split(/\r?\n\r?\n/);
   const rest = blocks.pop() ?? '';
@@ -50,12 +56,11 @@ function takeEvents(buffer: string): { events: ServerEvent[]; rest: string } {
 }
 
 /**
- * Runs an import and reads its progress stream with `fetch` and a stream reader (AD-40;
- * `EventSource` cannot POST or send the CSRF header). Resolves with the draft; a
- * failure throws the API's error shape `{code, detail, params?}`, whether the server
- * refused before the stream (plain HTTP status) or sent an `error` event after it.
- * `onStage` hears each pipeline stage. If the server stays silent longer than the
- * import safety net, the call fails with `request_timeout` (AD-43).
+ * Runs an import and reads its progress stream (AD-40). Returns the draft.
+ *
+ * On failure it throws the API's error shape `{code, detail, params?}`, both when the
+ * server refuses before the stream starts and when it sends an `error` event.
+ * `onStage` is called for each import step.
  */
 export async function streamImport(
   kind: 'text' | 'url',
@@ -66,6 +71,8 @@ export async function streamImport(
   signal?.addEventListener('abort', () => controller.abort(), { once: true });
   let silent = false;
   let timer: ReturnType<typeof setTimeout> | undefined;
+  // Restart the timer on every chunk. If the server sends nothing for longer than the
+  // import time limit, abort, and the call fails with `request_timeout` (AD-43).
   const watch = () => {
     clearTimeout(timer);
     timer = setTimeout(() => {
@@ -77,6 +84,8 @@ export async function streamImport(
   watch();
   try {
     const base = client.getConfig().baseUrl ?? '';
+    // We use `fetch` and not `EventSource`, because `EventSource` cannot send a POST
+    // or the CSRF header.
     const response = await fetch(`${base}/api/imports/${kind}`, {
       method: 'POST',
       credentials: 'same-origin',
@@ -119,7 +128,7 @@ export async function streamImport(
         }
       }
     }
-    // The stream ended without a draft or an error: the connection was cut.
+    // The stream ended without a draft or an error, so the connection was cut.
     throw apiError('request_failed', 'The import stream ended early');
   } catch (error) {
     if (silent) {

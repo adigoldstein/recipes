@@ -35,7 +35,7 @@ import { useErrorMessage } from '../shared/use-error-message';
 
 type Mode = 'url' | 'text';
 
-/** The pipeline stages in the order the checklist shows them (AD-40). */
+/** The import steps, in the order the checklist shows them (AD-40). */
 const STAGES: ImportStageName[] = [
   'fetch',
   'extract',
@@ -46,7 +46,7 @@ const STAGES: ImportStageName[] = [
 
 type Progress = Partial<Record<ImportStageName, ImportStageStatus>>;
 
-/** Fetch failures where pasting the page's text is the way forward (AD-35). */
+/** Download errors where the solution is to paste the page's text (AD-35). */
 const FETCH_ERRORS = new Set([
   'fetch_blocked',
   'fetch_challenged',
@@ -54,7 +54,10 @@ const FETCH_ERRORS = new Set([
   'fetch_too_large',
 ]);
 
-/** Failures where the engine (or the wait for it) failed and trying again is the way. */
+/**
+ * Errors where the AI engine failed (or took too long), and the solution is to try
+ * again.
+ */
 const ENGINE_ERRORS = new Set([
   'llm_timeout',
   'llm_unavailable',
@@ -66,7 +69,7 @@ const ENGINE_ERRORS = new Set([
   'internal_error',
 ]);
 
-/** A link the server can try: http or https, nothing else. */
+/** Checks that a link is one the server can try: http or https only. */
 function isWebLink(value: string) {
   try {
     const url = new URL(value);
@@ -76,23 +79,31 @@ function isWebLink(value: string) {
   }
 }
 
-/** What the page that hosts the panel gives it. The two libraries never import each other. */
+/**
+ * What the page that shows the panel gives it. The two libraries do not import each
+ * other.
+ */
 export interface ImportPanelProps {
-  /** The form already holds what the editor typed, so an import would replace it. */
+  /** True if the form has text the editor typed, so an import would replace it. */
   dirty: boolean;
-  /** The import produced a draft: the page puts it into its form (AD-22). */
+  /**
+   * Called with the draft when the import succeeds. The page puts it in its form
+   * (AD-22).
+   */
   onDraft: (draft: DraftRecipe) => void;
-  /** A request is running or not, so the page can lock its form meanwhile. */
+  /** Called when a request starts or ends, so the page can lock its form meanwhile. */
   onBusyChange: (busy: boolean) => void;
 }
 
 /**
- * "ייבוא עם בינה מלאכותית" at the top of the new-recipe page (FR-17, FR-18): a button
- * that opens a panel with two ways in, "קישור" (a recipe page's link, Story 5.4) and
- * "הדבקת טקסט". While the import runs the page locks its form; when it ends the form
- * is filled with the draft and nothing is saved until the editor presses "שמירה". A
- * failure leaves the form and the input as they were. When a page cannot be fetched,
- * one click switches to pasting its text.
+ * "ייבוא עם בינה מלאכותית" at the top of the new recipe page (FR-17, FR-18). A button
+ * opens a panel with two options: "קישור" (a link to a recipe page, Story 5.4) and
+ * "הדבקת טקסט".
+ *
+ * While the import runs, the page locks its form. When it ends, the form is filled
+ * with the draft, and nothing is saved until the editor presses "שמירה". If it fails,
+ * the form and the input stay as they were. If a page cannot be downloaded, one click
+ * switches to pasting its text.
  */
 export function ImportPanel({
   dirty,
@@ -123,9 +134,9 @@ export function ImportPanel({
   const [done, setDone] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [canRetry, setCanRetry] = useState(false);
-  // The request that is running; aborting it is how "ביטול" works.
+  // The running request. "ביטול" works by aborting it.
   const running = useRef<AbortController>(undefined);
-  // Learns the engine's timeout so the client's own limit follows it (AD-43).
+  // Load the engine's timeout, so the client sets its own time limit from it (AD-43).
   useImportEngines();
   const pending = importDraft.isPending;
 
@@ -139,7 +150,7 @@ export function ImportPanel({
       setDone(true);
     },
     onError: (error: unknown) => {
-      // A cancel is not a failure: no message, the form stays as it was.
+      // A cancel is not an error: show no message, and keep the form as it was.
       if (running.current?.signal.aborted) return;
       const code = getErrorCode(error) ?? '';
       setProblem(errorMessage(error));
@@ -346,7 +357,7 @@ export function ImportPanel({
               ) : null}
             </div>
           ) : null}
-          {/* Always rendered, so a screen reader announces the text when it appears. */}
+          {/* Always in the page, so a screen reader reads the text when it appears. */}
           <p role="status" className="min-h-5 text-sm text-muted-foreground">
             {pending ? t('import.pending') : null}
           </p>
@@ -389,8 +400,8 @@ export function ImportPanel({
 }
 
 /**
- * What the import is really doing, one line per pipeline stage as the server reports
- * it (AD-40). Stages that do not apply ("skipped") are left out. No percentage.
+ * Shows what the import is doing: one line for each step the server reports (AD-40).
+ * Steps that do not apply ("skipped") are not shown. There is no percentage.
  */
 function StageChecklist({ progress }: { progress: Progress }) {
   const { t } = useTranslation();

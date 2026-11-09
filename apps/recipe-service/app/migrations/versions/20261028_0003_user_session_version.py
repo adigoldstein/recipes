@@ -17,12 +17,12 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    # Every existing user starts at 0, the version their current tokens already
-    # carry (a token without the claim counts as 0), so nobody is signed out.
+    # Every existing user starts at version 0. Their current tokens have no version,
+    # which also counts as 0, so nobody is logged out.
     #
-    # Plain ALTER TABLE, not batch mode: a batch rebuild would copy the table through
-    # reflection, which skips the expression index on lower(email) and would silently
-    # drop it (AD-30).
+    # We use a plain ALTER TABLE and not batch mode. Batch mode rebuilds the table,
+    # and while copying it, it would lose the index on lower(email) without any
+    # warning (AD-30).
     op.add_column(
         "user",
         sa.Column(
@@ -35,5 +35,6 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    # SQLite can drop a plain column in place (3.35+); see upgrade() for why not batch.
+    # SQLite (3.35+) can drop a simple column directly. See upgrade() for why we do
+    # not use batch mode.
     op.execute(sa.text('ALTER TABLE "user" DROP COLUMN session_version'))

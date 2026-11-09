@@ -3,7 +3,7 @@ import type { DraftRecipe, ImportStage } from '@bite-and-board/data-access';
 
 const encoder = new TextEncoder();
 
-/** One SSE block, as the server writes it (AD-40). */
+/** Builds one SSE block, like the server writes it (AD-40). */
 export const sse = (event: string, data: unknown) =>
   `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
 
@@ -18,7 +18,7 @@ const ALL_STAGES: ImportStage[] = [
   { name: 'convert_units', status: 'done' },
 ];
 
-/** An event stream response made of these SSE blocks. */
+/** Builds an event stream response from these SSE blocks. */
 export function streamOf(blocks: string[]) {
   return new HttpResponse(
     new ReadableStream<Uint8Array>({
@@ -31,7 +31,7 @@ export function streamOf(blocks: string[]) {
   );
 }
 
-/** A good import: the stages, then the draft. */
+/** A successful import: the steps, then the draft. */
 export function draftResponse(
   draft: DraftRecipe,
   stages: ImportStage[] = ALL_STAGES,
@@ -42,14 +42,17 @@ export function draftResponse(
   ]);
 }
 
-/** Refusals the server makes before the stream starts keep a plain HTTP status. */
+/**
+ * Errors that the server returns before the stream starts, with a regular HTTP
+ * status.
+ */
 const BEFORE_STREAM = new Set([
   'import_cap_reached',
   'import_text_too_long',
   'provider_unavailable',
 ]);
 
-/** A failed import: an HTTP error before the stream, an `error` event after it. */
+/** A failed import: an HTTP error before the stream, or an `error` event inside it. */
 export function errorResponse(
   status: number,
   code: string,

@@ -8,18 +8,22 @@ import { toWritePayload, type RecipeFormValues } from './recipe-form-values';
 
 const INTEGER = /^\d+$/;
 
-/** Array fields keep their own message apart from their rows' (`errors.steps.root`). */
+/**
+ * List fields. Their own error is kept apart from the rows' errors
+ * (`errors.steps.root`).
+ */
 const ARRAY_FIELDS = new Set(['ingredients', 'steps', 'tags']);
 
-/** The path React Hook Form stores an issue under. */
+/** Returns the path where React Hook Form keeps the error of this field. */
 export function issueFieldPath(path: string) {
   return ARRAY_FIELDS.has(path) ? `${path}.root` : path;
 }
 
-/** The part of the form a path belongs to, for telling form fields from other errors. */
+/** Checks whether a path is a form field, to tell field errors from other errors. */
 export function isFormField(path: string) {
   const [field, , leaf] = path.split('.');
-  // A refused ingredient `id` has no field to sit on; the form shows it under the button.
+  // An invalid ingredient `id` has no field to show it on, so the form shows it
+  // under the save button.
   if (field === 'ingredients' && leaf === 'id') return false;
   return [
     'title',
@@ -35,7 +39,7 @@ export function isFormField(path: string) {
   ].includes(field);
 }
 
-/** Text that is not a number at all; the write schema only sees numbers. */
+/** Finds text that is not a number at all. The write schema only checks numbers. */
 function numberIssues(values: RecipeFormValues): FieldIssue[] {
   const issues: FieldIssue[] = [];
   const check = (
@@ -68,9 +72,9 @@ function numberIssues(values: RecipeFormValues): FieldIssue[] {
 }
 
 /**
- * Everything wrong with these values, as the server would report it: text that is
- * not a number first, then whatever the generated write schema rejects. Empty
- * means the values can be sent.
+ * Returns all the problems in these values, in the same format as the server: first
+ * text that is not a number, then what the generated write schema rejects. An empty
+ * list means the values can be sent.
  */
 export function validateRecipeForm(values: RecipeFormValues): FieldIssue[] {
   const unparsable = numberIssues(values);

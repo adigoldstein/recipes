@@ -1,4 +1,4 @@
-"""Helpers that insert recipes and users straight into the migrated test database."""
+"""Helpers that add recipes and users directly into the test database."""
 
 from collections.abc import Sequence
 from datetime import datetime
@@ -53,7 +53,7 @@ def add_recipe(
 
 
 def ingredient(name: str, **fields: Any) -> IngredientItem:
-    """An ingredient item; its place in the list is its order (AD-41)."""
+    """Creates an ingredient item. Its place in the list is its order (AD-41)."""
     return IngredientItem(name=name, **fields)
 
 

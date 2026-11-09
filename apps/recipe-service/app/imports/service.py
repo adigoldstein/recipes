@@ -1,4 +1,4 @@
-"""Business rules for imports; other modules call this layer, never the repository."""
+"""The business logic of imports. Other modules call this layer, not the repository."""
 
 import asyncio
 import contextlib
@@ -42,10 +42,10 @@ from app.tags.service import TagService, get_tag_service
 
 logger = logging.getLogger(__name__)
 
-# Tag names are stored with this limit (the tags module owns it).
+# The maximum tag name length (defined by the tags module).
 _TAG_NAME_MAX_LENGTH = 40
 
-# Where each failure goes on the wire (a provider failure is 502, a timeout 504).
+# The HTTP status for each error (a provider failure is 502, a timeout is 504).
 _LLM_STATUS = {
     ErrorCode.LLM_TIMEOUT: 504,
     ErrorCode.LLM_UNAVAILABLE: 502,
@@ -54,15 +54,16 @@ _LLM_STATUS = {
 }
 
 
-# How often a waiting stream checks that the client is still there.
+# How often, in seconds, a waiting stream checks that the client is still connected.
 _POLL_SECONDS = 0.25
-# The outcome logged when the client cancelled (the column is free text).
+# The outcome saved when the client cancelled (the column is free text).
 CANCELLED = "cancelled"
 
 
 @dataclass(frozen=True)
 class ImportJob:
-    """An import that passed the checks which answer with a plain HTTP status."""
+    """An import that passed the first checks (the ones that can still return a
+    regular HTTP error)."""
 
     provider: LlmProvider
     user_id: uuid.UUID
@@ -84,7 +85,8 @@ class ImportService:
         self._settings = settings
 
     def providers(self) -> list[ProviderInfo]:
-        """The active engine and its timeout, so the client can set its own (AD-43)."""
+        """Returns the active engine and its timeout, so the client can set its own
+        (AD-43)."""
         provider = self._provider()
         return [
             ProviderInfo(
@@ -93,7 +95,8 @@ class ImportService:
         ]
 
     def prepare_text(self, text: str, user_id: uuid.UUID) -> ImportJob:
-        """Checks that can still answer with a plain HTTP status, before the stream."""
+        """Runs the checks for a text import before the stream starts, while we can
+        still return a regular HTTP error."""
         if len(text) > self._settings.import_max_chars:
             raise AppError(
                 413,
@@ -105,7 +108,8 @@ class ImportService:
         return ImportJob(self._provider(), user_id, "text", text=text)
 
     def prepare_url(self, url: str, user_id: uuid.UUID) -> ImportJob:
-        """Same for a link; the fetch itself is a stage of the stream (AD-40)."""
+        """Runs the checks for a URL import before the stream starts. Downloading the
+        page is a step inside the stream (AD-40)."""
         self._ensure_under_daily_cap()
         return ImportJob(
             self._provider(), user_id, "url", url=url, fetcher=self._fetcher()
@@ -114,13 +118,10 @@ class ImportService:
     async def stream(
         self, job: ImportJob, is_disconnected: Callable[[], Awaitable[bool]]
     ) -> AsyncGenerator[ImportEvent]:
-        """The import as events: `stage`..., then `draft` or `error` (AD-40).
-
-        The work runs as a task. When the client goes away (or this generator is
-        cancelled) the task is cancelled, which drops the call to the engine; the run
-        is then logged as `cancelled` and nothing else is written (AD-22).
-        """
+        """Runs the import and sends its events: `stage` events, then `draft` or
+        `error` (AD-40)."""
         queue: asyncio.Queue[ImportEvent | None] = asyncio.Queue()
+        # The work runs in a separate task and puts events in the queue.
         task = asyncio.create_task(self._produce(job, queue))
         try:
             while True:
@@ -134,6 +135,9 @@ class ImportService:
                     return
                 yield event
         finally:
+            # If the client left (or this generator was cancelled), cancel the task.
+            # That stops the call to the AI engine, and the import is saved as
+            # `cancelled` with nothing else written (AD-22).
             task.cancel()
             with contextlib.suppress(asyncio.CancelledError):
                 await task
@@ -167,7 +171,8 @@ class ImportService:
         if job.fetcher is not None and job.url is not None:
             stage("fetch", "started")
             try:
-                # The fetch and the parsing are blocking code: off the event loop.
+                # Downloading and parsing are blocking code, so run them in a thread
+                # and not on the event loop.
                 page = await asyncio.to_thread(self._fetch_page, job.fetcher, job.url)
             except FetchError as error:
                 logger.info(
@@ -180,7 +185,8 @@ class ImportService:
                 raise AppError(
                     400, ErrorCode.NO_RECIPE_FOUND, "No recipe found on the page"
                 )
-            # A long page is cut, not refused: the recipe is usually near the top.
+            # A long page is cut, not rejected, because the recipe is usually near
+            # the top.
             text = page.text[: self._settings.import_max_chars]
             path, photo_url = page.path, page.photo_url
             stage("fetch", "done")
@@ -205,7 +211,7 @@ class ImportService:
             record(started, CANCELLED, None)
             raise
         stage("extract", "done")
-        # The model translates inside the same call; the draft says whether it did.
+        # The AI translates in the same call. The draft says whether it translated.
         stage("translate", "done" if result.draft.translated else "skipped")
 
         stage("validate", "started")
@@ -250,7 +256,8 @@ class ImportService:
             ) from error
 
     def _ensure_under_daily_cap(self) -> None:
-        """The cap is global and resets at midnight in the app timezone (AD-29)."""
+        """Checks the daily import limit. The limit is for all users together, and
+        it resets at midnight in the app's timezone (AD-29)."""
         zone = ZoneInfo(self._settings.app_timezone)
         midnight = datetime.now(zone).replace(hour=0, minute=0, second=0, microsecond=0)
         used = self._repository.count_runs_since(midnight.astimezone(UTC))
@@ -274,7 +281,7 @@ class ImportService:
         source_kind: str,
         path: ImportPath,
     ) -> None:
-        """One run row and its one attempt row (AD-38)."""
+        """Saves one run row and its attempt row (AD-38)."""
         latency_ms = round((time.perf_counter() - started) * 1000)
         usage = result.usage if result else Usage()
         run = ImportRun(
@@ -307,7 +314,8 @@ class ImportService:
 
 
 def _validate(draft: DraftRecipe, existing_tags: list[str]) -> DraftRecipe:
-    """Tags matched to the existing list, and the fields the source did not give."""
+    """Matches the tags to the existing list, and lists the fields the source did
+    not have."""
     tags, new_tags = _split_tags(draft, existing_tags)
     missing = [
         field
@@ -319,7 +327,7 @@ def _validate(draft: DraftRecipe, existing_tags: list[str]) -> DraftRecipe:
             "tags": tags,
             "new_tags": new_tags,
             "missing_fields": missing,
-            # Filled by the code only, whatever the model returned.
+            # Only the code fills these, whatever the AI returned.
             "source_url": None,
             "photo_source_url": None,
         }
@@ -327,7 +335,7 @@ def _validate(draft: DraftRecipe, existing_tags: list[str]) -> DraftRecipe:
 
 
 def _convert(draft: DraftRecipe) -> DraftRecipe:
-    """The deterministic unit and temperature conversion."""
+    """Converts the units and temperatures to metric, in code."""
     return draft.model_copy(
         update={
             "ingredients": [convert_ingredient(item) for item in draft.ingredients],
@@ -339,7 +347,8 @@ def _convert(draft: DraftRecipe) -> DraftRecipe:
 def _split_tags(
     draft: DraftRecipe, existing_tags: list[str]
 ) -> tuple[list[str], list[str]]:
-    """Tags are existing names (matched ignoring case) or new proposals (FR24)."""
+    """Splits the AI's tags into existing tags (matched ignoring upper and lower
+    case) and new suggested tags (FR24)."""
     by_lower = {name.lower(): name for name in existing_tags}
     tags: list[str] = []
     new_tags: list[str] = []
@@ -361,5 +370,6 @@ def get_import_service(
     tag_service: Annotated[TagService, Depends(get_tag_service)],
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> ImportService:
-    """Provider, like a Nest injectable: `Depends(get_import_service)`."""
+    """Creates the import service for a route, like a Nest provider:
+    `Depends(get_import_service)`."""
     return ImportService(ImportRepository(session), tag_service, settings)

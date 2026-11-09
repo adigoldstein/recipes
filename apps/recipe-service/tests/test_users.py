@@ -38,7 +38,7 @@ def service(session: Session) -> UserService:
 
 @pytest.fixture
 def type_passwords(monkeypatch: pytest.MonkeyPatch) -> Typed:
-    """Feed the CLI's password prompts; a prompt beyond the answers fails the test."""
+    """Types answers into the CLI's password prompts. An extra prompt fails the test."""
 
     def feed(*answers: str) -> None:
         remaining: Iterator[str] = iter(answers)
@@ -134,7 +134,7 @@ def test_losing_a_race_for_an_email_is_still_a_clear_conflict(
     service: UserService, session: Session, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     add_user(session)
-    # The pre-check sees nothing, as if the other insert had not committed yet.
+    # The first check finds nothing, as if another insert was not committed yet.
     monkeypatch.setattr(UserRepository, "get_by_email", lambda _self, _email: None)
     with pytest.raises(AppError) as error:
         service.create_user(_new_admin(), PASSWORD)
@@ -530,7 +530,8 @@ def test_cli_stops_cleanly_when_the_prompt_is_cancelled(
 def test_authenticate_still_verifies_a_hash_for_an_unknown_email(
     service: UserService, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Same work for an unknown email, so timing does not reveal who has an account."""
+    """An unknown email takes the same work, so the timing does not reveal who has an
+    account."""
     verified: list[str] = []
 
     def spy(password: str, password_hash: str) -> bool:

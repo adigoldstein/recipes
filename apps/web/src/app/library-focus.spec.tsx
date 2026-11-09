@@ -25,15 +25,15 @@ const server = setupServer(
 );
 
 beforeAll(() => {
-  // Node's fetch rejects the client's relative `/api` URLs.
+  // Node's fetch does not accept relative URLs like `/api`, so set a full base URL.
   client.setConfig({ baseUrl: window.location.origin });
   server.listen({ onUnhandledFrame: 'error' });
 });
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 
-// The library keeps its filters in the URL, so each keystroke is a navigation.
-// The shell must not treat that as a new page and pull focus away.
+// The library keeps its filters in the URL, so every key press is a navigation.
+// The app layout must not treat it as a new page and move the focus away.
 describe('the library inside the app shell', () => {
   it('keeps focus in the search field while typing', async () => {
     const queryClient = createAppQueryClient();

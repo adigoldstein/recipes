@@ -1,6 +1,6 @@
-"""The deterministic `fake` provider, for tests and CI, which never call a real model.
+"""A fake AI provider for tests and CI, which never call a real AI model.
 
-The scenario is chosen by the pasted text: `FAKE:<scenario>` (see `SCENARIOS`).
+The pasted text chooses what it returns: `FAKE:<scenario>` (see `SCENARIOS`).
 """
 
 import asyncio
@@ -59,7 +59,7 @@ _ENGLISH: dict[str, Any] = {**_COOKIES, "translated": True, "base_servings": Non
 
 _EMPTY: dict[str, Any] = {"title": "אין כאן מתכון", "ingredients": [], "steps": []}
 
-# An ingredient with amount 0 breaks the schema (amount must be above zero).
+# An invalid answer: the amount must be above zero, so 0 fails validation.
 _INVALID = json.dumps(
     {**_COOKIES, "ingredients": [{"name": "קמח", "amount": 0, "unit": "g"}]}
 )
@@ -77,7 +77,8 @@ def _raise(error: type[Exception], detail: str) -> Callable[[int], RawReply]:
     return respond
 
 
-# Each scenario answers call number 1, 2, ... (the second call is the retry).
+# Each scenario gets the call number (1, 2, ...) and returns the answer for it.
+# The second call is the retry.
 SCENARIOS: dict[str, Callable[[int], RawReply]] = {
     "ok": lambda _call: _reply(_COOKIES),
     "imperial": lambda _call: _reply(_IMPERIAL),
@@ -92,7 +93,7 @@ SCENARIOS: dict[str, Callable[[int], RawReply]] = {
     "slow": lambda _call: _reply(_COOKIES),
 }
 
-# How long `FAKE:slow` takes to answer.
+# How many seconds `FAKE:slow` takes to answer.
 SLOW_SECONDS = 20.0
 
 
@@ -115,7 +116,8 @@ class FakeProvider:
             nonlocal calls
             calls += 1
             if scenario == "slow":
-                # A slow engine, for trying "ביטול" by hand and for the cancel tests.
+                # Answer slowly, to test the "ביטול" (cancel) button by hand and in
+                # the cancel tests.
                 await asyncio.sleep(SLOW_SECONDS)
             return respond(calls)
 
