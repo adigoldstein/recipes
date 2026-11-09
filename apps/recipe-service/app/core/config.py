@@ -29,9 +29,6 @@ class Settings(BaseSettings):
     # Defaults to production so a forgotten ENV fails safe (e.g. secure cookies).
     env: Environment = Environment.PRODUCTION
     data_dir: Path = Path("./data")
-    # The built React app (`index.html` and `assets/`). Set only in the Docker image,
-    # where FastAPI serves the app too; in dev it stays unset and Vite serves it.
-    web_dir: Path | None = None
     # The app is a demo: a start that finds no recipes loads the demo recipes
     # (`app/seed_data/demo_recipes.json`). Not a user setting; only the tests and the
     # e2e server set SEED_DEMO=false, so they start from an empty database.
@@ -79,7 +76,7 @@ class Settings(BaseSettings):
             return [name.strip() for name in value.split(",") if name.strip()]
         return value
 
-    @field_validator("gemini_api_key", "anthropic_api_key", "web_dir", mode="before")
+    @field_validator("gemini_api_key", "anthropic_api_key", mode="before")
     @classmethod
     def _blank_key_is_none(cls, value: object) -> object:
         return None if isinstance(value, str) and not value.strip() else value

@@ -1,5 +1,5 @@
-// Starts the app the way production does, for the end-to-end tests (Story 6.3):
-// one FastAPI process serving the API and the built React app, on a fresh database.
+// Starts the API for the end-to-end tests (Story 6.3), on a fresh database. The built
+// React app is served by `vite preview` (see playwright.config.ts).
 //
 // Every setting is passed in the environment, and the Python processes run from the
 // temp directory, so the developer's `.env` (which is read from the working
@@ -29,7 +29,6 @@ const env = {
   // Only the small `seed` recipes, never the demo library.
   SEED_DEMO: 'false',
   DATA_DIR: join(workdir, 'data'),
-  WEB_DIR: join(root, 'apps/web/dist'),
   ANTHROPIC_API_KEY: '',
   GEMINI_API_KEY: '',
   PYTHONUTF8: '1',

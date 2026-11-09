@@ -40,7 +40,7 @@ Login is limited to 5 attempts a minute per client IP (slowapi, in memory, so a 
 clears it). Behind a reverse proxy the app sees the proxy's address, so every user would
 share one bucket. In production start uvicorn with `--proxy-headers` and
 `--forwarded-allow-ips` set to the proxy's address only (not `*`, or the header can be
-spoofed to dodge the limit). That is set up with the container in Story 6.1.
+spoofed to dodge the limit).
 
 ## Guarding routes (AD-6, AD-30)
 

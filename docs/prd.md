@@ -22,7 +22,7 @@ The application is built within an Nx Monorepo prioritizing Clean Architecture, 
 - **UI State Management:** React Context / Hooks (with room to add Zustand on-the-go if needed).
 - **Core Backend:** Python 3.12, FastAPI, Pydantic v2, SQLModel (SQLAlchemy v2), Alembic, Uvicorn, SQLite (Embedded DB).
 - **AI Service / Module:** Python, `instructor` / OpenAI SDK / Ollama.
-- **DevOps & Infrastructure:** Docker, Multi-stage Dockerfiles, Docker Compose.
+- **DevOps & Infrastructure:** ~~Docker, Multi-stage Dockerfiles, Docker Compose.~~ Cancelled 2026-11-09 (Adi): needless complexity for a demo project. `npm run dev` runs the app.
 
 ### Nx Monorepo Directory Layout
 
@@ -36,11 +36,6 @@ bite-and-board/
 │   ├── ui-components/           # Shared Dumb / Presentational React Components (Storybook-ready)
 │   ├── data-access/             # Shared API Clients, TanStack Query Hooks, Zod Schemas
 │   └── shared-types/            # Generated TypeScript types from FastAPI OpenAPI schemas
-├── docker/
-│   ├── Dockerfile.web
-│   ├── Dockerfile.recipe-service
-│   └── Dockerfile.ai-service
-├── docker-compose.yml
 ├── nx.json
 └── README.md
 ```
@@ -140,8 +135,8 @@ bite-and-board/
 - [ ] Create AI Recipe Import modal in React (Raw text -> Structured JSON -> Database save).
 - [ ] Implement Smart Ingredient Substitution endpoint.
 
-### Phase 4: Containerization & Deployment
+### Phase 4: Deployment
 
-- [ ] Author Dockerfiles for React frontend and FastAPI backend.
-- [ ] Configure `docker-compose.yml` for unified local execution with persistent SQLite volumes.
+- ~~Author Dockerfiles for React frontend and FastAPI backend.~~ Cancelled 2026-11-09 (Adi): no Docker.
+- ~~Configure `docker-compose.yml` for unified local execution with persistent SQLite volumes.~~ Cancelled 2026-11-09: `npm run dev` runs the app.
 - [ ] (Optional) Deployment target setup (Railway / Render / Cloud server).

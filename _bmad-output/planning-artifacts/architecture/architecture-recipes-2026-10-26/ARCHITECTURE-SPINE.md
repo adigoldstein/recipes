@@ -176,11 +176,12 @@ flowchart LR
   - Imported photos are downloaded on **save**, not at import time, and their source domain is kept as credit.
   - Photos are served under `/media/…`.
 
-### AD-15 — One container, one origin [ADOPTED]
+### AD-15 — One origin through the Vite proxy [AMENDED 2026-11-09: container dropped]
 
 - **Binds:** NFR-6, AD-6, AD-14, deployment
 - **Prevents:** cross-origin cookie problems, and split deploy units drifting apart.
-- **Rule:** The production image is a single container. FastAPI serves the built SPA (with fallback to `index.html` for client routes), `/api/*` and `/media/*`. The SQLite file and the photos live on one mounted volume (`/data`). `docker compose up` runs this image locally. Day-to-day dev is `npm run dev`: Nx runs `web` and `recipe-service` together, and Vite proxies `/api` and `/media` to FastAPI. The AI engines (Gemini, Groq) are hosted free-tier APIs reached with keys from config (Ollama was dropped on 2026-11-04).
+- **Rule:** FastAPI serves only `/api/*` and `/media/*`; it does not serve the React app. Vite serves the app and proxies `/api` and `/media` to FastAPI, so the browser sees one origin: `vite` in development and `vite preview` (the built app) in the e2e run. The SQLite file and the photos live in `DATA_DIR`. Day-to-day dev is `npm run dev`: Nx runs `web` and `recipe-service` together, and Vite proxies `/api` and `/media` to FastAPI. The AI engines (Gemini, Groq) are hosted free-tier APIs reached with keys from config (Ollama was dropped on 2026-11-04).
+- **Amended 2026-11-09 (Adi):** the Docker image and `docker compose` (Story 6.1) were removed: needless complexity for a demo project that never goes to production. FastAPI no longer serves the built SPA either; the single origin comes from the Vite proxy.
 
 ### AD-16 — Tests per layer, never a real model [ADOPTED]
 
@@ -327,8 +328,8 @@ flowchart LR
 - **Prevents:** secrets in logs, unrecoverable data loss, and misconfigured environments.
 - **Rule:**
   - **Logging:** Python `logging`, pretty in dev and JSON in prod, with request IDs and redaction of passwords, cookies and keys. Each import writes one `import_runs` row (AD-38; replaces the earlier `import_log`), which also counts the daily cap.
-  - **Config:** the env matrix lives in a committed `.env.example`: `ENV`, `DATA_DIR`, `JWT_SECRET` (the app fails fast if it is missing), `COOKIE_SECURE`, `LLM_PROVIDERS`, `OLLAMA_URL` (`host.docker.internal` under compose), `GEMINI_API_KEY`, `GEMINI_MODEL`, `IMPORT_DAILY_CAP`, `LLM_MAX_TOKENS`, `APP_TIMEZONE`, `LOG_LEVEL`.
-  - **Health:** `GET /api/health` (moved from `/health`) is the container `HEALTHCHECK`. A failed startup migration exits non-zero.
+  - **Config:** the env matrix lives in a committed `.env.example`: `ENV`, `DATA_DIR`, `JWT_SECRET` (the app fails fast if it is missing), `COOKIE_SECURE`, `LLM_PROVIDERS`, `GEMINI_API_KEY`, `GEMINI_MODEL`, `IMPORT_DAILY_CAP`, `LLM_MAX_TOKENS`, `APP_TIMEZONE`, `LOG_LEVEL`.
+  - **Health:** `GET /api/health` (moved from `/health`) answers when the server is up; the e2e run waits on it. A failed startup migration exits non-zero.
   - **Backup:** `app.cli backup` runs `VACUUM INTO` and tars the photos, with a documented restore. Scheduling is deferred with the host.
 
 ### AD-30 — Users and roles [ADOPTED]
@@ -365,7 +366,7 @@ flowchart LR
 - **Prevents:** rules that are followed only on the honour system.
 - **Rule:**
   - **Python:** mypy (strict, with the pydantic plugin) is the `recipe-service:typecheck` target. import-linter contracts for AD-1 and AD-25 run in `lint`.
-  - **Rate limit:** slowapi limits login attempts (in memory, which is fine for one container).
+  - **Rate limit:** slowapi limits login attempts (in memory, which is fine for one server process).
   - **Frontend boundaries:** Nx tags `type:app`, `type:feature`, `type:data-access`, `type:ui`, `type:domain` and `type:i18n` carry these dependency constraints:
     - app → feature, data-access, ui, domain, i18n
     - feature → data-access, ui, domain, i18n (never another feature)
@@ -580,7 +581,7 @@ libs/
 | F9 AI import                | imports module + providers · libs/feature-import             | AD-12, AD-13, AD-34–AD-40 |
 | F10 tags                    | tags module · libs/feature-tags                              | AD-7               |
 | Photos                      | photos module                                                | AD-14              |
-| NFR-6 one-command run       | compose + nx dev target                                      | AD-15, AD-18       |
+| NFR-6 one-command run       | `npm run dev` (nx dev target)                                | AD-15, AD-18       |
 | NFR-1/2 quality, CI         | all projects                                                 | AD-16, AD-17       |
 | NFR-12 RTL                  | web + ui-components                                          | AD-10              |
 
