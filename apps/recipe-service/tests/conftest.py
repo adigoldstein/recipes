@@ -38,6 +38,8 @@ def isolated_settings(
     # TestClient talks plain http, and a Secure cookie would never be sent back.
     monkeypatch.setenv("COOKIE_SECURE", "false")
     monkeypatch.setenv("DATA_DIR", str(tmp_path / "data"))
+    # Every test starts from an empty database; test_demo_seed turns this back on.
+    monkeypatch.setenv("SEED_DEMO", "false")
     get_settings.cache_clear()
     # The login limiter is process-wide, so one test's attempts must not leak.
     limiter.reset()
