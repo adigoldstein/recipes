@@ -20,6 +20,7 @@ from app.core.health import router as health_router
 from app.core.migrate import run_migrations
 from app.core.rate_limit import limiter
 from app.core.security import get_session_user, require_csrf_header
+from app.demo_seed import seed_demo_on_first_start
 from app.imports.router import publish_stream_events
 from app.imports.router import router as imports_router
 from app.photos.router import router as photos_router
@@ -92,11 +93,16 @@ class SpaFiles(StaticFiles):
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
-    """Migrate the database before serving; any failure stops startup (AD-29)."""
-    data_dir = get_settings().data_dir
+    """Migrate the database before serving; any failure stops startup (AD-29).
+
+    An empty library then gets the demo recipes (switched off in tests and e2e).
+    """
+    settings = get_settings()
+    data_dir = settings.data_dir
     run_migrations(data_dir)
     with Session(get_engine(data_dir)) as session:
         sweep_unattached_photos(session)
+        seed_demo_on_first_start(session, enabled=settings.seed_demo)
     try:
         yield
     finally:

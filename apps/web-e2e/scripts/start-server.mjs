@@ -26,6 +26,8 @@ const env = {
   LLM_PROVIDERS: 'fake',
   JWT_SECRET: 'e2e-only-secret-not-for-real-use',
   COOKIE_SECURE: 'false',
+  // Only the small `seed` recipes, never the demo library.
+  SEED_DEMO: 'false',
   DATA_DIR: join(workdir, 'data'),
   WEB_DIR: join(root, 'apps/web/dist'),
   ANTHROPIC_API_KEY: '',

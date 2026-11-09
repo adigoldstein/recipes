@@ -32,6 +32,10 @@ class Settings(BaseSettings):
     # The built React app (`index.html` and `assets/`). Set only in the Docker image,
     # where FastAPI serves the app too; in dev it stays unset and Vite serves it.
     web_dir: Path | None = None
+    # The app is a demo: a start that finds no recipes loads the demo recipes
+    # (`app/seed_data/demo_recipes.json`). Not a user setting; only the tests and the
+    # e2e server set SEED_DEMO=false, so they start from an empty database.
+    seed_demo: bool = True
     jwt_secret: SecretStr
     cookie_secure: bool = True
     # The import engine (AD-12): the first name is the one used. Switching engines
