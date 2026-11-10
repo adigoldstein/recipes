@@ -26,7 +26,7 @@ export const authLoginMutation = (options?: Partial<Options<AuthLoginData>>): Us
 /**
  * Logout
  *
- * Always succeeds, signed in or not.
+ * Logs out by deleting the cookie. Always succeeds, even if not logged in.
  */
 export const authLogoutMutation = (options?: Partial<Options<AuthLogoutData>>): UseMutationOptions<AuthLogoutResponse, DefaultError, Options<AuthLogoutData>> => {
     const mutationOptions: UseMutationOptions<AuthLogoutResponse, DefaultError, Options<AuthLogoutData>> = {
@@ -45,10 +45,11 @@ export const authLogoutMutation = (options?: Partial<Options<AuthLogoutData>>): 
 /**
  * Change Password
  *
- * Change my own password (FR-27); any signed-in user, editor or admin.
+ * Changes the logged-in user's own password (FR-27). Editors and admins can
+ * both use it.
  *
- * The old cookie dies with the version bump, so the answer sets a new one: this
- * device stays signed in and every other device is signed out.
+ * Changing the password makes the old cookie invalid, so the response sets a new
+ * cookie. This device stays logged in, and all other devices are logged out.
  */
 export const authChangePasswordMutation = (options?: Partial<Options<AuthChangePasswordData>>): UseMutationOptions<AuthChangePasswordResponse, AuthChangePasswordError, Options<AuthChangePasswordData>> => {
     const mutationOptions: UseMutationOptions<AuthChangePasswordResponse, AuthChangePasswordError, Options<AuthChangePasswordData>> = {
@@ -102,7 +103,7 @@ export const authSessionQueryKey = (options?: Options<AuthSessionData>) => creat
 /**
  * Session
  *
- * Public: 200 with the user, or `user: null` for a visitor (AD-21).
+ * Returns the logged-in user, or `user: null` for a visitor. Always 200 (AD-21).
  */
 export const authSessionOptions = (options?: Options<AuthSessionData>) => queryOptions<AuthSessionResponse, AuthSessionError, AuthSessionResponse, ReturnType<typeof authSessionQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
@@ -140,7 +141,8 @@ export const importsListProvidersQueryKey = (options?: Options<ImportsListProvid
 /**
  * List Providers
  *
- * The active import engine and its timeout (the client's limit follows it).
+ * Returns the active import engine and its timeout. The client sets its own
+ * time limit from it.
  */
 export const importsListProvidersOptions = (options?: Options<ImportsListProvidersData>) => queryOptions<ImportsListProvidersResponse, ImportsListProvidersError, ImportsListProvidersResponse, ReturnType<typeof importsListProvidersQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
@@ -193,7 +195,8 @@ export const photosGetLimitsOptions = (options?: Options<PhotosGetLimitsData>) =
 /**
  * Upload Photo From Url
  *
- * Download a photo from a link (an imported recipe's) and store it unattached.
+ * Downloads a photo from a link (for example, of an imported recipe) and saves
+ * it. No recipe uses it yet.
  */
 export const photosUploadPhotoFromUrlMutation = (options?: Partial<Options<PhotosUploadPhotoFromUrlData>>): UseMutationOptions<PhotosUploadPhotoFromUrlResponse, PhotosUploadPhotoFromUrlError, Options<PhotosUploadPhotoFromUrlData>> => {
     const mutationOptions: UseMutationOptions<PhotosUploadPhotoFromUrlResponse, PhotosUploadPhotoFromUrlError, Options<PhotosUploadPhotoFromUrlData>> = {

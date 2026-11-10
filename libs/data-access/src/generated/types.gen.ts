@@ -17,10 +17,11 @@ export type BodyPhotosUploadPhoto = {
 /**
  * ChangePasswordRequest
  *
- * The signed-in user's own password change (Story 2.6).
+ * The body for changing your own password (Story 2.6).
  *
- * The new password's length is checked by the password policy in the service, so
- * the client gets the same `password_too_short` error as an admin reset.
+ * The length of the new password is checked in the service, by the password
+ * policy. That way the client gets the same `password_too_short` error as when an
+ * admin resets a password.
  */
 export type ChangePasswordRequest = {
     /**
@@ -118,7 +119,7 @@ export type DraftRecipe = {
 /**
  * DraftSource
  *
- * An imperial value found in the source; the code converts it to metric (FR-21).
+ * An imperial value found in the source. The code converts it to metric (FR-21).
  */
 export type DraftSource = {
     /**
@@ -145,14 +146,15 @@ export type DraftStep = {
 /**
  * ErrorCode
  *
- * Stable error codes; the client shows `errors.<code>` from he.json.
+ * Error codes that do not change. The client shows the message
+ * `errors.<code>` from he.json.
  */
 export type ErrorCode = 'recipe_not_found' | 'tag_not_found' | 'tag_name_taken' | 'photo_not_found' | 'photo_too_large' | 'photo_dimensions_too_large' | 'photo_unsupported_type' | 'email_taken' | 'user_not_found' | 'password_too_short' | 'password_too_long' | 'invalid_credentials' | 'account_blocked' | 'last_admin' | 'rate_limited' | 'unauthorized' | 'forbidden' | 'csrf_header_missing' | 'no_recipe_found' | 'import_text_too_long' | 'import_cap_reached' | 'provider_unavailable' | 'llm_timeout' | 'llm_unavailable' | 'llm_quota' | 'llm_invalid_output' | 'fetch_blocked' | 'fetch_challenged' | 'fetch_failed' | 'fetch_too_large';
 
 /**
  * ErrorEvent
  *
- * `event: error`. A failure after the stream started; `code` is an AD-28 code.
+ * `event: error`. An error after the stream started. `code` is an AD-28 code.
  */
 export type ErrorEvent = {
     /**
@@ -231,7 +233,7 @@ export type ImportUrlRequest = {
 /**
  * IngredientCreate
  *
- * An ingredient in a recipe write; its position is its place in the list.
+ * An ingredient sent when saving a recipe. Its order is its place in the list.
  */
 export type IngredientCreate = {
     /**
@@ -277,7 +279,8 @@ export type IngredientRead = {
 /**
  * IngredientUpdate
  *
- * An ingredient in a recipe replace: with an `id` it is an existing one (AD-20).
+ * An ingredient sent when updating a recipe. If it has an `id`, it is an
+ * existing ingredient (AD-20).
  */
 export type IngredientUpdate = {
     /**
@@ -302,7 +305,8 @@ export type IngredientUpdate = {
 /**
  * LoginRequest
  *
- * Plain strings on purpose: a malformed email is just wrong credentials.
+ * Login details. The email is a plain string on purpose: an invalid email is
+ * treated like any wrong email and password.
  */
 export type LoginRequest = {
     /**
@@ -320,7 +324,7 @@ export type LoginRequest = {
  *
  * The ingredient's amount and unit before its first edit (FR-7).
  *
- * Both fields null means it was originally "to taste".
+ * If both fields are null, it was "to taste" before the edit.
  */
 export type OriginalValue = {
     /**
@@ -333,7 +337,8 @@ export type OriginalValue = {
 /**
  * PhotoFromUrl
  *
- * A photo to download from a page, such as an imported recipe's (AD-23, AD-27).
+ * A photo to download from a link, for example of an imported recipe
+ * (AD-23, AD-27).
  */
 export type PhotoFromUrl = {
     /**
@@ -345,7 +350,7 @@ export type PhotoFromUrl = {
 /**
  * PhotoLimits
  *
- * What an upload may be, for the form to show beside the field.
+ * The upload limits, shown by the form next to the photo field.
  */
 export type PhotoLimits = {
     /**
@@ -361,7 +366,8 @@ export type PhotoLimits = {
 /**
  * PhotoRead
  *
- * The photo shape that read schemas embed (AD-27); URLs are built server-side.
+ * A photo as it appears inside API responses (AD-27). The server builds the
+ * URLs.
  */
 export type PhotoRead = {
     /**
@@ -381,7 +387,7 @@ export type PhotoRead = {
 /**
  * PhotoUploaded
  *
- * An uploaded photo that no recipe holds yet; a recipe save attaches it.
+ * An uploaded photo that no recipe uses yet. Saving a recipe attaches it.
  */
 export type PhotoUploaded = {
     /**
@@ -393,7 +399,7 @@ export type PhotoUploaded = {
 /**
  * ProviderInfo
  *
- * An enabled import engine and how long the server waits for it (AD-43).
+ * An active import engine and how long the server waits for it (AD-43).
  */
 export type ProviderInfo = {
     /**
@@ -409,7 +415,7 @@ export type ProviderInfo = {
 /**
  * RecipeCreate
  *
- * Everything needed to create a recipe.
+ * All the data needed to create a recipe.
  */
 export type RecipeCreate = {
     /**
@@ -547,7 +553,8 @@ export type RecipeSummary = {
 /**
  * RecipeUpdate
  *
- * The whole recipe, replacing the saved one (AD-4); never carries originals.
+ * The full recipe, which replaces the saved one (AD-4). It never includes the
+ * original values.
  */
 export type RecipeUpdate = {
     /**
@@ -599,14 +606,15 @@ export type RecipeUpdate = {
 /**
  * Role
  *
- * A visitor has no session, so there is no viewer role (AD-30).
+ * The user roles. A visitor is simply not logged in, so there is no visitor
+ * role (AD-30).
  */
 export type Role = 'editor' | 'admin';
 
 /**
  * SessionResponse
  *
- * `user` is null for a visitor.
+ * The current session. `user` is null for a visitor.
  */
 export type SessionResponse = {
     user: SessionUser | null;
@@ -615,7 +623,7 @@ export type SessionResponse = {
 /**
  * SessionUser
  *
- * What the client may know about the signed-in user (AD-21).
+ * The details of the logged-in user that the client may see (AD-21).
  */
 export type SessionUser = {
     /**
@@ -636,14 +644,15 @@ export type SessionUser = {
 /**
  * SourceUnit
  *
- * Imperial units an import converted to metric; kept as the 'source' value.
+ * Imperial units that an import converted to metric. We keep the original unit
+ * as the 'source' value.
  */
 export type SourceUnit = 'oz' | 'lb' | 'fl_oz';
 
 /**
  * SourceValue
  *
- * An imperial value an import converted to metric (FR-21).
+ * The imperial value that an import converted to metric (FR-21).
  */
 export type SourceValue = {
     /**
@@ -656,7 +665,7 @@ export type SourceValue = {
 /**
  * StageEvent
  *
- * `event: stage`. Only real pipeline stages are reported, no percentage.
+ * `event: stage`. Reports a real step of the import. There is no percentage.
  */
 export type StageEvent = {
     /**
@@ -700,7 +709,7 @@ export type StepRead = {
 /**
  * TagCreate
  *
- * Body of `POST /tags`: the name is normalized and length-checked.
+ * The body of `POST /tags`. The name is cleaned up and its length is checked.
  */
 export type TagCreate = {
     /**
@@ -712,7 +721,8 @@ export type TagCreate = {
 /**
  * TagInput
  *
- * A tag in a recipe write: an existing tag by id, or a name to find or create.
+ * A tag sent when saving a recipe: either the id of an existing tag, or a name.
+ * A name is matched to an existing tag, or a new tag is created.
  */
 export type TagInput = {
     /**
@@ -750,7 +760,7 @@ export type TagRead = {
 /**
  * TagRef
  *
- * A tag as embedded in recipe read schemas (AD-20).
+ * A tag as it appears inside a recipe in API responses (AD-20).
  */
 export type TagRef = {
     /**
@@ -766,7 +776,7 @@ export type TagRef = {
 /**
  * TagUpdate
  *
- * Body of `PATCH /tags/{id}`: send only what changes.
+ * The body of `PATCH /tags/{id}`. Send only the fields that change.
  */
 export type TagUpdate = {
     /**
@@ -787,10 +797,10 @@ export type Unit = 'g' | 'kg' | 'ml' | 'l' | 'tsp' | 'tbsp' | 'cup' | 'unit' | '
 /**
  * UserCreateRequest
  *
- * The body of `POST /api/users`: an account plus its starting password.
+ * The body of `POST /api/users`: the new account and its first password.
  *
- * The confirmation field of the form is checked in the browser only; the server
- * just enforces the password policy (FR-13).
+ * The form's "confirm password" field is checked only in the browser. The server
+ * only checks the password policy (FR-13).
  */
 export type UserCreateRequest = {
     /**
@@ -811,7 +821,7 @@ export type UserCreateRequest = {
 /**
  * UserRead
  *
- * A user as returned to callers. There is deliberately no password field.
+ * A user as the API returns it. On purpose, it has no password field.
  */
 export type UserRead = {
     /**
@@ -840,10 +850,10 @@ export type UserRead = {
 /**
  * UserUpdate
  *
- * The body of `PATCH /api/users/{id}`: any of these, at least one.
+ * The body of `PATCH /api/users/{id}`. Send at least one field.
  *
- * A field that is left out stays as it is. `password` is a reset: it replaces the
- * current one and ends every session the user has.
+ * A field that is not sent does not change. Sending `password` resets it: the new
+ * password replaces the old one and the user is logged out on all devices.
  */
 export type UserUpdate = {
     /**
