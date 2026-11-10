@@ -95,7 +95,7 @@ development_status:
   6-2-logging-and-backups: backlog # V3 / nice to have
   6-3-end-to-end-tests-in-ci: done # V1 (PR #39 merged 2026-11-09)
   6-4-performance-budgets: backlog # V2
-  6-5-readme-for-recruiters: backlog # V1
+  6-5-readme-for-recruiters: review # V1
   epic-6-retrospective: optional
 
   epic-7: backlog # V3 / nice to have | optional / nice to have: can be cut
