@@ -1,8 +1,8 @@
-"""Demo recipes for a new install, loaded on a start that finds no recipes.
+"""Adds demo recipes when the app starts and the library has no recipes.
 
-The recipes live in `seed_data/demo_recipes.json` (no photos, no ids, no authors) and
-are created through `recipes.service`, so every rule a saved recipe follows applies.
-The small `seed` CLI (`app.seed`) is separate: tests and the e2e suite rely on it.
+The recipes are in `seed_data/demo_recipes.json` (no photos, ids or authors). They are
+created through `recipes.service`, so they follow the same rules as any saved recipe.
+The small `seed` CLI (`app.seed`) is a different thing, used by the tests and e2e.
 """
 
 import json
@@ -23,8 +23,11 @@ logger = logging.getLogger(__name__)
 
 
 class DemoTag(BaseModel):
-    """A tag the demo uses, as it was. A missing one is created by the tag resolver
-    (unpinned); the pinned ones are the defaults the migrations already create."""
+    """A tag used by a demo recipe.
+
+    If the tag does not exist yet, it is created as a regular (not pinned) tag. The
+    pinned tags already exist, because the migrations create them.
+    """
 
     name: str
     pinned: bool = False
@@ -41,10 +44,10 @@ def load_demo_data(path: Path = DEMO_FILE) -> DemoData:
 
 
 def run_demo_seed(recipes: RecipeService, data: DemoData | None = None) -> int:
-    """Create the demo recipes, only into a library with no recipes. Returns how many.
+    """Adds the demo recipes if the library is empty. Returns how many were added.
 
-    All of them, and the tags they need, are saved in one transaction: an error
-    leaves nothing behind. Running it again finds recipes and does nothing.
+    All the recipes and their tags are saved in one transaction, so if something
+    fails, nothing is saved. If the library already has recipes, it does nothing.
     """
     if recipes.list_recipes():
         return 0
@@ -53,7 +56,10 @@ def run_demo_seed(recipes: RecipeService, data: DemoData | None = None) -> int:
 
 
 def seed_demo_on_first_start(session: Session, *, enabled: bool) -> int:
-    """The startup hook: seed an empty library. Tests and e2e switch it off."""
+    """Runs at app startup and adds the demo recipes to an empty library.
+
+    Tests and e2e turn it off with `enabled=False`.
+    """
     if not enabled:
         return 0
     tags = get_tag_service(session)

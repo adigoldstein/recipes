@@ -23,11 +23,12 @@ import {
 } from '../form/recipe-form-values';
 
 /**
- * What the new-recipe page offers a panel placed above its form (the AI import). The
- * panel's library and this one never import each other; the app joins them (AD-2).
+ * What the new recipe page gives to a panel shown above its form (the AI import).
+ * The panel's library and this library may not import each other, so the app
+ * connects them (AD-2).
  */
 export interface ImportSlotApi {
-  /** The editor changed the form, so filling it would replace their work. */
+  /** True if the editor changed the form, so filling it would replace their work. */
   dirty: boolean;
   /** Fills the form with an imported draft (AD-22). Nothing is saved. */
   onDraft: (draft: DraftRecipe) => void;
@@ -36,38 +37,42 @@ export interface ImportSlotApi {
 }
 
 export interface RecipeNewPageProps {
-  /** Renders the import panel above the form; left out, the page is just the form. */
+  /** Renders the import panel above the form. Without it, the page is only the form. */
   importPanel?: (api: ImportSlotApi) => ReactNode;
 }
 
-/** The new-recipe form at `/recipes/new` (FR-4); editors only, guarded by the route. */
+/**
+ * The new recipe page at `/recipes/new` (FR-4). Only for editors (the route checks
+ * it).
+ */
 export function RecipeNewPage({ importPanel }: RecipeNewPageProps = {}) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { onBack } = useBackNavigation();
   const create = useMutation(recipesCreateRecipeMutation());
-  // An import replaces the form by giving it new starting values under a new key.
+  // An import replaces the form: it gives it new starting values and a new key.
   const [start, setStart] = useState<{ key: number; values: RecipeFormValues }>(
     () => ({ key: 0, values: emptyFormValues() }),
   );
-  // Set while the form holds an imported draft; reloading the page clears it.
+  // Set while the form holds an imported draft. Reloading the page clears it.
   const [review, setReview] = useState<DraftReview>();
   const [busy, setBusy] = useState(false);
   const [dirty, setDirty] = useState(false);
 
-  // A rejection here is shown by the form. Once the recipe is saved nothing below
-  // can fail, so a second tap on "save" can never create a duplicate.
+  // If saving fails, the form shows the error. After the recipe is saved, nothing
+  // below can fail, so a second click on "save" can never create a duplicate.
   const save = async (payload: RecipeCreate) => {
     const recipe = await create.mutateAsync({ body: payload });
-    // The detail page opens with the answer we already have.
+    // Put the new recipe in the cache, so the recipe page opens without loading.
     queryClient.setQueryData(
       recipesGetRecipeQueryKey({ path: { recipe_id: recipe.id } }),
       recipe,
     );
     await invalidationMap.recipeWrite(queryClient);
     toast.success(t('recipeForm.saved'));
-    // Replaced, so "back" from the new recipe is the library, not this form.
+    // Replace the history entry, so "back" from the new recipe goes to the library,
+    // not to this form.
     await navigate(`/recipes/${recipe.id}`, { replace: true });
   };
 
@@ -79,7 +84,8 @@ export function RecipeNewPage({ importPanel }: RecipeNewPageProps = {}) {
     }));
   };
 
-  // "ביטול" on the review banner: back to an empty form, as if nothing was imported.
+  // "ביטול" on the review banner: go back to an empty form, as if nothing was
+  // imported.
   const discard = () => {
     setReview(undefined);
     setStart((current) => ({

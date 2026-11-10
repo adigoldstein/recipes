@@ -1,7 +1,7 @@
 """Migration 0005: ingredients and steps move inside the recipe as JSON (AD-41).
 
-Every test puts the database back at 0004 with real rows in the old child tables, then
-upgrades it. The point of the file is that no recipe, ingredient or step is ever lost.
+Each test moves the database back to 0004, adds real rows to the old tables, and then
+upgrades it. The goal is to prove that no recipe, ingredient or step is ever lost.
 """
 
 import json
@@ -42,7 +42,7 @@ def _backup_path() -> Any:
 
 
 def _legacy_row(connection: Connection, table: str, **values: Any) -> str:
-    """Insert a row into an old child table; returns its id as the JSON spells it."""
+    """Adds a row to an old table. Returns its id in the format used in the JSON."""
     row_id = uuid.uuid4()
     values = {"id": row_id.hex, **values}
     columns = ", ".join(values)
@@ -83,11 +83,11 @@ def _json_step(id_: str, description: str, source_text: str | None = None) -> An
 
 
 def _legacy_recipes(connection: Connection) -> tuple[Config, dict[uuid.UUID, Stored]]:
-    """Put the database back at 0004 with two recipes in the old child tables.
+    """Moves the database back to 0004 and adds two recipes to the old tables.
 
-    Returns the JSON each recipe should end up with. Rows go in out of order and
-    cover every field: an original, "originally to taste", an import source and a
-    step's source text.
+    Returns the JSON that each recipe should have at the end. The rows are added out
+    of order and use every field: an original value, "originally to taste", an
+    import source and a step's source text.
     """
     config = _alembic_config(connection)
     command.downgrade(config, "0004")
@@ -252,7 +252,8 @@ def test_the_app_reads_the_migrated_recipes(
 def test_downgrade_and_upgrade_again_give_back_the_same_data(
     connection: Connection,
 ) -> None:
-    """The round trip: old tables -> JSON -> old tables -> JSON, nothing lost."""
+    """Upgrade and downgrade: old tables -> JSON -> old tables -> JSON, and nothing
+    is lost."""
     config, expected = _legacy_recipes(connection)
     old_rows = _old_tables(connection)
     old_definitions = _table_definitions(connection)
@@ -322,7 +323,7 @@ def test_a_recipe_without_steps_stops_the_migration_and_loses_nothing(
     version = connection.execute(text("SELECT version_num FROM alembic_version"))
     assert version.scalar_one() == "0004"
 
-    # Mend the data and run again: the half-finished first run does not get in the way.
+    # Fix the data and run again. The first, half-finished run does not cause problems.
     _legacy_row(
         connection, "step", recipe_id=broken.hex, position=0, description="לטגן"
     )

@@ -2,11 +2,12 @@ import { client } from '@bite-and-board/data-access';
 import { server } from './server';
 import './viewport';
 
-// The generated client uses relative `/api` URLs, which Node's fetch rejects;
-// the page origin gives MSW something to match.
+// The generated client uses relative `/api` URLs, which Node's fetch does not
+// accept. So use the page origin as the base URL, and MSW can match it.
 client.setConfig({ baseUrl: window.location.origin });
 
-// jsdom gaps that Radix (the chip row and the unit select) relies on.
+// Browser features that jsdom does not have, but Radix (the chip row and the unit
+// select) needs.
 class ResizeObserverStub {
   observe() {
     /* no layout in jsdom */
@@ -21,9 +22,10 @@ class ResizeObserverStub {
 globalThis.ResizeObserver ??= ResizeObserverStub;
 Element.prototype.hasPointerCapture ??= () => false;
 Element.prototype.releasePointerCapture ??= () => undefined;
-Element.prototype.setPointerCapture ??= () => undefined; // sonner, when a toast is pressed
+// sonner needs this when a toast is clicked.
+Element.prototype.setPointerCapture ??= () => undefined;
 Element.prototype.scrollIntoView ??= () => undefined;
-// jsdom has no object URLs; the photo field previews a chosen file with one.
+// jsdom has no object URLs. The photo field uses one to preview the chosen file.
 URL.createObjectURL ??= () => 'blob:preview';
 URL.revokeObjectURL ??= () => undefined;
 

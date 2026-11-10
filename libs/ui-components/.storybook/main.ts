@@ -5,7 +5,7 @@ const config: StorybookConfig = {
   framework: '@storybook/react-vite',
   stories: ['../src/**/*.stories.@(ts|tsx)'],
   addons: ['@storybook/addon-a11y'],
-  // Same Tailwind pipeline as apps/web, so stories render the real tokens.
+  // Use Tailwind the same way as apps/web, so stories show the real design tokens.
   viteFinal: (viteConfig) => ({
     ...viteConfig,
     plugins: [...(viteConfig.plugins ?? []), tailwindcss()],

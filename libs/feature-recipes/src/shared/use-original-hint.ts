@@ -6,9 +6,10 @@ import { formatAmount } from '@bite-and-board/recipe-domain';
 type Scale = (amount: number, unit: Unit | null) => number;
 
 /**
- * The FR-7 hint text, "במקור 2 כוסות" or "במקור: לפי הטעם", for an ingredient's
- * saved original; undefined when it has none. `scale` follows the servings on the
- * detail page; the edit form shows the original as saved.
+ * Returns the hint text for an ingredient's original value (FR-7), such as
+ * "במקור 2 כוסות" or "במקור: לפי הטעם". Returns undefined if there is no original.
+ * On the recipe page, `scale` adjusts it to the servings. The edit form shows the
+ * original as it was saved.
  */
 export function useOriginalHint() {
   const { t } = useTranslation();
@@ -18,7 +19,8 @@ export function useOriginalHint() {
     const amount = scale
       ? scale(original.amount, original.unit)
       : original.amount;
-    // Hebrew has a singular only for exactly 1 ("1 כוס", "2 כוסות", "0.5 כוסות").
+    // In Hebrew the singular is used only for exactly 1 ("1 כוס", "2 כוסות",
+    // "0.5 כוסות").
     const unit = original.unit
       ? t(`units.${original.unit}` as ParseKeys, {
           count: amount === 1 ? 1 : 0,

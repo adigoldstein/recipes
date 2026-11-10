@@ -1,11 +1,11 @@
 import { client } from '@bite-and-board/data-access';
 import { server } from './server';
 
-// The generated client uses relative `/api` URLs, which Node's fetch rejects;
-// the page origin gives MSW something to match.
+// The generated client uses relative `/api` URLs, which Node's fetch does not
+// accept. So use the page origin as the base URL, and MSW can match it.
 client.setConfig({ baseUrl: window.location.origin });
 
-// jsdom gaps that Radix (the chip row) relies on.
+// A browser feature that jsdom does not have, but Radix (the chip row) needs.
 class ResizeObserverStub {
   observe() {
     /* no layout in jsdom */

@@ -33,17 +33,18 @@ export const authLogin = <ThrowOnError extends boolean = false>(options: Options
 /**
  * Logout
  *
- * Always succeeds, signed in or not.
+ * Logs out by deleting the cookie. Always succeeds, even if not logged in.
  */
 export const authLogout = <ThrowOnError extends boolean = false>(options?: Options<AuthLogoutData, ThrowOnError>): RequestResult<AuthLogoutResponses, unknown, ThrowOnError> => (options?.client ?? client).post<AuthLogoutResponses, unknown, ThrowOnError>({ url: '/api/auth/logout', ...options });
 
 /**
  * Change Password
  *
- * Change my own password (FR-27); any signed-in user, editor or admin.
+ * Changes the logged-in user's own password (FR-27). Editors and admins can
+ * both use it.
  *
- * The old cookie dies with the version bump, so the answer sets a new one: this
- * device stays signed in and every other device is signed out.
+ * Changing the password makes the old cookie invalid, so the response sets a new
+ * cookie. This device stays logged in, and all other devices are logged out.
  */
 export const authChangePassword = <ThrowOnError extends boolean = false>(options: Options<AuthChangePasswordData, ThrowOnError>): RequestResult<AuthChangePasswordResponses, AuthChangePasswordErrors, ThrowOnError> => (options.client ?? client).post<AuthChangePasswordResponses, AuthChangePasswordErrors, ThrowOnError>({
     url: '/api/auth/password',
@@ -57,7 +58,7 @@ export const authChangePassword = <ThrowOnError extends boolean = false>(options
 /**
  * Session
  *
- * Public: 200 with the user, or `user: null` for a visitor (AD-21).
+ * Returns the logged-in user, or `user: null` for a visitor. Always 200 (AD-21).
  */
 export const authSession = <ThrowOnError extends boolean = false>(options?: Options<AuthSessionData, ThrowOnError>): RequestResult<AuthSessionResponses, AuthSessionErrors, ThrowOnError> => (options?.client ?? client).get<AuthSessionResponses, AuthSessionErrors, ThrowOnError>({ url: '/api/auth/session', ...options });
 
@@ -69,14 +70,15 @@ export const healthGetHealth = <ThrowOnError extends boolean = false>(options?: 
 /**
  * List Providers
  *
- * The active import engine and its timeout (the client's limit follows it).
+ * Returns the active import engine and its timeout. The client sets its own
+ * time limit from it.
  */
 export const importsListProviders = <ThrowOnError extends boolean = false>(options?: Options<ImportsListProvidersData, ThrowOnError>): RequestResult<ImportsListProvidersResponses, ImportsListProvidersErrors, ThrowOnError> => (options?.client ?? client).get<ImportsListProvidersResponses, ImportsListProvidersErrors, ThrowOnError>({ url: '/api/imports/providers', ...options });
 
 /**
  * Import Text
  *
- * Turn pasted recipe text into a Hebrew draft, as a progress stream.
+ * Turns pasted recipe text into a Hebrew draft, and streams the progress.
  */
 export const importsImportText = <ThrowOnError extends boolean = false>(options: Options<ImportsImportTextData, ThrowOnError, ImportsImportTextResponse>): Promise<ServerSentEventsResult<ImportsImportTextResponses>> => (options.client ?? client).sse.post<ImportsImportTextResponses, ImportsImportTextErrors, ThrowOnError>({
     url: '/api/imports/text',
@@ -90,7 +92,8 @@ export const importsImportText = <ThrowOnError extends boolean = false>(options:
 /**
  * Import Url
  *
- * Fetch a recipe page and turn it into a Hebrew draft, as a progress stream.
+ * Downloads a recipe page, turns it into a Hebrew draft, and streams the
+ * progress.
  */
 export const importsImportUrl = <ThrowOnError extends boolean = false>(options: Options<ImportsImportUrlData, ThrowOnError, ImportsImportUrlResponse>): Promise<ServerSentEventsResult<ImportsImportUrlResponses>> => (options.client ?? client).sse.post<ImportsImportUrlResponses, ImportsImportUrlErrors, ThrowOnError>({
     url: '/api/imports/url',
@@ -122,7 +125,8 @@ export const photosGetLimits = <ThrowOnError extends boolean = false>(options?: 
 /**
  * Upload Photo From Url
  *
- * Download a photo from a link (an imported recipe's) and store it unattached.
+ * Downloads a photo from a link (for example, of an imported recipe) and saves
+ * it. No recipe uses it yet.
  */
 export const photosUploadPhotoFromUrl = <ThrowOnError extends boolean = false>(options: Options<PhotosUploadPhotoFromUrlData, ThrowOnError>): RequestResult<PhotosUploadPhotoFromUrlResponses, PhotosUploadPhotoFromUrlErrors, ThrowOnError> => (options.client ?? client).post<PhotosUploadPhotoFromUrlResponses, PhotosUploadPhotoFromUrlErrors, ThrowOnError>({
     url: '/api/photos/url',

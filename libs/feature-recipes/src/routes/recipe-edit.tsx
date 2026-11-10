@@ -23,20 +23,23 @@ import { RecipeForm } from '../form/recipe-form';
 import { toFormValues } from '../form/recipe-form-values';
 import { useErrorMessage } from '../shared/use-error-message';
 
-/** The edit form at `/recipes/:id/edit` (FR-6); editors only, guarded by the route. */
+/**
+ * The edit page at `/recipes/:id/edit` (FR-6). Only for editors (the route checks
+ * it).
+ */
 export function RecipeEditPage() {
   const { t } = useTranslation();
   const errorMessage = useErrorMessage();
   const { id = '' } = useParams();
-  // Always fetched on arrival, so the form never starts from a stale copy; it is not
-  // refetched while typing, which would replace what the person is changing.
+  // Always load the recipe when the page opens, so the form does not start from old
+  // data. Do not reload while typing, because that would replace the user's changes.
   const recipe = useQuery({
     ...recipesGetRecipeOptions({ path: { recipe_id: id } }),
     refetchOnMount: 'always',
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });
-  // Once the form is up it stays up, even while a save refreshes the cache.
+  // Once the form is shown, keep showing it, even while a save reloads the cache.
   const [shown, setShown] = useState(false);
   if (!shown && recipe.data && !recipe.isFetching) setShown(true);
 
@@ -75,29 +78,31 @@ export function RecipeEditPage() {
 }
 
 function RecipeEdit({ recipe }: { recipe: RecipeRead }) {
-  // Back returns to the recipe the person came from, as the detail page's back does.
+  // "Back" returns to the recipe page, like the back button on the recipe page.
   const { onBack } = useBackNavigation();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const update = useMutation(recipesUpdateRecipeMutation());
 
-  // A rejection here is shown by the form. Once the recipe is saved nothing below
-  // can fail, so a second tap on "save" cannot save twice.
+  // If saving fails, the form shows the error. After the recipe is saved, nothing
+  // below can fail, so a second click on "save" cannot save twice.
   const save = async (payload: RecipeUpdate) => {
     const saved = await update.mutateAsync({
       path: { recipe_id: recipe.id },
       body: payload,
     });
-    // The detail page opens with the answer we already have. This page's own copy is
-    // set, not refetched, so the form keeps what was typed until it navigates away.
+    // Put the saved recipe in the cache, so the recipe page opens without loading.
+    // We set the cache instead of reloading, so the form keeps what was typed until
+    // the page closes.
     queryClient.setQueryData(
       recipesGetRecipeQueryKey({ path: { recipe_id: recipe.id } }),
       saved,
     );
     await invalidationMap.recipeWrite(queryClient);
     toast.success(t('recipeForm.editSaved'));
-    // Replaced, so "back" from the recipe is where the person came from.
+    // Replace the history entry, so "back" from the recipe goes where the user came
+    // from, not to the form.
     await navigate(`/recipes/${recipe.id}`, { replace: true });
   };
 

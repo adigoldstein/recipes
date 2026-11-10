@@ -14,7 +14,8 @@ from app.core.migrate import migration_transaction
 def _render_item(
     type_: str, obj: object, _autogen_context: AutogenContext
 ) -> str | Literal[False]:
-    """Keep revisions free of app imports: they must run the same forever."""
+    """Writes column types in new migrations without importing app code, so the
+    migration files keep working the same way forever."""
     if type_ != "type":
         return False
     if isinstance(obj, AutoString):
@@ -32,7 +33,8 @@ def _run(connection: Connection) -> None:
     context.configure(
         connection=connection,
         target_metadata=metadata,
-        # SQLite cannot ALTER most things in place; batch mode copies the table.
+        # SQLite cannot change most things in a table directly, so batch mode copies
+        # the table instead.
         render_as_batch=True,
         compare_type=True,
         render_item=_render_item,
@@ -42,7 +44,8 @@ def _run(connection: Connection) -> None:
 
 
 def run_migrations_online() -> None:
-    # `app.core.migrate` passes its own connection; the CLI builds one from settings.
+    # `app.core.migrate` passes its own connection. When run from the CLI, we create
+    # one from the settings.
     connection = context.config.attributes.get("connection")
     if connection is not None:
         _run(connection)

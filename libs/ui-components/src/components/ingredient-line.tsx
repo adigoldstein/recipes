@@ -4,20 +4,26 @@ import { cn } from '../lib/utils';
 export interface IngredientQuantity {
   /** The amount, already formatted. */
   amount: string;
-  /** The unit label, already singular or plural; leave out for a bare count. */
+  /** The unit name, already singular or plural. Leave it out for a plain count. */
   unit?: string;
 }
 
 export interface IngredientLineProps {
   name: string;
   note?: string;
-  /** The amount; leave out (with `toTasteLabel`) for a to-taste line. */
+  /** The amount. Leave it out (and pass `toTasteLabel`) for "to taste". */
   quantity?: IngredientQuantity;
-  /** The imperial value an import converted from; shown with `quantity` in parentheses. */
+  /**
+   * The imperial value before an import converted it. Shown in parentheses next to
+   * `quantity`.
+   */
   source?: IngredientQuantity;
-  /** "לפי הטעם": makes the line read "name — to taste". */
+  /** "לפי הטעם". The line then shows "name — to taste". */
   toTasteLabel?: string;
-  /** The FR-7 hint, e.g. "במקור 2 כוסות", shown under the line. */
+  /**
+   * The original value hint (FR-7), for example "במקור 2 כוסות", shown under the
+   * line.
+   */
   originalHint?: string;
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
@@ -33,7 +39,7 @@ function Quantity({ amount, unit }: IngredientQuantity) {
   );
 }
 
-/** One ingredient on the board, with a tick-off checkbox (UX-DR10). */
+/** One ingredient on the board, with a checkbox to mark it done (UX-DR10). */
 export function IngredientLine({
   name,
   note,

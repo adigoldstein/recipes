@@ -1,4 +1,4 @@
-"""The image pipeline: what `PhotoService.store` makes of an upload (AD-14, AD-27)."""
+"""How `PhotoService.store` processes an uploaded image (AD-14, AD-27)."""
 
 import os
 import time
@@ -100,7 +100,8 @@ def test_a_file_over_the_byte_limit_is_413_and_nothing_is_stored(
 def test_a_picture_with_too_many_pixels_is_413_before_it_is_decoded(
     photos: PhotoService, root: Path
 ) -> None:
-    # 200 x 100 = 20,000 pixels is over this service's 10,000, yet the file is tiny.
+    # 200 x 100 = 20,000 pixels, which is over this service's limit of 10,000,
+    # even though the file is tiny.
     with pytest.raises(AppError) as error:
         photos.store(png(200, 100))
     assert code(error) == (413, "photo_dimensions_too_large")
@@ -110,7 +111,7 @@ def test_a_picture_with_too_many_pixels_is_413_before_it_is_decoded(
 def test_a_decompression_bomb_is_413(
     root: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    # Pillow itself refuses pictures far beyond its own pixel limit when opening.
+    # Pillow itself refuses to open pictures that are far above its own pixel limit.
     monkeypatch.setattr(Image, "MAX_IMAGE_PIXELS", 100)
     photos = PhotoService(LocalPhotoStorage(root), UploadLimits(50_000, 10_000_000))
     with pytest.raises(AppError) as error:
@@ -152,8 +153,8 @@ def test_a_small_picture_is_not_enlarged(photos: PhotoService, root: Path) -> No
 
 
 def test_orientation_is_applied(photos: PhotoService, root: Path) -> None:
-    # Orientation 6 means "rotate 90 degrees to show it": the 80 x 60 file is upright
-    # as 60 x 80.
+    # Orientation 6 means "rotate 90 degrees to show it", so the 80 x 60 file is
+    # shown as 60 x 80.
     key = photos.store(jpeg(80, 60, exif=exif_with(orientation=6)))
     assert open_webp(stored(root, key)).size == (60, 80)
     assert open_webp(stored(root, key, "-thumb")).size == (60, 80)

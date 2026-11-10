@@ -1,4 +1,4 @@
-"""Reading the import progress stream (AD-40) in tests."""
+"""Helpers for reading the import progress stream (AD-40) in tests."""
 
 import json
 from typing import Any
@@ -7,7 +7,7 @@ import httpx
 
 
 def parse_events(body: str) -> list[tuple[str, dict[str, Any]]]:
-    """`event: x` / `data: {...}` blocks, in order."""
+    """Splits the stream into (event name, data) pairs, in order."""
     events: list[tuple[str, dict[str, Any]]] = []
     for block in body.split("\n\n"):
         if not block.strip():
@@ -18,10 +18,10 @@ def parse_events(body: str) -> list[tuple[str, dict[str, Any]]]:
 
 
 class ImportResult:
-    """What an import call returned, whether a plain HTTP error or a finished stream.
+    """The result of an import call: a regular HTTP error or a finished stream.
 
     `status_code` is the HTTP status (always 200 once the stream started). `json()`
-    is the plain error body, or the last event's data: the draft or the error.
+    returns the error body, or the data of the last event (the draft or the error).
     """
 
     def __init__(self, response: httpx.Response) -> None:

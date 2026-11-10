@@ -3,10 +3,12 @@
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
-# Failed and successful attempts both count. The counters live in memory, which is
-# fine for the single server process (AD-15) and means a restart clears them.
+# At most 5 login attempts per minute. Failed and successful attempts both count.
+# The counters are kept in memory. That is fine because the app runs as one server
+# process (AD-15). A restart resets them.
 LOGIN_LIMIT = "5/minute"
 
-# Keyed by the client IP. Behind a reverse proxy uvicorn must be told to trust its
-# forwarded headers, or every user shares one bucket (see the service README).
+# Counts attempts per client IP. Behind a reverse proxy, uvicorn must be told to
+# trust the proxy's forwarded headers. Otherwise all users look like one IP and share
+# one counter (see the service README).
 limiter = Limiter(key_func=get_remote_address)

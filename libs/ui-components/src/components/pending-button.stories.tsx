@@ -7,7 +7,7 @@ const meta = { title: 'UI kit/PendingButton' } satisfies Meta;
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Nothing is happening. */
+/** Nothing is running. */
 export const Idle: Story = {
   render: () => (
     <PendingButton pending={false} pendingLabel="שומרים">
@@ -17,8 +17,8 @@ export const Idle: Story = {
 };
 
 /**
- * The wait has been noticeable (the 0.3 s delay is set to 0 here so it can be seen
- * at once): disabled, with a spinner and the present-tense label, at the same width.
+ * The action is taking a while: the button is disabled, with a spinner and the
+ * "working" label, at the same width. The 0.3 s delay is 0 here, so it shows at once.
  */
 export const Working: Story = {
   render: () => (
@@ -28,7 +28,7 @@ export const Working: Story = {
   ),
 };
 
-/** Disabled at once but not yet showing a spinner: what a fast action looks like. */
+/** Disabled right away, but with no spinner yet. This is how a fast action looks. */
 export const JustStarted: Story = {
   render: () => (
     <PendingButton pending delayMs={60_000} pendingLabel="שומרים">
@@ -50,7 +50,10 @@ export const Destructive: Story = {
   ),
 };
 
-/** Press it to see the real timing: spinner after 0.3 s, slow note after 3 s here. */
+/**
+ * Click it to see the real timing: a spinner after 0.3 s, and here the "slow" note
+ * after 3 s.
+ */
 export const Interactive: Story = {
   render: function Demo() {
     const [pending, setPending] = useState(false);

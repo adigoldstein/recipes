@@ -4,7 +4,7 @@ import { Dialog as SheetPrimitive } from 'radix-ui';
 import { cn } from '../../lib/utils';
 import { Button } from './button';
 
-/** A bottom sheet (phones): a Radix dialog that slides up from the bottom edge. */
+/** A bottom sheet (for phones): a Radix dialog that slides up from the bottom. */
 function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
   return <SheetPrimitive.Root data-slot="sheet" {...props} />;
 }
@@ -21,7 +21,10 @@ function SheetContent({
   closeLabel,
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Content> & {
-  /** Accessible name of the corner close button; omit to hide the button. */
+  /**
+   * The accessible name of the close button in the corner. Leave it out to hide the
+   * button.
+   */
   closeLabel?: string;
 }) {
   return (

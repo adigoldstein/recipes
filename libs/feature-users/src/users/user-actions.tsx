@@ -17,7 +17,7 @@ import { useErrorMessage } from '../shared/use-error-message';
 import { ResetPasswordDialog } from './reset-password-dialog';
 import { useUpdateUser } from './use-update-user';
 
-/** The one-step changes; each has its own words under `users.change.<name>`. */
+/** The simple changes. Each has its own texts under `users.change.<name>`. */
 type Change = 'makeAdmin' | 'makeEditor' | 'block' | 'unblock';
 
 const CHANGES: Record<Change, UserUpdate> = {
@@ -31,13 +31,22 @@ type Dialog = Change | 'reset' | null;
 
 export interface UserActionsProps {
   user: UserRead;
-  /** This row is the signed-in admin: they use "החשבון שלי" for their own password. */
+  /**
+   * True if this row is the logged-in admin. They change their own password in
+   * "החשבון שלי".
+   */
   isSelf: boolean;
-  /** Nobody else is an active admin, so this user can be neither demoted nor blocked. */
+  /**
+   * True if no one else is an active admin, so this user cannot be demoted or
+   * blocked.
+   */
   isLastAdmin: boolean;
 }
 
-/** Mounted only while open, so each opening starts without an old error. */
+/**
+ * The confirmation dialog of a change. It exists only while open, so it never shows
+ * an old error.
+ */
 function ConfirmChange({
   user,
   change,
@@ -81,7 +90,7 @@ function ConfirmChange({
   );
 }
 
-/** The "⋮" menu on a user's row: change role, block or unblock, reset password. */
+/** The "⋮" menu of a user row: change role, block or unblock, and reset password. */
 export function UserActions({ user, isSelf, isLastAdmin }: UserActionsProps) {
   const { t } = useTranslation();
   const [dialog, setDialog] = useState<Dialog>(null);

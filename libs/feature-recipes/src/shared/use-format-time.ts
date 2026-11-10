@@ -2,7 +2,10 @@ import { useTranslation } from 'react-i18next';
 
 const MINUTES_PER_HOUR = 60;
 
-/** Minutes as Hebrew copy ("1 שע׳ 15 דק׳"); undefined when the time is unknown. */
+/**
+ * Turns minutes into Hebrew text ("1 שע׳ 15 דק׳"). Returns undefined if the time is
+ * unknown.
+ */
 export function useFormatTime() {
   const { t } = useTranslation();
   return (minutes: number | null) => {

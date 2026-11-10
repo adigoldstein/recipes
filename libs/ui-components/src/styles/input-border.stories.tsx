@@ -18,9 +18,10 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 /**
- * Story 1.5 approval preview. Switch Light/Dark in the toolbar. "Before" is the
- * old `--input` (= `--border`, about 1.25:1); "After" is the new stronger
- * `--input` (>= 3:1 on background, card and popover; see theme-contrast.spec.ts).
+ * Preview for approving Story 1.5. Switch Light/Dark in the toolbar. "Before" is the
+ * old `--input` (same as `--border`, about 1.25:1). "After" is the new, stronger
+ * `--input` (at least 3:1 on background, card and popover; see
+ * theme-contrast.spec.ts).
  */
 export const BeforeAndAfter: Story = {
   render: () => (

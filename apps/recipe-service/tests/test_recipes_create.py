@@ -59,9 +59,9 @@ def test_create_resolves_ids_and_names(client: TestClient, session: Session) -> 
         new_recipe(
             tags=[
                 TagInput(id=brunch.id),
-                TagInput(name="  party "),  # reuses "Party", case-insensitive
-                TagInput(name="על   האש"),  # new, spaces collapsed
-                TagInput(id=brunch.id),  # duplicate collapses
+                TagInput(name="  party "),  # uses "Party", case is ignored
+                TagInput(name="על   האש"),  # a new tag; extra spaces are removed
+                TagInput(id=brunch.id),  # a duplicate is linked only once
             ]
         )
     )

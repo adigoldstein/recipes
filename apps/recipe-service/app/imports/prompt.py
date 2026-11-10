@@ -1,4 +1,8 @@
-"""The import prompt. Bump `PROMPT_VERSION` on each wording change (logged per run)."""
+"""The prompt for the import AI.
+
+Increase `PROMPT_VERSION` every time you change the wording. It is saved with each
+import.
+"""
 
 from collections.abc import Sequence
 

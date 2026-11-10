@@ -71,28 +71,33 @@ import { useIssueMessage } from './use-issue-message';
 import { useUnsavedChangesGuard } from './use-unsaved-changes-guard';
 
 const NO_UNIT = 'none';
-// The options list names the unit in general, which is the plural form (`_other`).
+// The unit list shows the general name of each unit, which is the plural form
+// (`_other`).
 const UNITS = schemas.zUnit.options;
 
 export interface RecipeFormProps {
   defaultValues: RecipeFormValues;
-  /** Saves the recipe. A rejected promise shows its error on the form. */
+  /** Saves the recipe. If the promise rejects, the form shows the error. */
   onSave: (payload: RecipeUpdate) => Promise<unknown>;
   submitLabel: string;
   /**
-   * Locks the whole form while something else is filling it (an import): nothing in it
-   * can be focused, clicked or typed in, and screen readers skip it.
+   * Locks the whole form while something else fills it (an import). Nothing in it can
+   * be focused, clicked or typed in, and screen readers skip it.
    */
   locked?: boolean;
-  /** Tells the page whether the editor changed anything, so an import can ask first. */
+  /**
+   * Tells the page whether the editor changed anything, so an import can ask
+   * before it replaces the values.
+   */
   onDirtyChange?: (dirty: boolean) => void;
   /**
-   * Set when the form was filled from an imported draft (Story 5.3): a banner tells how
-   * many fields need the editor, fields the source left out are flagged until filled,
-   * and the form checks itself once so required gaps show at once.
+   * Set when the form was filled from an imported draft (Story 5.3). A banner shows
+   * how many fields need the editor, fields missing in the source are marked until
+   * they are filled, and the form checks itself once so empty required fields show
+   * right away.
    */
   review?: DraftReview;
-  /** "ביטול" on the review banner: the page throws the draft away. */
+  /** Called by "ביטול" on the review banner. The page then discards the draft. */
   onDiscard?: () => void;
 }
 
@@ -103,7 +108,7 @@ function rowError(errors: FieldErrors | undefined, field: string) {
   return error?.message;
 }
 
-/** The message of a tags error: the list's own, or the first tag's. */
+/** Returns the tags error message: the error of the whole list, or of the first tag. */
 function firstTagMessage(errors: FieldErrors<RecipeFormValues>['tags']) {
   if (!errors) return undefined;
   if (errors.root?.message) return errors.root.message;
@@ -151,7 +156,7 @@ function IngredientRow({
     [messages.length > 0 ? errorId : null, originalHint ? hintId : null]
       .filter(Boolean)
       .join(' ') || undefined;
-  // Enter in a text box never submits the form; in the last row it adds the next one.
+  // Enter in a text box never submits the form. In the last row it adds a new row.
   const enter = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key !== 'Enter' || event.nativeEvent.isComposing) {
       return;
@@ -292,7 +297,7 @@ function Ingredients({
             onMove={(to) => move(index, to)}
             onRemove={() => remove(index)}
             onEnter={() => {
-              // Only the last row grows the list, and only once it has a name.
+              // Add a row only from the last row, and only if it has a name.
               const last = index === fields.length - 1;
               if (
                 !last ||
@@ -399,9 +404,9 @@ function Steps({
 }
 
 /**
- * The recipe form (FR-4, FR-6), for create and edit. Values are
- * checked against the generated write schema before sending; a 422 from the server
- * lands on the same fields with the same Hebrew messages (AD-9, AD-28).
+ * The recipe form (FR-4, FR-6), for create and edit. The values are checked with the
+ * generated write schema before sending. A 422 from the server is shown on the same
+ * fields, with the same Hebrew messages (AD-9, AD-28).
  */
 export function RecipeForm({
   defaultValues,
@@ -416,7 +421,8 @@ export function RecipeForm({
   const issueMessage = useIssueMessage();
   const errorMessage = useErrorMessage();
 
-  // The resolver turns client issues into field errors with their Hebrew text.
+  // The resolver turns the client check's problems into field errors with Hebrew
+  // messages.
   const resolver: Resolver<RecipeFormValues> = (values) => {
     const issues = validateRecipeForm(values);
     if (issues.length === 0) return { values, errors: {} };
@@ -443,7 +449,8 @@ export function RecipeForm({
   } = useForm<RecipeFormValues>({
     defaultValues,
     resolver,
-    // An error shows when a field is first left, then follows the typing until it clears.
+    // Show an error after the user first leaves the field. After that, update it
+    // while typing until it is fixed.
     mode: 'onTouched',
   });
   const { blocker, allowLeaving } = useUnsavedChangesGuard(isDirty);
@@ -451,8 +458,8 @@ export function RecipeForm({
     onDirtyChange?.(isDirty);
   }, [isDirty, onDirtyChange]);
 
-  // A draft can leave required fields empty. Checking once on arrival shows them now,
-  // like Angular's markAllAsTouched(), instead of only after the first "save".
+  // A draft can leave required fields empty. Check the form once when it opens, so
+  // they show right away (like Angular's markAllAsTouched()), not only after "save".
   useEffect(() => {
     if (review) void trigger();
   }, [review, trigger]);
@@ -463,7 +470,7 @@ export function RecipeForm({
     getValues,
     setValue,
     limits: limits.data,
-    // An imported photo is not saved yet, so removing it needs nothing on save.
+    // An imported photo is not saved yet, so removing it does not need to be sent.
     savedPreview: defaultValues.photoSourceUrl
       ? null
       : defaultValues.photoPreview,
@@ -481,13 +488,13 @@ export function RecipeForm({
     prep_time_minutes: prepTime.trim() !== '',
     cook_time_minutes: cookTime.trim() !== '',
   };
-  // A flagged field is one the source left out; the flag clears once it is filled.
+  // Mark the fields that the source did not have, until they are filled.
   const flagged = new Set(
     (review?.missingFields ?? []).filter((name) => !filled[name]),
   );
   const flagText = (name: ReviewableField) =>
     flagged.has(name) ? t('recipeForm.review.complete') : undefined;
-  // The banner counts flagged fields and fields with a check error, each once.
+  // The banner counts the marked fields and the fields with errors, each field once.
   const needAttention = new Set<string>([
     ...flagged,
     ...Object.keys(errors).filter((name) => name !== 'root'),
@@ -504,13 +511,13 @@ export function RecipeForm({
 
   const onSubmit: () => Promise<void> = handleSubmit(async (values) => {
     clearErrors('root.server');
-    // An imported photo is downloaded by the server first, so the save can attach it.
+    // The server first downloads the imported photo, so saving can attach it.
     let photoKey = values.photoKey;
     if (values.photoSourceUrl && photoKey === undefined) {
       photoKey = await photo.download(values.photoSourceUrl);
       if (photoKey === undefined) return;
     }
-    // A saved form navigates away from inside `onSave`; that must not ask.
+    // `onSave` navigates away after saving, so do not ask "leave without saving?".
     allowLeaving(true);
     try {
       await onSave(toWritePayload({ ...values, photoKey }));
@@ -524,14 +531,15 @@ export function RecipeForm({
           message: issueMessage(issue),
         });
       }
-      // Anything the form cannot place on a field is shown under the button.
+      // An error that does not belong to a field is shown under the save button.
       if (known.length === 0 || known.length < issues.length) {
         setError('root.server', {
           type: getErrorCode(error) ?? 'unknown',
           message: errorMessage(error),
         });
       }
-      // No code and no field means the network or the server failed, not the input.
+      // No code and no field error means the network or the server failed, not the
+      // input.
       if (getErrorCode(error) === undefined && issues.length === 0) {
         toast.error(t('recipeForm.saveFailed'), {
           action: {
@@ -743,8 +751,8 @@ export function RecipeForm({
               render={({ field }) => (
                 <TagPicker
                   {...tagsField}
-                  // Without the list (loading, or failed) a typed name still works:
-                  // the server reuses an existing tag of that name.
+                  // If the list did not load (still loading, or failed), typing a
+                  // name still works: the server uses an existing tag with that name.
                   options={tagList.data ?? []}
                   value={field.value}
                   onChange={field.onChange}

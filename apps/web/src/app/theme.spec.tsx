@@ -36,7 +36,7 @@ describe('pre-paint script in index.html', () => {
     'utf8',
   );
   const script = /<script id="theme-init">([\s\S]*?)<\/script>/.exec(html)?.[1];
-  // Runs the inline script the way the browser does before first paint.
+  // Runs the inline script, like the browser does before it first draws the page.
   // eslint-disable-next-line no-new-func -- the code under test is that script
   const run = () => new Function(script ?? '')();
 

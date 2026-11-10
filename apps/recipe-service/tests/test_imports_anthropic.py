@@ -1,4 +1,4 @@
-"""The Claude adapter against a fake HTTP server (no network, no key)."""
+"""Tests the Claude provider with a fake HTTP server (no network, no API key)."""
 
 import asyncio
 import json
@@ -69,10 +69,10 @@ def test_a_valid_tool_reply_is_returned_with_its_cost() -> None:
     body = json.loads(request.content)
     assert body["model"] == "claude-test"
     assert body["tool_choice"] == {"type": "tool", "name": "record_recipe"}
-    # The model rejects `temperature` with a 400, so the request must never send it.
+    # The model returns 400 for `temperature`, so the request must never send it.
     assert "temperature" not in body
     assert body["tools"][0]["input_schema"]["type"] == "object"
-    # The key travels in a header, never in the body.
+    # The API key is sent in a header, never in the body.
     assert API_KEY.encode() not in request.content
 
 

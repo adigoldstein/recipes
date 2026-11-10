@@ -1,4 +1,5 @@
-"""Ingredient unit codes, defined once (AD-20). Hebrew labels live in `he.json`."""
+"""The ingredient unit codes, defined in one place (AD-20). The Hebrew names are in
+`he.json`."""
 
 from enum import StrEnum
 
@@ -20,12 +21,14 @@ class Unit(StrEnum):
 
 
 class SourceUnit(StrEnum):
-    """Imperial units an import converted to metric; kept as the 'source' value."""
+    """Imperial units that an import converted to metric. We keep the original unit
+    as the 'source' value."""
 
     OZ = "oz"
     LB = "lb"
     FL_OZ = "fl_oz"
 
 
-# Counted things the scaler rounds to the nearest half (AD-20, AD-32).
+# Units of things you count. When servings change, these amounts are rounded to
+# the nearest half (AD-20, AD-32).
 COUNTABLE_UNITS = frozenset({Unit.UNIT, Unit.CLOVE, Unit.SLICE, Unit.CAN, Unit.PACKAGE})

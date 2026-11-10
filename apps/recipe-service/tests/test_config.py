@@ -50,7 +50,8 @@ def test_a_photo_limit_of_zero_is_refused(monkeypatch: pytest.MonkeyPatch) -> No
 
 
 def test_env_example_lists_every_setting() -> None:
-    """`.env.example` documents every setting (README), so a new one must be added."""
+    """`.env.example` lists every setting (see README), so a new setting must be
+    added there too."""
     lines = (SERVICE_ROOT / ".env.example").read_text(encoding="utf-8").splitlines()
     listed = {line.split("=")[0] for line in lines if "=" in line and line[0] != "#"}
     assert listed == {name.upper() for name in Settings.model_fields}

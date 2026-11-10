@@ -1,4 +1,4 @@
-"""Database access for tags; used only by this module's service."""
+"""Database queries for tags. Only this module's service uses them."""
 
 import uuid
 from collections.abc import Sequence
@@ -17,7 +17,7 @@ class TagRepository:
         return self._session.get(Tag, tag_id)
 
     def get_by_name(self, name: str) -> Tag | None:
-        """The tag with this name, compared case-insensitively (AD-7)."""
+        """Finds the tag with this name, ignoring upper and lower case (AD-7)."""
         statement = select(Tag).where(func.lower(col(Tag.name)) == name.lower())
         return self._session.exec(statement).first()
 
@@ -38,7 +38,7 @@ class TagRepository:
     def list_for_recipes(
         self, recipe_ids: Sequence[uuid.UUID]
     ) -> Sequence[tuple[uuid.UUID, Tag]]:
-        """Every (recipe id, tag) pair for the recipes, in a stable display order."""
+        """Returns (recipe id, tag) pairs for the given recipes, in display order."""
         statement = (
             select(RecipeTag.recipe_id, Tag)
             .join(Tag, col(RecipeTag.tag_id) == col(Tag.id))
@@ -52,7 +52,8 @@ class TagRepository:
         return [(recipe_id, tag) for recipe_id, tag in self._session.exec(statement)]
 
     def list_all_with_counts(self) -> Sequence[tuple[Tag, int]]:
-        """Every tag with its recipe count, pinned first, then by name."""
+        """Returns every tag with its number of recipes. Pinned tags first, then by
+        name."""
         statement = (
             select(Tag, func.count(col(RecipeTag.recipe_id)))
             .join(RecipeTag, col(RecipeTag.tag_id) == col(Tag.id), isouter=True)
@@ -70,12 +71,12 @@ class TagRepository:
         return self._session.exec(statement).one()
 
     def next_sort_order(self) -> int:
-        """One past the last pinned tag, so a newly pinned tag goes last."""
+        """Returns the next free position, so a newly pinned tag is added at the end."""
         top = self._session.exec(select(func.max(col(Tag.sort_order)))).one()
         return 0 if top is None else top + 1
 
     def delete(self, tag: Tag) -> None:
-        """Remove the tag and its recipe links."""
+        """Deletes the tag and its links to recipes."""
         self._session.exec(delete(RecipeTag).where(col(RecipeTag.tag_id) == tag.id))
         self._session.delete(tag)
         self._session.flush()

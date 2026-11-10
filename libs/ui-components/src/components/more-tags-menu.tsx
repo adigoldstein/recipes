@@ -15,13 +15,13 @@ export interface MoreTagsOption {
 }
 
 export interface MoreTagsMenuProps {
-  /** Text of the button that opens the list. */
+  /** The text of the button that opens the list. */
   label: string;
-  /** Heading of the list. */
+  /** The heading of the list. */
   title: string;
-  /** Accessible name of the sheet's close button. */
+  /** The accessible name of the sheet's close button. */
   closeLabel: string;
-  /** Every tag, pinned or not. */
+  /** All the tags, pinned or not. */
   options: readonly MoreTagsOption[];
   selectedIds: readonly string[];
   onSelectedIdsChange: (ids: string[]) => void;
@@ -34,8 +34,8 @@ export interface MoreTagsMenuProps {
 }
 
 /**
- * The phone's tag filter (UX-DR11): a button that opens a bottom sheet with every
- * tag and a checkbox. Props in, callbacks out.
+ * The tag filter on a phone (UX-DR11): a button that opens a bottom sheet with all
+ * the tags, each with a checkbox. It gets props and calls callbacks.
  */
 export function MoreTagsMenu({
   label,

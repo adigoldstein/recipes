@@ -75,7 +75,7 @@ describe('RecipeCard', () => {
     expect(photo?.getAttribute('width')).toBe('600');
     expect(photo?.getAttribute('height')).toBe('450');
     expect(screen.getByRole('heading').className).toContain('text-title');
-    // The title comes first and the photo follows it.
+    // The title comes first, and the photo after it.
     const title = screen.getByRole('heading');
     expect(
       title.compareDocumentPosition(photo as Node) &

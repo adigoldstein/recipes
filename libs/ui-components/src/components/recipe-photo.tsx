@@ -2,17 +2,23 @@ import { cn } from '../lib/utils';
 
 export interface RecipePhotoProps {
   src: string;
-  /** What the picture shows, for a screen reader (the recipe's title is not enough alone). */
+  /**
+   * What the picture shows, for screen readers (the recipe's title alone is not
+   * enough).
+   */
   alt: string;
-  /** The credit line, already worded, e.g. "מקור: example.com". Left out when none. */
+  /**
+   * The credit line, ready to show, for example "מקור: example.com". Leave it out if
+   * there is none.
+   */
   credit?: string;
   className?: string;
 }
 
 /**
- * The recipe's photo on the detail page (UX-DR8): board-shaped, with the handle slot
- * cut through the picture, 4:3 on a phone and 16:9 from `lg`. It is at the top of the
- * page, so it loads at once; width and height are set so the page does not jump.
+ * The recipe's photo on the recipe page (UX-DR8), in the shape of a board with a
+ * handle hole: 4:3 on a phone and 16:9 from `lg`. It is at the top of the page, so
+ * it loads right away. Width and height are set, so the page does not jump.
  */
 export function RecipePhoto({ src, alt, credit, className }: RecipePhotoProps) {
   return (

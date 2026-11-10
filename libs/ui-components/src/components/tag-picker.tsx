@@ -11,40 +11,43 @@ import {
 } from './ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 
-/** A tag that exists, as the picker lists it. */
+/** An existing tag in the picker's list. */
 export interface TagPickerOption {
   id: string;
   name: string;
 }
 
-/** A tag on the recipe: an existing one by id, or a new one by name. */
+/** A tag of the recipe: an existing tag with an id, or a new tag with only a name. */
 export interface TagPickerValue {
   id?: string;
   name: string;
 }
 
 export interface TagPickerLabels {
-  /** The closed field's text. */
+  /** The text of the field when it is closed. */
   trigger: string;
-  /** Placeholder of the search box in the list. */
+  /** The placeholder of the search box in the list. */
   search: string;
-  /** Shown when the list has nothing at all. */
+  /** Shown when the list is empty. */
   empty: string;
-  /** The row that creates a tag from the typed text. */
+  /** The text of the row that creates a tag from the typed text. */
   create: (name: string) => string;
-  /** Accessible name of a chip's remove button. */
+  /** The accessible name of a chip's remove button. */
   remove: (name: string) => string;
-  /** Accessible name of the chosen-tags list. */
+  /** The accessible name of the list of chosen tags. */
   chosen: string;
 }
 
 export interface TagPickerProps {
   id: string;
-  /** Every existing tag, in the order to show them. */
+  /** All the existing tags, in the order to show them. */
   options: readonly TagPickerOption[];
   value: readonly TagPickerValue[];
   onChange: (value: TagPickerValue[]) => void;
-  /** Cleans typed text the way the server will (AD-24), so matching agrees with it. */
+  /**
+   * Cleans the typed text the same way the server does (AD-24), so the matching is
+   * the same.
+   */
   normalize: (text: string) => string;
   maxLength: number;
   labels: TagPickerLabels;
@@ -59,9 +62,10 @@ const sameName = (a: string, b: string) =>
   a.toLocaleLowerCase() === b.toLocaleLowerCase();
 
 /**
- * Tags on a recipe (FR-22): a field that opens the list of every tag, a search box
- * that narrows it, a "create" row for a name that does not exist yet, and the chosen
- * tags as removable chips. Props in, callbacks out: it knows nothing about the API.
+ * Chooses the tags of a recipe (FR-22): a field that opens the list of all tags, a
+ * search box that filters it, a "create" row for a name that does not exist yet, and
+ * the chosen tags as chips you can remove. It gets props and calls callbacks, and
+ * knows nothing about the API.
  */
 export function TagPicker({
   id,
@@ -134,7 +138,7 @@ export function TagPicker({
           className="w-(--radix-popover-trigger-width)"
           onCloseAutoFocus={() => setQuery('')}
         >
-          {/* Our own matching, so "BBQ " and "bbq" agree with the server. */}
+          {/* We filter by ourselves, so "BBQ " and "bbq" match like on the server. */}
           <Command shouldFilter={false}>
             <CommandInput
               value={query}

@@ -20,7 +20,10 @@ import {
 import { safeNext } from '../shared/safe-next';
 import { useErrorMessage } from '../shared/use-error-message';
 
-/** The login page at `/login` (FR-14). Wrong credentials never say which field. */
+/**
+ * The login page at `/login` (FR-14). A failed login never says which field was
+ * wrong.
+ */
 export function LoginPage() {
   const { t } = useTranslation();
   const errorMessage = useErrorMessage();
@@ -43,7 +46,7 @@ export function LoginPage() {
     defaultValues: { email: '', password: '' },
   });
 
-  // Signed in, whether just now or already before: go where the visitor was headed.
+  // If the user is logged in (just now, or from before), go to the page they wanted.
   if (session.data?.user) {
     return <Navigate to={safeNext(params.get('next'))} replace />;
   }
@@ -52,8 +55,8 @@ export function LoginPage() {
     login.mutate(
       { body: values },
       {
-        // The login answer has the session's shape, so it fills the cache directly
-        // and the editing controls appear without another request.
+        // The login response has the same shape as the session, so put it in the
+        // cache. The edit controls then appear without another request.
         onSuccess: (response) =>
           queryClient.setQueryData(authSessionQueryKey(), response),
       },
@@ -109,7 +112,7 @@ export function LoginPage() {
               />
             )}
           </FormField>
-          {/* Always rendered, so a screen reader announces the text when it appears. */}
+          {/* Always in the page, so a screen reader reads the text when it appears. */}
           <p role="alert" className="text-sm text-destructive">
             {login.isError ? errorMessage(login.error) : null}
           </p>

@@ -1,4 +1,5 @@
-"""`DELETE /api/recipes/{id}`: editors delete a recipe with its parts (FR-10)."""
+"""`DELETE /api/recipes/{id}`: editors delete a recipe with its ingredients and
+steps (FR-10)."""
 
 import uuid
 
@@ -77,7 +78,7 @@ def test_deleting_without_the_csrf_header_is_403(
 def test_delete_removes_the_recipe_and_its_parts_but_keeps_the_tag(
     client: TestClient, session: Session, editor: User, saved: Recipe
 ) -> None:
-    recipe_id = saved.id  # the row is gone afterwards, so read it first
+    recipe_id = saved.id  # save the id first, because the row is deleted next
     response = client.delete(url(recipe_id))
     assert response.status_code == 204
     assert response.content == b""

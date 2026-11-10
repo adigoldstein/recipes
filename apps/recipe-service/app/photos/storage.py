@@ -1,7 +1,8 @@
-"""Where photo files live: the `PhotoStorage` port and its local-disk adapter (AD-14).
+"""Where photo files are saved: the `PhotoStorage` interface and its local disk
+implementation (AD-14).
 
-Only `photos.service` talks to a storage. Moving to S3-compatible storage later means
-writing another adapter for this Protocol and nothing else.
+Only `photos.service` uses a storage. To move to S3-like storage later, we only need
+to write another class that implements this Protocol.
 """
 
 import logging
@@ -28,19 +29,20 @@ class PhotoStorage(Protocol):
     def exists(self, key: str) -> bool: ...
 
     def delete(self, key: str) -> None:
-        """Remove every file of the photo; missing files are not an error."""
+        """Deletes all the files of the photo. A missing file is not an error."""
         ...
 
     def list_photos(self) -> list[StoredPhoto]: ...
 
 
 def file_name(key: str, variant: Variant) -> str:
-    """The file's name, which is also its last URL segment under `/media/photos/`."""
+    """Returns the file name. It is also the last part of the URL under
+    `/media/photos/`."""
     return f"{key}.webp" if variant == "full" else f"{key}-thumb.webp"
 
 
 class LocalPhotoStorage:
-    """Photos as files in one folder, on the same volume as the database."""
+    """Saves photos as files in one folder, on the same disk as the database."""
 
     def __init__(self, root: Path) -> None:
         self._root = root
@@ -48,7 +50,7 @@ class LocalPhotoStorage:
     def save(self, key: str, variant: Variant, data: bytes) -> None:
         self._root.mkdir(parents=True, exist_ok=True)
         target = self._root / file_name(key, variant)
-        # Written beside the target and renamed, so a reader never sees half a file.
+        # Write to a temporary file and then rename it, so nobody reads half a file.
         partial = target.with_suffix(".partial")
         partial.write_bytes(data)
         os.replace(partial, target)
@@ -61,7 +63,8 @@ class LocalPhotoStorage:
             try:
                 (self._root / file_name(key, variant)).unlink(missing_ok=True)
             except OSError:
-                # The row is already gone; a file left behind is swept at startup.
+                # The database row is already deleted. A file left behind is
+                # cleaned up at the next startup.
                 logger.warning("Could not delete photo file for %s", key)
 
     def list_photos(self) -> list[StoredPhoto]:

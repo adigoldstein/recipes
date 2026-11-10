@@ -1,4 +1,4 @@
-"""SQLModel tables owned by tags."""
+"""The database tables of the tags module."""
 
 import uuid
 
@@ -7,15 +7,16 @@ from sqlmodel import Field, SQLModel
 
 
 class Tag(SQLModel, table=True):
-    """One flat list of tags; a recipe has any number of them (AD-7)."""
+    """A tag. All tags are in one flat list, and a recipe can have any number of
+    them (AD-7)."""
 
     __tablename__ = "tag"
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     name: str = Field(max_length=40)
-    # Pinned tags are the quick-filter chips in the library.
+    # Pinned tags appear as quick filter chips in the library.
     pinned: bool = Field(default=False, sa_column_kwargs={"server_default": false()})
-    # Display order of the pinned tags; unpinned tags leave it empty.
+    # The order of the pinned tags on screen. Empty for tags that are not pinned.
     sort_order: int | None = None
 
 
@@ -27,11 +28,11 @@ Index(
 
 
 class RecipeTag(SQLModel, table=True):
-    """Links a recipe to its tags. Owned by tags (AD-25)."""
+    """Connects a recipe to a tag. This table belongs to the tags module (AD-25)."""
 
     __tablename__ = "recipe_tag"
 
-    # String references: tags must not import the recipes module.
+    # The foreign key is written as a string because tags may not import recipes.
     recipe_id: uuid.UUID = Field(
         foreign_key="recipe.id",
         ondelete="CASCADE",

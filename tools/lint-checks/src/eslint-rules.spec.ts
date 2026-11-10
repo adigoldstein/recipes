@@ -5,7 +5,7 @@ const WORKSPACE = join(import.meta.dirname, '../../..');
 
 const engines = new Map<string, ESLint>();
 
-/** Lints `code` as if it were a file in `project`, with that project's real config. */
+/** Lints `code` as if it was a file in `project`, with that project's real config. */
 async function lint(
   project: string,
   code: string,
@@ -59,7 +59,7 @@ describe('RTL and design-token class bans', () => {
         'apps/web',
         `declare function cn(...c: string[]): string;\nexport const A = () => <div className={cn('flex', '${cls}')} />;\n`,
       );
-      // `bg-[#ff0000]` also trips the colour-literal rule.
+      // `bg-[#ff0000]` also breaks the color rule.
       expect(rulesOf(messages)).toContain(TAILWIND);
     },
   );
@@ -262,7 +262,7 @@ describe('module boundaries', () => {
   });
 
   it('keeps feature libs from importing each other', async () => {
-    // No feature lib exists yet to lint against, so assert the constraint itself.
+    // There is no feature lib yet to lint, so check the rule config itself.
     const engine = new ESLint({ cwd: join(WORKSPACE, 'apps/web') });
     const config = await engine.calculateConfigForFile(
       join(WORKSPACE, 'apps/web/src/main.tsx'),

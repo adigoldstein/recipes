@@ -15,7 +15,7 @@ const DRAFT: DraftRecipe = {
   missing_fields: [],
 };
 
-/** Answers POST /api/imports/text with this draft and returns what was sent. */
+/** Answers POST /api/imports/text with this draft. Returns what was sent. */
 function serveDraft(wait = 0) {
   const sent: unknown[] = [];
   server.use(
@@ -42,7 +42,7 @@ type User = ReturnType<typeof userEvent.setup>;
 
 const openPanel = (user: User) =>
   user.click(screen.getByRole('button', { name: 'ייבוא עם בינה מלאכותית' }));
-/** Opens the panel on the "הדבקת טקסט" input (the link input is the default). */
+/** Opens the panel and switches to "הדבקת טקסט" (the link input is the default). */
 const open = async (user: User) => {
   await openPanel(user);
   await user.click(screen.getByRole('radio', { name: 'הדבקת טקסט' }));
@@ -108,7 +108,8 @@ describe('ImportPanel', () => {
       await screen.findByText('מכינים טיוטה. זה יכול לקחת כמה שניות.'),
     ).toBeTruthy();
     expect(onBusyChange).toHaveBeenCalledWith(true);
-    // At once: disabled; after the short delay the button shows its working label.
+    // Disabled right away. After the short delay, the button shows its "working"
+    // label.
     expect(submit()).toHaveProperty('disabled', true);
     expect(
       await screen.findByRole('button', { name: 'מכינים טיוטה' }),
@@ -147,7 +148,7 @@ describe('ImportPanel', () => {
     expect(sent).toHaveLength(0);
     expect(onDraft).not.toHaveBeenCalled();
     expect(onBusyChange).not.toHaveBeenCalled();
-    // The text is still there to edit.
+    // The text is still there, so it can be edited.
     expect(textbox()).toHaveProperty('value', 'מתכון');
   });
 
@@ -313,7 +314,10 @@ describe('ImportPanel link input', () => {
 });
 
 describe('ImportPanel cancel', () => {
-  /** A server that never answers; it records when the browser drops the request. */
+  /**
+   * A fake server that never answers. It records when the browser cancels the
+   * request.
+   */
   function serveForever() {
     const state = { received: 0, aborted: false };
     server.use(
@@ -356,7 +360,7 @@ describe('ImportPanel cancel', () => {
     await user.type(textbox(), 'מתכון');
     await user.click(submit());
     await user.click(await screen.findByRole('button', { name: 'ביטול' }));
-    // Give the aborted request time to reject; nothing may be shown.
+    // Give the cancelled request time to fail. Nothing should be shown.
     await new Promise((resolve) => setTimeout(resolve, 50));
     expect(screen.queryByRole('alert')).toBeNull();
     expect(screen.queryByText(/שגיאה|בעיה/)).toBeNull();
@@ -504,7 +508,7 @@ describe('ImportPanel progress stream', () => {
   const stageLines = () =>
     screen.queryAllByRole('listitem').map((item) => item.textContent ?? '');
 
-  /** A stream that sends these blocks and then waits, so the dialog stays busy. */
+  /** A stream that sends these blocks and then waits, so the panel stays busy. */
   function serveOpenStream(blocks: string[]) {
     server.use(
       http.post('*/api/imports/text', () => {
@@ -538,13 +542,13 @@ describe('ImportPanel progress stream', () => {
     await user.click(submit());
     const list = await screen.findByRole('list', { name: 'שלבי הייבוא' });
     await vi.waitFor(() => expect(stageLines()).toHaveLength(2));
-    // Skipped stages are left out; finished and running ones carry a status.
+    // Skipped steps are not shown. Finished and running steps show a status.
     expect(stageLines()).toEqual([
       'קוראים את המתכוןהושלם',
       'בודקים את הטיוטהבעבודה',
     ]);
     expect(list).toBeTruthy();
-    // No percentage bar.
+    // There is no percentage bar.
     expect(screen.queryByRole('progressbar')).toBeNull();
     await user.click(screen.getByRole('button', { name: 'ביטול' }));
     expect(screen.queryByRole('list', { name: 'שלבי הייבוא' })).toBeNull();

@@ -1,7 +1,7 @@
-"""The FR-7..9 original-value rule for one ingredient (AD-4, AD-20, AD-31).
+"""Keeps an ingredient's original value when it is edited (FR-7..9, AD-4, AD-20, AD-31).
 
-Pure and database-free so the whole truth table can be unit tested. Every comparison
-uses amounts quantized to 3 decimals; "to taste" is an amount of None, with no unit.
+This code does not use the database, so every case can be unit tested. Amounts are
+compared after rounding to 3 decimals. "To taste" is an amount of None with no unit.
 """
 
 from decimal import Decimal
@@ -14,7 +14,7 @@ Quantity = tuple[Decimal | None, Unit | None]
 
 
 def quantity(amount: Decimal | None, unit: Unit | None) -> Quantity:
-    """The comparable form of an amount and unit; to taste has no unit."""
+    """Returns the amount and unit in a form we can compare. "To taste" has no unit."""
     if amount is None:
         return (None, None)
     return (amount.quantize(AMOUNT_QUANTUM), unit)
@@ -23,14 +23,15 @@ def quantity(amount: Decimal | None, unit: Unit | None) -> Quantity:
 def apply_edit(
     item: IngredientItem, amount: Decimal | None, unit: Unit | None
 ) -> IngredientItem:
-    """The ingredient with a new amount and unit, its original kept up to date.
+    """Returns the ingredient with a new amount and unit, and updates its original.
 
-    Items are immutable (AD-41), so this returns a new item and leaves `item` alone.
+    Items cannot be changed (AD-41), so this returns a new item and does not change
+    `item`.
 
-    - The first change stores the previous value as the original; later changes keep it.
-    - Changing to or from to taste counts as a change.
-    - Setting the value back to the original clears the original (a reset).
-    - A write that changes nothing leaves the original alone.
+    - The first change saves the previous value as the original. Later changes keep it.
+    - Changing to or from "to taste" counts as a change.
+    - Setting the value back to the original deletes the original (a reset).
+    - Saving the same value does not touch the original.
     """
     current = quantity(item.amount, item.unit)
     new = quantity(amount, unit)

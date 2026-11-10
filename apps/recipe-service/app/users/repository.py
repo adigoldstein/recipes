@@ -1,4 +1,4 @@
-"""Database access for users; used only by this module's service."""
+"""Database queries for users. Only this module's service uses them."""
 
 import uuid
 
@@ -17,21 +17,21 @@ class UserRepository:
         return self._session.get(User, user_id)
 
     def get_by_email(self, email: str) -> User | None:
-        """The user with this email, compared case-insensitively (AD-30).
+        """Finds the user with this email, ignoring upper and lower case (AD-30).
 
-        Both sides go through SQLite's `lower()`, exactly like the unique index, so a
-        lookup and the uniqueness rule can never disagree about what "same" means.
+        Both sides use SQLite's `lower()`, just like the unique index, so the search
+        and the uniqueness rule always agree on which emails are the same.
         """
         statement = select(User).where(func.lower(col(User.email)) == func.lower(email))
         return self._session.exec(statement).first()
 
     def list_all(self) -> list[User]:
-        """Every user, oldest account first."""
+        """Returns all users, oldest account first."""
         statement = select(User).order_by(col(User.created_at), col(User.email))
         return list(self._session.exec(statement).all())
 
     def count_active_admins(self) -> int:
-        """How many admins can sign in right now (admin role, not blocked)."""
+        """Counts the admins who can log in right now (admin role and not blocked)."""
         statement = (
             select(func.count())
             .select_from(User)
@@ -40,7 +40,7 @@ class UserRepository:
         return self._session.exec(statement).one()
 
     def add(self, user: User) -> User:
-        """Stage the user; the caller commits."""
+        """Adds or updates the user in the session. The caller commits."""
         self._session.add(user)
         self._session.flush()
         return user

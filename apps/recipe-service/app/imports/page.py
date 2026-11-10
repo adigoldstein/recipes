@@ -1,9 +1,10 @@
-"""Reading a fetched recipe page (AD-13, AD-35).
+"""Reads a downloaded recipe page (AD-13, AD-35).
 
-Schema.org Recipe JSON-LD is used first; otherwise the page's readable text. Both
-become plain text for the LLM, which always runs (to translate, map units and pick
-tags). The main photo is `Recipe.image`, else `og:image`. A bot-protection challenge
-or block page is recognised here and reported, never bypassed.
+If the page has Schema.org Recipe JSON-LD, we use it. Otherwise we use the page's
+readable text. Either way, the result is plain text for the LLM, which always runs
+(to translate, set units, and choose tags). The main photo is `Recipe.image`, or
+`og:image` if there is none. If the site answers with an anti-bot check or a block
+page, we detect it here and report it. We never try to get around it.
 """
 
 import json
@@ -26,8 +27,9 @@ ImportPath = Literal["json_ld", "llm"]
 
 _HTML_TYPES = {"text/html", "application/xhtml+xml", ""}
 
-# Statuses a protection layer answers with, and the markers of its pages. A marker
-# alone also counts on a 200, because some challenges answer with 200.
+# HTTP statuses that anti-bot services answer with, and text that appears on their
+# pages. The text alone is enough, even with status 200, because some anti-bot pages
+# answer with 200.
 _CHALLENGE_STATUSES = {403, 429, 503}
 _CHALLENGE_MARKERS = (
     "cf-chl-",  # Cloudflare managed challenge
@@ -47,7 +49,7 @@ _CHALLENGE_TITLES = (
 )
 _BLOCKED_STATUSES = {401, 403, 429}
 
-# Page parts that are never the recipe.
+# HTML tags that never contain the recipe.
 _NOISE_TAGS = (
     "script",
     "style",
@@ -66,13 +68,13 @@ _NOISE_TAGS = (
 @dataclass(frozen=True)
 class ParsedPage:
     path: ImportPath
-    # What the LLM gets: the JSON-LD recipe written out, or the page's text.
+    # The text we send to the LLM: the JSON-LD recipe as text, or the page's text.
     text: str
     photo_url: str | None
 
 
 def read_page(page: FetchedPage) -> ParsedPage:
-    """Check the response, then pick the recipe text and photo from the HTML."""
+    """Checks the response, then takes the recipe text and photo from the HTML."""
     soup = BeautifulSoup(page.html, "html.parser")
     if _is_challenge(page.status, soup):
         raise FetchChallengedError("the site answered with a bot-protection check")
@@ -83,6 +85,7 @@ def read_page(page: FetchedPage) -> ParsedPage:
     if page.content_type not in _HTML_TYPES:
         raise FetchFailedError("the link is not a web page")
 
+    # Prefer the JSON-LD recipe. If there is none, use the page's readable text.
     recipe = _find_recipe(soup)
     if recipe is not None:
         text = recipe_text(recipe)
@@ -120,7 +123,8 @@ def _find_recipe(soup: BeautifulSoup) -> dict[str, Any] | None:
 
 
 def _nodes(data: Any) -> Iterator[dict[str, Any]]:
-    """Every object in a JSON-LD document: top level, lists and `@graph`."""
+    """Returns every object in a JSON-LD document: at the top level, in lists, and in
+    `@graph`."""
     if isinstance(data, list):
         for item in data:
             yield from _nodes(item)
@@ -137,7 +141,8 @@ def _is_recipe(node: dict[str, Any]) -> bool:
 
 
 def recipe_text(recipe: dict[str, Any]) -> str:
-    """The JSON-LD recipe as labelled plain text, ingredients and steps in order."""
+    """Writes the JSON-LD recipe as plain text with labels, with the ingredients and
+    steps in order."""
     lines: list[str] = []
     for label, key in (
         ("Title", "name"),
@@ -166,9 +171,12 @@ def recipe_text(recipe: dict[str, Any]) -> str:
 
 
 def _steps(value: Any) -> Iterator[str]:
-    """Strings, HowToStep objects and HowToSection groups, flattened in order."""
+    """Returns the steps as a flat list of strings, in order.
+
+    A step can be a string, a HowToStep object, or a HowToSection group of steps.
+    """
     if isinstance(value, str):
-        # Some sites put every step in one string, one per line.
+        # Some sites put all the steps in one string, one step per line.
         for line in _clean(value).split("\n"):
             if line.strip():
                 yield line.strip()
@@ -208,7 +216,7 @@ def _as_list(value: Any) -> list[Any]:
 
 
 def _plain(value: Any) -> str:
-    """A JSON-LD value as one line of text (HTML entities and tags removed)."""
+    """Turns a JSON-LD value into one line of text, without HTML tags and entities."""
     if isinstance(value, list):
         value = next((item for item in value if item), "")
     if isinstance(value, int | float) and not isinstance(value, bool):
@@ -248,7 +256,8 @@ def _og_image(soup: BeautifulSoup) -> str | None:
 
 
 def _absolute(base: str, url: str | None) -> str | None:
-    """Relative photo URLs resolve against the page; only http(s) is kept."""
+    """Turns a relative photo URL into a full URL, based on the page URL. Returns
+    None if it is not http(s)."""
     if not url:
         return None
     absolute = urljoin(base, url.strip())

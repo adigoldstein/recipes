@@ -9,10 +9,8 @@ const text = (value: number | null | undefined) =>
   value == null ? '' : String(value);
 
 /**
- * An imported draft as form values, for the new-recipe form (AD-22). It only fills
- * the form: nothing is saved until the editor presses "שמירה". A tag goes by name,
- * which the server resolves to the existing tag or creates (AD-25), so an existing
- * tag and a suggested new one are handled the same way here.
+ * Turns an imported draft into values for the new recipe form (AD-22). It only fills
+ * the form. Nothing is saved until the editor presses "שמירה".
  */
 export function draftToFormValues(draft: DraftRecipe): RecipeFormValues {
   const ingredients = (draft.ingredients ?? []).map((ingredient) => ({
@@ -28,7 +26,8 @@ export function draftToFormValues(draft: DraftRecipe): RecipeFormValues {
     title: draft.title,
     description: draft.description ?? '',
     notes: draft.notes ?? '',
-    // Left empty when the source gave none, so the review marks it instead of guessing.
+    // Stays empty if the source has no value, so the review marks it instead of
+    // guessing.
     base_servings: text(draft.base_servings),
     prep_time_minutes: text(draft.prep_time_minutes),
     cook_time_minutes: text(draft.cook_time_minutes),
@@ -38,13 +37,13 @@ export function draftToFormValues(draft: DraftRecipe): RecipeFormValues {
     })),
     ingredients: ingredients.length > 0 ? ingredients : [emptyIngredientRow()],
     steps: steps.length > 0 ? steps : [emptyStepRow()],
-    // The page's photo is shown from its own site until the save downloads it.
+    // Show the photo from the original site until saving downloads it.
     photoPreview: draft.photo_source_url ?? null,
     photoSourceUrl: draft.photo_source_url ?? null,
   };
 }
 
-/** The form fields a draft can leave empty and ask the editor to complete. */
+/** The form fields that a draft can leave empty, for the editor to fill in. */
 export const REVIEWABLE_FIELDS = [
   'base_servings',
   'prep_time_minutes',
@@ -52,13 +51,16 @@ export const REVIEWABLE_FIELDS = [
 ] as const;
 export type ReviewableField = (typeof REVIEWABLE_FIELDS)[number];
 
-/** What the review step needs from a draft besides its values (Story 5.3). */
+/** What the review step needs from a draft, besides the form values (Story 5.3). */
 export interface DraftReview {
-  /** Fields the source did not give, from the server's `missing_fields`. */
+  /** Fields that the source did not have, from the server's `missing_fields`. */
   missingFields: ReviewableField[];
-  /** The source was in another language and the draft was translated. */
+  /** True if the source was in another language and the draft was translated. */
   translated: boolean;
-  /** Suggested tags that are not in the tag list yet; created only on save (AD-25). */
+  /**
+   * Suggested tags that are not in the tag list yet. They are created only on save
+   * (AD-25).
+   */
   newTags: string[];
 }
 

@@ -7,8 +7,8 @@ import {
 } from 'lucide-react';
 import { Toaster as Sonner, toast, type ToasterProps } from 'sonner';
 
-// shadcn's Toaster reads the theme from next-themes; here the app passes it in
-// (`theme`), so this lib needs no theme context. The toast colours come from
+// shadcn's Toaster reads the theme from next-themes. Here the app passes the theme
+// (`theme`), so this lib does not need a theme context. The toast colors come from
 // the `[data-sonner-toaster]` block in theme.css.
 function Toaster({ ...props }: ToasterProps) {
   return (

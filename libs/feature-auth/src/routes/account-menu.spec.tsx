@@ -39,7 +39,7 @@ describe('AccountMenu', () => {
   it('hides "כניסה" on the login page', async () => {
     serveSession(null);
     renderMenu('/login');
-    // Give the session answer time to arrive; there is still nothing to show.
+    // Give the session time to load. There should still be nothing to show.
     await act(() => new Promise((resolve) => setTimeout(resolve, 50)));
     expect(screen.queryByRole('link')).toBeNull();
     expect(screen.queryByRole('button')).toBeNull();

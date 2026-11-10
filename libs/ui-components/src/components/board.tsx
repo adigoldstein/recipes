@@ -1,7 +1,7 @@
 import type * as React from 'react';
 import { cn } from '../lib/utils';
 
-/** The oak cutting-board slab with its handle slot; food surfaces only (DESIGN.md). */
+/** The oak cutting board with its handle hole. Used only for food content (DESIGN.md). */
 export function Board({
   className,
   children,

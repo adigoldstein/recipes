@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 
 /**
- * Waiting feedback timings (Story 2.7). A spinner that flashes for a tenth of a second
- * is worse than none, so it appears only after `PENDING_DELAY_MS`, and once shown it
- * stays for at least `PENDING_MIN_MS`.
+ * Timings for the "waiting" indicator (Story 2.7). A spinner that flashes for a tenth
+ * of a second is worse than no spinner. So it appears only after `PENDING_DELAY_MS`,
+ * and once shown, it stays for at least `PENDING_MIN_MS`.
  */
 export const PENDING_DELAY_MS = 300;
 export const PENDING_MIN_MS = 500;
-/** After this long a short action says it is taking longer than usual. */
+/** After this time, a short action shows that it is taking longer than usual. */
 export const SLOW_AFTER_MS = 10_000;
-/** The same for the long ones: an import, a photo upload. */
+/** The same, for long actions: an import or a photo upload. */
 export const SLOW_AFTER_LONG_MS = 30_000;
 
 export interface PendingTiming {
@@ -18,9 +18,10 @@ export interface PendingTiming {
 }
 
 /**
- * Whether to show the waiting indicator for an action that is `pending`: false for a
- * fast action, true only once it has lasted `delayMs`, then kept for `minVisibleMs`.
- * The action itself must still be blocked at once; this only decides what to show.
+ * Decides whether to show the waiting indicator for a `pending` action. False for a
+ * fast action. True only after the action lasted `delayMs`, and then it stays for at
+ * least `minVisibleMs`. This only decides what to show; the action itself must still
+ * be blocked right away.
  */
 export function usePendingVisible(
   pending: boolean,
@@ -30,7 +31,7 @@ export function usePendingVisible(
   }: PendingTiming = {},
 ): boolean {
   const [visible, setVisible] = useState(false);
-  // When the indicator appeared; null while it is hidden.
+  // When the indicator appeared. Null while it is hidden.
   const shownAt = useRef<number | null>(null);
 
   useEffect(() => {
@@ -56,7 +57,7 @@ export function usePendingVisible(
   return visible;
 }
 
-/** True once an action that is `pending` has lasted `afterMs`; resets when it ends. */
+/** True after a `pending` action lasted `afterMs`. Goes back to false when it ends. */
 export function useSlowPending(
   pending: boolean,
   afterMs: number = SLOW_AFTER_MS,
@@ -66,7 +67,7 @@ export function useSlowPending(
   useEffect(() => {
     if (!pending) return;
     const timer = setTimeout(() => setSlow(true), afterMs);
-    // Reset when the action ends (or the limit changes), for the next run.
+    // Reset when the action ends (or the limit changes), ready for the next time.
     return () => {
       clearTimeout(timer);
       setSlow(false);

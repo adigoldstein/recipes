@@ -1,4 +1,4 @@
-"""Pydantic request and response schemas for tags."""
+"""The request and response shapes (Pydantic) of tags."""
 
 import unicodedata
 import uuid
@@ -10,7 +10,8 @@ TAG_NAME_MAX_LENGTH = 40
 
 
 def normalize_tag_name(name: str) -> str:
-    """NFC, trimmed, inner whitespace collapsed to single spaces (AD-24)."""
+    """Cleans up a tag name: Unicode NFC form, no spaces at the ends, and single
+    spaces between words (AD-24)."""
     return " ".join(unicodedata.normalize("NFC", name).split())
 
 
@@ -22,7 +23,7 @@ def _checked_name(name: str) -> str:
 
 
 class TagRef(BaseModel):
-    """A tag as embedded in recipe read schemas (AD-20)."""
+    """A tag as it appears inside a recipe in API responses (AD-20)."""
 
     id: uuid.UUID
     name: str
@@ -36,7 +37,7 @@ class TagRead(BaseModel):
 
 
 class TagCreate(BaseModel):
-    """Body of `POST /tags`: the name is normalized and length-checked."""
+    """The body of `POST /tags`. The name is cleaned up and its length is checked."""
 
     name: str
 
@@ -47,7 +48,7 @@ class TagCreate(BaseModel):
 
 
 class TagUpdate(BaseModel):
-    """Body of `PATCH /tags/{id}`: send only what changes."""
+    """The body of `PATCH /tags/{id}`. Send only the fields that change."""
 
     name: str | None = None
     pinned: bool | None = None
@@ -59,7 +60,8 @@ class TagUpdate(BaseModel):
 
 
 class TagInput(BaseModel):
-    """A tag in a recipe write: an existing tag by id, or a name to find or create."""
+    """A tag sent when saving a recipe: either the id of an existing tag, or a name.
+    A name is matched to an existing tag, or a new tag is created."""
 
     id: uuid.UUID | None = None
     name: str | None = None

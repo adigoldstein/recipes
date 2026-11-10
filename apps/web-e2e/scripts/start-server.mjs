@@ -1,9 +1,9 @@
-// Starts the API for the end-to-end tests (Story 6.3), on a fresh database. The built
+// Starts the API for the end-to-end tests (Story 6.3), with a new database. The built
 // React app is served by `vite preview` (see playwright.config.ts).
 //
-// Every setting is passed in the environment, and the Python processes run from the
-// temp directory, so the developer's `.env` (which is read from the working
-// directory) is never loaded. The fake AI provider answers imports; no network.
+// Every setting is passed as an env var, and the Python processes run from a temp
+// folder, so the developer's `.env` is never loaded (the app reads `.env` from the
+// current folder). Imports use the fake AI provider, with no network.
 import { spawn, spawnSync } from 'node:child_process';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -26,7 +26,7 @@ const env = {
   LLM_PROVIDERS: 'fake',
   JWT_SECRET: 'e2e-only-secret-not-for-real-use',
   COOKIE_SECURE: 'false',
-  // Only the small `seed` recipes, never the demo library.
+  // Use only the small `seed` recipes, not the demo recipes.
   SEED_DEMO: 'false',
   DATA_DIR: join(workdir, 'data'),
   ANTHROPIC_API_KEY: '',
@@ -34,7 +34,7 @@ const env = {
   PYTHONUTF8: '1',
   PYTHONPATH: service,
 };
-// Run from the temp directory: the app reads `.env` from the working directory.
+// Run from the temp folder, because the app reads `.env` from the current folder.
 const uv = (args, options = {}) => [
   'uv',
   ['run', '--frozen', '--project', service, ...args],
@@ -57,7 +57,7 @@ function cleanup() {
 
 try {
   run('seed', uv(['python', '-m', 'app.cli', 'seed'], { input: '' }));
-  // The password goes in on stdin: never on the command line or in the environment.
+  // Pass the password on stdin, never as an argument or an env var.
   run(
     'create-admin',
     uv(

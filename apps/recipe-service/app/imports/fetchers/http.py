@@ -1,4 +1,5 @@
-"""The MVP `PageFetcher` adapter: httpx under the AD-23 safe-fetch rules (AD-35)."""
+"""The real `PageFetcher`: downloads with httpx under the AD-23 safe-fetch rules
+(AD-35)."""
 
 import httpx
 

@@ -30,10 +30,11 @@ import {
 } from '@bite-and-board/ui-components';
 import { useErrorMessage } from '../shared/use-error-message';
 
-// Matches the server's policy (FR-13); the server stays the authority.
+// The same minimum as the server's password policy (FR-13). The server still makes
+// the real check.
 const MIN_PASSWORD_LENGTH = 8;
 const ROLES: Role[] = ['editor', 'admin'];
-// Errors the form shows on a field; any other error shows under the form.
+// Errors that the form shows on a field. Any other error is shown under the form.
 const FIELD_ERRORS = ['email_taken', 'password_too_short', 'password_too_long'];
 
 export interface AddUserDialogProps {
@@ -97,8 +98,8 @@ function AddUserForm({ onDone }: { onDone: () => void }) {
           toast.success(t('users.add.created', { name: user.name }));
           onDone();
         },
-        // A taken email belongs to the email field and a rejected password to
-        // the password field.
+        // Show "email taken" on the email field, and a password error on the
+        // password field.
         onError: (error) => {
           const code = getErrorCode(error);
           if (code === 'email_taken') {
@@ -200,7 +201,7 @@ function AddUserForm({ onDone }: { onDone: () => void }) {
           />
         )}
       </FormField>
-      {/* Always rendered, so a screen reader announces the text when it appears. */}
+      {/* Always in the page, so a screen reader reads the text when it appears. */}
       <p role="alert" className="text-sm text-destructive">
         {formError ? errorMessage(create.error) : null}
       </p>
@@ -220,7 +221,10 @@ function AddUserForm({ onDone }: { onDone: () => void }) {
   );
 }
 
-/** "הוספת משתמש": the form lives only while the dialog is open, so it opens empty. */
+/**
+ * The "הוספת משתמש" dialog. The form exists only while the dialog is open, so it
+ * always opens empty.
+ */
 export function AddUserDialog({ open, onOpenChange }: AddUserDialogProps) {
   const { t } = useTranslation();
   return (

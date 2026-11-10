@@ -1,4 +1,5 @@
-"""A photo from a link (Story 5.4): `POST /api/photos/url` and the credit on save."""
+"""A photo from a link (Story 5.4): `POST /api/photos/url`, and the photo credit when
+the recipe is saved."""
 
 from collections.abc import Callable
 from typing import Any
@@ -44,7 +45,8 @@ def image(body: bytes, content_type: str = "image/jpeg", status: int = 200) -> H
 
 @pytest.fixture
 def serve(app: FastAPI) -> Callable[[Handler], None]:
-    """Answers the photo service's downloads with a handler instead of the network."""
+    """Makes the photo service's downloads use a test handler instead of the
+    network."""
 
     def use(handler: Handler) -> None:
         def fetch(url: str, limits: FetchLimits) -> FetchedResponse:

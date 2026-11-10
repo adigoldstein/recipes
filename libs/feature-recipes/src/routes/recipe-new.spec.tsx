@@ -29,7 +29,7 @@ const SAVED: RecipeRead = {
   updated_at: '2026-10-28T12:00:00Z',
 };
 
-/** Answers POST /api/recipes with a created recipe and returns what the page sent. */
+/** Answers POST /api/recipes with a created recipe. Returns what the page sent. */
 function serveCreate() {
   const sent: unknown[] = [];
   server.use(
@@ -50,7 +50,7 @@ function serveInvalid(detail: object[]) {
   );
 }
 
-// A required field's label also holds its " *", so match the name with or without it.
+// A required field's label also has " *", so match the name with or without it.
 const field = (name: string) =>
   screen.getByLabelText(new RegExp(String.raw`^${name}( \*)?$`));
 const save = () => screen.getByRole('button', { name: 'שמירה' });
@@ -63,7 +63,8 @@ async function fillRequired(user: User) {
 }
 
 describe('RecipeNewPage', () => {
-  // Toasts live in a module-level store, so one test's would show in the next.
+  // Toasts are kept in a shared store, so close them. Otherwise one test's toasts
+  // would show in the next test.
   afterEach(() => {
     toast.dismiss();
   });
@@ -100,7 +101,7 @@ describe('RecipeNewPage', () => {
       expect(banner.textContent).toContain('שני שדות דורשים השלמה');
       expect(banner.textContent).toContain('המתכון תורגם מאנגלית');
       expect(screen.getAllByText('יש להשלים')).toHaveLength(1);
-      // Servings is flagged and also required, so it shows its error as well.
+      // Servings is marked and also required, so it shows its error too.
       expect(field('מספר מנות').getAttribute('aria-invalid')).toBe('true');
       expect(field('זמן בישול בדקות')).toBeTruthy();
     });
@@ -151,7 +152,7 @@ describe('RecipeNewPage', () => {
       new_tags: ['עוגיות'],
     };
 
-    /** A stand-in panel: three buttons that drive the slot, and a line showing `dirty`. */
+    /** A fake panel: three buttons that use the slot, and a line that shows `dirty`. */
     const panel: NonNullable<RecipeNewPageProps['importPanel']> = (api) => (
       <section aria-label="panel stub">
         <button type="button" onClick={() => api.onDraft(DRAFT)}>
@@ -287,7 +288,7 @@ describe('RecipeNewPage', () => {
           screen.getByText(name).querySelector('[aria-hidden]'),
         ).toBeNull();
       }
-      // Rows have no labels of their own: the star is on the section headings.
+      // The rows have no labels of their own, so the star is on the section headings.
       for (const heading of ['מצרכים', 'אופן הכנה']) {
         const h2 = screen.getByRole('heading', { level: 2, name: heading });
         expect(h2.querySelector('[aria-hidden="true"]')?.textContent).toBe(
@@ -462,7 +463,7 @@ describe('RecipeNewPage', () => {
     ];
     const serveTags = () =>
       server.use(http.get('*/api/tags', () => HttpResponse.json(TAGS)));
-    // The field's label is the button's accessible name.
+    // The field's label is also the button's accessible name.
     const picker = () => screen.getByLabelText('תגיות');
 
     it('lists every tag when opened, and sends existing ones by id and new ones by name', async () => {
@@ -557,8 +558,8 @@ describe('RecipeNewPage', () => {
       const user = userEvent.setup();
       serveCreate();
       const { queryClient } = renderNew();
-      // The form reads the tags, so the list refetches at once and cannot be
-      // inspected as "stale": watch for the call instead.
+      // The form uses the tags, so the list reloads right away and we cannot check
+      // that it is "stale". So we check the call instead.
       const invalidate = vi.spyOn(queryClient, 'invalidateQueries');
       await fillRequired(user);
       await user.click(save());
@@ -648,7 +649,7 @@ describe('RecipeNewPage', () => {
       await user.keyboard('{Enter}');
       expect(field('שם המצרך 1')).toHaveProperty('value', 'מלח');
       expect(field('שם המצרך 2')).toHaveProperty('value', 'תרד');
-      // The pressed button is now disabled, so focus moves to its partner.
+      // The clicked button is now disabled, so focus moves to the other move button.
       expect(document.activeElement).toBe(button('העברת מצרך 2 למעלה'));
 
       await user.click(save());
@@ -679,7 +680,7 @@ describe('RecipeNewPage', () => {
       await user.type(field('שם המצרך 1'), 'תרד{Enter}');
       expect(field('כמות, מצרך 2')).toBeTruthy();
       expect(document.activeElement).toBe(field('כמות, מצרך 2'));
-      // Enter in a row that is not the last one adds nothing, and never submits.
+      // Enter in a row that is not the last adds no row, and never submits.
       await user.type(field('שם המצרך 1'), '{Enter}');
       expect(screen.queryByLabelText('שם המצרך 3')).toBeNull();
       expect(sent).toEqual([]);
@@ -912,7 +913,7 @@ describe('RecipeNewPage', () => {
       </button>
     );
 
-    /** Answers POST /api/photos/url and returns the bodies it got. */
+    /** Answers POST /api/photos/url. Returns the bodies it got. */
     function serveDownload(answer: () => Response) {
       const sent: unknown[] = [];
       server.use(

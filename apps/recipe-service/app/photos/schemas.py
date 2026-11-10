@@ -1,13 +1,15 @@
-"""Pydantic request and response schemas for photos."""
+"""The request and response shapes (Pydantic) of photos."""
 
 from pydantic import BaseModel, ConfigDict, Field
 
-# A photo key is a random UUID in hex and also a file name, so nothing else goes.
+# A photo key is a random UUID in hex. It is also used as a file name, so we allow
+# nothing else.
 PHOTO_KEY_PATTERN = r"^[0-9a-f]{32}$"
 
 
 class PhotoRead(BaseModel):
-    """The photo shape that read schemas embed (AD-27); URLs are built server-side."""
+    """A photo as it appears inside API responses (AD-27). The server builds the
+    URLs."""
 
     url: str
     thumb_url: str
@@ -15,20 +17,21 @@ class PhotoRead(BaseModel):
 
 
 class PhotoUploaded(BaseModel):
-    """An uploaded photo that no recipe holds yet; a recipe save attaches it."""
+    """An uploaded photo that no recipe uses yet. Saving a recipe attaches it."""
 
     photo_key: str
 
 
 class PhotoLimits(BaseModel):
-    """What an upload may be, for the form to show beside the field."""
+    """The upload limits, shown by the form next to the photo field."""
 
     max_bytes: int
     content_types: list[str]
 
 
 class PhotoFromUrl(BaseModel):
-    """A photo to download from a page, such as an imported recipe's (AD-23, AD-27)."""
+    """A photo to download from a link, for example of an imported recipe
+    (AD-23, AD-27)."""
 
     model_config = ConfigDict(extra="forbid")
 

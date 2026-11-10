@@ -1,4 +1,4 @@
-"""Database access for imports; used only by this module's service."""
+"""Database queries for imports. Only this module's service uses them."""
 
 from datetime import datetime
 

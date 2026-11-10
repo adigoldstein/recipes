@@ -45,9 +45,9 @@ const picture = (name = 'cake.jpg', type = 'image/jpeg') =>
   new File(['pixels'], name, { type });
 
 /**
- * Answers POST /api/photos with a key and returns the names of the files it got;
- * `wait` makes the upload take a while. The body is read as text because jsdom's
- * `File` is not one that Node's multipart parser accepts.
+ * Answers POST /api/photos with a key, and returns the names of the files it got.
+ * `wait` makes the upload slower. The body is read as text, because Node's multipart
+ * parser does not accept jsdom's `File`.
  */
 function serveUpload(wait = 0) {
   const names: string[] = [];

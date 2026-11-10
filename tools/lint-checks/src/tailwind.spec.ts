@@ -3,7 +3,8 @@ import { createServer } from 'vite';
 
 const WORKSPACE = join(import.meta.dirname, '../../..');
 
-// Without the Tailwind Vite plugin the app ships unstyled while every other check stays green.
+// Without the Tailwind Vite plugin, the app would have no styles, and every other
+// check would still pass.
 it('generates the theme tokens and utilities for the app stylesheet', async () => {
   const root = join(WORKSPACE, 'apps/web');
   const server = await createServer({

@@ -17,25 +17,27 @@ from app.core.errors import AppError, ErrorCode
 
 
 class Role(StrEnum):
-    """A visitor has no session, so there is no viewer role (AD-30)."""
+    """The user roles. A visitor is simply not logged in, so there is no visitor
+    role (AD-30)."""
 
     EDITOR = "editor"
     ADMIN = "admin"
 
 
-# Argon2id only, with the library's recommended cost settings (AD-6).
+# Hash passwords with Argon2id only, using the library's recommended settings (AD-6).
 _hasher = PasswordHash((Argon2Hasher(),))
 
 
 def hash_password(password: str) -> str:
-    """A salted Argon2id hash; the plain password is never stored or logged."""
+    """Returns a salted Argon2id hash of the password. The plain password is never
+    stored or logged."""
     return _hasher.hash(password)
 
 
 def verify_password(password: str, password_hash: str) -> bool:
-    """Whether the password matches the hash. The comparison is constant-time.
+    """Checks whether the password matches the hash, in constant time.
 
-    A stored value that is not a known hash format simply never matches.
+    If the stored value is not a known hash format, the password does not match.
     """
     try:
         return _hasher.verify(password, password_hash)
@@ -56,13 +58,12 @@ def create_session_token(
     session_version: int = 0,
     now: datetime | None = None,
 ) -> str:
-    """A signed JWT that says who the user is, which session generation it belongs
-    to, and when it expires.
+    """Creates a signed JWT with the user id, the session version, and the expiry time.
 
-    The role and the blocked flag are deliberately not in it: they are read from the
-    database on every request, so a demotion or a block takes effect at once (AD-30).
-    The version is what lets the server end every old session of one user: bumping
-    `user.session_version` makes all earlier tokens stop matching (Story 2.5).
+    The role and the "blocked" flag are not in the token on purpose. They are read
+    from the database on every request, so a role change or a block works right
+    away (AD-30). The session version lets the server log a user out everywhere:
+    increasing `user.session_version` makes all older tokens invalid (Story 2.5).
     """
     issued_at = now or datetime.now(UTC)
     claims = {
@@ -75,24 +76,25 @@ def create_session_token(
 
 
 class SessionClaims(NamedTuple):
-    """What a valid session token vouches for."""
+    """The data inside a valid session token."""
 
     user_id: uuid.UUID
     session_version: int
 
 
 def read_session_token(token: str, secret: str) -> SessionClaims | None:
-    """The user id and session version inside a valid, unexpired token, else None.
+    """Returns the user id and session version from a valid, unexpired token.
+    Returns None if the token is not valid.
 
-    A token issued before versions existed has no `sv` and counts as version 0,
-    which is what every existing user starts at, so nobody is signed out by the
-    upgrade.
+    Old tokens, created before session versions existed, have no `sv`. We treat them
+    as version 0, which is the version every existing user starts with, so the
+    upgrade did not log anybody out.
     """
     try:
         claims = jwt.decode(
             token,
             secret,
-            # Pinning the algorithm list is what rejects `alg: none` forgeries.
+            # Accept only our algorithm. This blocks fake tokens with `alg: none`.
             algorithms=[_JWT_ALGORITHM],
             options={"require": ["sub", "exp"]},
         )
@@ -106,18 +108,19 @@ def read_session_token(token: str, secret: str) -> SessionClaims | None:
 
 # --- Request guards ----------------------------------------------------------
 
-# The CSRF guard: a cross-site form post cannot add a custom header, and a
-# cross-site fetch that does would need a CORS preflight this app never allows (AD-6).
+# CSRF protection: every request that changes data must send this header. A form
+# on another site cannot add a custom header, and a fetch from another site that adds
+# one needs CORS approval, which this app never gives (AD-6).
 CSRF_HEADER = "X-Requested-With"
 CSRF_VALUE = "bite-and-board"
 _SAFE_METHODS = frozenset({"GET", "HEAD", "OPTIONS"})
 
 
 def require_csrf_header(request: Request) -> None:
-    """Reject any request that changes something without the CSRF header.
+    """Rejects any request that changes data and has no CSRF header.
 
-    Registered once on the whole app, so no route can forget it. It runs before the
-    role check, which makes a missing header a 403 and never a 401 (AD-21).
+    It is registered once for the whole app, so no route can forget it. It runs
+    before the role check, so a missing header returns 403 and never 401 (AD-21).
     """
     if request.method not in _SAFE_METHODS and (
         request.headers.get(CSRF_HEADER) != CSRF_VALUE
@@ -129,7 +132,7 @@ def require_csrf_header(request: Request) -> None:
 
 @dataclass(frozen=True)
 class CurrentUser:
-    """Who is making this request, as the database says right now."""
+    """The user who sent this request, as currently stored in the database."""
 
     id: uuid.UUID
     email: str
@@ -138,17 +141,19 @@ class CurrentUser:
 
 
 def get_session_user() -> CurrentUser | None:
-    """The seam that answers "who does this request's cookie belong to?".
+    """Returns the user that this request's session cookie belongs to.
 
-    `core` may not import the feature modules, so it only declares the question.
-    `main.py` answers it with `dependency_overrides`, like a Nest custom provider
-    (`useFactory`). The answer must be looked up fresh: that is what makes a demotion
-    or a block take effect on the next request (AD-30).
+    `core` is not allowed to import the feature modules, so here it only declares
+    the function. `main.py` replaces it with the real one using
+    `dependency_overrides`, like a Nest custom provider (`useFactory`). The user must
+    be read from the database on every request, so a role change or a block works
+    on the next request (AD-30).
     """
     raise RuntimeError("get_session_user is not wired; see create_app()")
 
 
-# Admin satisfies every editor-level check.
+# Role ranks. A higher rank passes every check of a lower one, so an admin can do
+# everything an editor can.
 _RANK = {Role.EDITOR: 1, Role.ADMIN: 2}
 
 
@@ -157,9 +162,10 @@ def has_role(user_role: Role, required: Role) -> bool:
 
 
 def require_role(role: Role | str) -> Callable[..., CurrentUser]:
-    """A route dependency, like a Nest `@Roles()` guard: 401 without a session,
-    403 when the role is too low, otherwise the current user.
+    """A route dependency that checks the user's role, like a Nest `@Roles()` guard.
 
+    Returns 401 if the user is not logged in, 403 if the role is too low, and
+    otherwise returns the current user.
     Use it as `Depends(require_role(Role.EDITOR))` or `Depends(require_role("admin"))`.
     """
     required = Role(role)

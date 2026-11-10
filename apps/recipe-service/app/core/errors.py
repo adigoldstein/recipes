@@ -7,7 +7,8 @@ from slowapi.errors import RateLimitExceeded
 
 
 class ErrorCode(StrEnum):
-    """Stable error codes; the client shows `errors.<code>` from he.json."""
+    """Error codes that do not change. The client shows the message
+    `errors.<code>` from he.json."""
 
     RECIPE_NOT_FOUND = "recipe_not_found"
     TAG_NOT_FOUND = "tag_not_found"
@@ -48,7 +49,8 @@ class ErrorResponse(BaseModel):
 
 
 class AppError(Exception):
-    """Raise from a service to return a non-422 error with a stable code."""
+    """Raise this in a service to return an error response (not 422) with an
+    error code."""
 
     def __init__(
         self,

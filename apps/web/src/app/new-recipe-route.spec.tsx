@@ -13,8 +13,8 @@ const EDITOR: SessionUser = {
   role: 'editor',
 };
 
-// The first import of a lazy page transforms its whole module graph, which can take
-// a while when the machine is busy running every other project's tests.
+// Time limit for loading a lazy page. The first load builds all the code it imports,
+// which can be slow when the computer is busy running the other projects' tests.
 const LAZY_TIMEOUT = 30_000;
 
 let sessionUser: SessionUser | null = null;
@@ -80,11 +80,10 @@ describe('the "מתכון חדש" button', () => {
     async () => {
       sessionUser = EDITOR;
       const router = renderAt('/');
-      // The library's empty state has its own link with this name, so look only in
-      // the top bar. The button is a lazy chunk, which a busy machine can take a
-      // while to load.
-      // Wait until both links are there, so the check always runs in the state where
-      // an unscoped query would be ambiguous.
+      // The empty library also has a link with this name, so search only in the top
+      // bar. The button is loaded lazily, which can be slow on a busy computer.
+      // Wait until both links exist, so the test always checks the case where a
+      // search of the whole page would find two links.
       await waitFor(
         () =>
           expect(

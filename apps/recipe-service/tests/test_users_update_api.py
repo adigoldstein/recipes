@@ -50,7 +50,7 @@ def dana(session: Session) -> User:
 
 @pytest.fixture
 def other_client(app: FastAPI) -> TestClient:
-    """A second browser, so one test can have two people signed in at once."""
+    """A second browser, so one test can have two people logged in at the same time."""
     return TestClient(app, headers={CSRF_HEADER: CSRF_VALUE})
 
 
@@ -418,7 +418,7 @@ def test_an_admin_may_block_another_admin_while_two_are_active(
 def test_two_admins_cannot_remove_each_other(
     client: TestClient, session: Session, admin: User
 ) -> None:
-    """Whoever acts second finds one active admin left, and is refused."""
+    """The second admin to act finds only one active admin left, and is refused."""
     other = add_user(session, email="b@example.com", name="B", role=Role.ADMIN)
 
     assert _patch(client, other, is_blocked=True).status_code == 200

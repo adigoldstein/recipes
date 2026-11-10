@@ -1,4 +1,4 @@
-// A desktop-wide screen by default; `setPhone()` narrows it for one test.
+// A desktop size screen by default. `setPhone()` makes it narrow for one test.
 let phone = false;
 export const setPhone = (value: boolean) => {
   phone = value;

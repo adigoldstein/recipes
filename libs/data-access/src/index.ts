@@ -5,7 +5,7 @@ configureClient();
 export * from './generated';
 export * from './generated/@tanstack/react-query.gen';
 export * as schemas from './generated/zod.gen';
-// The configured client instance, for tests that point it at a mock server.
+// The API client itself, for tests that point it to a mock server.
 export { client } from './generated/client.gen';
 export {
   CSRF_HEADER,

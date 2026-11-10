@@ -212,7 +212,7 @@ describe('TagsPage', () => {
     await user.click(
       await screen.findByRole('button', { name: 'נעיצת על האש לסינון מהיר' }),
     );
-    // The label flipped already: the request is still running.
+    // The label already changed, while the request is still running.
     expect(
       screen.getByRole('button', { name: 'ביטול הנעיצה של על האש' }),
     ).toBeTruthy();

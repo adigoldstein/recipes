@@ -8,7 +8,7 @@ import {
 } from 'react';
 import type { ThemeMode } from '@bite-and-board/ui-components';
 
-/** Read by the pre-paint script in index.html too; keep both in sync. */
+/** The script in index.html also reads this key, so keep both the same. */
 export const THEME_STORAGE_KEY = 'theme';
 
 const DARK_QUERY = '(prefers-color-scheme: dark)';
@@ -30,7 +30,7 @@ function storeMode(mode: ThemeMode) {
       window.localStorage.setItem(THEME_STORAGE_KEY, mode);
     }
   } catch {
-    // Storage blocked: the choice lasts for this session only.
+    // Storage is blocked, so the choice is kept only until the page closes.
   }
 }
 
@@ -53,7 +53,10 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-/** Owns the theme mode (AD-8): remembered per browser, `system` follows the OS live. */
+/**
+ * Manages the theme (AD-8). The choice is saved in the browser. In `system` mode,
+ * the theme changes right away when the OS setting changes.
+ */
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [mode, setModeState] = useState(readStoredMode);
   const systemDark = useSyncExternalStore(
@@ -62,7 +65,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   );
   const dark = mode === 'dark' || (mode === 'system' && systemDark);
 
-  // Layout effect: the class flips before the browser paints the new theme.
+  // A layout effect, so the class changes before the browser draws the page.
   useLayoutEffect(() => {
     document.documentElement.classList.toggle('dark', dark);
   }, [dark]);

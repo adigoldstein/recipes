@@ -10,7 +10,7 @@ import { server } from './server';
 
 initI18n();
 
-/** Serves GET /api/tags with these tags. */
+/** Makes GET /api/tags return these tags. */
 export function serveTags(tags: TagRead[]) {
   server.use(http.get('*/api/tags', () => HttpResponse.json(tags)));
 }

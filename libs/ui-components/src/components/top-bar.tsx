@@ -3,14 +3,14 @@ import { Slot } from 'radix-ui';
 import { cn } from '../lib/utils';
 
 export interface TopBarProps {
-  /** The wordmark, usually a router link wrapped in `Wordmark`. */
+  /** The app name, usually a router link inside `Wordmark`. */
   brand: React.ReactNode;
-  /** Trailing controls (theme toggle, account menu). */
+  /** The controls at the end (theme toggle, account menu). */
   actions?: React.ReactNode;
   className?: string;
 }
 
-/** The app's only navigation bar: wordmark at the start, actions at the end. */
+/** The app's top bar: the app name at the start, and the controls at the end. */
 export function TopBar({ brand, actions, className }: TopBarProps) {
   return (
     <header className={cn('bg-background', className)}>
@@ -22,7 +22,7 @@ export function TopBar({ brand, actions, className }: TopBarProps) {
   );
 }
 
-/** The ביס & סיר wordmark styling; `asChild` lets a router link carry it. */
+/** The style of the "ביס & סיר" name. With `asChild`, a router link gets the style. */
 export function Wordmark({
   asChild = false,
   className,

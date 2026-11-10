@@ -1,4 +1,4 @@
-"""Business rules for tags; other modules call this layer, never the repository."""
+"""The business logic of tags. Other modules call this layer, not the repository."""
 
 import uuid
 from collections.abc import Sequence
@@ -21,7 +21,10 @@ class TagService:
     def get_tags(
         self, recipe_ids: Sequence[uuid.UUID]
     ) -> dict[uuid.UUID, list[TagRef]]:
-        """Tags for each recipe (pinned first, then by name), in one query (no N+1)."""
+        """Returns the tags of each recipe (pinned first, then by name).
+
+        Uses one query for all the recipes, not one query per recipe (no N+1).
+        """
         tags: dict[uuid.UUID, list[TagRef]] = {
             recipe_id: [] for recipe_id in recipe_ids
         }
@@ -30,7 +33,7 @@ class TagService:
         return tags
 
     def list_tags(self) -> list[TagRead]:
-        """Every tag, pinned first, then by name."""
+        """Returns all tags, pinned first, then by name."""
         return [
             _read(tag, count) for tag, count in self._repository.list_all_with_counts()
         ]
@@ -42,7 +45,8 @@ class TagService:
         return _read(tag, 0)
 
     def update_tag(self, tag_id: uuid.UUID, data: TagUpdate) -> TagRead:
-        """Rename and/or pin a tag. Pinning goes last in the chip row (FR23)."""
+        """Renames and/or pins a tag. A newly pinned tag goes at the end of the chip
+        row (FR23)."""
         tag = self._get(tag_id)
         if data.name is not None and data.name != tag.name:
             self._ensure_name_free(data.name, except_id=tag.id)
@@ -73,9 +77,10 @@ class TagService:
             raise AppError(409, ErrorCode.TAG_NAME_TAKEN, "Tag name already exists")
 
     def assign_to_recipe(self, recipe_id: uuid.UUID, refs: Sequence[TagInput]) -> None:
-        """Link the recipe to each tag, creating tags given by a new name (AD-25).
+        """Links the recipe to each tag. Creates the tags that do not exist yet (AD-25).
 
-        Flushes but never commits: the caller's transaction owns the commit.
+        Sends the changes to the database (flush) but does not commit. The caller
+        commits.
         """
         linked: set[uuid.UUID] = set()
         for ref in refs:
@@ -87,7 +92,7 @@ class TagService:
     def replace_for_recipe(
         self, recipe_id: uuid.UUID, refs: Sequence[TagInput]
     ) -> None:
-        """Make `refs` the recipe's whole tag list; the caller's transaction commits."""
+        """Replaces all the recipe's tags with `refs`. The caller commits."""
         self._repository.unlink_all(recipe_id)
         self.assign_to_recipe(recipe_id, refs)
 
@@ -97,7 +102,8 @@ class TagService:
             if tag is None:
                 raise AppError(404, ErrorCode.TAG_NOT_FOUND, "Tag not found")
             return tag
-        name = ref.name or ""  # TagInput guarantees a normalized name when no id.
+        # TagInput makes sure there is a clean name when there is no id.
+        name = ref.name or ""
         return self._repository.get_by_name(name) or self._repository.add(
             Tag(name=name)
         )
@@ -110,5 +116,6 @@ def _read(tag: Tag, recipe_count: int) -> TagRead:
 
 
 def get_tag_service(session: Annotated[Session, Depends(get_session)]) -> TagService:
-    """Provider, like a Nest injectable: `Depends(get_tag_service)`."""
+    """Creates the tag service for a route, like a Nest provider:
+    `Depends(get_tag_service)`."""
     return TagService(TagRepository(session))

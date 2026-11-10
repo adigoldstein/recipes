@@ -236,7 +236,7 @@ describe('LibraryPage', () => {
       expect(document.activeElement).toBe(search());
       expect(search()).toHaveProperty('value', '');
 
-      // Typing a slash in the field itself is just text.
+      // A slash typed inside the search field is just text.
       await userEvent.keyboard('a/b');
       expect(search()).toHaveProperty('value', 'a/b');
     });

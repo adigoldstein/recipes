@@ -21,7 +21,10 @@ import { useErrorMessage } from '../shared/use-error-message';
 
 const SKELETON_COUNT = 3;
 
-/** One account: name and role, the email below it, a label when blocked, and its actions. */
+/**
+ * One user row: name and role, the email below, a label if blocked, and the
+ * actions.
+ */
 function UserRow({
   user,
   isSelf,
@@ -55,7 +58,7 @@ function UserRow({
   );
 }
 
-/** The admin's Users screen at `/users` (FR-25): everyone, and a way to add someone. */
+/** The admin's users page at `/users` (FR-25): all the users, and a way to add one. */
 export function UsersPage() {
   const { t } = useTranslation();
   const errorMessage = useErrorMessage();
@@ -90,8 +93,8 @@ export function UsersPage() {
         />
       );
     }
-    // The last active admin must stay (AD-30); the server enforces it, and the
-    // controls say so up front.
+    // There must always be one active admin (AD-30). The server checks it, and the
+    // controls also show it in advance.
     const activeAdmins = users.data.filter(
       (user) => user.role === 'admin' && !user.is_blocked,
     );

@@ -7,21 +7,18 @@ import {
 } from './library-filters';
 
 /**
- * The library filters, kept in the URL so Back from a recipe finds them again
- * (AD-8). Every change replaces the history entry, so typing and chip taps do
- * not pile up Back steps.
- *
- * `knownTagIds` are the ids that really exist; any other id in the URL is
- * ignored. The search text also has a local copy, so a fast typist is never
- * fighting the router for the input's value.
+ * The library filters. They are kept in the URL, so "back" from a recipe finds them
+ * again (AD-8). `knownTagIds` are the tag ids that really exist.
  */
 export function useLibraryFilters(knownTagIds: ReadonlySet<string>) {
   const [params, setParams] = useSearchParams();
   const parsed = parseLibraryFilters(params);
 
+  // A local copy of the search text, so fast typing does not fight with the router
+  // over the field's value.
   const [draft, setDraft] = useState(parsed.query);
   const [seenQuery, setSeenQuery] = useState(parsed.query);
-  // The URL changed by itself (Back, a link, "clear"): follow it.
+  // If the URL changed from outside (back, a link, "clear"), use the new text.
   if (parsed.query !== seenQuery) {
     setSeenQuery(parsed.query);
     setDraft(parsed.query);
@@ -29,12 +26,15 @@ export function useLibraryFilters(knownTagIds: ReadonlySet<string>) {
 
   const filters: LibraryFilters = {
     query: draft,
+    // Ignore tag ids in the URL that do not exist.
     tagIds: parsed.tagIds.filter((id) => knownTagIds.has(id)),
     fastOnly: parsed.fastOnly,
   };
 
   const update = (change: Partial<LibraryFilters>) => {
     if (change.query !== undefined) setDraft(change.query);
+    // Replace the history entry, so typing and chip clicks do not add many "back"
+    // steps.
     setParams((current) => withLibraryFilters(current, change), {
       replace: true,
     });

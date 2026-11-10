@@ -48,7 +48,7 @@ def test_changing_the_password_keeps_this_device_signed_in(
     set_cookie = response.headers["set-cookie"].lower()
     assert "httponly" in set_cookie and "samesite=lax" in set_cookie
     assert "max-age=604800" in set_cookie
-    # The cookie the response set is the one the client now holds.
+    # The client now uses the new cookie from the response.
     assert client.get(SESSION).json()["user"]["email"] == EMAIL
 
 

@@ -16,7 +16,7 @@
         "type": "object"
       },
       "ChangePasswordRequest": {
-        "description": "The signed-in user's own password change (Story 2.6).\n\nThe new password's length is checked by the password policy in the service, so\nthe client gets the same `password_too_short` error as an admin reset.",
+        "description": "The body for changing your own password (Story 2.6).\n\nThe length of the new password is checked in the service, by the password\npolicy. That way the client gets the same `password_too_short` error as when an\nadmin resets a password.",
         "properties": {
           "current_password": {
             "maxLength": 128,
@@ -250,7 +250,7 @@
       },
       "DraftSource": {
         "additionalProperties": false,
-        "description": "An imperial value found in the source; the code converts it to metric (FR-21).",
+        "description": "An imperial value found in the source. The code converts it to metric (FR-21).",
         "properties": {
           "amount": {
             "exclusiveMinimum": 0,
@@ -296,7 +296,7 @@
         "type": "object"
       },
       "ErrorCode": {
-        "description": "Stable error codes; the client shows `errors.<code>` from he.json.",
+        "description": "Error codes that do not change. The client shows the message\n`errors.<code>` from he.json.",
         "enum": [
           "recipe_not_found",
           "tag_not_found",
@@ -333,7 +333,7 @@
         "type": "string"
       },
       "ErrorEvent": {
-        "description": "`event: error`. A failure after the stream started; `code` is an AD-28 code.",
+        "description": "`event: error`. An error after the stream started. `code` is an AD-28 code.",
         "properties": {
           "code": {
             "title": "Code",
@@ -471,7 +471,7 @@
       },
       "IngredientCreate": {
         "additionalProperties": false,
-        "description": "An ingredient in a recipe write; its position is its place in the list.",
+        "description": "An ingredient sent when saving a recipe. Its order is its place in the list.",
         "properties": {
           "amount": {
             "anyOf": [
@@ -597,7 +597,7 @@
       },
       "IngredientUpdate": {
         "additionalProperties": false,
-        "description": "An ingredient in a recipe replace: with an `id` it is an existing one (AD-20).",
+        "description": "An ingredient sent when updating a recipe. If it has an `id`, it is an\nexisting ingredient (AD-20).",
         "properties": {
           "amount": {
             "anyOf": [
@@ -658,7 +658,7 @@
         "type": "object"
       },
       "LoginRequest": {
-        "description": "Plain strings on purpose: a malformed email is just wrong credentials.",
+        "description": "Login details. The email is a plain string on purpose: an invalid email is\ntreated like any wrong email and password.",
         "properties": {
           "email": {
             "maxLength": 254,
@@ -681,7 +681,7 @@
         "type": "object"
       },
       "OriginalValue": {
-        "description": "The ingredient's amount and unit before its first edit (FR-7).\n\nBoth fields null means it was originally \"to taste\".",
+        "description": "The ingredient's amount and unit before its first edit (FR-7).\n\nIf both fields are null, it was \"to taste\" before the edit.",
         "properties": {
           "amount": {
             "anyOf": [
@@ -714,7 +714,7 @@
       },
       "PhotoFromUrl": {
         "additionalProperties": false,
-        "description": "A photo to download from a page, such as an imported recipe's (AD-23, AD-27).",
+        "description": "A photo to download from a link, for example of an imported recipe\n(AD-23, AD-27).",
         "properties": {
           "source_url": {
             "maxLength": 2048,
@@ -730,7 +730,7 @@
         "type": "object"
       },
       "PhotoLimits": {
-        "description": "What an upload may be, for the form to show beside the field.",
+        "description": "The upload limits, shown by the form next to the photo field.",
         "properties": {
           "content_types": {
             "items": {
@@ -752,7 +752,7 @@
         "type": "object"
       },
       "PhotoRead": {
-        "description": "The photo shape that read schemas embed (AD-27); URLs are built server-side.",
+        "description": "A photo as it appears inside API responses (AD-27). The server builds the\nURLs.",
         "properties": {
           "credit_domain": {
             "anyOf": [
@@ -783,7 +783,7 @@
         "type": "object"
       },
       "PhotoUploaded": {
-        "description": "An uploaded photo that no recipe holds yet; a recipe save attaches it.",
+        "description": "An uploaded photo that no recipe uses yet. Saving a recipe attaches it.",
         "properties": {
           "photo_key": {
             "title": "Photo Key",
@@ -797,7 +797,7 @@
         "type": "object"
       },
       "ProviderInfo": {
-        "description": "An enabled import engine and how long the server waits for it (AD-43).",
+        "description": "An active import engine and how long the server waits for it (AD-43).",
         "properties": {
           "name": {
             "title": "Name",
@@ -817,7 +817,7 @@
       },
       "RecipeCreate": {
         "additionalProperties": false,
-        "description": "Everything needed to create a recipe.",
+        "description": "All the data needed to create a recipe.",
         "properties": {
           "base_servings": {
             "maximum": 100.0,
@@ -1127,7 +1127,7 @@
       },
       "RecipeUpdate": {
         "additionalProperties": false,
-        "description": "The whole recipe, replacing the saved one (AD-4); never carries originals.",
+        "description": "The full recipe, which replaces the saved one (AD-4). It never includes the\noriginal values.",
         "properties": {
           "base_servings": {
             "maximum": 100.0,
@@ -1247,7 +1247,7 @@
         "type": "object"
       },
       "Role": {
-        "description": "A visitor has no session, so there is no viewer role (AD-30).",
+        "description": "The user roles. A visitor is simply not logged in, so there is no visitor\nrole (AD-30).",
         "enum": [
           "editor",
           "admin"
@@ -1256,7 +1256,7 @@
         "type": "string"
       },
       "SessionResponse": {
-        "description": "`user` is null for a visitor.",
+        "description": "The current session. `user` is null for a visitor.",
         "properties": {
           "user": {
             "anyOf": [
@@ -1276,7 +1276,7 @@
         "type": "object"
       },
       "SessionUser": {
-        "description": "What the client may know about the signed-in user (AD-21).",
+        "description": "The details of the logged-in user that the client may see (AD-21).",
         "properties": {
           "email": {
             "title": "Email",
@@ -1305,7 +1305,7 @@
         "type": "object"
       },
       "SourceUnit": {
-        "description": "Imperial units an import converted to metric; kept as the 'source' value.",
+        "description": "Imperial units that an import converted to metric. We keep the original unit\nas the 'source' value.",
         "enum": [
           "oz",
           "lb",
@@ -1315,7 +1315,7 @@
         "type": "string"
       },
       "SourceValue": {
-        "description": "An imperial value an import converted to metric (FR-21).",
+        "description": "The imperial value that an import converted to metric (FR-21).",
         "properties": {
           "amount": {
             "title": "Amount",
@@ -1333,7 +1333,7 @@
         "type": "object"
       },
       "StageEvent": {
-        "description": "`event: stage`. Only real pipeline stages are reported, no percentage.",
+        "description": "`event: stage`. Reports a real step of the import. There is no percentage.",
         "properties": {
           "name": {
             "enum": [
@@ -1410,7 +1410,7 @@
         "type": "object"
       },
       "TagCreate": {
-        "description": "Body of `POST /tags`: the name is normalized and length-checked.",
+        "description": "The body of `POST /tags`. The name is cleaned up and its length is checked.",
         "properties": {
           "name": {
             "title": "Name",
@@ -1424,7 +1424,7 @@
         "type": "object"
       },
       "TagInput": {
-        "description": "A tag in a recipe write: an existing tag by id, or a name to find or create.",
+        "description": "A tag sent when saving a recipe: either the id of an existing tag, or a name.\nA name is matched to an existing tag, or a new tag is created.",
         "properties": {
           "id": {
             "anyOf": [
@@ -1483,7 +1483,7 @@
         "type": "object"
       },
       "TagRef": {
-        "description": "A tag as embedded in recipe read schemas (AD-20).",
+        "description": "A tag as it appears inside a recipe in API responses (AD-20).",
         "properties": {
           "id": {
             "format": "uuid",
@@ -1503,7 +1503,7 @@
         "type": "object"
       },
       "TagUpdate": {
-        "description": "Body of `PATCH /tags/{id}`: send only what changes.",
+        "description": "The body of `PATCH /tags/{id}`. Send only the fields that change.",
         "properties": {
           "name": {
             "anyOf": [
@@ -1551,7 +1551,7 @@
         "type": "string"
       },
       "UserCreateRequest": {
-        "description": "The body of `POST /api/users`: an account plus its starting password.\n\nThe confirmation field of the form is checked in the browser only; the server\njust enforces the password policy (FR-13).",
+        "description": "The body of `POST /api/users`: the new account and its first password.\n\nThe form's \"confirm password\" field is checked only in the browser. The server\nonly checks the password policy (FR-13).",
         "properties": {
           "email": {
             "format": "email",
@@ -1580,7 +1580,7 @@
         "type": "object"
       },
       "UserRead": {
-        "description": "A user as returned to callers. There is deliberately no password field.",
+        "description": "A user as the API returns it. On purpose, it has no password field.",
         "properties": {
           "created_at": {
             "format": "date-time",
@@ -1621,7 +1621,7 @@
       },
       "UserUpdate": {
         "additionalProperties": false,
-        "description": "The body of `PATCH /api/users/{id}`: any of these, at least one.\n\nA field that is left out stays as it is. `password` is a reset: it replaces the\ncurrent one and ends every session the user has.",
+        "description": "The body of `PATCH /api/users/{id}`. Send at least one field.\n\nA field that is not sent does not change. Sending `password` resets it: the new\npassword replaces the old one and the user is logged out on all devices.",
         "properties": {
           "is_blocked": {
             "anyOf": [
@@ -1750,7 +1750,7 @@
     },
     "/api/auth/logout": {
       "post": {
-        "description": "Always succeeds, signed in or not.",
+        "description": "Logs out by deleting the cookie. Always succeeds, even if not logged in.",
         "operationId": "auth_logout",
         "responses": {
           "204": {
@@ -1765,7 +1765,7 @@
     },
     "/api/auth/password": {
       "post": {
-        "description": "Change my own password (FR-27); any signed-in user, editor or admin.\n\nThe old cookie dies with the version bump, so the answer sets a new one: this\ndevice stays signed in and every other device is signed out.",
+        "description": "Changes the logged-in user's own password (FR-27). Editors and admins can\nboth use it.\n\nChanging the password makes the old cookie invalid, so the response sets a new\ncookie. This device stays logged in, and all other devices are logged out.",
         "operationId": "auth_change_password",
         "requestBody": {
           "content": {
@@ -1807,7 +1807,7 @@
     },
     "/api/auth/session": {
       "get": {
-        "description": "Public: 200 with the user, or `user: null` for a visitor (AD-21).",
+        "description": "Returns the logged-in user, or `user: null` for a visitor. Always 200 (AD-21).",
         "operationId": "auth_session",
         "parameters": [
           {
@@ -1878,7 +1878,7 @@
     },
     "/api/imports/providers": {
       "get": {
-        "description": "The active import engine and its timeout (the client's limit follows it).",
+        "description": "Returns the active import engine and its timeout. The client sets its own\ntime limit from it.",
         "operationId": "imports_list_providers",
         "responses": {
           "200": {
@@ -1934,7 +1934,7 @@
     },
     "/api/imports/text": {
       "post": {
-        "description": "Turn pasted recipe text into a Hebrew draft, as a progress stream.",
+        "description": "Turns pasted recipe text into a Hebrew draft, and streams the progress.",
         "operationId": "imports_import_text",
         "requestBody": {
           "content": {
@@ -2036,7 +2036,7 @@
     },
     "/api/imports/url": {
       "post": {
-        "description": "Fetch a recipe page and turn it into a Hebrew draft, as a progress stream.",
+        "description": "Downloads a recipe page, turns it into a Hebrew draft, and streams the\nprogress.",
         "operationId": "imports_import_url",
         "requestBody": {
           "content": {
@@ -2250,7 +2250,7 @@
     },
     "/api/photos/url": {
       "post": {
-        "description": "Download a photo from a link (an imported recipe's) and store it unattached.",
+        "description": "Downloads a photo from a link (for example, of an imported recipe) and saves\nit. No recipe uses it yet.",
         "operationId": "photos_upload_photo_from_url",
         "requestBody": {
           "content": {

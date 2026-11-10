@@ -1,4 +1,5 @@
-"""The `LlmProvider` port and the shared validate-and-retry step (AD-12, AD-34)."""
+"""The `LlmProvider` interface, and the shared "validate, and retry once" step
+(AD-12, AD-34)."""
 
 from collections.abc import Awaitable, Callable, Sequence
 from dataclasses import dataclass
@@ -9,19 +10,19 @@ from pydantic import ValidationError
 from app.core.errors import ErrorCode
 from app.imports.schemas import DraftRecipe
 
-# A chat turn: ("user" | "assistant", text).
+# One chat message: ("user" or "assistant", text).
 Message = tuple[str, str]
 
 
 class LlmError(Exception):
-    """A provider call failed; `code` is the stable error code the client shows."""
+    """A call to the AI provider failed. `code` is the error code the client shows."""
 
     code: ErrorCode
 
     def __init__(self, detail: str, upstream_status: int | None = None) -> None:
         super().__init__(detail)
         self.detail = detail
-        # The HTTP status the provider answered with, when it answered at all.
+        # The HTTP status the provider returned (None if it did not answer).
         self.upstream_status = upstream_status
 
 
@@ -59,7 +60,7 @@ def _sum(a: int | None, b: int | None) -> int | None:
 
 @dataclass(frozen=True)
 class RawReply:
-    """What a provider transport returns: the reply text and what it cost."""
+    """The raw answer from a provider: the text, and the tokens it used."""
 
     text: str
     usage: Usage = Usage()
@@ -74,7 +75,8 @@ class LlmResult:
 
 
 class LlmProvider(Protocol):
-    """The only thing `imports` depends on: text in, a validated draft out."""
+    """The only AI interface `imports` uses: it gets text and returns a validated
+    draft."""
 
     name: str
     model: str
@@ -82,7 +84,7 @@ class LlmProvider(Protocol):
     timeout_seconds: float
 
     async def extract(self, text: str, existing_tags: Sequence[str]) -> LlmResult:
-        """Awaiting it can be cancelled, which stops the call to the engine."""
+        """Turns recipe text into a draft. Cancelling it stops the call to the AI."""
         ...
 
 
@@ -92,10 +94,11 @@ Transport = Callable[[Sequence[Message]], Awaitable[RawReply]]
 async def extract_with_retry(
     transport: Transport, messages: Sequence[Message]
 ) -> LlmResult:
-    """Validate the reply against `DraftRecipe`; on failure retry once with the error.
+    """Validates the AI's answer against `DraftRecipe`. If it is invalid, asks once
+    more and sends the error back to the AI.
 
-    A second failure raises `LlmInvalidOutputError` (AD-34). Transport errors
-    (`LlmError`) pass through untouched.
+    If the second answer is also invalid, raises `LlmInvalidOutputError` (AD-34).
+    Connection errors (`LlmError`) are not caught here.
     """
     first = await transport(messages)
     try:

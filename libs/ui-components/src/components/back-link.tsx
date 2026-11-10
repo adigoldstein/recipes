@@ -5,15 +5,15 @@ import { Button } from './ui/button';
 export interface BackLinkProps {
   label: string;
   /**
-   * Renders the router link around the content. The app passes a link to the
-   * fallback page with the history behaviour; this lib imports no router.
+   * Renders the router link around the content. The app passes a link to the home
+   * page, with the "go back in history" behavior. This lib does not import a router.
    */
   link: (children: ReactNode) => ReactElement;
 }
 
 /**
- * The back button every page except the library has: an arrow that points to the
- * start of the line (right in Hebrew) and a label, 44 px high.
+ * The back button that every page except the library has: an arrow that points to
+ * the start of the line (right, in Hebrew) and a label. 44 px high.
  */
 export function BackLink({ label, link }: BackLinkProps) {
   return (

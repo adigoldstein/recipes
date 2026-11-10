@@ -3,7 +3,7 @@ import { E2E_AUTH_FILE } from './test-account';
 
 test.use({ storageState: E2E_AUTH_FILE });
 
-// Flow 2: an editor imports a pasted recipe, completes the missing fields and saves.
+// Flow 2: an editor imports a pasted recipe, fills in the missing fields and saves.
 test('an editor imports a draft, fills the gaps and saves it', async ({
   page,
 }) => {

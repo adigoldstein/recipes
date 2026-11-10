@@ -6,9 +6,11 @@ Create Date: 2026-11-04 14:10:00.000000
 
 Upgrade: back up the database file, add `recipe.ingredients` and `recipe.steps`, copy
 every `ingredient` and `step` row into them in `position` order, check that nothing was
-lost, and only then drop the two tables. Downgrade rebuilds the tables from the JSON.
+lost, and only then drop the two old tables. Downgrade rebuilds the tables from the
+JSON.
 
-Like 0001 to 0004 this file imports nothing from the app: it must run the same forever.
+Like 0001 to 0004, this file imports nothing from the app, so it keeps working the
+same way forever.
 """
 
 import sqlite3
@@ -78,7 +80,8 @@ _step = sa.table(
 
 
 def _text_amount(value: Decimal | None) -> str | None:
-    """An amount as stored in the JSON: a string with 3 decimals (AD-31)."""
+    """Returns an amount as it is saved in the JSON: a string with 3 decimals
+    (AD-31)."""
     return None if value is None else format(value.quantize(QUANTUM), "f")
 
 
@@ -87,11 +90,12 @@ def _decimal(value: str | None) -> Decimal | None:
 
 
 def _backup_database(bind: sa.Connection) -> None:
-    """Copy the database file next to itself before anything changes.
+    """Copies the database file to a backup next to it, before anything changes.
 
-    It uses SQLite's own backup API, which is safe in WAL mode, and it never replaces
-    an earlier backup. A database with no recipes has nothing to protect.
+    It uses SQLite's own backup API, which is safe in WAL mode. It never overwrites
+    an earlier backup.
     """
+    # A database with no recipes has nothing to protect.
     if bind.execute(sa.text("SELECT count(*) FROM recipe")).scalar_one() == 0:
         return
     files = bind.exec_driver_sql("PRAGMA database_list").all()
@@ -101,8 +105,9 @@ def _backup_database(bind: sa.Connection) -> None:
     target = Path(path).with_name(Path(path).name + BACKUP_SUFFIX)
     if target.exists():
         return
-    # A second connection, not the migration's own: it sees only what is committed, so
-    # the backup is the state before this run, and it cannot wait on the run's lock.
+    # Use a separate connection, not the migration's. It sees only committed data, so
+    # the backup is the state before this migration, and it does not wait for the
+    # migration's lock.
     source = sqlite3.connect(path)
     copy = sqlite3.connect(target)
     try:
@@ -117,7 +122,8 @@ def _count(bind: sa.Connection, sql: str) -> int:
 
 
 def _verify_json_matches_rows(bind: sa.Connection) -> None:
-    """Raise unless every row has a place in the JSON; the caller rolls back."""
+    """Raises an error if any row is missing from the JSON. The caller then rolls
+    back."""
     for table, column in (("ingredient", "ingredients"), ("step", "steps")):
         rows = _count(bind, f"SELECT count(*) FROM {table}")
         items = _count(
@@ -149,7 +155,8 @@ def upgrade() -> None:
     bind = op.get_bind()
     _backup_database(bind)
     # SQLite may run a plain ALTER outside the migration's transaction, so a failed
-    # run can leave the columns behind; adding only what is missing makes a rerun safe.
+    # run can leave the new columns behind. Add only the columns that are missing, so
+    # running it again is safe.
     for column in ("ingredients", "steps"):
         if not _has_column(bind, "recipe", column):
             op.add_column(
@@ -223,7 +230,7 @@ def upgrade() -> None:
 
 
 def _create_child_tables() -> None:
-    """The `ingredient` and `step` tables exactly as 0001 made them."""
+    """Creates the `ingredient` and `step` tables exactly as 0001 created them."""
     op.create_table(
         "ingredient",
         sa.Column("id", sa.Uuid(), nullable=False),

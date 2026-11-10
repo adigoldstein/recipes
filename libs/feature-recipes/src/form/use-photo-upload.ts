@@ -14,9 +14,12 @@ import type { RecipeFormValues } from './recipe-form-values';
 interface Options {
   getValues: UseFormGetValues<RecipeFormValues>;
   setValue: UseFormSetValue<RecipeFormValues>;
-  /** The server's limits, when they have loaded; used to refuse a file at once. */
+  /** The server's limits, once loaded. Used to reject a wrong file right away. */
   limits: PhotoLimits | undefined;
-  /** The recipe's saved photo thumbnail, if any (so removing it must be sent, and can be undone). */
+  /**
+   * The recipe's saved photo thumbnail, if any. If there is one, removing it must
+   * be sent on save, and can be undone.
+   */
   savedPreview: string | null;
 }
 
@@ -24,12 +27,13 @@ const isAbort = (error: unknown) =>
   error instanceof DOMException && error.name === 'AbortError';
 
 /**
- * The form's photo: picking a file uploads it at once and keeps its key in the form
- * (AD-27); the recipe save then attaches it. `photoKey` is only set when the photo
- * changed, so a form that never touched it leaves the saved photo alone.
+ * Handles the form's photo. Choosing a file uploads it right away and keeps its key
+ * in the form (AD-27). Saving the recipe then attaches it. `photoKey` is set only
+ * when the photo changed, so if the user did not touch it, the saved photo stays.
  *
- * An imported recipe can bring its page's photo (`photoSourceUrl`); `download` has the
- * server fetch it at save time (AD-23), and picking or removing a photo drops it.
+ * An imported recipe can have a photo from its page (`photoSourceUrl`). `download`
+ * asks the server to download it when saving (AD-23). Choosing or removing a photo
+ * removes it.
  */
 export function usePhotoUpload({
   getValues,
@@ -50,7 +54,7 @@ export function usePhotoUpload({
     blobUrl.current = null;
   };
 
-  // Leaving the form ends an upload in flight and frees the preview.
+  // When leaving the form, cancel an upload in progress and free the preview.
   useEffect(
     () => () => {
       controller.current?.abort();
@@ -61,7 +65,8 @@ export function usePhotoUpload({
 
   const select = async (file: File) => {
     setError(undefined);
-    // The same limits the server enforces, so a wrong file is refused without a trip.
+    // Check the same limits as the server, so a wrong file is rejected without
+    // sending it.
     if (limits && !limits.content_types.includes(file.type)) {
       setError(t('errors.photo_unsupported_type'));
       return;
@@ -93,7 +98,7 @@ export function usePhotoUpload({
     } catch (caught) {
       URL.revokeObjectURL(preview);
       if (isAbort(caught)) return;
-      // The picture that was there before stays.
+      // Put back the picture that was there before.
       setValue('photoPreview', before.preview);
       setValue('photoKey', before.key);
       setError(
@@ -112,7 +117,8 @@ export function usePhotoUpload({
   const remove = () => {
     setError(undefined);
     forgetBlob();
-    // A photo that was never saved just goes; a saved one is removed on save.
+    // A photo that was never saved is just removed. A saved photo is removed when
+    // the recipe is saved.
     setValue('photoKey', savedPreview ? null : undefined, {
       shouldDirty: true,
     });
@@ -121,9 +127,9 @@ export function usePhotoUpload({
   };
 
   /**
-   * Has the server download the imported photo and returns its key, or `undefined`
-   * when that failed; a message under the photo says so, and "הסרה" lets the editor
-   * save without it.
+   * Asks the server to download the imported photo and returns its key. Returns
+   * `undefined` if it failed. Then a message is shown under the photo, and "הסרה"
+   * lets the editor save without it.
    */
   const download = async (sourceUrl: string): Promise<string | undefined> => {
     setError(undefined);
@@ -136,7 +142,8 @@ export function usePhotoUpload({
       setValue('photoSourceUrl', null);
       return photo_key;
     } catch {
-      // The fetch codes speak of pasting text, which does not fit a photo.
+      // Use our own message: the download error messages talk about pasting text,
+      // which does not fit a photo.
       setError(t('recipeForm.photo.downloadFailed'));
       return undefined;
     } finally {
@@ -144,7 +151,7 @@ export function usePhotoUpload({
     }
   };
 
-  // Back to the saved photo, as if it had never been touched (until the save).
+  // Go back to the saved photo, as if it was never changed.
   const restore = () => {
     setError(undefined);
     forgetBlob();

@@ -1,12 +1,13 @@
 import type { ErrorCode } from './generated/types.gen';
 
-/** Every code the API publishes (AD-28). The UI renders `errors.<code>`. */
+/** All the error codes the API can return (AD-28). The UI shows `errors.<code>`. */
 export type { ErrorCode };
 
 /**
- * Reads the `code` of a non-422 API error body `{detail, code, params?}`.
- * Returns undefined for anything else (network failure, 422, unknown shape);
- * a code newer than this client is returned as-is so the UI can fall back.
+ * Returns the `code` from an API error body `{detail, code, params?}` (not 422).
+ * Returns undefined for anything else (network error, 422, unknown shape).
+ * A code that this client does not know yet is returned as is, so the UI can show
+ * a general message.
  */
 export function getErrorCode(error: unknown): ErrorCode | undefined {
   if (typeof error !== 'object' || error === null) return undefined;
@@ -15,8 +16,8 @@ export function getErrorCode(error: unknown): ErrorCode | undefined {
 }
 
 /**
- * Reads the `params` of an API error body, the values its message needs (for
- * example `{min: 8}` for `password_too_short`). Empty when there are none.
+ * Returns the `params` from an API error body: the values its message needs (for
+ * example `{min: 8}` for `password_too_short`). Returns an empty object if none.
  */
 export function getErrorParams(
   error: unknown,

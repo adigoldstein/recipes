@@ -12,10 +12,11 @@ export const zBodyPhotosUploadPhoto = z.object({
 /**
  * ChangePasswordRequest
  *
- * The signed-in user's own password change (Story 2.6).
+ * The body for changing your own password (Story 2.6).
  *
- * The new password's length is checked by the password policy in the service, so
- * the client gets the same `password_too_short` error as an admin reset.
+ * The length of the new password is checked in the service, by the password
+ * policy. That way the client gets the same `password_too_short` error as when an
+ * admin resets a password.
  */
 export const zChangePasswordRequest = z.object({
     current_password: z.string().min(1).max(128),
@@ -33,7 +34,8 @@ export const zDraftStep = z.object({
 /**
  * ErrorCode
  *
- * Stable error codes; the client shows `errors.<code>` from he.json.
+ * Error codes that do not change. The client shows the message
+ * `errors.<code>` from he.json.
  */
 export const zErrorCode = z.enum([
     'recipe_not_found',
@@ -71,7 +73,7 @@ export const zErrorCode = z.enum([
 /**
  * ErrorEvent
  *
- * `event: error`. A failure after the stream started; `code` is an AD-28 code.
+ * `event: error`. An error after the stream started. `code` is an AD-28 code.
  */
 export const zErrorEvent = z.object({
     code: z.string(),
@@ -118,7 +120,8 @@ export const zImportUrlRequest = z.object({
 /**
  * LoginRequest
  *
- * Plain strings on purpose: a malformed email is just wrong credentials.
+ * Login details. The email is a plain string on purpose: an invalid email is
+ * treated like any wrong email and password.
  */
 export const zLoginRequest = z.object({
     email: z.string().min(1).max(254),
@@ -128,7 +131,8 @@ export const zLoginRequest = z.object({
 /**
  * PhotoFromUrl
  *
- * A photo to download from a page, such as an imported recipe's (AD-23, AD-27).
+ * A photo to download from a link, for example of an imported recipe
+ * (AD-23, AD-27).
  */
 export const zPhotoFromUrl = z.object({
     source_url: z.string().min(1).max(2048)
@@ -137,7 +141,7 @@ export const zPhotoFromUrl = z.object({
 /**
  * PhotoLimits
  *
- * What an upload may be, for the form to show beside the field.
+ * The upload limits, shown by the form next to the photo field.
  */
 export const zPhotoLimits = z.object({
     content_types: z.array(z.string()),
@@ -147,7 +151,8 @@ export const zPhotoLimits = z.object({
 /**
  * PhotoRead
  *
- * The photo shape that read schemas embed (AD-27); URLs are built server-side.
+ * A photo as it appears inside API responses (AD-27). The server builds the
+ * URLs.
  */
 export const zPhotoRead = z.object({
     credit_domain: z.string().nullable(),
@@ -158,7 +163,7 @@ export const zPhotoRead = z.object({
 /**
  * PhotoUploaded
  *
- * An uploaded photo that no recipe holds yet; a recipe save attaches it.
+ * An uploaded photo that no recipe uses yet. Saving a recipe attaches it.
  */
 export const zPhotoUploaded = z.object({
     photo_key: z.string()
@@ -167,7 +172,7 @@ export const zPhotoUploaded = z.object({
 /**
  * ProviderInfo
  *
- * An enabled import engine and how long the server waits for it (AD-43).
+ * An active import engine and how long the server waits for it (AD-43).
  */
 export const zProviderInfo = z.object({
     name: z.string(),
@@ -177,14 +182,15 @@ export const zProviderInfo = z.object({
 /**
  * Role
  *
- * A visitor has no session, so there is no viewer role (AD-30).
+ * The user roles. A visitor is simply not logged in, so there is no visitor
+ * role (AD-30).
  */
 export const zRole = z.enum(['editor', 'admin']);
 
 /**
  * SessionUser
  *
- * What the client may know about the signed-in user (AD-21).
+ * The details of the logged-in user that the client may see (AD-21).
  */
 export const zSessionUser = z.object({
     email: z.string(),
@@ -196,7 +202,7 @@ export const zSessionUser = z.object({
 /**
  * SessionResponse
  *
- * `user` is null for a visitor.
+ * The current session. `user` is null for a visitor.
  */
 export const zSessionResponse = z.object({
     user: zSessionUser.nullable()
@@ -205,7 +211,8 @@ export const zSessionResponse = z.object({
 /**
  * SourceUnit
  *
- * Imperial units an import converted to metric; kept as the 'source' value.
+ * Imperial units that an import converted to metric. We keep the original unit
+ * as the 'source' value.
  */
 export const zSourceUnit = z.enum([
     'oz',
@@ -216,7 +223,7 @@ export const zSourceUnit = z.enum([
 /**
  * DraftSource
  *
- * An imperial value found in the source; the code converts it to metric (FR-21).
+ * An imperial value found in the source. The code converts it to metric (FR-21).
  */
 export const zDraftSource = z.object({
     amount: z.number().gt(0),
@@ -226,7 +233,7 @@ export const zDraftSource = z.object({
 /**
  * SourceValue
  *
- * An imperial value an import converted to metric (FR-21).
+ * The imperial value that an import converted to metric (FR-21).
  */
 export const zSourceValue = z.object({
     amount: z.number(),
@@ -236,7 +243,7 @@ export const zSourceValue = z.object({
 /**
  * StageEvent
  *
- * `event: stage`. Only real pipeline stages are reported, no percentage.
+ * `event: stage`. Reports a real step of the import. There is no percentage.
  */
 export const zStageEvent = z.object({
     name: z.enum([
@@ -272,7 +279,7 @@ export const zStepRead = z.object({
 /**
  * TagCreate
  *
- * Body of `POST /tags`: the name is normalized and length-checked.
+ * The body of `POST /tags`. The name is cleaned up and its length is checked.
  */
 export const zTagCreate = z.object({
     name: z.string()
@@ -281,7 +288,8 @@ export const zTagCreate = z.object({
 /**
  * TagInput
  *
- * A tag in a recipe write: an existing tag by id, or a name to find or create.
+ * A tag sent when saving a recipe: either the id of an existing tag, or a name.
+ * A name is matched to an existing tag, or a new tag is created.
  */
 export const zTagInput = z.object({
     id: z.uuid().nullish(),
@@ -301,7 +309,7 @@ export const zTagRead = z.object({
 /**
  * TagRef
  *
- * A tag as embedded in recipe read schemas (AD-20).
+ * A tag as it appears inside a recipe in API responses (AD-20).
  */
 export const zTagRef = z.object({
     id: z.uuid(),
@@ -323,7 +331,7 @@ export const zRecipeSummary = z.object({
 /**
  * TagUpdate
  *
- * Body of `PATCH /tags/{id}`: send only what changes.
+ * The body of `PATCH /tags/{id}`. Send only the fields that change.
  */
 export const zTagUpdate = z.object({
     name: z.string().nullish(),
@@ -383,7 +391,7 @@ export const zDraftRecipe = z.object({
 /**
  * IngredientCreate
  *
- * An ingredient in a recipe write; its position is its place in the list.
+ * An ingredient sent when saving a recipe. Its order is its place in the list.
  */
 export const zIngredientCreate = z.object({
     amount: z.number().gt(0).lt(1000000000).nullish(),
@@ -395,7 +403,8 @@ export const zIngredientCreate = z.object({
 /**
  * IngredientUpdate
  *
- * An ingredient in a recipe replace: with an `id` it is an existing one (AD-20).
+ * An ingredient sent when updating a recipe. If it has an `id`, it is an
+ * existing ingredient (AD-20).
  */
 export const zIngredientUpdate = z.object({
     amount: z.number().gt(0).lt(1000000000).nullish(),
@@ -410,7 +419,7 @@ export const zIngredientUpdate = z.object({
  *
  * The ingredient's amount and unit before its first edit (FR-7).
  *
- * Both fields null means it was originally "to taste".
+ * If both fields are null, it was "to taste" before the edit.
  */
 export const zOriginalValue = z.object({
     amount: z.number().nullable(),
@@ -433,7 +442,7 @@ export const zIngredientRead = z.object({
 /**
  * RecipeCreate
  *
- * Everything needed to create a recipe.
+ * All the data needed to create a recipe.
  */
 export const zRecipeCreate = z.object({
     base_servings: z.int().gte(1).lte(100),
@@ -472,7 +481,8 @@ export const zRecipeRead = z.object({
 /**
  * RecipeUpdate
  *
- * The whole recipe, replacing the saved one (AD-4); never carries originals.
+ * The full recipe, which replaces the saved one (AD-4). It never includes the
+ * original values.
  */
 export const zRecipeUpdate = z.object({
     base_servings: z.int().gte(1).lte(100),
@@ -491,10 +501,10 @@ export const zRecipeUpdate = z.object({
 /**
  * UserCreateRequest
  *
- * The body of `POST /api/users`: an account plus its starting password.
+ * The body of `POST /api/users`: the new account and its first password.
  *
- * The confirmation field of the form is checked in the browser only; the server
- * just enforces the password policy (FR-13).
+ * The form's "confirm password" field is checked only in the browser. The server
+ * only checks the password policy (FR-13).
  */
 export const zUserCreateRequest = z.object({
     email: z.email(),
@@ -506,7 +516,7 @@ export const zUserCreateRequest = z.object({
 /**
  * UserRead
  *
- * A user as returned to callers. There is deliberately no password field.
+ * A user as the API returns it. On purpose, it has no password field.
  */
 export const zUserRead = z.object({
     created_at: z.iso.datetime(),
@@ -520,10 +530,10 @@ export const zUserRead = z.object({
 /**
  * UserUpdate
  *
- * The body of `PATCH /api/users/{id}`: any of these, at least one.
+ * The body of `PATCH /api/users/{id}`. Send at least one field.
  *
- * A field that is left out stays as it is. `password` is a reset: it replaces the
- * current one and ends every session the user has.
+ * A field that is not sent does not change. Sending `password` resets it: the new
+ * password replaces the old one and the user is logged out on all devices.
  */
 export const zUserUpdate = z.object({
     is_blocked: z.boolean().nullish(),

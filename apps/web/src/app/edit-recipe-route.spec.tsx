@@ -13,8 +13,8 @@ const EDITOR: SessionUser = {
   role: 'editor',
 };
 
-// The first import of a lazy page transforms its whole module graph, which can take
-// a while when the machine is busy running every other project's tests.
+// Time limit for loading a lazy page. The first load builds all the code it imports,
+// which can be slow when the computer is busy running the other projects' tests.
 const LAZY_TIMEOUT = 30_000;
 
 let sessionUser: SessionUser | null = null;

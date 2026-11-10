@@ -1,4 +1,4 @@
-"""Database access for recipes; used only by this module's service."""
+"""Database queries for recipes. Only this module's service uses them."""
 
 import uuid
 from collections.abc import Sequence
@@ -11,7 +11,11 @@ from app.recipes.models import Recipe
 
 
 def _attribute(column: object) -> "QueryableAttribute[Any]":
-    """SQLModel types columns as plain values; at runtime they are attributes."""
+    """Fixes the type of a column for the type checker.
+
+    SQLModel types columns as plain values, but when the code runs they are query
+    attributes.
+    """
     return cast("QueryableAttribute[Any]", column)
 
 
@@ -20,7 +24,7 @@ class RecipeRepository:
         self._session = session
 
     def list_all(self) -> Sequence[Recipe]:
-        """Every recipe, newest first (AD-26); ingredients and steps are not loaded."""
+        """Returns all recipes, newest first (AD-26), without ingredients and steps."""
         statement = (
             select(Recipe)
             .order_by(col(Recipe.created_at).desc(), col(Recipe.id))
@@ -32,18 +36,19 @@ class RecipeRepository:
         return self._session.exec(statement).all()
 
     def photo_keys(self) -> set[str]:
-        """The keys of every photo a recipe holds."""
+        """Returns the keys of all the photos that recipes use."""
         statement = select(Recipe.photo_key).where(col(Recipe.photo_key).is_not(None))
         return {key for key in self._session.exec(statement) if key is not None}
 
     def add(self, recipe: Recipe) -> Recipe:
-        """Stage the recipe, ingredients and steps included; the caller commits."""
+        """Adds the recipe, with its ingredients and steps, to the session. The caller
+        commits."""
         self._session.add(recipe)
         self._session.flush()
         return recipe
 
     def delete(self, recipe: Recipe) -> None:
-        """Stage the removal; the database cascades to its tag links."""
+        """Deletes the recipe in the session. The database deletes its tag links too."""
         self._session.delete(recipe)
         self._session.flush()
 
@@ -54,6 +59,6 @@ class RecipeRepository:
         self._session.rollback()
 
     def get(self, recipe_id: uuid.UUID) -> Recipe | None:
-        """One recipe; its ingredients and steps come with the row, in order."""
+        """Returns one recipe, with its ingredients and steps in order."""
         statement = select(Recipe).where(Recipe.id == recipe_id)
         return self._session.exec(statement).first()

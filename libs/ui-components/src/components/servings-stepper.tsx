@@ -7,7 +7,10 @@ import { Input } from './ui/input';
 export interface ServingsStepperProps {
   /** The current number of servings. */
   value: number;
-  /** The recipe's own servings; the reset button shows when `value` differs. */
+  /**
+   * The recipe's own number of servings. The reset button shows when `value` is
+   * different.
+   */
   base: number;
   min: number;
   max: number;
@@ -15,16 +18,19 @@ export interface ServingsStepperProps {
   label: string;
   decreaseLabel: string;
   increaseLabel: string;
-  /** "חזרה ל־4"; the button is shown only when `value` differs from `base`. */
+  /** "חזרה ל־4". The button is shown only when `value` is not `base`. */
   resetLabel: string;
-  /** Shown while the typed value is empty or outside `min`–`max`. */
+  /** Shown while the typed value is empty or not between `min` and `max`. */
   rangeMessage: string;
-  /** Read out politely whenever the servings change, e.g. "10 מנות". */
+  /** Read aloud (politely) when the servings change, for example "10 מנות". */
   announcement: string;
   className?: string;
 }
 
-/** Servings control with 44 px buttons and a typeable, clamped value (UX-DR9). */
+/**
+ * The servings control: 44 px buttons, and a value you can type, kept within the
+ * limits (UX-DR9).
+ */
 export function ServingsStepper({
   value,
   base,
@@ -41,7 +47,7 @@ export function ServingsStepper({
 }: ServingsStepperProps) {
   const inputId = useId();
   const messageId = useId();
-  // What is being typed; null while the field simply shows `value`.
+  // The text being typed. Null when the field just shows `value`.
   const [draft, setDraft] = useState<string | null>(null);
   const invalid =
     draft !== null &&

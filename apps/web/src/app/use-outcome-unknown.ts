@@ -1,16 +1,16 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 
-// Must match `OUTCOME_UNKNOWN_EVENT` in data-access (a spec checks it). It is
-// repeated here because importing data-access would put the API client in the
-// first load (AD-11).
+// Must be the same as `OUTCOME_UNKNOWN_EVENT` in data-access (a test checks it). We
+// copy it here because importing data-access would add the API client to the first
+// load (AD-11).
 export const OUTCOME_UNKNOWN_EVENT = 'bite-and-board:outcome-unknown';
 
 /**
- * When a write ran past the client's time limit, the server may still have finished it
- * (AD-43). Every query is refetched, so the library, the recipe and the tags show what
- * the server really holds before the editor decides to try again. The message itself
- * ("לא ברור אם הפעולה הושלמה") is the failed action's own error.
+ * When a write takes longer than the client's time limit, the server may still have
+ * finished it (AD-43). So we reload all the data, and the library, the recipe and the
+ * tags show what the server really has before the editor tries again. The message
+ * ("לא ברור אם הפעולה הושלמה") is shown by the action that failed.
  */
 export function useOutcomeUnknown() {
   const queryClient = useQueryClient();

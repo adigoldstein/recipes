@@ -2,7 +2,8 @@ import { resolve } from 'node:path';
 import { defineConfig, devices } from '@playwright/test';
 import { E2E_EMAIL, E2E_PASSWORD } from './src/test-account';
 
-// Not 8000 / 4300 (development) so a running dev server never gets in the way.
+// Not 8000 / 4300 (the development ports), so a running dev server does not get in
+// the way.
 const API_PORT = 8130;
 const WEB_PORT = 8131;
 const apiOrigin = `http://127.0.0.1:${API_PORT}`;
@@ -15,7 +16,7 @@ const desktop = { width: 1280, height: 800 };
 export default defineConfig({
   testDir: './src',
   outputDir: './out-tsc/test-results',
-  // One server and one database: tests run one at a time, in order.
+  // There is one server and one database, so tests run one at a time, in order.
   workers: 1,
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
@@ -29,7 +30,7 @@ export default defineConfig({
     trace: 'off',
   },
   projects: [
-    // Logs in once (the login is rate limited to 5 a minute) and saves the session.
+    // Logs in once and saves the session (login is limited to 5 times a minute).
     { name: 'setup', testMatch: /login\.setup\.spec\.ts/ },
     {
       name: 'mobile',
@@ -44,8 +45,8 @@ export default defineConfig({
       testIgnore: /login\.setup\.spec\.ts/,
     },
   ],
-  // The API on a fresh database, and the built app (`vite preview`, which proxies
-  // `/api` and `/media` to that API, as `vite` does in development).
+  // Start the API with a new database, and the built app (`vite preview`, which
+  // passes `/api` and `/media` to that API, like `vite` does in development).
   webServer: [
     {
       command: 'node apps/web-e2e/scripts/start-server.mjs',

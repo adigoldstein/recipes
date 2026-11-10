@@ -5,8 +5,8 @@ import '../src/styles/theme.css';
 
 type StoryTheme = 'light' | 'dark';
 
-// Every story renders RTL in Hebrew, inside the Radix DirectionProvider, on the
-// page background, with `.dark` on <html> exactly as the app's ThemeProvider does.
+// Every story is shown in Hebrew and RTL, inside the Radix DirectionProvider, on the
+// page background. Dark mode puts `.dark` on <html>, like the app's ThemeProvider.
 function AppShell({
   theme,
   children,

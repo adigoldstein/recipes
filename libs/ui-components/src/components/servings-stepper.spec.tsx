@@ -77,7 +77,7 @@ describe('ServingsStepper', () => {
 
     await userEvent.type(input(), '150');
     expect(screen.getByText('בין 1 ל־100')).toBeTruthy();
-    // "15" was valid on the way to "150", so that is what the page holds.
+    // "15" was valid while typing "150", so the page keeps 15.
     expect(screen.getByRole('status').textContent).toBe('15 מנות');
 
     await userEvent.tab();

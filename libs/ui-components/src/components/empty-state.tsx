@@ -9,7 +9,7 @@ export interface EmptyStateProps {
   className?: string;
 }
 
-/** A centred message for "nothing here yet" and "nothing matches" (UX-DR17). */
+/** A centered message for "nothing here yet" and "nothing found" (UX-DR17). */
 export function EmptyState({
   title,
   description,

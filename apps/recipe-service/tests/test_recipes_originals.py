@@ -1,4 +1,5 @@
-"""The FR-7..9 original-value truth table (AD-4, AD-20, AD-31)."""
+"""All the cases of keeping an ingredient's original value (FR-7..9, AD-4, AD-20,
+AD-31)."""
 
 from decimal import Decimal
 
@@ -55,7 +56,7 @@ def state(ingredient: IngredientItem) -> tuple[Value, Value | None]:
         (TWO_TSP, ONE_TSP, TWO_TSP, TWO_TSP, ONE_TSP),  # untouched
         (TWO_TSP, ONE_TSP, TWO_TBSP, TWO_TBSP, ONE_TSP),
         (TWO_TSP, TASTE, THREE_TSP, THREE_TSP, TASTE),  # originally to taste
-        # Back to the original clears it.
+        # Going back to the original value deletes the original.
         (TWO_TSP, ONE_TSP, ONE_TSP, ONE_TSP, None),
         (TWO_TSP, TASTE, TASTE, TASTE, None),
         (TASTE, ONE_TSP, ONE_TSP, ONE_TSP, None),
@@ -77,7 +78,7 @@ def test_original_truth_table(
 def test_thirds_compare_after_quantizing() -> None:
     ingredient = apply_edit(make((D("1"), Unit.CUP)), D("0.33333"), Unit.CUP)
     assert state(ingredient) == ((D("0.333"), Unit.CUP), (D("1"), Unit.CUP))
-    # Typing the same third again (0.333) is no change, so the original stays.
+    # Typing the same third again (0.333) is not a change, so the original stays.
     ingredient = apply_edit(ingredient, D("0.333"), Unit.CUP)
     assert state(ingredient)[1] == (D("1"), Unit.CUP)
     ingredient = apply_edit(ingredient, D("1.0000"), Unit.CUP)

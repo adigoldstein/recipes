@@ -59,7 +59,7 @@ def test_a_session_token_round_trips_the_user_id_and_session_version() -> None:
 
 
 def test_a_token_without_a_session_version_counts_as_version_0() -> None:
-    """Tokens issued before versions existed must survive the upgrade."""
+    """Tokens created before session versions existed must still work."""
     user_id = uuid.uuid4()
     claims = {"sub": str(user_id), "exp": datetime.now(UTC) + timedelta(days=1)}
     token = jwt.encode(claims, SECRET, algorithm="HS256")

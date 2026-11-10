@@ -40,7 +40,7 @@ def test_friendly_round(value: float, expected: float) -> None:
         (1, SourceUnit.LB, 455, Unit.G),
         (2, SourceUnit.LB, 905, Unit.G),
         (8, SourceUnit.FL_OZ, 235, Unit.ML),
-        (0.02, SourceUnit.OZ, 0.6, Unit.G),  # a pinch of yeast keeps its precision
+        (0.02, SourceUnit.OZ, 0.6, Unit.G),  # a little yeast keeps its decimal
     ],
 )
 def test_imperial_units_become_metric_and_keep_the_source(

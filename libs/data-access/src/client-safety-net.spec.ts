@@ -8,7 +8,7 @@ import {
 
 const advance = (ms: number) => vi.advanceTimersByTimeAsync(ms);
 
-/** A server that never answers; it only reacts when the request is aborted. */
+/** A fake server that never answers. It only reacts when the request is aborted. */
 function hangingFetch() {
   return vi.fn(
     (request: Request) =>
@@ -81,7 +81,7 @@ describe('safetyNetMs', () => {
     expect(safetyNetMs('/api/photos/limits')).toBe(30_000);
     expect(safetyNetMs('/api/photos')).toBe(120_000);
     expect(safetyNetMs('/api/imports/text')).toBe(95_000);
-    // The slowest LLM provider waits 90 s on the server.
+    // The slowest AI provider can take 90 seconds on the server.
     expect(SAFETY_NET_MS.import).toBeGreaterThan(90_000);
   });
 });
@@ -146,7 +146,7 @@ describe('fetchWithSafetyNet', () => {
     await advance(36_000);
     const response = await pending;
     expect(await response.json()).toMatchObject({ code: 'request_timeout' });
-    // An import saves nothing, so it is not "unknown".
+    // An import saves nothing, so its result is not "unknown".
     expect(outcomeEvents).toBe(0);
   });
 

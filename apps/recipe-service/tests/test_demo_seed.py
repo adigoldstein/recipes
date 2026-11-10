@@ -1,4 +1,4 @@
-"""The demo recipes loaded on a start that finds no recipes."""
+"""The demo recipes that are added when the app starts with an empty library."""
 
 import json
 from collections.abc import Iterator
@@ -25,7 +25,8 @@ DEMO_TOTAL = 14
 
 
 def _start(monkeypatch: pytest.MonkeyPatch, seed_demo: str | None) -> None:
-    """Start the app once (the lifespan migrates and runs the demo hook), then stop."""
+    """Starts the app once and stops it. Startup creates the database and adds the
+    demo recipes."""
     if seed_demo is None:
         monkeypatch.delenv("SEED_DEMO", raising=False)
     else:
@@ -74,7 +75,7 @@ def test_an_empty_db_gets_the_demo_recipes(
             recipe.photo_key is None and recipe.created_by is None
             for recipe in session.exec(select(Recipe))
         )
-        # Every tag the demo uses exists, pinned the way the file says.
+        # Every tag of the demo exists, and is pinned or not as the file says.
         tags = {tag.name: tag.pinned for tag in session.exec(select(Tag))}
         for tag in load_demo_data().tags:
             assert tags[tag.name] is tag.pinned, tag.name
@@ -128,8 +129,8 @@ def test_a_failure_mid_load_leaves_nothing_behind(
     _start(monkeypatch, "false")
     data = load_demo_data()
     first = data.recipes[0]
-    # The first recipe brings a brand-new tag; a later one points at a photo that
-    # was never uploaded, so saving it fails after several recipes were staged.
+    # The first recipe adds a new tag. A later recipe uses a photo that was never
+    # uploaded, so saving fails after some recipes were already added.
     data.recipes[0] = first.model_copy(
         update={"tags": [*first.tags, TagInput(name="תגית שלא תישאר")]}
     )

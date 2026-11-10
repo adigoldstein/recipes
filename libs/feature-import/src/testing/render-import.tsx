@@ -7,13 +7,13 @@ import { ImportPanel, type ImportPanelProps } from '../panel/import-panel';
 
 initI18n();
 
-/** The spies for what the hosting page gives the panel. */
+/** Spies for the callbacks that the page gives the panel. */
 export interface PanelSpies {
   onDraft: Mock<ImportPanelProps['onDraft']>;
   onBusyChange: Mock<ImportPanelProps['onBusyChange']>;
 }
 
-/** Renders the panel with spies for what the hosting page gives it. */
+/** Renders the panel, with spies for the callbacks the page gives it. */
 export function renderPanel(props: Partial<ImportPanelProps> = {}): PanelSpies {
   const onDraft = vi.fn<ImportPanelProps['onDraft']>();
   const onBusyChange = vi.fn<ImportPanelProps['onBusyChange']>();

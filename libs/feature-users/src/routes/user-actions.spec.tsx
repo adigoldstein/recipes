@@ -43,7 +43,7 @@ interface PatchCall {
   csrf: string | null;
 }
 
-/** A PATCH handler that records the call and answers with the changed user. */
+/** A PATCH handler that records the call and returns the changed user. */
 function servePatch(users: UserRead[], calls: PatchCall[] = []) {
   server.use(
     http.get('*/api/users', () => HttpResponse.json(users)),

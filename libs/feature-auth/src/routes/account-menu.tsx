@@ -18,9 +18,9 @@ import {
 } from '@bite-and-board/ui-components';
 
 /**
- * The top bar's account slot (UX-DR4): "כניסה" for a visitor, the user's name with
- * an account menu once signed in. It is its own chunk, so the app shell does not
- * pull the API client into the first load.
+ * The account area in the top bar (UX-DR4): "כניסה" for a visitor, and the user's
+ * name with an account menu after login. It is a separate chunk, so the app layout
+ * does not add the API client to the first load.
  */
 export function AccountMenu() {
   const { t } = useTranslation();
@@ -31,11 +31,12 @@ export function AccountMenu() {
   const logout = useMutation({
     ...authLogoutMutation(),
     onSuccess: async () => {
-      // Visitor right away, then confirm with the server.
+      // Show the user as a visitor right away, then check with the server.
       queryClient.setQueryData(authSessionQueryKey(), { user: null });
       await queryClient.invalidateQueries({ queryKey: authSessionQueryKey() });
-      // Only this menu logs out on purpose; an expired session and a self-block
-      // have their own messages. A failed logout shows nothing, as before.
+      // Show "logged out" only here, where the user chose to log out. An expired
+      // session and a blocked account have their own messages. A failed logout
+      // shows nothing.
       toast.success(t('auth.logoutDone'));
     },
   });
@@ -70,7 +71,7 @@ export function AccountMenu() {
     );
   }
 
-  // Nothing while the first answer is loading, and none on the login page itself.
+  // Show nothing while the session loads, and nothing on the login page itself.
   if (!session.data || location.pathname === '/login') return null;
   const next = `${location.pathname}${location.search}`;
   return (

@@ -14,9 +14,9 @@ export interface RowActionsProps {
 }
 
 /**
- * Move up, move down and remove for one row of a list. The buttons are real buttons,
- * so the keyboard works. When a move leaves the row at an end, its button turns off;
- * focus then goes to the other move button, so the keyboard is not left on nothing.
+ * The move up, move down and remove buttons of a list row. They are real buttons, so
+ * the keyboard works. When a row reaches the top or the bottom, its move button is
+ * disabled, and focus moves to the other move button so it is not lost.
  */
 export function RowActions({
   index,

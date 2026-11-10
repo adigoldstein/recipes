@@ -19,7 +19,7 @@ URL = "/api/imports/text"
 
 @pytest.fixture(autouse=True)
 def fake_provider(monkeypatch: pytest.MonkeyPatch) -> None:
-    """CI never calls a real model: the `fake` provider answers by scenario."""
+    """Uses the `fake` AI provider, so CI never calls a real AI model."""
     monkeypatch.setenv("LLM_PROVIDERS", "fake")
 
 
@@ -96,7 +96,7 @@ def test_tags_come_from_the_existing_list_and_new_ones_are_proposals(
     client: TestClient, editor: User
 ) -> None:
     draft = run_import(client, "FAKE:ok").json()
-    # "קינוח" is one of the seeded tags; "עוגיות" is not in the list yet.
+    # "קינוח" is one of the default tags. "עוגיות" is not in the list yet.
     assert draft["tags"] == ["קינוח"]
     assert draft["new_tags"] == ["עוגיות"]
     tag_names = [tag["name"] for tag in client.get("/api/tags").json()]
@@ -135,7 +135,7 @@ def test_imperial_units_and_fahrenheit_are_converted_by_the_code(
     assert flour["source"] == {"amount": 1, "unit": "lb"}
     assert (milk["amount"], milk["unit"]) == (235, "ml")
     assert (cheese["amount"], cheese["unit"]) == (115, "g")
-    # Cups and spoons are left alone.
+    # Cups and spoons are not converted.
     assert (sugar["amount"], sugar["unit"], sugar["source"]) == (1, "cup", None)
     oven, bake = draft["steps"]
     assert oven["description"] == "מחממים תנור ל-175°C."
@@ -176,7 +176,7 @@ def test_an_invalid_reply_is_retried_once_with_the_error(
     assert run.first_try_valid is False
     assert run.retried is True
     assert run.outcome == "ok"
-    # Both calls are counted.
+    # The tokens of both calls are counted.
     assert (run.input_tokens, run.output_tokens) == (200, 100)
 
 

@@ -2,7 +2,7 @@ import type { ParseKeys } from 'i18next';
 import { useTranslation } from 'react-i18next';
 import type { FieldIssue } from '@bite-and-board/data-access';
 
-// Server types that read the same to a person as one of ours.
+// Server error types that mean the same as one of ours, so they get the same message.
 const SAME_MESSAGE: Record<string, string> = {
   missing: 'required',
   int_parsing: 'integer',
@@ -14,10 +14,10 @@ const SAME_MESSAGE: Record<string, string> = {
 };
 
 /**
- * A field problem as Hebrew copy (AD-9, AD-28), whether it came from the server's 422
- * or from the client check. It looks for `validation.fields.<path>.<type>` (with the
- * row numbers dropped) and then `validation.<type>`, and falls back to
- * `validation.invalid`.
+ * Turns a field problem into a Hebrew message (AD-9, AD-28), whether it came from the
+ * server's 422 or from the client check. It looks for
+ * `validation.fields.<path>.<type>` (without row numbers), then `validation.<type>`,
+ * and otherwise uses `validation.invalid`.
  */
 export function useIssueMessage() {
   const { t, i18n } = useTranslation();
@@ -31,7 +31,7 @@ export function useIssueMessage() {
       `validation.fields.${field}.${type}`,
       `validation.${type}`,
     ];
-    // The type comes from the server, so the key is checked at runtime.
+    // The type comes from the server, so we check that the key exists at runtime.
     const key = candidates.find((candidate) => i18n.exists(candidate));
     const message: string = t(
       (key ?? 'validation.invalid') as ParseKeys,

@@ -1,4 +1,4 @@
-"""Photo upload, attaching a photo to a recipe, and `/media` (AD-14, AD-27)."""
+"""Uploading a photo, attaching it to a recipe, and `/media` (AD-14, AD-27)."""
 
 import uuid
 from collections.abc import Iterator

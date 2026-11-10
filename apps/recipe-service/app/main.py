@@ -42,15 +42,18 @@ ROUTERS = (
 
 
 def generate_operation_id(route: APIRoute) -> str:
-    """`{tag}_{function}` keeps the generated client's hook names stable."""
+    """Names each API operation `{tag}_{function}`, so the generated client's hook
+    names do not change between builds."""
     if not route.tags:
         raise RuntimeError(f"Route {route.path} has no tag; every router needs tags")
     return f"{route.tags[0]}_{route.name}"
 
 
 class MediaFiles(StaticFiles):
-    """`/media/*`. A photo's key is random and its bytes never change, so a browser may
-    keep it for good."""
+    """Serves photos under `/media/*` and tells browsers to cache them forever.
+
+    This is safe because a photo's file name is random and its content never changes.
+    """
 
     async def get_response(self, path: str, scope: Scope) -> Response:
         response = await super().get_response(path, scope)
@@ -61,15 +64,14 @@ class MediaFiles(StaticFiles):
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
-    """Migrate the database before serving; any failure stops startup (AD-29).
-
-    An empty library then gets the demo recipes (switched off in tests and e2e).
-    """
+    """Prepares the database before the app starts serving requests."""
     settings = get_settings()
     data_dir = settings.data_dir
+    # Update the database schema. If this fails, the app does not start (AD-29).
     run_migrations(data_dir)
     with Session(get_engine(data_dir)) as session:
         sweep_unattached_photos(session)
+        # If the library is empty, add the demo recipes (turned off in tests and e2e).
         seed_demo_on_first_start(session, enabled=settings.seed_demo)
     try:
         yield
@@ -78,17 +80,18 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
 
 
 def create_app() -> FastAPI:
-    # Validate config before anything is served, so a bad env fails at startup.
+    # Check the settings first, so a wrong env var stops the app right at startup.
     get_settings()
 
     app = FastAPI(
         title="Bite & Board Recipe Service",
         generate_unique_id_function=generate_operation_id,
         lifespan=lifespan,
-        # Every route, present and future, gets the CSRF check (AD-6).
+        # Run the CSRF check on every route, including routes added later (AD-6).
         dependencies=[Depends(require_csrf_header)],
     )
-    # `core` cannot import `auth`, so the guards ask a question that `auth` answers.
+    # `core` is not allowed to import `auth`. So `core` only declares "who is the
+    # current user?", and here we plug in the `auth` function that answers it.
     app.dependency_overrides[get_session_user] = get_current_user
     app.state.limiter = limiter
     register_error_handlers(app)
@@ -98,7 +101,7 @@ def create_app() -> FastAPI:
     for router in ROUTERS:
         api.include_router(router)
     app.include_router(api)
-    # Uploaded and imported photos; a key never changes, so browsers may cache them.
+    # Serve the uploaded and imported photos from the data folder.
     media = get_settings().data_dir / MEDIA_DIR
     media.mkdir(parents=True, exist_ok=True)
     app.mount("/media", MediaFiles(directory=media), name="media")

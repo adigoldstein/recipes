@@ -11,18 +11,16 @@ import { Button } from './ui/button';
 
 export interface PendingButtonProps
   extends Omit<React.ComponentProps<typeof Button>, 'asChild'>, PendingTiming {
-  /** The action behind the button is running. */
+  /** True while the button's action is running. */
   pending: boolean;
-  /** What the button says while it works, in the present continuous: "מוחקים". */
+  /** The button's text while it works, in present tense: "מוחקים". */
   pendingLabel: React.ReactNode;
 }
 
 /**
- * A button for an action that waits on the server (Story 2.7). The moment `pending`
- * is true it is disabled, so a second tap cannot repeat the action. If the wait lasts
- * past a short delay it also shows a spinner and `pendingLabel`; a fast action never
- * flickers. Both labels share one grid cell, so the button keeps its width; the one
- * that is not shown is `aria-hidden`, so the button's name is the shown label only.
+ * A button for an action that waits for the server (Story 2.7). If the wait is longer
+ * than a short delay, it also shows a spinner and `pendingLabel`, so a fast action
+ * does not flicker.
  */
 export function PendingButton({
   pending,
@@ -37,9 +35,13 @@ export function PendingButton({
   return (
     <Button
       {...props}
+      // Disabled as soon as `pending` is true, so a second click cannot repeat the
+      // action.
       disabled={disabled || pending}
       aria-busy={pending || undefined}
     >
+      {/* Both labels are in the same grid cell, so the button keeps its width. The
+          hidden label is `aria-hidden`, so the button's name is only the shown one. */}
       <span className="inline-grid items-center justify-items-center">
         <span
           aria-hidden={visible || undefined}
@@ -70,15 +72,15 @@ export function PendingButton({
 
 export interface SlowNoteProps {
   pending: boolean;
-  /** How long the wait must last before the note shows; default for a short action. */
+  /** How long to wait before the note shows. The default fits a short action. */
   afterMs?: number;
-  /** "זה לוקח יותר זמן מהרגיל". */
+  /** The text, for example "זה לוקח יותר זמן מהרגיל". */
   children: React.ReactNode;
 }
 
 /**
  * The line that says an action is taking longer than usual. The live region is always
- * in the page, so a screen reader announces the text when it appears.
+ * in the page, so a screen reader reads the text when it appears.
  */
 export function SlowNote({
   pending,

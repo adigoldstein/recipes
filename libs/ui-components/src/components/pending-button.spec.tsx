@@ -23,7 +23,7 @@ function renderButton(pending: boolean) {
 }
 
 const button = () => screen.getByRole('button');
-// The label a screen reader reads: the one that is not hidden.
+// Finds the button by the text a screen reader reads (the label that is not hidden).
 const name = (label: string) => screen.getByRole('button', { name: label });
 
 describe('PendingButton', () => {
@@ -58,8 +58,10 @@ describe('PendingButton', () => {
 
   it('keeps the indicator for at least half a second once it showed', async () => {
     const { rerenderWith } = renderButton(true);
-    await advance(350); // shown at ~300 ms
-    rerenderWith(false); // the action ended 50 ms after it appeared
+    // The spinner appears after about 300 ms.
+    await advance(350);
+    // The action ends 50 ms after the spinner appeared.
+    rerenderWith(false);
     await advance(200);
     expect(name('מוחקים')).toBeTruthy();
     await advance(400);

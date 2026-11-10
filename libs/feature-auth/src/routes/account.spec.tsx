@@ -94,7 +94,7 @@ describe('AccountPage', () => {
       new_password: 'battery staple',
     });
     expect(csrf).toBe('bite-and-board');
-    // The answer is the new session, and the form is empty again.
+    // The response is the new session, and the form is empty again.
     expect(queryClient.getQueryData(authSessionQueryKey())).toEqual({
       user: { ...ADI, name: 'Adi B' },
     });

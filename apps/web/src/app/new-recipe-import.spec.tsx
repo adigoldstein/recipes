@@ -14,8 +14,8 @@ const EDITOR: SessionUser = {
   role: 'editor',
 };
 
-// The first import of a lazy page transforms its whole module graph, which can take
-// a while when the machine is busy running every other project's tests.
+// Time limit for loading a lazy page. The first load builds all the code it imports,
+// which can be slow when the computer is busy running the other projects' tests.
 const LAZY_TIMEOUT = 30_000;
 
 const server = setupServer(
@@ -51,7 +51,7 @@ describe('/recipes/new with the AI import', () => {
         http.post(
           '*/api/imports/text',
           () =>
-            // The import answers with an event stream (AD-40): the draft is its last event.
+            // The import returns an event stream (AD-40). The draft is the last event.
             new HttpResponse(
               `event: draft
 data: ${JSON.stringify({
@@ -88,7 +88,7 @@ data: ${JSON.stringify({
           timeout: LAZY_TIMEOUT,
         }),
       ).toBeTruthy();
-      // The same page, filled in: no navigation happened.
+      // Still the same page, now filled in. There was no navigation.
       expect(screen.getByLabelText(/^שם המתכון( \*)?$/)).toHaveProperty(
         'value',
         'לחם בית',

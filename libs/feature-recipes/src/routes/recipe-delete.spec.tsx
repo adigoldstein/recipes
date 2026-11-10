@@ -37,7 +37,7 @@ const RECIPE: RecipeRead = {
   updated_at: '2026-10-28T12:00:00Z',
 };
 
-/** Serves the recipe and answers DELETE with this status; returns the calls made. */
+/** Serves the recipe and answers DELETE with this status. Returns the calls made. */
 function serveDelete(status = 204, body?: object) {
   const calls: string[] = [];
   server.use(
@@ -54,7 +54,7 @@ function serveDelete(status = 204, body?: object) {
 
 const openDialog = async (user: ReturnType<typeof userEvent.setup>) => {
   await screen.findByRole('heading', { level: 1, name: RECIPE.title });
-  // The session answers after the recipe, so the button can arrive a moment later.
+  // The session can load after the recipe, so the button may appear a moment later.
   await user.click(await screen.findByRole('button', { name: 'מחיקה' }));
   return screen.findByRole('alertdialog');
 };

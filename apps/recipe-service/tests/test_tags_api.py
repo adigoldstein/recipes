@@ -1,4 +1,4 @@
-"""`GET /api/tags` (Story 1.9). Written first: they fail until the endpoint exists."""
+"""`GET /api/tags` (Story 1.9)."""
 
 from typing import Any
 
@@ -61,7 +61,7 @@ def test_unpinned_tags_follow_the_pinned_ones_ordered_by_name(
     add_tag(session, "Cherry")
     add_tag(session, "אפרסק")
     names = [tag["name"] for tag in list_tags(client)]
-    # Case-insensitive, like the tags embedded in recipes (AD-20).
+    # Sorted ignoring upper and lower case, like the tags inside recipes (AD-20).
     assert names[len(DEFAULT_PINNED_NAMES) :] == ["banana", "Cherry", "אפרסק", "תפוח"]
     assert names[: len(DEFAULT_PINNED_NAMES)] == DEFAULT_PINNED_NAMES
 
@@ -87,7 +87,7 @@ def test_includes_tags_that_no_recipe_uses(
 
 
 def test_is_public(client: TestClient) -> None:
-    # No session cookie and no CSRF header: a visitor can read the tags.
+    # No session cookie and no CSRF header, so a visitor can read the tags.
     assert not client.cookies
     list_tags(client)
 

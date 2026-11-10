@@ -23,7 +23,7 @@ const link = ({
   </a>
 );
 
-// A flat grey 4:3 stand-in, so the story needs no network.
+// A plain gray 4:3 picture instead of a photo, so the story needs no network.
 const PHOTO =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='450'%3E%3Crect width='600' height='450' fill='gray'/%3E%3C/svg%3E";
 

@@ -2,12 +2,13 @@ import type { MouseEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 
 /**
- * What a page's back button does. Arriving by navigating inside the app (the router
- * location key is not "default") means one step back in history returns to the page
- * the visitor came from, with its filters. A direct visit or a reload has no such
- * page, so the button keeps its link to the fallback (the home page).
+ * Decides what a page's back button does.
  *
- * Use `onBack` as the `onClick` of the router link to the fallback page.
+ * If the user came from another page in the app, going one step back in history
+ * returns to that page, with its filters. After a direct visit or a reload there is
+ * no such page, so the button keeps its link to the home page.
+ *
+ * Use `onBack` as the `onClick` of the link to the home page.
  */
 export function useBackNavigation() {
   const navigate = useNavigate();

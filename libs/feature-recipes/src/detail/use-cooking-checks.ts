@@ -3,9 +3,9 @@ import { useStoredState } from '../shared/use-stored-state';
 const NONE: ReadonlySet<string> = new Set();
 
 /**
- * Which ingredients and steps are ticked off while cooking, kept in this
- * browser per recipe. Storage failures are ignored. Mount it with
- * `key={recipeId}` so a new recipe reads its own ticks.
+ * Remembers which ingredients and steps were checked while cooking, per recipe, in
+ * this browser. Storage errors are ignored. Use it with `key={recipeId}`, so another
+ * recipe reads its own checks.
  */
 export function useCookingChecks(recipeId: string) {
   const [checked, setChecked] = useStoredState<ReadonlySet<string>>(

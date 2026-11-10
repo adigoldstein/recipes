@@ -20,7 +20,8 @@ import {
 import { useErrorMessage } from '../shared/use-error-message';
 import { useUpdateUser } from './use-update-user';
 
-// Matches the server's policy (FR-13); the server stays the authority.
+// The same minimum as the server's password policy (FR-13). The server still makes
+// the real check.
 const MIN_PASSWORD_LENGTH = 8;
 
 export interface ResetPasswordDialogProps {
@@ -73,7 +74,7 @@ function ResetPasswordForm({
           toast.success(t('users.reset.done', { name: user.name }));
           onDone();
         },
-        // A password the server rejects belongs to the password field.
+        // Show a password error from the server on the password field.
         onError: (error) => {
           const code = getErrorCode(error);
           if (code === 'password_too_short' || code === 'password_too_long') {
@@ -125,7 +126,7 @@ function ResetPasswordForm({
           />
         )}
       </FormField>
-      {/* Always rendered, so a screen reader announces the text when it appears. */}
+      {/* Always in the page, so a screen reader reads the text when it appears. */}
       <p role="alert" className="text-sm text-destructive">
         {formError ? errorMessage(update.error) : null}
       </p>
@@ -145,7 +146,10 @@ function ResetPasswordForm({
   );
 }
 
-/** "איפוס סיסמה": the admin sets a new password for someone, who is signed out everywhere. */
+/**
+ * The "איפוס סיסמה" dialog: the admin sets a new password for a user, and the user
+ * is logged out everywhere.
+ */
 export function ResetPasswordDialog({
   user,
   open,

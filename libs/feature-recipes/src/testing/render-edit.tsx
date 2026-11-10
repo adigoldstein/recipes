@@ -8,8 +8,8 @@ import { Component as RecipeEditPage } from '../routes/recipe-edit';
 initI18n();
 
 /**
- * Renders the edit form at `/recipes/:id/edit`, with stub routes for the recipe page.
- * Arriving from the recipe page is an in-app visit; `direct` is a visit with no history.
+ * Renders the edit page at `/recipes/:id/edit`, with fake routes for the recipe page.
+ * By default the user comes from the recipe page. `direct` opens it with no history.
  */
 export function renderEdit(id: string, { direct = false } = {}) {
   const router = createMemoryRouter(

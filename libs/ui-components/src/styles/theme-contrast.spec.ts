@@ -27,7 +27,7 @@ function contrast(a: string, b: string): number {
   return (hi + 0.05) / (lo + 0.05);
 }
 
-// Every text-on-surface pair the UI uses (DESIGN.md Colors).
+// Every pair of text color and background color the UI uses (DESIGN.md Colors).
 const TEXT_PAIRS: [text: string, surface: string][] = [
   ['foreground', 'background'],
   ['card-foreground', 'card'],
@@ -65,9 +65,9 @@ describe.each([':root', '.dark'])('theme %s', (selector) => {
     expect(contrast(theme.ring, theme.card)).toBeGreaterThanOrEqual(3);
   });
 
-  // WCAG 1.4.11: the edge of an input, select or toggle must be visible
-  // wherever a control can sit (page, card, dialog/popover). --border stays a
-  // quiet divider and is not used for controls.
+  // WCAG 1.4.11: the border of an input, select or toggle must be visible on every
+  // background a control can be on (page, card, dialog/popover). --border stays a
+  // soft divider line and is not used for controls.
   it.each(['background', 'card', 'popover'])(
     'control border (--input) on %s meets non-text contrast (3:1)',
     (surface) => {

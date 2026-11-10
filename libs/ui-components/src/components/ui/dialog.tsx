@@ -51,7 +51,10 @@ function DialogContent({
   closeLabel,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
-  /** Accessible name of the corner close button; omit to hide the button. */
+  /**
+   * The accessible name of the close button in the corner. Leave it out to hide the
+   * button.
+   */
   closeLabel?: string;
 }) {
   return (
@@ -99,7 +102,7 @@ function DialogFooter({
   children,
   ...props
 }: React.ComponentProps<'div'> & {
-  /** Adds a close button with this label; omit for none. */
+  /** Adds a close button with this text. Leave it out for no button. */
   closeLabel?: string;
 }) {
   return (

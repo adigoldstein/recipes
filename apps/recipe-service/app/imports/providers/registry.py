@@ -1,4 +1,5 @@
-"""Providers are registered by name and enabled from config (AD-12)."""
+"""A list of the AI providers by name. The settings choose which one is used
+(AD-12)."""
 
 from collections.abc import Callable
 
@@ -10,7 +11,7 @@ from app.imports.providers.gemini import GeminiProvider
 
 
 class ProviderUnavailableError(Exception):
-    """The requested provider is unknown, disabled, or missing its key."""
+    """The requested provider does not exist, is not enabled, or has no API key."""
 
 
 def _build_gemini(settings: Settings) -> LlmProvider:
@@ -43,7 +44,7 @@ _BUILDERS: dict[str, Callable[[Settings], LlmProvider]] = {
 
 
 def default_provider(settings: Settings) -> LlmProvider:
-    """The one engine in use: the first name in `LLM_PROVIDERS`, built from settings."""
+    """Creates the AI provider in use: the first name in `LLM_PROVIDERS`."""
     if not settings.llm_providers:
         raise ProviderUnavailableError("no import provider is enabled")
     name = settings.llm_providers[0]

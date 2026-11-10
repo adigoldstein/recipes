@@ -40,11 +40,12 @@ def upgrade() -> None:
         sa.Column("created_at", sa.DateTime(), nullable=False),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_user")),
     )
-    # lower(email) makes emails unique case-insensitively (AD-30).
+    # Emails must be unique, ignoring upper and lower case (AD-30).
     op.create_index(
         "uq_user_lower_email", "user", [sa.text("lower(email)")], unique=True
     )
-    # Existing recipes have no author (NULL), so the new constraints hold already.
+    # Existing recipes have no author (NULL), so the new foreign keys do not break
+    # any existing row.
     with op.batch_alter_table("recipe", schema=None) as batch_op:
         batch_op.create_foreign_key(
             batch_op.f("fk_recipe_created_by_user"),

@@ -25,7 +25,10 @@ const OPTIONS = [
 const normalize = (text: string) =>
   text.normalize('NFC').split(/\s+/).filter(Boolean).join(' ');
 
-/** Keeps the value in state, like a form would, and reports every change. */
+/**
+ * Renders the picker. Keeps the value in state like a form does, and reports every
+ * change.
+ */
 function renderPicker(initial: TagPickerValue[] = [], options = OPTIONS) {
   const onChange = vi.fn();
   function Host() {
@@ -78,7 +81,7 @@ describe('TagPicker', () => {
     expect(onChange).toHaveBeenLastCalledWith([{ id: 'b', name: 'מרק' }]);
     const chips = screen.getByRole('list', { name: 'התגיות של המתכון' });
     expect(within(chips).getByText('מרק')).toBeTruthy();
-    // The list stays open for more tags, and the chosen one has a check mark.
+    // The list stays open to choose more tags, and the chosen tag has a check mark.
     expect(
       screen.getByRole('option', { name: 'מרק' }).querySelector('svg'),
     ).toBeTruthy();

@@ -22,17 +22,19 @@ import {
 } from '@bite-and-board/ui-components';
 import { useErrorMessage } from '../shared/use-error-message';
 
-// Matches the server's policy (FR-13); the server stays the authority.
+// The same minimum as the server's password policy (FR-13). The server still makes
+// the real check.
 const MIN_PASSWORD_LENGTH = 8;
 
-// Errors that belong to one field; anything else gets the live line above the button.
+// Errors that belong to one field. Any other error is shown in the line above the
+// button.
 const FIELD_ERRORS = new Set([
   'invalid_credentials',
   'password_too_short',
   'password_too_long',
 ]);
 
-/** One required password input: label, control and error line. */
+/** One required password field: label, input and error line. */
 function PasswordField({
   id,
   label,
@@ -61,7 +63,10 @@ function PasswordField({
   );
 }
 
-/** Change my own password (FR-27). The server's answer carries a fresh session. */
+/**
+ * Changes the user's own password (FR-27). The server's response holds a new
+ * session.
+ */
 function ChangePasswordSection() {
   const { t } = useTranslation();
   const errorMessage = useErrorMessage();
@@ -100,8 +105,8 @@ function ChangePasswordSection() {
       { body: { current_password: current, new_password: next } },
       {
         onSuccess: (response) => {
-          // The old cookie no longer matches; the response set the new one, so this
-          // device stays signed in (other devices are signed out).
+          // The old cookie is no longer valid. The response set a new one, so this
+          // device stays logged in (other devices are logged out).
           queryClient.setQueryData(authSessionQueryKey(), response);
           toast.success(t('account.password.done'));
           reset();
@@ -160,7 +165,7 @@ function ChangePasswordSection() {
           error={errors.confirm?.message}
           registration={register('confirm')}
         />
-        {/* Always rendered, so a screen reader announces the text when it appears. */}
+        {/* Always in the page, so a screen reader reads the text when it appears. */}
         <p role="alert" className="text-sm text-destructive">
           {formLevelError}
         </p>
@@ -177,9 +182,9 @@ function ChangePasswordSection() {
 }
 
 /**
- * "החשבון שלי" at `/account` (FR-27). Each part of the account is its own
- * `<section>` in this column, so another one (personal details, Story 7.2) can be
- * added under the password section without reshaping the page.
+ * The "החשבון שלי" page at `/account` (FR-27). Each part of the account is a separate
+ * `<section>` in this column, so a new part (personal details, Story 7.2) can be
+ * added under the password section without changing the page layout.
  */
 export function AccountPage() {
   const { t } = useTranslation();

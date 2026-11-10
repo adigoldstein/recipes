@@ -1,4 +1,4 @@
-"""Business rules for photos; other modules call this layer, never the repository."""
+"""The business logic of photos. Other modules call this layer, not the repository."""
 
 import uuid
 from collections.abc import Callable, Collection
@@ -22,7 +22,8 @@ from app.core.safe_fetch import (
 from app.photos.schemas import PhotoLimits, PhotoRead
 from app.photos.storage import LocalPhotoStorage, PhotoStorage
 
-# Where `/media` is served from and the folder photos live in, under the data volume.
+# The folders, inside the data folder, that `/media` is served from and that hold
+# the photos.
 MEDIA_DIR = "media"
 PHOTOS_DIR = "photos"
 MEDIA_URL = "/media/photos"
@@ -30,7 +31,7 @@ MEDIA_URL = "/media/photos"
 FULL_SIZE = 1600
 THUMB_SIZE = 600
 WEBP_QUALITY = 80
-# Pillow's names for the formats an upload may be, and the types we tell the client.
+# The image formats we accept (Pillow's names) and their types for the client.
 ACCEPTED_FORMATS = {"JPEG": "image/jpeg", "PNG": "image/png", "WEBP": "image/webp"}
 UNATTACHED_MAX_AGE = timedelta(hours=24)
 
@@ -39,11 +40,11 @@ UNATTACHED_MAX_AGE = timedelta(hours=24)
 class UploadLimits:
     max_bytes: int
     max_pixels: int
-    # The longest download of a photo from a link, redirects included.
+    # The maximum time to download a photo from a link, including redirects.
     fetch_timeout_seconds: float = 15
 
 
-# Downloads a URL under the safe-fetch rules; replaced in tests.
+# A function that downloads a URL under the safe-fetch rules. Tests replace it.
 Fetch = Callable[[str, FetchLimits], FetchedResponse]
 
 
@@ -77,7 +78,7 @@ def _too_many_pixels() -> AppError:
 
 
 def _encode(image: Image.Image) -> bytes:
-    """WebP with no metadata: nothing is passed on, so nothing is written."""
+    """Saves the image as WebP. We pass no metadata, so none is written."""
     output = BytesIO()
     image.save(output, "WEBP", quality=WEBP_QUALITY, method=4)
     return output.getvalue()
@@ -98,14 +99,14 @@ class PhotoService:
         )
 
     def store(self, data: bytes) -> str:
-        """Turn an upload into a stored photo and return its (unattached) key.
+        """Saves an uploaded photo and returns its key. No recipe uses it yet.
 
-        The type is read from the file itself, never from its name or declared type.
-        Orientation is applied and all metadata dropped (EXIF can hold a GPS position);
-        the picture is saved as WebP at most 1600 px wide plus a 600 px thumbnail.
+        Saves a WebP up to 1600 px and a 600 px thumbnail, without any metadata
+        (EXIF can contain a GPS location).
         """
         if len(data) > self._limits.max_bytes:
             raise _too_large(self._limits.max_bytes)
+        # Detect the type from the file content, never from its name or declared type.
         try:
             image = Image.open(BytesIO(data))
         except Image.DecompressionBombError as error:
@@ -114,7 +115,7 @@ class PhotoService:
             raise _unsupported() from error
         if image.format not in ACCEPTED_FORMATS:
             raise _unsupported()
-        # The header gives the size before any pixels are decoded.
+        # The size is known from the file header, before the pixels are decoded.
         if image.width * image.height > self._limits.max_pixels:
             raise _too_many_pixels()
         try:
@@ -122,6 +123,7 @@ class PhotoService:
         except (OSError, ValueError, SyntaxError) as error:
             raise _unsupported() from error
 
+        # Rotate the picture according to its EXIF orientation.
         upright = ImageOps.exif_transpose(image)
         has_alpha = upright.mode in ("RGBA", "LA", "PA") or (
             "transparency" in upright.info
@@ -139,10 +141,10 @@ class PhotoService:
         return key
 
     def store_from_url(self, url: str) -> str:
-        """Download a photo through safe fetch (AD-23) and store it like an upload.
+        """Downloads a photo with safe fetch (AD-23) and saves it like an upload.
 
-        What comes back gets the same checks as an upload: the type is read from the
-        bytes, and the size and pixel limits hold.
+        The downloaded file gets the same checks as an upload: the type is detected
+        from the content, and the size and pixel limits apply.
         """
         limits = FetchLimits(
             max_bytes=self._limits.max_bytes,
@@ -164,16 +166,16 @@ class PhotoService:
         return self.store(response.body)
 
     def require(self, key: str) -> None:
-        """Raise 404 unless this key was uploaded and is still stored."""
+        """Raises 404 if no photo with this key is stored."""
         if not self._storage.exists(key):
             raise AppError(404, ErrorCode.PHOTO_NOT_FOUND, "Photo not found")
 
     def release(self, key: str) -> None:
-        """Delete a photo no recipe holds any more; call it after the commit."""
+        """Deletes a photo that no recipe uses any more. Call it after the commit."""
         self._storage.delete(key)
 
     def read(self, key: str | None, credit_domain: str | None) -> PhotoRead | None:
-        """The shape read schemas embed, with its URLs built on the server."""
+        """Returns the photo as it appears in API responses, with its URLs."""
         if key is None:
             return None
         return PhotoRead(
@@ -187,7 +189,8 @@ class PhotoService:
         in_use: Collection[str],
         now: datetime | None = None,
     ) -> int:
-        """Delete files no recipe holds that are older than 24 h; return how many."""
+        """Deletes photos that no recipe uses and that are older than 24 hours.
+        Returns how many were deleted."""
         cutoff = (now or datetime.now(UTC)) - UNATTACHED_MAX_AGE
         removed = 0
         for photo in self._storage.list_photos():
@@ -198,7 +201,8 @@ class PhotoService:
 
 
 def get_photo_service() -> PhotoService:
-    """Provider, like a Nest injectable: `Depends(get_photo_service)`."""
+    """Creates the photo service for a route, like a Nest provider:
+    `Depends(get_photo_service)`."""
     settings = get_settings()
     return PhotoService(
         LocalPhotoStorage(settings.data_dir / MEDIA_DIR / PHOTOS_DIR),

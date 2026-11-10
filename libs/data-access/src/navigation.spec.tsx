@@ -31,7 +31,8 @@ function renderPage(entries: string[]) {
 describe('useBackNavigation', () => {
   it('goes one step back in history after an in-app visit', async () => {
     const router = renderPage(['/other', '/page']);
-    // The first entry of a memory history is the "default" location; step off it.
+    // The first page in a memory history is the "default" location, so move away
+    // from it.
     await router.navigate('/other');
     await router.navigate('/page');
 

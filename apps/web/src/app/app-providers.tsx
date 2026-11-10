@@ -7,8 +7,8 @@ import { ThemeProvider, useTheme } from './theme';
 
 initI18n();
 
-// The Toaster is a UI-lib component that cannot read the app's theme, so the
-// app passes the mode in.
+// The Toaster comes from the UI lib and cannot read the app's theme, so we pass the
+// theme to it.
 function AppToaster() {
   const { t } = useTranslation();
   const { mode } = useTheme();
@@ -16,21 +16,21 @@ function AppToaster() {
 }
 
 /**
- * The one server cache. `main.tsx` creates it once and hands it to both the
- * providers and the route table, so route loaders and components share one session.
+ * Creates the server data cache. `main.tsx` creates it once and passes it to both
+ * the providers and the routes, so route loaders and components share one session.
  */
 export function createAppQueryClient() {
   return new QueryClient({
     defaultOptions: {
       queries: {
-        // Data stays fresh until a write in this app invalidates it
+        // Data is never reloaded by itself, only after a change in this app
         // (invalidationMap, AD-19). Changes by other users show after a page
-        // reload, which is accepted for this app (Story 7.3).
+        // reload, which is fine for this app (Story 7.3).
         staleTime: Infinity,
-        // An API error body with a `code` is a final answer ("recipe not
-        // found"); only network and server failures are worth retrying. This
-        // reads the code by hand: importing data-access here would pull the
-        // whole API client into the initial chunk.
+        // Retry up to 3 times, but only network and server failures. An API error
+        // with a `code` (like "recipe not found") will not change on retry.
+        // We read the code by hand, because importing data-access here would add
+        // the whole API client to the first load.
         retry: (failures, error) =>
           (error as { code?: unknown } | null)?.code === undefined &&
           failures < 3,
@@ -40,8 +40,8 @@ export function createAppQueryClient() {
 }
 
 /**
- * The one provider tree (server cache, i18n, RTL, theme, toasts). `main.tsx` and the specs
- * both render through it, so a missing provider fails a test.
+ * All the app providers (server cache, i18n, RTL, theme, toasts). `main.tsx` and the
+ * tests both use it, so a missing provider fails a test.
  */
 export function AppProviders({
   queryClient,

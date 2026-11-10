@@ -17,7 +17,8 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    # Plain ALTER TABLE, not batch mode, as in 0003: nothing is rebuilt or dropped.
+    # A plain ALTER TABLE and not batch mode, like in 0003, so the table is not
+    # rebuilt and nothing is lost.
     op.add_column("recipe", sa.Column("photo_key", sa.String(length=32), nullable=True))
     op.add_column(
         "recipe", sa.Column("photo_credit_domain", sa.String(length=255), nullable=True)

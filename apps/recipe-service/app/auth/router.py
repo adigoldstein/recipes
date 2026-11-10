@@ -19,7 +19,8 @@ ServiceDep = Annotated[AuthService, Depends(get_auth_service)]
 SettingsDep = Annotated[Settings, Depends(get_settings)]
 SessionCookie = Annotated[str | None, Cookie(alias=SESSION_COOKIE)]
 
-# Same attributes on set and delete, or the browser keeps the old cookie (AD-21).
+# Setting and deleting the cookie must use the same attributes. Otherwise the
+# browser does not delete the old cookie (AD-21).
 _SAMESITE: Literal["lax"] = "lax"
 
 
@@ -48,7 +49,8 @@ def _clear_cookie(response: Response, settings: Settings) -> None:
 @router.post("/login")
 @limiter.limit(LOGIN_LIMIT)
 def login(
-    request: Request,  # slowapi reads the client address from it
+    # Not used here, but slowapi needs it to read the client's IP address.
+    request: Request,
     body: LoginRequest,
     response: Response,
     service: ServiceDep,
@@ -62,17 +64,19 @@ def login(
 @router.post("/password")
 @limiter.limit(LOGIN_LIMIT)
 def change_password(
-    request: Request,  # slowapi reads the client address from it
+    # Not used here, but slowapi needs it to read the client's IP address.
+    request: Request,
     body: ChangePasswordRequest,
     response: Response,
     service: ServiceDep,
     settings: SettingsDep,
     current: Annotated[CurrentUser, Depends(require_role("editor"))],
 ) -> SessionResponse:
-    """Change my own password (FR-27); any signed-in user, editor or admin.
+    """Changes the logged-in user's own password (FR-27). Editors and admins can
+    both use it.
 
-    The old cookie dies with the version bump, so the answer sets a new one: this
-    device stays signed in and every other device is signed out.
+    Changing the password makes the old cookie invalid, so the response sets a new
+    cookie. This device stays logged in, and all other devices are logged out.
     """
     user, token = service.change_password(
         current.id, body.current_password, body.new_password
@@ -83,7 +87,7 @@ def change_password(
 
 @router.post("/logout", status_code=204)
 def logout(response: Response, settings: SettingsDep) -> None:
-    """Always succeeds, signed in or not."""
+    """Logs out by deleting the cookie. Always succeeds, even if not logged in."""
     _clear_cookie(response, settings)
 
 
@@ -94,9 +98,9 @@ def session(
     settings: SettingsDep,
     token: SessionCookie = None,
 ) -> SessionResponse:
-    """Public: 200 with the user, or `user: null` for a visitor (AD-21)."""
+    """Returns the logged-in user, or `user: null` for a visitor. Always 200 (AD-21)."""
     user = service.current_user(token)
     if user is None and token is not None:
-        # A stale or invalid cookie is dropped, so it is not sent again.
+        # The cookie is old or invalid, so delete it and the browser stops sending it.
         _clear_cookie(response, settings)
     return SessionResponse(user=user)

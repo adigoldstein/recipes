@@ -2,14 +2,16 @@ import { useEffect, useRef } from 'react';
 import { useBlocker } from 'react-router';
 
 /**
- * Stops a form with unsaved changes from being left by accident (UX-DR15). A move to
- * another path (a link, "back", the browser's back button) is blocked and the owner
- * asks the person; closing or reloading the tab gets the browser's own prompt, whose
- * text a page cannot change. `allowLeaving(false)` is for the save: it lets the
- * navigation after a successful save through, and puts the guard back if the save fails.
+ * Stops the user from leaving a form with unsaved changes by mistake (UX-DR15).
+ *
+ * `allowLeaving` is for saving: `allowLeaving(true)` lets the navigation after a
+ * successful save through, and `allowLeaving(false)` turns the guard back on if the
+ * save fails.
  */
 export function useUnsavedChangesGuard(dirty: boolean) {
   const allowed = useRef(false);
+  // Block a move to another path (a link, "back", the browser's back button). The
+  // component that uses this hook then asks the user.
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
       dirty &&
@@ -17,6 +19,8 @@ export function useUnsavedChangesGuard(dirty: boolean) {
       currentLocation.pathname !== nextLocation.pathname,
   );
 
+  // Closing or reloading the tab shows the browser's own question. A page cannot
+  // change its text.
   useEffect(() => {
     if (!dirty) return;
     const warn = (event: BeforeUnloadEvent) => {

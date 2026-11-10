@@ -1,4 +1,4 @@
-"""Business rules for auth; other modules call this layer, never the repository."""
+"""The business logic of auth. Other modules call this layer, not the repository."""
 
 import uuid
 from typing import Annotated
@@ -28,10 +28,11 @@ class AuthService:
         self._secret = secret
 
     def login(self, email: str, password: str) -> tuple[SessionUser, str]:
-        """The user and a fresh session token, or a generic 400 (AD-21).
+        """Logs a user in. Returns the user and a new session token (AD-21).
 
-        The error never says which part was wrong. A blocked account whose password
-        was right is the one exception: it raises 403 `account_blocked`.
+        On failure it raises a general 400 that does not say whether the email or the
+        password was wrong. The one exception: a blocked account with the right
+        password raises 403 `account_blocked`.
         """
         found = self._users.authenticate(email, password)
         if found is None:
@@ -47,10 +48,10 @@ class AuthService:
     def change_password(
         self, user_id: uuid.UUID, current_password: str, new_password: str
     ) -> tuple[SessionUser, str]:
-        """Change the user's own password; returns a token for the new session.
+        """Changes the user's own password and returns a token for a new session.
 
-        The old token stops matching (the version moved on), so the caller must set
-        the new cookie or the current device would be signed out too.
+        The old token is no longer valid, so the caller must set the new cookie.
+        Otherwise this device would be logged out too.
         """
         user, session_version = self._users.change_own_password(
             user_id, current_password, new_password
@@ -61,10 +62,11 @@ class AuthService:
         return _session_user(user), token
 
     def current_user(self, token: str | None) -> SessionUser | None:
-        """Who the cookie belongs to, looked up fresh; None for a visitor.
+        """Returns the user that the cookie belongs to, read fresh from the database.
 
-        A bad, expired, forged, orphaned or superseded token (the password was reset
-        since), and a blocked user, all give None.
+        Returns None for a visitor, for a blocked user, and for a token that is
+        invalid, expired, fake, belongs to a deleted user, or is older than the last
+        password reset.
         """
         if token is None:
             return None
@@ -79,7 +81,8 @@ def get_auth_service(
     users: Annotated[UserService, Depends(get_user_service)],
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> AuthService:
-    """Provider, like a Nest injectable: `Depends(get_auth_service)`."""
+    """Creates the auth service for a route, like a Nest provider:
+    `Depends(get_auth_service)`."""
     return AuthService(users, settings.jwt_secret.get_secret_value())
 
 
@@ -87,7 +90,8 @@ def get_current_user(
     service: Annotated[AuthService, Depends(get_auth_service)],
     token: Annotated[str | None, Cookie(alias=SESSION_COOKIE)] = None,
 ) -> CurrentUser | None:
-    """Answers `core.security.get_session_user`; `main.py` wires it in."""
+    """The real implementation of `core.security.get_session_user`. `main.py` plugs
+    it in."""
     user = service.current_user(token)
     if user is None:
         return None

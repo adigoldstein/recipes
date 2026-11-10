@@ -1,4 +1,5 @@
-"""`require_role` and the CSRF guard, via a test-only protected router (AD-6, AD-30)."""
+"""Tests `require_role` and the CSRF check, with protected routes that exist only in
+the tests (AD-6, AD-30)."""
 
 from datetime import UTC, datetime, timedelta
 from typing import Annotated
@@ -28,7 +29,7 @@ LOGIN = "/api/auth/login"
 EDITOR_AREA = "/api/guarded/editor"
 ADMIN_AREA = "/api/guarded/admin"
 
-# Counts how many times a protected mutation actually ran.
+# Records each time a protected change really ran.
 _writes: list[str] = []
 
 
@@ -59,7 +60,7 @@ def _guarded_router() -> APIRouter:
 
 @pytest.fixture
 def app(app: FastAPI) -> FastAPI:
-    """The real app plus the test-only protected routes."""
+    """The real app, plus the protected routes that exist only in the tests."""
     _writes.clear()
     app.include_router(_guarded_router(), prefix="/api")
     return app
@@ -216,7 +217,7 @@ def test_reads_never_need_the_header(bare_client: TestClient) -> None:
     assert bare_client.get(ADMIN_AREA).status_code == 401  # not 403
 
 
-# --- the seam ----------------------------------------------------------------
+# --- connecting `core` to `auth` ------------------------------------------------
 
 
 def test_main_wires_the_current_user_provider(app: FastAPI) -> None:

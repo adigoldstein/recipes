@@ -5,12 +5,12 @@ import { Skeleton } from './ui/skeleton';
 
 export interface IngredientBoardProps {
   title: string;
-  /** `IngredientLine`s. */
+  /** The `IngredientLine` items. */
   children: React.ReactNode;
   className?: string;
 }
 
-/** The oak board holding a recipe's ingredient lines (UX-DR6). */
+/** The oak board that holds a recipe's ingredient lines (UX-DR6). */
 export function IngredientBoard({
   title,
   children,
@@ -27,7 +27,7 @@ export function IngredientBoard({
   );
 }
 
-/** Placeholder with the detail page's footprint while the recipe loads. */
+/** A placeholder in the shape of the recipe page, shown while the recipe loads. */
 export function RecipeDetailSkeleton({ className }: { className?: string }) {
   return (
     <div

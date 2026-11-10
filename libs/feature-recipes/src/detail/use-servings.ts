@@ -1,8 +1,9 @@
 import { useStoredState } from '../shared/use-stored-state';
 
 /**
- * The servings being cooked for, remembered per recipe on this device; going
- * back to the base servings forgets them. Mount it with `key={recipeId}`.
+ * The number of servings the user is cooking, remembered per recipe on this device.
+ * Going back to the recipe's own number of servings deletes the saved value. Use it
+ * with `key={recipeId}`.
  */
 export function useServings(
   recipeId: string,

@@ -99,7 +99,7 @@ describe('ToggleGroup', () => {
     renderChips();
     const [all, dinner] = screen.getAllByRole('radio');
     all.focus();
-    // In RTL the next chip lies to the left.
+    // In RTL, the next chip is on the left.
     fireEvent.keyDown(all, { key: 'ArrowLeft' });
     await waitFor(() => expect(document.activeElement).toBe(dinner));
   });

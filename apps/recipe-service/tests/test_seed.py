@@ -37,7 +37,8 @@ def test_seed_creates_recipes_through_the_service(
         [recipe.title for recipe in SEED_RECIPES] + [TUNED_RECIPE.title]
     )
 
-    # Default tags are untouched; every one is used; free tags were created unpinned.
+    # The default tags did not change, every one of them is used, and the other tags
+    # were created as not pinned.
     assert [row for row in _tags(session) if row[2]] == defaults_before
     used = set(
         session.exec(
@@ -118,7 +119,7 @@ def test_seed_attaches_sample_photos_with_their_credit(
         assert client.get(photo["url"]).status_code == 200
         assert client.get(photo["thumb_url"]).status_code == 200
 
-    # A second run neither duplicates recipes nor stores more files.
+    # Running it again does not duplicate recipes or save more files.
     before = len(list((get_settings().data_dir / "media" / "photos").iterdir()))
     run_seed(service, photos)
     after = len(list((get_settings().data_dir / "media" / "photos").iterdir()))

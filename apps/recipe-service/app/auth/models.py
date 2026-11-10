@@ -1,1 +1,1 @@
-"""SQLModel tables owned by auth."""
+"""The database tables of the auth module."""

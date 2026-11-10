@@ -14,11 +14,11 @@ export function nextThemeMode(mode: ThemeMode): ThemeMode {
 export interface ThemeToggleProps {
   value: ThemeMode;
   onValueChange: (mode: ThemeMode) => void;
-  /** Accessible name; it should say which mode is active. */
+  /** The accessible name. It should say which mode is active. */
   label: string;
 }
 
-/** Icon button that cycles system → light → dark and shows the active mode. */
+/** An icon button that switches system → light → dark, and shows the active mode. */
 export function ThemeToggle({ value, onValueChange, label }: ThemeToggleProps) {
   const Icon = ICONS[value];
   return (
