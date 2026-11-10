@@ -11,7 +11,7 @@
 
 Bite & Board is a modern web application for managing personal recipes, planning event menus, dynamically scaling ingredient portions, and automatically importing messy recipes using AI.
 
-The application is built within an Nx Monorepo prioritizing Clean Architecture, clear separation of UI and business logic (Smart vs. Dumb components), high developer ergonomics, and seamless containerization via Docker.
+The application is built within an Nx Monorepo prioritizing Clean Architecture, clear separation of UI and business logic (Smart vs. Dumb components), high developer ergonomics, and a simple local run with `npm run dev`.
 
 ## 2. High-Level Architecture & Tech Stack
 
