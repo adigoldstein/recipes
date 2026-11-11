@@ -13,7 +13,8 @@
     "prettify": "nx format:write && nx run recipe-service:format",
     "api:types": "nx run data-access:generate",
     "db:mock-recipes": "nx run recipe-service:seed",
-    "create-admin": "nx run recipe-service:create-admin"
+    "create-admin": "nx run recipe-service:create-admin",
+    "setup": "node tools/setup.mjs"
   },
   "private": true,
   "engines": {
