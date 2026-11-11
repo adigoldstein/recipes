@@ -10,6 +10,7 @@ A Hebrew, right-to-left recipe site where you add a recipe by pasting a link.
 - **Stack:** React 19, Vite, TypeScript, Tailwind CSS and shadcn/ui on the front end. FastAPI, SQLAlchemy, Alembic and SQLite on the back end. One Nx monorepo.
 - **Worth a look:**
   - **AI import done carefully.** Live progress that can be cancelled. Models sit behind one provider port (Claude Haiku by default, Gemini as an option, a fake one for tests, so CI never calls a model). Unit conversion is plain code, not model arithmetic. URL fetches refuse private addresses and oversized pages.
+  - **Tested at every layer.** Unit tests (Vitest for the front end and shared libs, pytest for the domain and service rules), integration tests (pytest drives every API endpoint through FastAPI's `TestClient` against a real temporary SQLite database with migrations applied), component tests, and end-to-end tests (Playwright in a real browser, plus axe accessibility checks). CI runs all of it on every pull request, and no test ever calls a real AI model.
   - **Original-value tracking.** Change an ingredient's amount and the recipe keeps the first saved value, shown as "originally 1 tsp", scaled along with the recipe.
   - **One contract, no drift.** The backend's OpenAPI schema generates the TypeScript client, query hooks and Zod schemas. CI fails if the generated code is stale.
   - **Enforced architecture.** Backend layers (router, service, repository) are checked by an import linter, and frontend dependency direction by Nx module-boundary rules.
@@ -67,28 +68,33 @@ Mobile:
 
 `npm run dev` runs everything.
 
-### Steps
+### Quick start
 
 ```bash
 # 1. Install the front end dependencies
 npm ci
 
-# 2. Install the back end dependencies (Python is installed by uv if needed)
-cd apps/recipe-service && uv sync && cd ../..
+# 2. One-time setup: installs the back end (Python via uv), creates
+#    apps/recipe-service/.env with a random JWT_SECRET, and creates an admin
+#    account (the password is printed once)
+npm run setup
 
-# 3. Create the settings file and set JWT_SECRET (see Configuration below)
-cp apps/recipe-service/.env.example apps/recipe-service/.env
-
-# 4. Start the front end (http://localhost:4200) and the API (http://localhost:8000)
+# 3. Start the front end (http://localhost:4200) and the API (http://localhost:8000)
 npm run dev
 ```
 
-On its first start the API creates the database, runs the migrations and loads about ten demo recipes, so the library is not empty. Open <http://localhost:4200>.
+On its first start the API creates the database, runs the migrations and loads about ten demo recipes, so the library is not empty. Open <http://localhost:4200> and log in with the account that `npm run setup` printed.
 
-To edit recipes you need an account. Create the admin (you are asked for a password, twice), then log in from the app:
+The only thing you add yourself is your AI key: put `ANTHROPIC_API_KEY=...` in `apps/recipe-service/.env` to use the AI import. To try imports without a key, run `npm run setup -- --fake-ai` (it uses the built-in test engine, which returns a canned recipe). `npm run setup` is safe to run again: it never changes an existing `.env` or admin. Options: `--email <address>` and `--name <display name>` for the admin.
+
+### Doing it by hand
+
+If you prefer not to use the script:
 
 ```bash
-npm run create-admin -- --email you@example.com --name "Your Name"
+cd apps/recipe-service && uv sync && cd ../..
+cp apps/recipe-service/.env.example apps/recipe-service/.env   # then set JWT_SECRET
+npm run create-admin -- --email you@example.com --name "Your Name"   # asks for a password, twice
 ```
 
 To refill the dev database with the demo recipes later, run `npm run db:mock-recipes`.
@@ -110,6 +116,7 @@ Run from the repository root. They wrap `nx`.
 | `api:types`       | After a back-end API change: export the OpenAPI schema and regenerate the client in `libs/data-access` |
 | `db:mock-recipes` | Fill the dev database with a set of demo recipes                                                       |
 | `create-admin`    | Create the admin account                                                                               |
+| `setup`           | First-time setup: back end install, `.env`, admin account                                              |
 
 ### Storybook
 
@@ -196,7 +203,7 @@ Every pull request runs the same checks in GitHub Actions (`.github/workflows/ci
 - **Generated client is fresh:** regenerates the API client and fails on any diff.
 - **Formatting:** `nx format:check` (Prettier, plus ruff on the back end).
 - **Lint and type-check:** ESLint with Nx module boundaries and jsx-a11y; TypeScript; ruff, mypy and an import linter for the back end.
-- **Unit and integration tests:** Vitest for the front end and shared libs, pytest for the API.
+- **Unit and integration tests:** Vitest for the front end and shared libs (unit and component tests). pytest for the API: unit tests of the services, and integration tests that call each endpoint through `TestClient` against a real temporary SQLite database.
 - **End-to-end tests:** Playwright drives a real browser against a real API on a temporary database with the fake AI provider. It covers opening and scaling a recipe, and logging in to import, complete and save one, at 375 px and at desktop width. An axe accessibility check runs on the library, detail and form pages.
 - **Build and Storybook build** of everything affected.
 
