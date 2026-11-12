@@ -1,11 +1,6 @@
 import { client } from './generated/client.gen';
 import type { DraftRecipe } from './generated/types.gen';
-import {
-  CSRF_HEADER,
-  CSRF_VALUE,
-  SESSION_EXPIRED_EVENT,
-  importSafetyNetMs,
-} from './client';
+import { CSRF_HEADER, CSRF_VALUE, SESSION_EXPIRED_EVENT } from './client';
 
 /** The import steps that the server reports (AD-40). */
 export type ImportStageName =
@@ -67,75 +62,50 @@ export async function streamImport(
   body: { text: string } | { url: string },
   { signal, onStage }: StreamImportOptions = {},
 ): Promise<DraftRecipe> {
-  const controller = new AbortController();
-  signal?.addEventListener('abort', () => controller.abort(), { once: true });
-  let silent = false;
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  // Restart the timer on every chunk. If the server sends nothing for longer than the
-  // import time limit, abort, and the call fails with `request_timeout` (AD-43).
-  const watch = () => {
-    clearTimeout(timer);
-    timer = setTimeout(() => {
-      silent = true;
-      controller.abort();
-    }, importSafetyNetMs());
-  };
-
-  watch();
-  try {
-    const base = client.getConfig().baseUrl ?? '';
-    // We use `fetch` and not `EventSource`, because `EventSource` cannot send a POST
-    // or the CSRF header.
-    const response = await fetch(`${base}/api/imports/${kind}`, {
-      method: 'POST',
-      credentials: 'same-origin',
-      signal: controller.signal,
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'text/event-stream',
-        [CSRF_HEADER]: CSRF_VALUE,
-      },
-      body: JSON.stringify(body),
-    });
-    if (!response.ok || !response.body) {
-      if (response.status === 401) {
-        globalThis.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
-      }
-      throw await response.json().catch(() => apiError('unknown', 'failed'));
+  const base = client.getConfig().baseUrl ?? '';
+  // We use `fetch` and not `EventSource`, because `EventSource` cannot send a POST
+  // or the CSRF header.
+  const response = await fetch(`${base}/api/imports/${kind}`, {
+    method: 'POST',
+    credentials: 'same-origin',
+    signal,
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'text/event-stream',
+      [CSRF_HEADER]: CSRF_VALUE,
+    },
+    body: JSON.stringify(body),
+  });
+  if (!response.ok || !response.body) {
+    if (response.status === 401) {
+      globalThis.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
     }
-
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      watch();
-      buffer += decoder.decode(value, { stream: true });
-      const { events, rest } = takeEvents(buffer);
-      buffer = rest;
-      for (const { event, data } of events) {
-        const payload: unknown = JSON.parse(data);
-        if (event === 'stage') onStage?.(payload as ImportStage);
-        else if (event === 'draft') return payload as DraftRecipe;
-        else if (event === 'error') {
-          const failure = payload as {
-            code: string;
-            detail: string;
-            params?: unknown;
-          };
-          throw apiError(failure.code, failure.detail, failure.params);
-        }
-      }
-    }
-    // The stream ended without a draft or an error, so the connection was cut.
-    throw apiError('request_failed', 'The import stream ended early');
-  } catch (error) {
-    if (silent) {
-      throw apiError('request_timeout', 'The request took too long');
-    }
-    throw error;
-  } finally {
-    clearTimeout(timer);
+    throw await response.json().catch(() => apiError('unknown', 'failed'));
   }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const { events, rest } = takeEvents(buffer);
+    buffer = rest;
+    for (const { event, data } of events) {
+      const payload: unknown = JSON.parse(data);
+      if (event === 'stage') onStage?.(payload as ImportStage);
+      else if (event === 'draft') return payload as DraftRecipe;
+      else if (event === 'error') {
+        const failure = payload as {
+          code: string;
+          detail: string;
+          params?: unknown;
+        };
+        throw apiError(failure.code, failure.detail, failure.params);
+      }
+    }
+  }
+  // The stream ended without a draft or an error, so the connection was cut.
+  throw apiError('request_failed', 'The import stream ended early');
 }

@@ -29,7 +29,6 @@ const server = setupServer(
     tagRequests += 1;
     return HttpResponse.json([]);
   }),
-  http.get('*/api/imports/providers', () => HttpResponse.json([])),
 );
 
 beforeAll(() => {

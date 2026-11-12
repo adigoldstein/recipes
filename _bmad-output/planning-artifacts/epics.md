@@ -259,12 +259,6 @@ So that I never wonder whether a tap did anything, and never tap twice (NFR1, AD
 **When** they tap the pin
 **Then** the pin changes at once and rolls back with a message if the server refuses (the only optimistic action; delete and save wait for the server)
 
-**Given** a request exceeds the client safety net (an import 95 s, a photo upload 120 s, anything else 30 s; set once in the client's `fetch`)
-**When** the call is a read or an import
-**Then** the error `request_timeout` is shown with "לנסות שוב"
-**And** when the call is a write the error `outcome_unknown` is shown ("לא ברור אם הפעולה הושלמה"), every query is refetched from the server, and a retry is offered only after that (AD-43)
-**And** `request_timeout` and `outcome_unknown` have Hebrew messages, and tests cover both with a fake clock
-
 **Given** the SQLite connection is opened
 **When** it is configured
 **Then** `busy_timeout` is set to 5000 ms explicitly (AD-43)
@@ -958,7 +952,7 @@ So that I'm never stuck on a slow or failing import (FR20, AD-12, AD-43).
 **When** I tap "ביטול"
 **Then** the request is aborted (AbortController), the dialog returns to the form with my input kept, no error toast appears, and nothing is saved. The server stops waiting on the provider where possible
 **And** the dialog shows an indeterminate spinner with "ביטול" (no percentage, no fake phase text) until Story 5.6
-**And** `GET /api/imports/providers` (editor) returns the active engine as `[{name, timeout_s}]`, and the client aborts at `timeout_s + 5`. The Vite proxy and uvicorn timeouts exceed the largest provider timeout
+**And** the Vite proxy and uvicorn timeouts exceed the largest provider timeout
 **And** the default engine is `anthropic` (Haiku, model name from config); `gemini` and `fake` keep working
 **And** `llm_timeout`, `llm_unavailable`, `llm_quota` and `llm_invalid_output` show a readable Hebrew message (for example "יש בעיה זמנית בשירות ה־AI. אפשר לנסות שוב בעוד כמה דקות.") with "לנסות שוב" and, for a URL import, an offer to use the "הדבקת טקסט" tab. Nothing is saved
 **And** an unknown or disabled provider returns 400 `provider_unavailable`

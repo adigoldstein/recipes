@@ -14,7 +14,6 @@ from app.imports.schemas import (
     ErrorEvent,
     ImportTextRequest,
     ImportUrlRequest,
-    ProviderInfo,
     StageEvent,
 )
 from app.imports.service import ImportJob, ImportService, get_import_service
@@ -23,20 +22,6 @@ router = APIRouter(prefix="/imports", tags=["imports"])
 
 ServiceDep = Annotated[ImportService, Depends(get_import_service)]
 EditorDep = Annotated[CurrentUser, Depends(require_role("editor"))]
-
-
-@router.get(
-    "/providers",
-    responses={
-        400: {"model": ErrorResponse},
-        401: {"model": ErrorResponse},
-        403: {"model": ErrorResponse},
-    },
-)
-def list_providers(service: ServiceDep, user: EditorDep) -> list[ProviderInfo]:
-    """Returns the active import engine and its timeout. The client sets its own
-    time limit from it."""
-    return service.providers()
 
 
 _STREAM_RESPONSES: dict[int | str, dict[str, Any]] = {

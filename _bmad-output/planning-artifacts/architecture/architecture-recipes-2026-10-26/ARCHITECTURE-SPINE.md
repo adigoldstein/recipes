@@ -255,7 +255,7 @@ flowchart LR
 - **Binds:** AD-12, FR-17–21, FR-24
 - **Prevents:** the client aborting slow local imports, error states that can't be told apart, and drafts leaking into the URL.
 - **Rule:**
-  - **Timeouts:** `GET /api/imports/providers` (editor) returns `[{name, timeout_s}]`. The client aborts at `timeout_s + 5`, which replaces the UX's flat 60 s. The Vite proxy and uvicorn timeouts are set above the largest provider timeout.
+  - **Timeouts:** the Vite proxy and uvicorn timeouts are set above the largest provider timeout.
   - **Progress:** real pipeline stages streamed over SSE (AD-40). _(Changed 2026-11-04: was client-timed cosmetic phase text with no streaming.)_
   - **Errors:** import failures never return 422. They use these codes: `fetch_blocked`, `fetch_challenged` (AD-35), `fetch_failed`, `fetch_too_large`, `no_recipe_found`, `import_duplicate` (AD-39), `llm_timeout`, `llm_unavailable`, `llm_quota`, `llm_invalid_output` (after the AD-34 retry), `import_cap_reached`, `provider_unavailable`.
   - **Recipe text fields:** `description` (a short intro) and `notes` (free multi-line tips and remarks) are separate nullable text columns and schema fields, limited by Pydantic to 500 and 5,000 characters (the form shows a live counter). The UI shows `notes` as plain text with line breaks kept, never as HTML. `DraftRecipe` fills `description` from the source and leaves `notes` null unless the source has its own.
@@ -448,7 +448,6 @@ flowchart LR
   - Only real stages are reported. There is **no percentage bar**.
   - Errors found before the stream starts (auth, CSRF, cap, duplicate, unknown provider) use normal HTTP status codes. After the stream starts, errors are `error` events.
   - Cancel = the client aborts the request; the server notices the disconnect and cancels the provider call. Per-provider timeouts (AD-22) still apply. _(Built 2026-11-08, Story 5.6: providers are async (`httpx.AsyncClient`); the import runs as an asyncio task that a stream generator cancels when `request.is_disconnected()` turns true, polled every 0.25 s, because uvicorn does not interrupt a response that is waiting without sending. A cancelled run is logged with outcome `cancelled`, the column is free text so there is no migration. The page fetch is blocking code and runs in a thread: it stops being awaited on cancel but finishes by itself, within its own 15 s limit.)_
-  - The client's idle limit: if the stream is silent for longer than the import safety net (`timeout_s + 5`, AD-43) the call fails with `request_timeout`.
 
 ### AD-41 — Ingredients and steps live inside the recipe as JSON [ADOPTED]
 
@@ -476,15 +475,13 @@ flowchart LR
   - The state is not stored in the database (a restart clears it). Every attempt, including skipped ones, is still logged in `import_attempts` (AD-38), with a `skipped_cooldown` outcome.
   - This is not a per-user rate limit: the daily import cap (AD-29) already protects the quota.
 
-### AD-43 — Timeouts and a write whose outcome is unknown [ADOPTED]
+### AD-43 — Timeouts and the boundary of a write [ADOPTED]
 
 - **Binds:** AD-4, AD-12, AD-19, AD-25, AD-40
-- **Prevents:** a half-saved recipe, a client that reports "failed" for a write that went through, and a proxy that cuts a slow import.
+- **Prevents:** a half-saved recipe and a proxy that cuts a slow import.
 - **Rule:** _(Approved by Adi 2026-11-05, after Winston checked the code.)_
   - **The server transaction is the boundary of a write.** `create_recipe` and `update_recipe` add the recipe, link its tags (`assign_to_recipe` only flushes) and commit once; any error rolls back. Endpoints are sync functions run in a thread pool, so a client that disconnects does **not** stop a running write: it finishes and commits. No change to the server is needed for this.
   - **A hard timeout lives on the server only where the server calls out:** the LLM providers (AD-12: `gemini-3.5-flash-lite` 30 s, `gemini-3.5-flash` 90 s, Groq 90 s). On a timeout the import answers 504 `llm_timeout` and logs the run; nothing else is written. Ordinary endpoints have no deadline. SQLite waits for a lock for its driver default of 5 s, then the write fails and rolls back; the value is set explicitly (`busy_timeout` 5000 ms) so it is documented.
-  - **The client has a safety net that is always longer than the server's own deadline,** so a definite server answer can arrive first: an import 95 s (90 s + 5), a photo upload 120 s, everything else 30 s. It is set in one place, the client's `fetch` (`libs/data-access`).
-  - **When the safety net fires**, the client answers with the error code `request_timeout` for a read or an import (the user may retry), and `outcome_unknown` for a write (save, delete, tag and user changes): the message says it is not clear whether the action completed, and the app refetches from the server before anything is offered again. Creating a recipe can duplicate on a blind retry; with one user that is accepted, and the message sends the editor to check the library first. Delete (a 404 counts as done), full replace on update, and unique tag names are safe to repeat.
   - _(Changed 2026-11-08, Story 5.5: an import shows a "ביטול" button while it runs; it aborts the request with `AbortController` and shows no error. The server cannot stop a provider call that is already running in its thread, so the call finishes and is logged; true server-side cancel comes with SSE, Story 5.6.)_
   - **No cancel or retry button appears while any other request is running.** "Retry" shows only after a request has actually failed. While waiting, the UI follows Story 2.7: nothing for 0.3 s, then a spinner kept for at least 0.5 s, and a "taking longer than usual" note after 10 s (30 s for an import or a photo upload).
   - **A reverse proxy in production must wait at least 120 s** (checked in Story 6.1); the deployment host is still open.

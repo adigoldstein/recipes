@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-26-2026 13:09
-last_updated: 11-08-2026 13:20
+last_updated: 11-12-2026 10:20
 project: recipes
 project_key: NOKEY
 tracking_system: file-system
@@ -82,7 +82,7 @@ development_status:
   5-2-import-from-pasted-text: done
   5-3-review-the-draft-before-saving: done
   5-4-import-from-a-url: done
-  5-5-cancel-engine-choice-and-errors: done # reduced scope 2026-11-08 (Adi): cancel + client timeout + Hebrew errors; no engine chain, no cool down; Haiku default
+  5-5-cancel-engine-choice-and-errors: done # reduced scope 2026-11-08 (Adi): cancel + Hebrew errors; no engine chain, no cool down; Haiku default
   5-6-live-import-progress-sse: done # AD-40
   5-7-duplicate-check-before-a-url-import: backlog # V3 / nice to have | AD-39
   5-8-ai-dashboard-for-the-admin: backlog # V2 | AD-38; chart library to agree with Adi first
@@ -96,6 +96,7 @@ development_status:
   6-3-end-to-end-tests-in-ci: done # V1 (PR #39 merged 2026-11-09)
   6-4-performance-budgets: backlog # V2
   6-5-readme-for-recruiters: done # V1
+  6-6-simplify-import-timeouts: review # V1 (Adi 2026-11-12)
   epic-6-retrospective: optional
 
   epic-7: backlog # V3 / nice to have | optional / nice to have: can be cut

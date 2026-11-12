@@ -13,7 +13,6 @@ import { useTranslation } from 'react-i18next';
 import {
   getErrorCode,
   streamImport,
-  useImportEngines,
   type DraftRecipe,
   type ImportStage,
   type ImportStageName,
@@ -64,7 +63,6 @@ const ENGINE_ERRORS = new Set([
   'llm_quota',
   'llm_invalid_output',
   'provider_unavailable',
-  'request_timeout',
   'request_failed',
   'internal_error',
 ]);
@@ -136,8 +134,6 @@ export function ImportPanel({
   const [canRetry, setCanRetry] = useState(false);
   // The running request. "ביטול" works by aborting it.
   const running = useRef<AbortController>(undefined);
-  // Load the engine's timeout, so the client sets its own time limit from it (AD-43).
-  useImportEngines();
   const pending = importDraft.isPending;
 
   const callbacks = {
