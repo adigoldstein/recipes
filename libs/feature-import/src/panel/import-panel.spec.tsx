@@ -1,7 +1,7 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { HttpResponse, delay, http } from 'msw';
-import { safetyNetMs, type DraftRecipe } from '@bite-and-board/data-access';
+import type { DraftRecipe } from '@bite-and-board/data-access';
 import { renderPanel } from '../testing/render-import';
 import { server } from '../testing/server';
 import { draftResponse, errorResponse, sse, streamOf } from '../testing/stream';
@@ -476,31 +476,6 @@ describe('ImportPanel engine errors', () => {
     expect(textbox()).toBeTruthy();
     expect(screen.queryByText(TEMPORARY)).toBeNull();
     expect(screen.queryByRole('button', { name: 'לנסות שוב' })).toBeNull();
-  });
-
-  it('shows the timeout message when the client gave up waiting', async () => {
-    serveError(504, 'request_timeout');
-    const user = userEvent.setup();
-    renderPanel();
-    await open(user);
-    await user.type(textbox(), 'מתכון');
-    await user.click(submit());
-    expect(
-      await screen.findByText('הבקשה לקחה יותר מדי זמן. אפשר לנסות שוב'),
-    ).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'לנסות שוב' })).toBeTruthy();
-  });
-
-  it('learns the engine timeout from the server', async () => {
-    server.use(
-      http.get('*/api/imports/providers', () =>
-        HttpResponse.json([{ name: 'anthropic', timeout_s: 45 }]),
-      ),
-    );
-    renderPanel();
-    await vi.waitFor(() =>
-      expect(safetyNetMs('/api/imports/text')).toBe(50_000),
-    );
   });
 });
 

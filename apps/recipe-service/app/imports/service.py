@@ -4,7 +4,6 @@ import asyncio
 import contextlib
 import functools
 import logging
-import math
 import time
 import uuid
 from collections.abc import AsyncGenerator, Awaitable, Callable
@@ -33,7 +32,6 @@ from app.imports.schemas import (
     DraftRecipe,
     ErrorEvent,
     ImportEvent,
-    ProviderInfo,
     StageEvent,
     StageName,
     StageStatus,
@@ -83,16 +81,6 @@ class ImportService:
         self._repository = repository
         self._tag_service = tag_service
         self._settings = settings
-
-    def providers(self) -> list[ProviderInfo]:
-        """Returns the active engine and its timeout, so the client can set its own
-        (AD-43)."""
-        provider = self._provider()
-        return [
-            ProviderInfo(
-                name=provider.name, timeout_s=math.ceil(provider.timeout_seconds)
-            )
-        ]
 
     def prepare_text(self, text: str, user_id: uuid.UUID) -> ImportJob:
         """Runs the checks for a text import before the stream starts, while we can

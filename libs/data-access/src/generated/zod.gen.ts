@@ -170,16 +170,6 @@ export const zPhotoUploaded = z.object({
 });
 
 /**
- * ProviderInfo
- *
- * An active import engine and how long the server waits for it (AD-43).
- */
-export const zProviderInfo = z.object({
-    name: z.string(),
-    timeout_s: z.int()
-});
-
-/**
  * Role
  *
  * The user roles. A visitor is simply not logged in, so there is no visitor
@@ -587,13 +577,6 @@ export const zAuthSessionResponse = zSessionResponse;
  * Successful Response
  */
 export const zHealthGetHealthResponse = zHealthRead;
-
-/**
- * Response Imports List Providers
- *
- * Successful Response
- */
-export const zImportsListProvidersResponse = z.array(zProviderInfo);
 
 export const zImportsImportTextBody = zImportTextRequest;
 

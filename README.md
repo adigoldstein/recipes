@@ -178,6 +178,22 @@ Key decisions (the full list, with the reasoning, is in the architecture spine):
 - **Safe imports.** Outbound fetches refuse private addresses, cap page size and time, and never bypass bot protection.
 - **Schema changes only through Alembic**, applied on start.
 
+### How the API contract flows (Pydantic to React)
+
+The front end never hand-writes API types or fetch calls. They are generated from the back end, at development time (nothing is generated while the app runs):
+
+1. **FastAPI describes itself.** Pydantic models and type hints (`def list_tags(...) -> list[TagRead]`) become the OpenAPI schema. `generate_operation_id` in `app/main.py` names each operation `{tag}_{function}` (for example `tags_list_tags`), so generated names stay stable.
+2. **Export the schema.** `app/openapi_export.py` builds the app without starting a server and writes `libs/data-access/openapi.json`, with sorted keys so a diff appears only when the API really changes (Nx target `recipe-service:openapi`).
+3. **Generate the client.** `nx run data-access:generate` (depends on step 2) runs hey-api with `libs/data-access/openapi-ts.config.ts` and writes `libs/data-access/src/generated/`:
+   - `types.gen.ts`: TypeScript types (`TagRead`)
+   - `client.gen.ts`, `sdk.gen.ts`: fetch functions (`tagsListTags()`)
+   - `@tanstack/react-query.gen.ts`: query options, query keys and mutations (`tagsListTagsOptions()`, `tagsCreateTagMutation()`)
+   - `zod.gen.ts`: runtime validation schemas (`zTagRead`)
+4. **Use it in React.** `libs/data-access` re-exports the generated code and adds the shared client setup (CSRF header, 401 handling). Feature libs only call `useQuery(tagsListTagsOptions())`, and forms validate with the generated Zod schemas.
+5. **CI keeps it honest.** CI runs the generator again and `git diff --exit-code`. If the back end changed and the client was not regenerated, the build fails.
+
+When you change a back-end model or endpoint, run `npm run api:types` and commit the regenerated files with the change.
+
 ## Tech stack and why
 
 | Area          | Choice                                  | Why                                                                                     |
